@@ -78,20 +78,8 @@ public class CassandraDAOImpl implements CassandraDAO {
 	@Autowired
 	private SessionFactory gooruSlaveSessionFactory;
 
-	@Autowired
-	private SessionFactory gooruMasterSessionFactory;
-
 	static final Logger logger = LoggerFactory
 			.getLogger(CassandraDAOImpl.class);
-
-	public SessionFactory getGooruMasterSessionFactory() {
-		return gooruMasterSessionFactory;
-	}
-
-	public void setGooruMasterSessionFactory(
-			SessionFactory gooruMasterSessionFactory) {
-		this.gooruMasterSessionFactory = gooruMasterSessionFactory;
-	}
 
 	@Resource(name = "cassandra")
 	private Properties cassandra;
@@ -787,107 +775,6 @@ public class CassandraDAOImpl implements CassandraDAO {
 			logger.error("transformation not begin \n" + e);
 		}
 		logger.error("Transformation Execution completed \n");
-	}
-
-	@Async
-	public void popularity(String suffix, String prefix, Integer depth) {
-		Collection<String> codeIds = new ArrayList<String>();
-		List courseCodeIds = gooruSlaveSessionFactory
-				.getCurrentSession()
-				.createSQLQuery(
-						"SELECT code_id FROM code WHERE depth =" + depth + "")
-				.list();
-		for (Object id : courseCodeIds) {
-			if (getBaseService().checkNull(suffix)) {
-				if (getBaseService().checkNull(prefix)) {
-					codeIds.add(prefix + id + suffix);
-				}
-
-			} else {
-				prefix = "PC~";
-				suffix = "~W";
-				if (getBaseService().checkNull(prefix)) {
-					codeIds.add(prefix + id + suffix);
-				}
-
-			}
-
-		}
-
-		OperationResult<Rows<String, String>> multipleRecord = null;
-		RowSliceQuery<String, String> query = getKeyspace(logKeyspaceCli,
-				"cassandraClient").prepareQuery(
-				this.accessColumnFamily("popularity_collection")).getKeySlice(
-				codeIds);
-		try {
-			multipleRecord = query.execute();
-			logger.info("got cassandra data");
-		} catch (ConnectionException e) {
-			logger.info("catch is called");
-		}
-		// /codeId with popular collection
-		Map<String, String> popularData = new HashMap<String, String>();
-		for (Row<String, String> rows : multipleRecord.getResult()) {
-			StringBuffer gooruOId = new StringBuffer();
-			for (int i = 0; i < 10; i++) {
-				if (gooruOId != null && (!gooruOId.toString().isEmpty())) {
-					gooruOId.append(",");
-				}
-				gooruOId.append("'" + rows.getColumns().getColumnByIndex(i)
-						+ "'");
-			}
-			String filteredCode = rows.getKey().replaceAll("[^0-9]", "");
-
-			popularData.put(filteredCode, gooruOId.toString());
-		}
-
-		String typeId = getGooruMasterSessionFactory()
-				.getCurrentSession()
-				.createSQLQuery(
-						"SELECT custom_table_value_id  FROM custom_table_value WHERE value='popular';")
-				.list().get(0).toString();
-		if (getBaseService().checkNull(typeId)) {
-			for (Map.Entry<String, String> entry : popularData.entrySet()) {
-				getGooruMasterSessionFactory()
-						.getCurrentSession()
-						.createSQLQuery(
-								"INSERT INTO featured_set(name,active_flag,account_uid,theme_code,sequence,display_name,organization_uid,type_id,subject_code_id)"
-										+ " values('Popular',1,'4261739e-ccae-11e1-adfb-5404a609bd14','popular',1,'Popular collection',"
-										+ typeId
-										+ ",'"
-										+ entry.getKey()
-										+ "');");
-				String featuredSetId = getGooruMasterSessionFactory()
-						.getCurrentSession()
-						.createSQLQuery(
-								"SELECT featured_set_id FROM featured_set WHERE type_id=65 AND theme_code='popular' AND subject_code_id ='"
-										+ entry.getKey() + "';").list().get(0)
-						.toString();
-				if (getBaseService().checkNull(featuredSetId)) {
-					int i = 1;
-					for (String gooruOid : entry.getValue().split(",")) {
-						String contentId = getGooruMasterSessionFactory()
-								.getCurrentSession()
-								.createSQLQuery(
-										"SELECT content_id FROM content WHERE gooru_oid='"
-												+ gooruOid + "'").list().get(0)
-								.toString();
-						if (getBaseService().checkNull(contentId)) {
-							getGooruMasterSessionFactory().getCurrentSession()
-									.createSQLQuery(
-											"INSERT INTO featured_set_items (featured_set_id,content_id,sequence)"
-													+ "values(" + featuredSetId
-													+ ",'" + contentId + "',"
-													+ i + ");");
-						}
-						i++;
-
-					}
-				}
-			}
-
-		}
-		logger.info("transformation end");
 	}
 
 	public BaseService getBaseService() {
