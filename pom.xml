@@ -320,6 +320,7 @@
 		<env>dev</env>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<projectName>${project.name}</projectName>
+		<webapp.container.home>${env.CATALINA_HOME}</webapp.container.home>
 		<!-- Application settings -->
 		<copyright.year>2008</copyright.year>
 		<dao.framework>hibernate</dao.framework>
