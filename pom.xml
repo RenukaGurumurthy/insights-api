@@ -284,6 +284,11 @@
 			<artifactId>spring-security-config</artifactId>
 			<version>${org.springframework.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjweaver</artifactId>
+			<version>1.6.12</version>
+		</dependency>
 		<!-- Used for FileUtils -->
 		<dependency>
 			<groupId>commons-io</groupId>

@@ -43,7 +43,9 @@
 	<bean id="gooruSlaveSessionFactory"
 		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean"
 		p:dataSource-ref="gooruSlaveDataSource" p:configLocation="/WEB-INF/hibernate.cfg.xml"
-		p:packagesToScan="org.gooru.insights.api.daos" />
+		p:packagesToScan="org.gooru.insights.api.daos" >
+		
+		</bean>
 
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
 		destroy-method="close">

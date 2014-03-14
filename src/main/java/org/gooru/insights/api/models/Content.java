@@ -26,14 +26,6 @@ package org.gooru.insights.api.models;
 import java.io.Serializable;
 import java.math.BigInteger;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import org.codehaus.jackson.annotate.JsonAutoDetect;
-
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 
 @XStreamAlias(value = "content")

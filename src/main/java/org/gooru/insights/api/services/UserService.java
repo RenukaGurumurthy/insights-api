@@ -38,5 +38,6 @@ public interface UserService {
 	List<Map<Object, Object>> getProficiencyData(String databaseType, String userUid, String data, List<Map<String,String>> errorData) throws ParseException;
 
 	List<Map<String, Object>> getTopProficiencyList(String databaseType, List<Map<String, String>> errorData) throws ParseException;
-
+	
+	//UserCredential getUserCredential(User user, String sessionToken);
 }

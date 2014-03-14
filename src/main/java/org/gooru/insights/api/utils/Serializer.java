@@ -41,11 +41,6 @@ public class Serializer {
 		return toModelAndView(serialize(obj, type, excludes, includes));
 	}
 
-	// public static String serialize(Object model, String type, String[]
-	// excludes, boolean deepSerialize, String... includes) {
-	// return toModelAndView(serialize(model, type, excludes, deepSerialize,
-	// true, includes));
-	// }
 	public static ModelAndView toModelAndView(Object obj, String type, String[] excludes) {
 		return toModelAndView(serialize(obj, type, excludes));
 	}

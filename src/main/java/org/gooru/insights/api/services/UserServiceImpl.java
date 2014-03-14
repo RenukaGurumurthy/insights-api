@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private CassandraDAO cassandraDAO;
-
+	
 	String gooruSearchKeyspaceCli = "goorusearch.keyspace";
 	String logKeyspaceCli = "log.keyspace";
 
@@ -353,4 +353,5 @@ public class UserServiceImpl implements UserService {
 	public CassandraService getCassandraService() {
 		return cassandraService;
 	}
+
 }

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN" 
+    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="org.gooru.insights.api.models.UserToken" table="user_token">
+        
+	    <id name="token" column="token" unsaved-value="null">
+	     	<generator class="guid"/>				 
+		</id>	
+		<property
+	        name="sessionId"
+	        column="session_id"
+	        length="50"
+	        type="string"
+	        not-null="true"
+	        >	        
+	    </property>  
+	    <property
+	        name="scope"
+	        column="scope"
+	        type="string"
+	        length="10"
+	        not-null="true">	        
+	    </property> 
+	    <many-to-one 
+		    name="user" 
+		    class="org.gooru.insights.api.models.User" 
+		    column="user_uid" 
+		    not-null="true" 
+		    lazy="proxy"
+		    cascade="none"/>
+		<property
+	        name="createdOn"
+	        column="created_on"	       	       	       
+	        not-null="false">	        
+	    </property>
+   </class>    
+</hibernate-mapping>

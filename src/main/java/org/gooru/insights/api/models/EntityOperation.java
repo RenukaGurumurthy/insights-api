@@ -1,5 +1,5 @@
 /*******************************************************************************
- * RequestParamsDTO.java
+ * EntityOperation.java
  * insights-read-api
  * Created by Gooru on 2014
  * Copyright (c) 2014 Gooru. All rights reserved.
@@ -25,60 +25,39 @@ package org.gooru.insights.api.models;
 
 import java.io.Serializable;
 
-public class RequestParamsDTO implements Serializable {
+public class EntityOperation implements Serializable {
 
-	private static final long serialVersionUID = -2840599796987757919L;
-
-	private String fields;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2007539524878855125L;
 	
-	RequestParamsPaginationDTO paginate;
-	
-	RequestParamsFiltersDTO filters;
-	
-	RequestParamsSearchDTO search;
-	
-	private String groupBy;
+	private Integer entityOperationId;
+	private String entityName;
+	private String operationName;
 
-	public String getFields() {
-		return fields;
+	public String getOperationName() {
+		return operationName;
 	}
 
-	public void setFields(String fields) {
-		this.fields = fields;
+	public void setOperationName(String operationName) {
+		this.operationName = operationName;
 	}
 
-	public RequestParamsFiltersDTO getFilters() {
-		return filters;
+	public String getEntityName() {
+		return this.entityName;
 	}
 
-	public void setFilters(RequestParamsFiltersDTO filters) {
-		this.filters = filters;
+	public void setEntityName(final String entityName) {
+		this.entityName = entityName;
 	}
 
-	public String getGroupBy() {
-		return groupBy;
+	public Integer getEntityOperationId() {
+		return entityOperationId;
 	}
 
-	public void setGroupBy(String groupBy) {
-		this.groupBy = groupBy;
+	public void setEntityOperationId(Integer entityOperationId) {
+		this.entityOperationId = entityOperationId;
 	}
 
-	public RequestParamsPaginationDTO getPaginate() {
-		return paginate;
-	}
-
-	public void setPaginate(RequestParamsPaginationDTO paginate) {
-		this.paginate = paginate;
-	}
-
-	public RequestParamsSearchDTO getSearch() {
-		return search;
-	}
-
-	public void setSearch(RequestParamsSearchDTO search) {
-		this.search = search;
-	}
-	
-	
-	
 }

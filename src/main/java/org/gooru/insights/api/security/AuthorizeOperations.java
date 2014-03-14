@@ -1,5 +1,5 @@
 /*******************************************************************************
- * RequestParamsDTO.java
+ * AuthorizeOperations.java
  * insights-read-api
  * Created by Gooru on 2014
  * Copyright (c) 2014 Gooru. All rights reserved.
@@ -21,64 +21,21 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ******************************************************************************/
-package org.gooru.insights.api.models;
+package org.gooru.insights.api.security;
 
-import java.io.Serializable;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class RequestParamsDTO implements Serializable {
-
-	private static final long serialVersionUID = -2840599796987757919L;
-
-	private String fields;
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface AuthorizeOperations
+{
+	public String[] operations();
 	
-	RequestParamsPaginationDTO paginate;
+	public String[] partyOperations() default {};
 	
-	RequestParamsFiltersDTO filters;
-	
-	RequestParamsSearchDTO search;
-	
-	private String groupBy;
+	public String partyUId() default "";
 
-	public String getFields() {
-		return fields;
-	}
-
-	public void setFields(String fields) {
-		this.fields = fields;
-	}
-
-	public RequestParamsFiltersDTO getFilters() {
-		return filters;
-	}
-
-	public void setFilters(RequestParamsFiltersDTO filters) {
-		this.filters = filters;
-	}
-
-	public String getGroupBy() {
-		return groupBy;
-	}
-
-	public void setGroupBy(String groupBy) {
-		this.groupBy = groupBy;
-	}
-
-	public RequestParamsPaginationDTO getPaginate() {
-		return paginate;
-	}
-
-	public void setPaginate(RequestParamsPaginationDTO paginate) {
-		this.paginate = paginate;
-	}
-
-	public RequestParamsSearchDTO getSearch() {
-		return search;
-	}
-
-	public void setSearch(RequestParamsSearchDTO search) {
-		this.search = search;
-	}
-	
-	
-	
 }

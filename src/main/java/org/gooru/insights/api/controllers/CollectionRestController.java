@@ -31,10 +31,13 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.gooru.insights.api.constants.InsightsOperationConstants;
 import org.gooru.insights.api.models.InsightsConstant;
+import org.gooru.insights.api.security.AuthorizeOperations;
 import org.gooru.insights.api.services.CassandraService;
 import org.gooru.insights.api.services.CollectionRestService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,7 +45,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.scheduling.annotation.EnableAsync;
 
 @Controller
 @RequestMapping(value = "/collections", headers = "Accept=application/xml, application/json,application/xls ", produces = {
@@ -64,6 +66,7 @@ public class CollectionRestController extends BaseController implements
 	@RequestMapping(value = "", method = { RequestMethod.GET,
 			RequestMethod.POST })
 	@ResponseBody
+	@AuthorizeOperations(operations = { InsightsOperationConstants.OPERATION_COLLECTION_VIEW })
 	public ModelAndView getCollectionList(HttpServletRequest request,
 			@RequestParam(value = DATA_OBJECT, required = true) String data,
 			HttpServletResponse response) throws Exception {
@@ -77,6 +80,7 @@ public class CollectionRestController extends BaseController implements
 	@RequestMapping(value = "/{collectionId}", method = { RequestMethod.GET,
 			RequestMethod.POST })
 	@ResponseBody
+	@AuthorizeOperations(operations = { InsightsOperationConstants.OPERATION_COLLECTION_VIEW })
 	public ModelAndView getCollectionList(HttpServletRequest request,
 			@RequestParam(value = DATA_OBJECT, required = true) String data,
 			@PathVariable(value = "collectionId") String collectionId,
@@ -91,6 +95,7 @@ public class CollectionRestController extends BaseController implements
 	@RequestMapping(value = "/resources", method = { RequestMethod.GET,
 			RequestMethod.POST })
 	@ResponseBody
+	@AuthorizeOperations(operations = { InsightsOperationConstants.OPERATION_COLLECTION_VIEW })
 	public ModelAndView getCollectionResourceDetail(HttpServletRequest request,
 			@RequestParam(value = DATA_OBJECT, required = true) String data,
 			HttpServletResponse response) throws Exception {
@@ -103,6 +108,7 @@ public class CollectionRestController extends BaseController implements
 	@RequestMapping(value = "/{collectionId}/{resourceId}", method = {
 			RequestMethod.GET, RequestMethod.POST })
 	@ResponseBody
+	@AuthorizeOperations(operations = { InsightsOperationConstants.OPERATION_COLLECTION_VIEW })
 	public ModelAndView getCollectionResourceDetail(HttpServletRequest request,
 			@RequestParam(value = DATA_OBJECT, required = true) String data,
 			@PathVariable(value = "collectionId") String collectionId,
@@ -118,6 +124,7 @@ public class CollectionRestController extends BaseController implements
 	@RequestMapping(value = "/{collectionId}/resources", method = {
 			RequestMethod.GET, RequestMethod.POST })
 	@ResponseBody
+	@AuthorizeOperations(operations = { InsightsOperationConstants.OPERATION_COLLECTION_VIEW })
 	public ModelAndView getCollectionResourceDetail(HttpServletRequest request,
 			@RequestParam(value = DATA_OBJECT, required = true) String data,
 			@PathVariable(value = "collectionId") String collectionId,
@@ -137,6 +144,7 @@ public class CollectionRestController extends BaseController implements
 	@RequestMapping(value = "{collectionId}/detail", method = {
 			RequestMethod.GET, RequestMethod.POST })
 	@ResponseBody
+	@AuthorizeOperations(operations = { InsightsOperationConstants.OPERATION_COLLECTION_VIEW })
 	public ModelAndView getEventDetail(HttpServletRequest request,
 			@PathVariable(value = "collectionId") String collectionId,
 			@RequestParam(value = DATA_OBJECT, required = false) String data,
@@ -151,6 +159,7 @@ public class CollectionRestController extends BaseController implements
 	@RequestMapping(value = "resource/deleted", method = { RequestMethod.GET,
 			RequestMethod.POST })
 	@ResponseBody
+	@AuthorizeOperations(operations = { InsightsOperationConstants.OPERATION_COLLECTION_VIEW })
 	public ModelAndView markDeletedResource(HttpServletRequest request,
 			@RequestParam(value = "startTime") String startTime,
 			@RequestParam(value = "endTime") String endTime,

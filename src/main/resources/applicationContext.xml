@@ -71,6 +71,7 @@
 			<props>
 				<prop key="gooruConfigStyleBuild">${buildNumber}</prop>
 				<prop key="insights.api.rest.endpoint">${insights.api.rest.endpoint}</prop>
+				<prop key="gooru.api.rest.endpoint">${gooru.api.rest.endpoint}</prop>
 			</props>
 		</property>
 	</bean>

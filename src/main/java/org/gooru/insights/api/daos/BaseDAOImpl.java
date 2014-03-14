@@ -42,6 +42,7 @@ import org.springframework.stereotype.Repository;
 public class BaseDAOImpl implements BaseDAO,InsightsConstant {
 
 	@Autowired
+	@javax.annotation.Resource(name = "sessionFactory")
 	private SessionFactory sessionFactory;
 
 	public String getTimeInHour(String time) {
