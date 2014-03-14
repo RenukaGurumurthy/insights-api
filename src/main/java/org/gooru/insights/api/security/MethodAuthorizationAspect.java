@@ -89,7 +89,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 		
 		if(session.getAttribute("token") != null)
 		{
-			if(request.getParameter("sessionToken") != null){
+			if(request.getParameter("sessionToken") != null && request.getParameter("sessionToken").length() == 36){
 				sessionToken = (String) session.getAttribute("token");
 				if(sessionToken.equalsIgnoreCase(request.getParameter("sessionToken"))) {
 				logger.info("Token : \n"+ sessionToken );
