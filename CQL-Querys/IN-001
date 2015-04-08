@@ -1,0 +1,44 @@
+/**
+*This file has data for Gooru 1.0 Release
+*Created on 24/07/2014 
+*modified on 24/07/2014
+*/
+
+/*** purpose:Micro Aggregator-formula Logic --Start***/
+
+1)	ALTER COLUMNFAMILY job_config_settings ADD item_value text;
+
+2)	UPDATE job_config_settings SET 
+item_value='collection.play~columnkey,resource.play~columnkey,item.search~columnkey,collection.resource.play~columnkey,user.register~columnkey' 
+WHERE key='aggregation~events';
+
+3)	CREATE TABLE formula_detail (
+   KEY text PRIMARY KEY,
+   last_processed_time text,
+   constant_value text,
+   aggregate_type text,
+   formula text
+ ) WITH
+   comment='' AND
+   comparator=text AND
+   read_repair_chance=0.100000 AND
+   gc_grace_seconds=864000 AND
+   default_validation=text AND
+   min_compaction_threshold=4 AND
+   max_compaction_threshold=32 AND
+   replicate_on_write='true' AND
+   compaction_strategy_class='SizeTieredCompactionStrategy' AND
+   compression_parameters:sstable_compression='SnappyCompressor';
+   
+4)	CREATE INDEX constant_value_idx ON formula_detail (constant_value);
+   
+5)	CREATE INDEX aggregate_type_idx ON formula_detail (aggregate_type);
+   
+6)	UPDATE formula_detail SET aggregate_type='normal',
+   constant_value='gooruUId,organizationUId,organizationUId~gooruUId,contentGooruId,contentGooruId~gooruUId' ,
+   formula='{"formulas":[{"requestValues":"views,timeSpent","views":"C:count~E:eventName","timeSpent":"C:time_spent~E:eventName","formula":"timeSpent/views","name":"C:avg_time_spent~E:eventName","description":"calculaion for average time spent ","status":"active","createdOn":1406104787145},{"requestValues":"views,timeSpent","views":"C:count~C:views","timeSpent":"C:time_spent~C:total","formula":"timeSpent/views","name":"C:avg_time_spent~C:total","status":"active","description":"calculaion for average time spent ","createdOn":1406104787145}],"events":"collection.play"}' 
+   WHERE key='collection.play';
+   
+/*** purpose:Micro Aggregator-formula Logic --End ***/
+
+   
