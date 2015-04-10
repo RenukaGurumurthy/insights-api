@@ -26,18 +26,18 @@ public class ConfigurationController extends BaseController {
 	@RequestMapping(value = "/formula", method = RequestMethod.PUT)
 	@AuthorizeOperations(operations = InsightsOperationConstants.OPERATION_INSIGHTS_CONFIG_SETTINGS_ADD)
 	@ResponseBody
-	public ModelAndView addFormula(HttpServletRequest request, @RequestParam(value = "sessionToken", required = false) String sessionToken,
+	public ModelAndView addFormula(HttpServletRequest request,
 			@RequestParam(value = "eventName", required = true) String eventName,
 			@RequestParam(value = "formula", required = true) JSONObject formulaJSON,@RequestParam(value = "aggregateType", required = false) String aggregateType, HttpServletResponse response) throws Exception {
-		return getModel(configurationService.addFormula(getTraceId(request),sessionToken,eventName,aggregateType, formulaJSON));
+		return getModel(configurationService.addFormula(getTraceId(request),getSessionToken(request),eventName,aggregateType, formulaJSON));
 	}
 
 	@RequestMapping(value = "/formula", method = RequestMethod.GET)
 	@AuthorizeOperations(operations = InsightsOperationConstants.OPERATION_INSIGHTS_CONFIG_SETTINGS_VIEW)
 	@ResponseBody
-	public ModelAndView listFormula(HttpServletRequest request, @RequestParam(value = "sessionToken", required = false) String sessionToken,
+	public ModelAndView listFormula(HttpServletRequest request,
 			@RequestParam(value = "eventName", required = true) String eventName, HttpServletResponse response) throws JSONException {
-		return getModel(configurationService.listFormula(getTraceId(request),sessionToken,eventName));
+		return getModel(configurationService.listFormula(getTraceId(request),getSessionToken(request),eventName));
 	}
 	
 	@RequestMapping(value="/add/settings",method={RequestMethod.POST})
