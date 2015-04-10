@@ -34,6 +34,10 @@ public class BaseController {
 	
 	private static final String REQUEST_BODY_ERROR = "Include JSON Body data!!!";
 	
+	private static final String TOKEN_HEADER_PREFIX = "Gooru-Session-Token";
+	
+	private static final String TOKEN_PARAM_PREFIX = "sessionToken";
+	
 	protected <K, V> ModelAndView getModel(List<Map<String, V>> data, Map<K, V> message) {
 
 		ModelAndView model = new ModelAndView(modelAttributes.CONTENT.getAttribute());
@@ -153,6 +157,15 @@ public class BaseController {
 		response.setHeader("Access-Control-Allow-Headers", "Cache-Control, Pragma, Origin, Authorization, Content-Type, X-Requested-With");
 		response.setHeader("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
 		return response;
+	}
+	
+	public String getSessionToken(HttpServletRequest request) {
+
+		if (request.getHeader(TOKEN_HEADER_PREFIX) != null) {
+			return request.getHeader(TOKEN_HEADER_PREFIX);
+		} else {
+			return request.getParameter(TOKEN_PARAM_PREFIX);
+		}
 	}
 	
 	public String checkRequestContentType(HttpServletRequest request) {
