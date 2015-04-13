@@ -42,11 +42,10 @@ import org.gooru.insights.api.services.RedisService;
 import org.gooru.insights.api.utils.InsightsLogger;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.restlet.data.Form;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -76,6 +75,10 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	
 	private static final String TRACE_ID = "aspect";
 	
+	private static final String TOKEN_HEADER_PREFIX = "Gooru-Session-Token";
+	
+	private static final String TOKEN_PARAM_PREFIX = "sessionToken";
+
 	@PostConstruct
 	private void init(){
 		 endPoint = cassandraService.getDashBoardKeys("tomcat-init","gooru.api.rest.endpoint");
@@ -121,10 +124,10 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 		session = request.getSession(true);
 		request.setAttribute("traceId", TRACE_ID);
 		}
-		if(request.getParameter("sessionToken") != null && ! request.getParameter("sessionToken").isEmpty()){
-			sessionToken = request.getParameter("sessionToken");
+		sessionToken = getSessionToken(request);
+		
+		if(sessionToken != null){
 			String result;
-
 			try{
 			result = redisService.getDirectValue(GOORU_PREFIX+sessionToken);
 			if(result == null || result.isEmpty()){
@@ -172,10 +175,16 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 		request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 		session = request.getSession(true);
 		}
-				if(request.getParameter("sessionToken") != null && ! request.getParameter("sessionToken").isEmpty()){
-					sessionToken = request.getParameter("sessionToken");					
+		sessionToken = getSessionToken(request);
+				if(sessionToken != null){
 					String address = endPoint.getColumnByName("constant_value").getStringValue()+"/v2/user/token/"+ sessionToken + "?sessionToken=" + sessionToken;
 					ClientResource client = new ClientResource(address);
+					Form headers = (Form)client.getRequestAttributes().get("org.restlet.http.headers");
+					if (headers == null) {
+					    headers = new Form();
+					}
+					    headers.add("Gooru-Session-Token", sessionToken);
+					    client.getRequestAttributes().put("org.restlet.http.headers", headers);
 					if (client.getStatus().isSuccess()) {
 						try{
 							Representation representation = client.get();
@@ -244,5 +253,14 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 				}
 			}
 		return false;
+	}
+	
+	private String getSessionToken(HttpServletRequest request) {
+
+		if (request.getHeader(TOKEN_HEADER_PREFIX) != null) {
+			return request.getHeader(TOKEN_HEADER_PREFIX);
+		} else {
+			return request.getParameter(TOKEN_PARAM_PREFIX);
+		}
 	}
 }
