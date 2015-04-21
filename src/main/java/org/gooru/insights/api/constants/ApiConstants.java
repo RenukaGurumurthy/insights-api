@@ -11,6 +11,30 @@ public class ApiConstants {
 	
 	public static final String TILDA = "~";
 	
+	public static final String GOORU_SESSION_TOKEN = "Gooru-Session-Token";
+	
+	public static final String SESSION_TOKEN = "sessionToken";
+	
+	public static final String TOMCAT_INIT = "tomcat-init";
+	
+	public static final String GOORU_REST_ENDPOINT = "gooru.api.rest.endpoint";
+	
+	public static final String ENTITY_ROLE_OPERATIONS = "entity_role_opertaions";
+	
+	public static final String ROLE_GOORU_ADMIN = "ROLE_GOORU_ADMIN";
+	
+	public static final String CONTENT_ADMIN = "Content_Admin";
+	
+	public static final String ORGANIZATION_ADMIN = "Organization_Admin";
+	
+	public static final String USER_ROLE_SETSTRING = "userRoleSetString";
+	
+	public static final String CONSTANT_VALUE = "constant_value";
+	
+	public static final String USER_TOKEN = "userToken";
+	
+	public static final String USER = "user";
+	
 	/**
 	 * Mail Constants
 	 */
@@ -124,6 +148,16 @@ public class ApiConstants {
 	public static final String QUESTION = "question";
 	
 	public static final String QUESTION_TYPE = "questionType";
+	
+	public static final String FIRST_NAME = "firstName";
+	
+	public static final String LAST_NAME = "lastName";
+	
+	public static final String EMAIL_ID = "emailId";
+	
+	public static final String GOORU_U_ID = "gooruUId";
+	
+	public static final String PARTY_UId = "partyUid";
 	
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");

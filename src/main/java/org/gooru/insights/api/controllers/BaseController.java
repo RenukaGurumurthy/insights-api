@@ -34,10 +34,6 @@ public class BaseController {
 	
 	private static final String REQUEST_BODY_ERROR = "Include JSON Body data!!!";
 	
-	private static final String TOKEN_HEADER_PREFIX = "Gooru-Session-Token";
-	
-	private static final String TOKEN_PARAM_PREFIX = "sessionToken";
-	
 	protected <K, V> ModelAndView getModel(List<Map<String, V>> data, Map<K, V> message) {
 
 		ModelAndView model = new ModelAndView(modelAttributes.CONTENT.getAttribute());
@@ -159,12 +155,12 @@ public class BaseController {
 		return response;
 	}
 	
-	public String getSessionToken(HttpServletRequest request) {
+	public static String getSessionToken(HttpServletRequest request) {
 
-		if (request.getHeader(TOKEN_HEADER_PREFIX) != null) {
-			return request.getHeader(TOKEN_HEADER_PREFIX);
+		if (request.getHeader(ApiConstants.GOORU_SESSION_TOKEN) != null) {
+			return request.getHeader(ApiConstants.GOORU_SESSION_TOKEN);
 		} else {
-			return request.getParameter(TOKEN_PARAM_PREFIX);
+			return request.getParameter(ApiConstants.SESSION_TOKEN);
 		}
 	}
 	

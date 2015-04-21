@@ -36,6 +36,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.gooru.insights.api.constants.ApiConstants;
+import org.gooru.insights.api.controllers.BaseController;
 import org.gooru.insights.api.models.User;
 import org.gooru.insights.api.services.CassandraService;
 import org.gooru.insights.api.services.RedisService;
@@ -73,16 +75,18 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	
 	private static final String GOORU_PREFIX = "authenticate_";
 	
-	private static final String TRACE_ID = "aspect";
+	private static final String TRACE_ID = "traceId";
 	
-	private static final String TOKEN_HEADER_PREFIX = "Gooru-Session-Token";
+	private static final String ASPECT = "aspect";
 	
-	private static final String TOKEN_PARAM_PREFIX = "sessionToken";
-
+	private static final String DO_API = "doAPI";
+	
+	private static final String PROCEED = "proceed";
+	
 	@PostConstruct
 	private void init(){
-		 endPoint = cassandraService.getDashBoardKeys("tomcat-init","gooru.api.rest.endpoint");
-		 entityOperationsRole = cassandraService.getDashBoardKeys("tomcat-init","entity_role_opertaions");
+		 endPoint = cassandraService.getDashBoardKeys(ApiConstants.TOMCAT_INIT,ApiConstants.GOORU_REST_ENDPOINT);
+		 entityOperationsRole = cassandraService.getDashBoardKeys(ApiConstants.TOMCAT_INIT,ApiConstants.ENTITY_ROLE_OPERATIONS);
 	}
 	
 	@Around("accessCheckPointcut() && @annotation(authorizeOperations) && @annotation(requestMapping)")
@@ -104,11 +108,11 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	
 	private boolean validateApi(AuthorizeOperations authorizeOperations, ProceedingJoinPoint pjp){
 		Map<String,Boolean> isValid = hasRedisOperations(authorizeOperations,pjp);	
-		if(isValid.get("doApi")){
-			InsightsLogger.info(TRACE_ID, "doing API request");
+		if(isValid.get(DO_API)){
+			InsightsLogger.info(ASPECT, "doing API request");
 			return hasApiOperationsAuthority(authorizeOperations,pjp);
 		}
-		return isValid.get("proceed");
+		return isValid.get(PROCEED);
 	}
 	
 	private Map<String,Boolean> hasRedisOperations(AuthorizeOperations authorizeOperations, ProceedingJoinPoint pjp) {
@@ -117,45 +121,45 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 		HttpSession session = null;
 		String sessionToken = null;
 		Map<String,Boolean> validStatus = new HashMap<String,Boolean>();
-		validStatus.put("proceed", false);
-		validStatus.put("doApi", false);
+		validStatus.put(PROCEED, false);
+		validStatus.put(DO_API, false);
 		if (RequestContextHolder.getRequestAttributes() != null) {
 		request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 		session = request.getSession(true);
-		request.setAttribute("traceId", TRACE_ID);
+		request.setAttribute(TRACE_ID, ASPECT);
 		}
-		sessionToken = getSessionToken(request);
+		sessionToken = BaseController.getSessionToken(request);
 		
 		if(sessionToken != null){
 			String result;
 			try{
 			result = redisService.getDirectValue(GOORU_PREFIX+sessionToken);
 			if(result == null || result.isEmpty()){
-				InsightsLogger.error(TRACE_ID, "null value in redis data for "+GOORU_PREFIX+sessionToken);
-				validStatus.put("doApi", true);
+				InsightsLogger.error(ASPECT, "null value in redis data for "+GOORU_PREFIX+sessionToken);
+				validStatus.put(DO_API, true);
 				return validStatus;
 			}
 				JSONObject	jsonObject = new JSONObject(result);
-				jsonObject = new JSONObject(jsonObject.getString("userToken"));
-				jsonObject = new JSONObject(jsonObject.getString("user"));
+				jsonObject = new JSONObject(jsonObject.getString(ApiConstants.USER_TOKEN));
+				jsonObject = new JSONObject(jsonObject.getString(ApiConstants.USER));
 				User user = new User();
-				user.setFirstName(jsonObject.getString("firstName"));
-				user.setLastName(jsonObject.getString("lastName"));
-				user.setEmailId(jsonObject.getString("emailId"));
-				user.setGooruUId(jsonObject.getString("partyUid"));
+				user.setFirstName(jsonObject.getString(ApiConstants.FIRST_NAME));
+				user.setLastName(jsonObject.getString(ApiConstants.LAST_NAME));
+				user.setEmailId(jsonObject.getString(ApiConstants.EMAIL_ID));
+				user.setGooruUId(jsonObject.getString(ApiConstants.PARTY_UId));
 				if(hasGooruAdminAuthority(authorizeOperations, jsonObject)){
-					session.setAttribute("sessionToken", sessionToken);
-					validStatus.put("proceed", true);
+					session.setAttribute(ApiConstants.SESSION_TOKEN, sessionToken);
+					validStatus.put(PROCEED, true);
 					return validStatus;
 				}
 				 if(hasAuthority(authorizeOperations, jsonObject)){
-					 session.setAttribute("sessionToken", sessionToken);
-					 validStatus.put("proceed", true);
+					 session.setAttribute(ApiConstants.SESSION_TOKEN, sessionToken);
+					 validStatus.put(PROCEED, true);
 					 return validStatus;
 				 }
 				} catch (Exception e) {
-					InsightsLogger.error(TRACE_ID, "Exception from redis:"+e.getMessage());
-					validStatus.put("doApi", true);
+					InsightsLogger.error(ASPECT, "Exception from redis:"+e.getMessage());
+					validStatus.put(DO_API, true);
 					return validStatus;
 				}
 	}else{
@@ -170,20 +174,20 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 		HttpSession session = null;
 		String sessionToken = null;
 		Map<String,Boolean> validStatus = new HashMap<String,Boolean>();
-		validStatus.put("proceed", false);
+		validStatus.put(PROCEED, false);
 		if (RequestContextHolder.getRequestAttributes() != null) {
 		request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 		session = request.getSession(true);
 		}
-		sessionToken = getSessionToken(request);
+		sessionToken = BaseController.getSessionToken(request);
 				if(sessionToken != null){
-					String address = endPoint.getColumnByName("constant_value").getStringValue()+"/v2/user/token/"+ sessionToken + "?sessionToken=" + sessionToken;
+					String address = endPoint.getColumnByName(ApiConstants.CONSTANT_VALUE).getStringValue()+"/v2/user/token/"+ sessionToken + "?sessionToken=" + sessionToken;
 					ClientResource client = new ClientResource(address);
 					Form headers = (Form)client.getRequestAttributes().get("org.restlet.http.headers");
 					if (headers == null) {
 					    headers = new Form();
 					}
-					    headers.add("Gooru-Session-Token", sessionToken);
+					    headers.add(ApiConstants.GOORU_SESSION_TOKEN, sessionToken);
 					    client.getRequestAttributes().put("org.restlet.http.headers", headers);
 					if (client.getStatus().isSuccess()) {
 						try{
@@ -192,17 +196,13 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 									representation);
 							JSONObject jsonObj = jsonRepresentation.getJsonObject();
 							User user = new User();
-							user.setFirstName(jsonObj.getString("firstName"));
-							user.setLastName(jsonObj.getString("lastName"));
-							user.setEmailId(jsonObj.getString("emailId"));
-							user.setGooruUId(jsonObj.getString("gooruUId"));
-							if(hasGooruAdminAuthority(authorizeOperations, jsonObj)){
-								session.setAttribute("token", sessionToken);
+							user.setFirstName(jsonObj.getString(ApiConstants.FIRST_NAME));
+							user.setLastName(jsonObj.getString(ApiConstants.LAST_NAME));
+							user.setEmailId(jsonObj.getString(ApiConstants.EMAIL_ID));
+							user.setGooruUId(jsonObj.getString(ApiConstants.GOORU_U_ID));
+							if(hasGooruAdminAuthority(authorizeOperations, jsonObj) || hasAuthority(authorizeOperations, jsonObj)){
+								session.setAttribute(ApiConstants.SESSION_TOKEN, sessionToken);
 								return true;
-							}
-							 if(hasAuthority(authorizeOperations, jsonObj)){
-								 session.setAttribute("token", sessionToken);
-								 return true;
 							 }
 						}catch(Exception e){
 							throw new AccessDeniedException("Invalid sessionToken!");
@@ -211,7 +211,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 						throw new AccessDeniedException("Invalid sessionToken!");
 					}
 				}else{
-					InsightsLogger.debug(TRACE_ID, "session token is null");
+					InsightsLogger.debug(ASPECT, "session token is null");
 					throw new AccessDeniedException("sessionToken can not be NULL!");
 				}
 				return false;
@@ -220,15 +220,15 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	private boolean hasGooruAdminAuthority(AuthorizeOperations authorizeOperations,JSONObject jsonObj){
 		boolean roleAuthority = false;
 		try {
-			String userRole = jsonObj.getString("userRoleSetString");
+			String userRole = jsonObj.getString(ApiConstants.USER_ROLE_SETSTRING);
 			String operations =  authorizeOperations.operations();
-			for(String op :operations.split(",")){
-				if(userRole.contains("ROLE_GOORU_ADMIN") || userRole.contains("Content_Admin") || userRole.contains("Organization_Admin")){
+			for(String op :operations.split(ApiConstants.COMMA)){
+				if(userRole.contains(ApiConstants.ROLE_GOORU_ADMIN) || userRole.contains(ApiConstants.CONTENT_ADMIN) || userRole.contains(ApiConstants.ORGANIZATION_ADMIN)){
 					roleAuthority = true;
 				}
 			}
 		} catch (JSONException e) {
-			InsightsLogger.debug(TRACE_ID,"user doesn't have authorization to access:",e);
+			InsightsLogger.debug(ASPECT,"user doesn't have authorization to access:",e);
 		}
 		return roleAuthority;
 		
@@ -237,15 +237,15 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	private boolean hasAuthority(AuthorizeOperations authorizeOperations,JSONObject jsonObj){
 			String userRole = null;
 			try {
-				userRole = jsonObj.getString("userRoleSetString");
+				userRole = jsonObj.getString(ApiConstants.USER_ROLE_SETSTRING);
 			} catch (JSONException e) {
-				InsightsLogger.error(TRACE_ID,"unable to fetch the userRoleSetString:", e);
+				InsightsLogger.error(ASPECT,"unable to fetch the userRoleSetString:", e);
 				return  false;
 			}
 			String operations =  authorizeOperations.operations();
 			for(String op : operations.split(",")){
 				String roles = entityOperationsRole.getColumnByName(op).getStringValue();
-				InsightsLogger.debug(TRACE_ID, "role : " +roles + "roleAuthority > :"+userRole.contains(roles));
+				InsightsLogger.debug(ASPECT, "role : " +roles + "roleAuthority > :"+userRole.contains(roles));
 				for(String role : roles.split(",")){
 					if((userRole.contains(role))){
 						return true;
@@ -253,14 +253,5 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 				}
 			}
 		return false;
-	}
-	
-	private String getSessionToken(HttpServletRequest request) {
-
-		if (request.getHeader(TOKEN_HEADER_PREFIX) != null) {
-			return request.getHeader(TOKEN_HEADER_PREFIX);
-		} else {
-			return request.getParameter(TOKEN_PARAM_PREFIX);
-		}
 	}
 }
