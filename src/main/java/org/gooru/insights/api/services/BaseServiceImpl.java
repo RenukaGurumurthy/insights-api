@@ -195,12 +195,13 @@ public class BaseServiceImpl implements BaseService {
 	 * get input as OperationResult ColumnList
 	 * @return List of Map fields with corresponding data types values 
 	 */
-	public List<Map<String, Object>> getColumnValues(OperationResult<ColumnList<String>> columnList) {
+	public List<Map<String, Object>> getColumnValues(String traceId, OperationResult<ColumnList<String>> columnList) {
 		List<Map<String, Object>> resultSet = new ArrayList<Map<String, Object>>();
 		if (columnList != null && notNull(columnList.toString())) {
 			/** Collection get */
 			Map<String, Object> dataSet = new HashMap<String, Object>();
 			for (Column<String> column : columnList.getResult()) {
+				try{
 				if (column.getName().endsWith("~grade_in_percentage") || column.getName().endsWith("~question_count") || column.getName().endsWith("~views")
 						|| column.getName().endsWith("~avg_time_spent") || column.getName().endsWith("~time_spent") || column.getName().endsWith("~A") || column.getName().endsWith("~B")
 						|| column.getName().endsWith("~C") || column.getName().endsWith("~D") || column.getName().endsWith("~E") || column.getName().endsWith("~RA")
@@ -218,6 +219,9 @@ public class BaseServiceImpl implements BaseService {
 				}else {
 					dataSet.put(column.getName(), column.getStringValue());
 				}
+				}catch(Exception e){
+					InsightsLogger.error(traceId, e);
+				}
 			}
 			resultSet.add(dataSet);
 		}
@@ -229,10 +233,11 @@ public class BaseServiceImpl implements BaseService {
 	 * get input as OperationResult ColumnList
 	 * @return Map fields with corresponding data types values 
 	 */
-	public Map<String, Object> getColumnValue(OperationResult<ColumnList<String>> columnList) {
+	public Map<String, Object> getColumnValue(String traceId, OperationResult<ColumnList<String>> columnList) {
 		Map<String, Object> dataSet = new HashMap<String, Object>();
 		if (columnList != null && notNull(columnList.toString())) {
 			for (Column<String> column : columnList.getResult()) {
+				try{
 				if (column.getName().endsWith("~grade_in_percentage") || column.getName().endsWith("~question_count") || column.getName().endsWith("~views")
 						|| column.getName().endsWith("~avg_time_spent") || column.getName().endsWith("~time_spent") || column.getName().endsWith("~A") || column.getName().endsWith("~B")
 						|| column.getName().endsWith("~C") || column.getName().endsWith("~D") || column.getName().endsWith("~E") || column.getName().endsWith("~RA")
@@ -250,16 +255,23 @@ public class BaseServiceImpl implements BaseService {
 				}else {
 					dataSet.put(column.getName(), column.getStringValue());
 				}
+				}catch(Exception e){
+					InsightsLogger.error(traceId, e);
+				}
 			}
 		}
 		return dataSet;
 	}
 
-	public Map<String, Object> getLongValue(OperationResult<ColumnList<String>> columnList) {
+	public Map<String, Object> getLongValue(String traceId, OperationResult<ColumnList<String>> columnList) {
 		Map<String, Object> dataSet = new HashMap<String, Object>();
 		if (columnList != null && notNull(columnList.toString())) {
 			for (Column<String> column : columnList.getResult()) {
+				try{
 				dataSet.put(column.getName(), (notNull(String.valueOf(column.getLongValue()))) ? column.getLongValue() : 0);
+			}catch(Exception e){
+			InsightsLogger.error(traceId, e);	
+			}
 			}
 		}
 		return dataSet;
@@ -275,14 +287,18 @@ public class BaseServiceImpl implements BaseService {
 		return dataSet;
 	}
 	
-	public Map<String, Object> getRowLongValue(OperationResult<Rows<String, String>> rowList) {
+	public Map<String, Object> getRowLongValue(String traceId, OperationResult<Rows<String, String>> rowList) {
 		Map<String, Object> resultSetMap = new LinkedHashMap<String, Object>();
 		if (rowList != null && !rowList.getResult().isEmpty()) {
 			Rows<String, String> row = rowList.getResult();
 			if (row != null && !row.isEmpty()) {
 				for (int i = 0; i < row.size(); i++) {
 					for (Column<String> column : row.getRowByIndex(i).getColumns()) {
+						try{
 						resultSetMap.put(row.getRowByIndex(i).getKey(),column.getLongValue());
+						}catch(Exception e){
+							InsightsLogger.error(traceId, e);
+						}
 					}
 				}
 			}
@@ -290,7 +306,7 @@ public class BaseServiceImpl implements BaseService {
 		return resultSetMap;
 	}
 	
-	public Map<String, Object> getRowLongValues(OperationResult<Rows<String, String>> rowList) {
+	public Map<String, Object> getRowLongValues(String traceId, OperationResult<Rows<String, String>> rowList) {
 		Map<String, Object> resultSetMap = new LinkedHashMap<String, Object>();
 		if (rowList != null && !rowList.getResult().isEmpty()) {
 			Rows<String, String> row = rowList.getResult();
@@ -298,7 +314,11 @@ public class BaseServiceImpl implements BaseService {
 				for (int i = 0; i < row.size(); i++) {
 					Map<String, Object> columnSet = new LinkedHashMap<String, Object>();
 					for (Column<String> column : row.getRowByIndex(i).getColumns()) {
+						try{
 						columnSet.put(column.getName(), column.getLongValue());
+						}catch(Exception e){
+							InsightsLogger.error(traceId, e);
+						}
 					}
 					resultSetMap.put(row.getRowByIndex(i).getKey(),columnSet);
 				}
@@ -306,10 +326,11 @@ public class BaseServiceImpl implements BaseService {
 		}
 		return resultSetMap;
 	}
-	public Map<String, Object> getColumnValues(OperationResult<ColumnList<String>> columnList, Map<String, Object> key) {
+	public Map<String, Object> getColumnValues(String traceId, OperationResult<ColumnList<String>> columnList, Map<String, Object> key) {
 		Map<String, Object> dataSet = new HashMap<String, Object>();
 		if (notNull(columnList.toString())) {
 			for (Column<String> column : columnList.getResult()) {
+				try{
 				if (column.getName().endsWith("~views") || column.getName().endsWith("~avg_time_spent") || column.getName().endsWith("~time_spent") || column.getName().endsWith("~A")
 						|| column.getName().endsWith("~B") || column.getName().endsWith("~C") || column.getName().endsWith("~D") || column.getName().endsWith("~E") || column.getName().endsWith("~RA")
 						|| column.getName().endsWith("question_id") || column.getName().endsWith("~skipped") || column.getName().endsWith("deleted") || column.getName().endsWith("~avg_reaction")
@@ -325,6 +346,9 @@ public class BaseServiceImpl implements BaseService {
 				}else {
 					dataSet.put(column.getName(), column.getStringValue());
 				}
+				}catch(Exception e){
+					InsightsLogger.error(traceId, e);
+				}
 			}
 
 			dataSet.putAll(key);
@@ -339,7 +363,7 @@ public class BaseServiceImpl implements BaseService {
 	 * get input as OperationResult Rows
 	 * @return List of Map fields with corresponding data types values 
 	 */
-		public List<Map<String, Object>> getRowsColumnValues(OperationResult<Rows<String, String>> rowList) {
+		public List<Map<String, Object>> getRowsColumnValues(String traceId, OperationResult<Rows<String, String>> rowList) {
 			List<Map<String, Object>> resultSet = new ArrayList<Map<String, Object>>();
 		if (rowList != null && !rowList.getResult().isEmpty()) {
 			Rows<String, String> row = rowList.getResult();
@@ -349,6 +373,7 @@ public class BaseServiceImpl implements BaseService {
 					Map<String, Object> dataSet = new HashMap<String, Object>();
 					/** Grade info */
 					for (Column<String> column : row.getRowByIndex(i).getColumns()) {
+						try{
 						if ((column.getName().endsWith("~grade_in_percentage") || column.getName().endsWith("~question_count") || column.getName().endsWith("~views")
 								|| column.getName().endsWith("~avg_time_spent") || column.getName().endsWith("~time_spent") || column.getName().endsWith("~A") || column.getName().endsWith("~B")
 								|| column.getName().endsWith("is_group_owner") || column.getName().endsWith("question_id") || column.getName().endsWith("~C") || column.getName().endsWith("~D")
@@ -382,6 +407,9 @@ public class BaseServiceImpl implements BaseService {
 							dataSet.put("key", key);
                              dataSet.put(column.getName(), column.getStringValue());
 						}
+					}catch(Exception e){
+						InsightsLogger.error(traceId, e);
+					}
 					}
 					if(!dataSet.isEmpty()){
 					resultSet.add(dataSet);
@@ -1283,9 +1311,6 @@ public class BaseServiceImpl implements BaseService {
 	}
 
 public JSONObject mergeJSONObject(String traceId, String raw,String custom,String arrayObjectIdentityfier){
-	/*String raw = "{ \"metric\" : \"collection.play\",\"displayName\" : \"No. of Collections Played\", \"order\":1,\"values\":[{\"key\":\"C:all\",\"identity\":\"all\",\"displayName\":\"All\",\"selected\":true},{\"key\":\"D:yyyy\",\"identity\":\"year\",\"displayName\":\"Yearly\",\"selected\":true},{\"key\":\"D:yyyyMM\",\"identity\":\"month\",\"displayName\":\"Monthly\",\"selected\":true},{\"key\":\"D:yyyyMMWW\",\"identity\":\"week\",\"displayName\":\"Weekly\",\"selected\":true},{\"key\":\"D:yyyyMMdd\",\"identity\":\"day\",\"displayName\":\"Today\",\"selected\":true}], \"progress\":[{\"key\":\"D:yyyy\",\"identity\":\"year\",\"displayName\":\"Last Year\",\"selected\":true},{\"key\":\"D:yyyyMM\",\"identity\":\"month\",\"displayName\":\"Last Month\",\"selected\":false},{\"key\":\"D:yyyyMMWW\",\"identity\":\"week\",\"displayName\":\"Last Week\",\"selected\":false},{\"key\":\"D:yyyyMMdd\",\"identity\":\"day\",\"displayName\":\"Last day\",\"selected\":false}], \"widget\": {\"displayName\":\"Rectangle\",\"type\": \"rectangle-progress-1\",\"color\":\"orange\" }}";
-	String custom = "{\"values\":[{\"selected\":false,\"displayName\":\"year\",\"key\":\"D:yyyy\"}]}";
-	String arrayObjectIdentityfier = "key";*/
 	try {
 	JSONObject  rawMap = new JSONObject(raw);
 	JSONObject  customMap = new JSONObject(custom);

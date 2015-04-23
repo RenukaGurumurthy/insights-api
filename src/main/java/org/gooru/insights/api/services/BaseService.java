@@ -25,19 +25,19 @@ public interface BaseService {
 	
 	RequestParamsDTO buildRequestParameters(String data) throws Exception;
 	
-	List<Map<String,Object>> getColumnValues(OperationResult<ColumnList<String>> columnList);
+	List<Map<String,Object>> getColumnValues(String traceId, OperationResult<ColumnList<String>> columnList);
 	
-	Map<String,Object> getColumnValue(OperationResult<ColumnList<String>> columnList);
+	Map<String,Object> getColumnValue(String traceId, OperationResult<ColumnList<String>> columnList);
 	
-	Map<String,Object> getLongValue(OperationResult<ColumnList<String>> columnList);
+	Map<String,Object> getLongValue(String traceId, OperationResult<ColumnList<String>> columnList);
 	
-	Map<String, Object> getRowLongValue(OperationResult<Rows<String, String>> rowList);
+	Map<String, Object> getRowLongValue(String traceId, OperationResult<Rows<String, String>> rowList);
 	
-	Map<String, Object> getRowLongValues(OperationResult<Rows<String, String>> rowList);
+	Map<String, Object> getRowLongValues(String traceId, OperationResult<Rows<String, String>> rowList);
 	
 	Map<String,String> getStringValue(OperationResult<ColumnList<String>> columnList);
 	
-	List<Map<String,Object>> getRowsColumnValues(OperationResult<Rows<String, String>> rowList);
+	List<Map<String,Object>> getRowsColumnValues(String traceId, OperationResult<Rows<String, String>> rowList);
 	
 	List<Map<String,Object>> getData(List<Map<String,Object>> requestData,String coreKey);
 	
@@ -65,7 +65,7 @@ public interface BaseService {
 
 	List<Map<String,Object>> RandomJoin(List<Map<String,Object>> record1,List<Map<String,Object>> record2);
 
-	Map<String,Object> getColumnValues(OperationResult<ColumnList<String>> columnList,Map<String,Object> key);
+	Map<String,Object> getColumnValues(String traceId, OperationResult<ColumnList<String>> columnList,Map<String,Object> key);
 
 	List<Map<String,Object>> getUserData(List<Map<String,Object>> requestData,String coreKey,Map<String,String> selectValue,String sortBy,String sortOrder,Integer limit);
 
