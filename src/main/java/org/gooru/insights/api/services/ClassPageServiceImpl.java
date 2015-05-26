@@ -1531,39 +1531,46 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 	 */
 	private String buildRowKey(String traceId, RequestParamsDTO requestParamsDTO) throws Exception{
 		
-		String id = ApiConstants.STRING_EMPTY;
+		String id = null;
+		StringBuffer idBuilder = new StringBuffer();
 		String sessionId = ApiConstants.STRING_EMPTY;
 		boolean hasSessionId = false;
 		boolean hasClassId = false;
 		boolean hasUserUId = false;
 		
 		if(getBaseService().notNull(requestParamsDTO.getFilters().getSession())){
-			id = getSession(requestParamsDTO.getFilters().getSession());
+			idBuilder.append(getSession(requestParamsDTO.getFilters().getSession()));
 		} else{
-			throw new BadRequestException(ErrorMessages.E106+ApiConstants.SESSION);
+			throw new BadRequestException(ErrorMessages.E104.replace(ApiConstants.REPLACER, ApiConstants.SESSION));
 		}
 		if (getBaseService().notNull(requestParamsDTO.getFilters().getSessionId())) {
-			id += ApiConstants.TILDA+requestParamsDTO.getFilters().getSessionId();
+			idBuilder.append(ApiConstants.TILDA);
+			idBuilder.append(requestParamsDTO.getFilters().getSessionId());
 			hasSessionId = true;
 		}
 		if (getBaseService().notNull(requestParamsDTO.getFilters().getClassId())) {
-			id += ApiConstants.TILDA+requestParamsDTO.getFilters().getClassId();
+			idBuilder.append(ApiConstants.TILDA);
+			idBuilder.append(requestParamsDTO.getFilters().getClassId());
 			sessionId = requestParamsDTO.getFilters().getClassId();
 			hasClassId = true;
 		}
 		if (getBaseService().notNull(requestParamsDTO.getFilters().getPathwayId())) {
-			id += ApiConstants.TILDA+requestParamsDTO.getFilters().getPathwayId();
+			idBuilder.append(ApiConstants.TILDA);
+			idBuilder.append(requestParamsDTO.getFilters().getPathwayId());
 			sessionId +=ApiConstants.TILDA+requestParamsDTO.getFilters().getPathwayId();
 		}
 		if (getBaseService().notNull(requestParamsDTO.getFilters().getCollectionGooruOId())) {
-			id += ApiConstants.TILDA+requestParamsDTO.getFilters().getCollectionGooruOId();
+			idBuilder.append(ApiConstants.TILDA);
+			idBuilder.append(requestParamsDTO.getFilters().getCollectionGooruOId());
 			sessionId +=ApiConstants.TILDA+requestParamsDTO.getFilters().getCollectionGooruOId();
 		}
 		if (getBaseService().notNull(requestParamsDTO.getFilters().getUserUId())) {
-			id += ApiConstants.TILDA+requestParamsDTO.getFilters().getUserUId();
+			idBuilder.append(ApiConstants.TILDA);
+			idBuilder.append(requestParamsDTO.getFilters().getUserUId());
 			hasUserUId = true;
 		}
 		
+		id = idBuilder.toString();
 		if(id.startsWith(ApiConstants.SessionAttributes.AS.getSession())){
 			return id;
 		}
@@ -1618,7 +1625,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		               }
 		               dataList.add(sessionTimeStamp);
 		           }
-		           dataList = getBaseService().sortBy(dataList, "timeStamp", "ASC");
+		           dataList = getBaseService().sortBy(dataList, "timeStamp", "DESC");
 		           return id.replace(ApiConstants.SessionAttributes.FS.getSession(), dataList.get(0).get("sessionId").toString());
 		       }else{
 		    	   InsightsLogger.error(traceId, ErrorMessages.E105);

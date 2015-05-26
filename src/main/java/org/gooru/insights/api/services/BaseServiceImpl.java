@@ -110,7 +110,7 @@ public class BaseServiceImpl implements BaseService {
 		try {
 			return new JSONObject(data);
 		} catch (Exception e) {
-			throw new BadRequestException(ErrorMessages.E101);
+			throw new BadRequestException(ErrorMessages.E100);
 		}
 	}
 	

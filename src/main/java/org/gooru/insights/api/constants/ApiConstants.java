@@ -5,11 +5,16 @@ public class ApiConstants {
 	/**
 	 * String constants
 	 */
+	
+	public static final String DATA = "data";
+	
 	public static final String STRING_EMPTY= "";
 	 
 	public static final String COMMA = ",";
 	
 	public static final String TILDA = "~";
+	
+	public static final String REPLACER = "{0}";
 	
 	public static final String GOORU_SESSION_TOKEN = "Gooru-Session-Token";
 	
