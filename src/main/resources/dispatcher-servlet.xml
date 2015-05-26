@@ -45,9 +45,9 @@
 		<property name="defaultContentType" value="application/json" />
 		<property name="viewResolvers">
 			<list>
-				<bean id="viewResolver2"
+				<bean id="viewResolver"
 					class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-					<property name="order" value="2" />
+					<property name="order" value="1" />
 					<property name="prefix" value="/WEB-INF/jsp/" />
 					<property name="suffix" value=".jsp" />
 				</bean>

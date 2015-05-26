@@ -12,11 +12,13 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.util.IOUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.apiHeaders;
 import org.gooru.insights.api.constants.ApiConstants.fileAttributes;
 import org.gooru.insights.api.constants.ApiConstants.modelAttributes;
+import org.gooru.insights.api.constants.ErrorMessages;
 import org.gooru.insights.api.models.RequestParamsDTO;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.spring.exception.BadRequestException;
@@ -30,26 +32,6 @@ import flexjson.JSONSerializer;
 
 public class BaseController {
 	
-	private static final String REQUEST_DATA_ERROR = "Include data parameter!!!";
-	
-	private static final String REQUEST_BODY_ERROR = "Include JSON Body data!!!";
-	
-	protected <K, V> ModelAndView getModel(List<Map<String, V>> data, Map<K, V> message) {
-
-		ModelAndView model = new ModelAndView(modelAttributes.CONTENT.getAttribute());
-		model.addObject(modelAttributes.CONTENT.getAttribute(), data);
-		Map<String, Integer> filterDate = new HashMap<String, Integer>();
-		Integer totalRows = null;
-		if (message.containsKey(modelAttributes.TOTAL_ROWS.getAttribute())) {
-			totalRows = message.get(modelAttributes.TOTAL_ROWS.getAttribute()) == null ? 0 : Integer.valueOf(message.get(modelAttributes.TOTAL_ROWS.getAttribute()).toString());
-			message.remove(modelAttributes.TOTAL_ROWS.getAttribute());
-			filterDate.put(modelAttributes.TOTAL_ROWS.getAttribute(), totalRows);
-		}
-		model.addObject(modelAttributes.PAGINATE.getAttribute(), filterDate);
-		model.addObject(modelAttributes.MESSAGE.getAttribute(), message);
-		return model;
-	}
-
 	public ModelAndView sendErrorResponse(HttpServletResponse response,Map<Integer,String> error) {
 
 		ModelAndView model = new ModelAndView(modelAttributes.CONTENT.getAttribute());
@@ -135,17 +117,11 @@ public class BaseController {
 	}
 
 	public String getRequestData(HttpServletRequest request,String requestBody){
-		if(request.getMethod().equalsIgnoreCase("GET")){
-			if(request.getParameter("data") == null){
-				throw new BadRequestException(REQUEST_DATA_ERROR);
-			}
-			return request.getParameter("data").toString();
-		}else {
-			if(requestBody == null){
-				throw new BadRequestException(REQUEST_BODY_ERROR);
+		requestBody = request.getParameter(ApiConstants.DATA) != null ? request.getParameter(ApiConstants.DATA) : requestBody;
+			if(StringUtils.isBlank(requestBody)){
+				throw new BadRequestException(ErrorMessages.E104.replace(ApiConstants.REPLACER, ApiConstants.DATA));
 			}
 			return requestBody;
-		}
 	}
 	
 	public HttpServletResponse setAllowOrigin(HttpServletResponse response) {
