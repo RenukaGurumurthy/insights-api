@@ -20,69 +20,19 @@
 
 	<!-- Declare the Hibernate SessionFactory for retrieving Hibernate sessions -->
 
-	<bean id="localSessionFactory"
+	<bean id="gooruSessionFactory"
 		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean"
-		p:dataSource-ref="dataSource" p:configLocation="/WEB-INF/hibernate.cfg.xml"
+		p:dataSource-ref="gooruDataSource" p:configLocation="/WEB-INF/hibernate.cfg.xml"
 		p:packagesToScan="org.gooru.insights.api.daos" />
 
-	<bean id="gooruSlaveSessionFactory"
-		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean"
-		p:dataSource-ref="gooruSlaveDataSource" p:configLocation="/WEB-INF/hibernate.cfg.xml"
-		p:packagesToScan="org.gooru.insights.api.daos" />
-
-
-	<bean id="gooruQASessionFactory"
-		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean"
-		p:dataSource-ref="gooruQADataSource" p:configLocation="/WEB-INF/hibernate.cfg.xml"
-		p:packagesToScan="org.gooru.insights.api.daos" />
-
-	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+	<bean id="gooruDataSource" class="org.apache.commons.dbcp.BasicDataSource"
 		destroy-method="close">
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-		<property name="url"
-			value="jdbc:mysql://localhost:3306/gooru_local?useUnicode=true&amp;characterEncoding=utf-8" />
-		<property name="username" value="root" />
-		<property name="password" value="password" />
-		<property name="maxActive" value="100" />
-		<property name="maxIdle" value="30" />
-		<property name="maxWait" value="1000" />
-		<property name="defaultAutoCommit" value="true" />
-		<property name="removeAbandoned" value="true" />
-		<property name="removeAbandonedTimeout" value="60" />
-		<property name="validationQuery" value="SELECT 1 FROM DUAL" />
-		<property name="testWhileIdle" value="true" />
-		<property name="timeBetweenEvictionRunsMillis" value="300000" />
-		<property name="numTestsPerEvictionRun" value="6" />
-		<property name="minEvictableIdleTimeMillis" value="1800000" />
-	</bean>
-
-	<bean id="gooruQADataSource" class="org.apache.commons.dbcp.BasicDataSource"
-		destroy-method="close">
-		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-		<property name="url" value="${gooru.qa.hibernate.connection.url}" />
-		<property name="username" value="${gooru.qa.hibernate.connection.username}" />
-		<property name="password" value="${gooru.qa.hibernate.connection.password}" />
-		<property name="maxActive" value="100" />
-		<property name="maxIdle" value="30" />
-		<property name="maxWait" value="1000" />
-		<property name="defaultAutoCommit" value="true" />
-		<property name="removeAbandoned" value="true" />
-		<property name="removeAbandonedTimeout" value="60" />
-		<property name="validationQuery" value="SELECT 1 FROM DUAL" />
-		<property name="testWhileIdle" value="true" />
-		<property name="timeBetweenEvictionRunsMillis" value="300000" />
-		<property name="numTestsPerEvictionRun" value="6" />
-		<property name="minEvictableIdleTimeMillis" value="1800000" />
-	</bean>
-
-	<bean id="gooruSlaveDataSource" class="org.apache.commons.dbcp.BasicDataSource"
-		destroy-method="close">
-		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-		<property name="url" value="${gooru.slave.hibernate.connection.url}" />
+		<property name="url" value="${gooru.hibernate.connection.url}" />
 		<property name="username"
-			value="${gooru.slave.hibernate.connection.username}" />
+			value="${gooru.hibernate.connection.username}" />
 		<property name="password"
-			value="${gooru.slave.hibernate.connection.password}" />
+			value="${gooru.hibernate.connection.password}" />
 		<property name="maxActive" value="100" />
 		<property name="maxIdle" value="30" />
 		<property name="maxWait" value="1000" />
@@ -98,17 +48,7 @@
 	<!-- Declare a transaction manager -->
 	<bean id="transactionManager"
 		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
-		<property name="sessionFactory" ref="localSessionFactory">
-		</property>
-	</bean>
-	<bean id="gooruSlaveTransactionManager"
-		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
-		<property name="sessionFactory" ref="gooruSlaveSessionFactory">
-		</property>
-	</bean>
-	<bean id="gooruQATransactionManager"
-		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
-		<property name="sessionFactory" ref="gooruQASessionFactory">
+		<property name="sessionFactory" ref="gooruSessionFactory">
 		</property>
 	</bean>
 </beans>

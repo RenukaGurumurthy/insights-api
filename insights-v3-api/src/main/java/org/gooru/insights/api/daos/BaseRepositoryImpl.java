@@ -10,33 +10,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Transactional
 public class BaseRepositoryImpl implements BaseRepository {
-
+   
     @Autowired
-    private SessionFactory localSessionFactory;
+    private SessionFactory gooruSessionFactory;
     
-    @Autowired
-    private SessionFactory gooruSlaveSessionFactory;
-    
-    @Autowired
-    private SessionFactory gooruQASessionFactory;
-    
-
-    public String getTitle(Integer contentId) {
+ 	public SessionFactory getSession() {
+		return gooruSessionFactory;
+	}
+	
+ 	public String getTitle(Integer contentId) {
         String sql = "select title from resource  where content_id = " + contentId ;
-        List<Object> r = getLocalSession().getCurrentSession().createSQLQuery(sql).list();
-        return r.size() > 0 ? r.get(0).toString() : null;
+        List<Object> resultList = getSession().getCurrentSession().createSQLQuery(sql).list();
+        return resultList.size() > 0 ? resultList.get(0).toString() : null;
     }
-
-	public SessionFactory getGooruSlaveSession() {
-		return gooruSlaveSessionFactory;
-	}
-	
-	public SessionFactory getGooruQASession() {
-		return gooruQASessionFactory;
-	}
-	
-	public SessionFactory getLocalSession() {
-		return localSessionFactory;
-	}
 
 }
