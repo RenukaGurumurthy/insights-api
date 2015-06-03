@@ -18,38 +18,27 @@
 	<tx:annotation-driven />
 	<context:annotation-config />
 
-	<!-- Declare the Hibernate SessionFactory for retrieving Hibernate sessions -->
-
-	<bean id="gooruSessionFactory"
-		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean"
-		p:dataSource-ref="gooruDataSource" p:configLocation="/WEB-INF/hibernate.cfg.xml"
-		p:packagesToScan="org.gooru.insights.api.daos" />
-
-	<bean id="gooruDataSource" class="org.apache.commons.dbcp.BasicDataSource"
-		destroy-method="close">
-		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
-		<property name="url" value="${gooru.hibernate.connection.url}" />
-		<property name="username"
-			value="${gooru.hibernate.connection.username}" />
-		<property name="password"
-			value="${gooru.hibernate.connection.password}" />
-		<property name="maxActive" value="100" />
-		<property name="maxIdle" value="30" />
-		<property name="maxWait" value="1000" />
-		<property name="defaultAutoCommit" value="true" />
-		<property name="removeAbandoned" value="true" />
-		<property name="removeAbandonedTimeout" value="60" />
-		<property name="validationQuery" value="SELECT 1 FROM DUAL" />
-		<property name="testWhileIdle" value="true" />
-		<property name="timeBetweenEvictionRunsMillis" value="300000" />
-		<property name="numTestsPerEvictionRun" value="6" />
-		<property name="minEvictableIdleTimeMillis" value="1800000" />
+	<bean id="abstractSessionFactory" abstract="true"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" >
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLInnoDBDialect</prop>
+				<prop key="hibernate.query.substitutions">true 'Y', false 'N'</prop>
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.jdbc.batch_size">50</prop>
+				<prop key="hibernate.cache.use_second_level_cache">true</prop>
+				<prop key="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</prop>
+				<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</prop>
+				<prop key="hibernate.connection.useUnicode">true</prop>
+				<prop key="hibernate.connection.release_mode">after_transaction</prop>
+				<prop key="hibernate.connection.characterEncoding">UTF-8</prop>
+				<prop key="org.hibernate.flushMode">auto</prop>
+			</props>
+		</property>
 	</bean>
-	<!-- Declare a transaction manager -->
 	<bean id="transactionManager"
 		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
-		<property name="sessionFactory" ref="gooruSessionFactory">
-		</property>
+		<property name="sessionFactory" ref="sessionFactoryReadOnly" />
 	</bean>
 </beans>
                        

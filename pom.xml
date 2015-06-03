@@ -58,28 +58,11 @@
 	</build>
 	<profiles>
 		<profile>
-			<id>local</id>
-			<properties>
-				<env>local</env>
-			</properties>
-		</profile>
-		<profile>
-			<id>dev</id>
-			<properties>
-				<env>dev</env>
-			</properties>
-		</profile>
-		<profile>
-			<id>prod</id>
-			<properties>
-				<env>prod</env>
-			</properties>
-		</profile>
-		<profile>
-			<id>qa</id>
-			<properties>
-				<env>qa</env>
-			</properties>
+			<id>insights-api</id>
+			<modules>
+				<module>insights-v1-api</module>
+				<module>insights-v3-api</module>
+			</modules>
 		</profile>
 	</profiles>
 </project>

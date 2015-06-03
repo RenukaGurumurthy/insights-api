@@ -16,9 +16,6 @@
 	<packaging>war</packaging>
 	<build>
 		<directory>${my.build.directory}</directory>
-		<filters>
-			<filter>build/filter-${env}.properties</filter>
-		</filters>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -51,7 +48,6 @@
 				<executions>
 					<execution>
 						<id>copy-resources</id>
-						<!-- here the phase you need -->
 						<phase>validate</phase>
 						<goals>
 							<goal>copy-resources</goal>
@@ -69,39 +65,8 @@
 				</executions>
 			</plugin>
 		</plugins>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
 	</build>
-	<profiles>
-		<profile>
-			<id>local</id>
-			<properties>
-				<env>local</env>
-			</properties>
-		</profile>
-		<profile>
-			<id>dev</id>
-			<properties>
-				<env>dev</env>
-			</properties>
-		</profile>
-		<profile>
-			<id>prod</id>
-			<properties>
-				<env>prod</env>
-			</properties>
-		</profile>
-		<profile>
-			<id>qa</id>
-			<properties>
-				<env>qa</env>
-			</properties>
-		</profile>
-	</profiles>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -241,6 +206,17 @@
 			<version>5.1.18</version>
 		</dependency>
 		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-ehcache</artifactId>
+			<version>4.0.1.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP-java6</artifactId>
+			<version>2.3.2</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
 			<version>${jaxb-api.version}</version>
@@ -280,12 +256,7 @@
 			<artifactId>spring-security-config</artifactId>
 			<version>${org.springframework.version}</version>
 		</dependency>
-		<!-- <dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>2.2</version>
-		</dependency>
- -->
+
 
 		<dependency>
 			<groupId>org.aspectj</groupId>
@@ -333,7 +304,7 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.5</version>
 		</dependency>
-			<dependency>
+		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
 			<version>1.1.2</version>
@@ -343,7 +314,6 @@
 			<artifactId>logback-core</artifactId>
 			<version>1.1.2</version>
 		</dependency>
-		
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -353,9 +323,7 @@
 	</dependencies>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<env>local</env>
-		<projectName>${project.name}</projectName>
-		<!-- <envProjectName>${project.name}</envProjectName> -->
+ 		<projectName>${project.name}</projectName>
 		<!-- Application settings -->
 		<copyright.year>2008</copyright.year>
 		<dao.framework>hibernate</dao.framework>

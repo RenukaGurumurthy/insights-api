@@ -119,8 +119,8 @@
 	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
 		<property name="host" value="smtp.gmail.com" />
 		<property name="port" value="587" />
-		<property name="username" value="reports@goorulearning.org" />
-		<property name="password" value="insights@2013" />
+		<property name="username" value="${smtp.username}" />
+		<property name="password" value="${smtp.password}" />
 		<property name="javaMailProperties">
 			<props>
 				<prop key="mail.transport.protocol">smtp</prop>
@@ -133,8 +133,8 @@
 
 	<!-- some pre-configured messages also which are ready to send -->
 	<bean id="preConfiguredMessage" class="org.springframework.mail.SimpleMailMessage">
-		<property name="to" value="kumaraswamy@goorulearning.org"></property>
-		<property name="from" value="reports@goorulearning.org"></property>
+		<property name="to" value="${report.receiver.mail.id}"></property>
+		<property name="from" value="${report.sender.mail.id}"></property>
 		<property name="subject" value="FATAL - Application crash. Save your job !!" />
 	</bean>
 
@@ -142,8 +142,8 @@
 	<bean id="defaultMailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
 		<property name="host" value="smtp.gmail.com" />
 		<property name="port" value="587" />
-		<property name="username" value="reports@goorulearning.org" />
-		<property name="password" value="insights@2013" />
+		<property name="username" value="${smtp.username}" />
+		<property name="password" value="${smtp.password}" />
 		<property name="javaMailProperties">
 			<props>
 				<prop key="mail.transport.protocol">smtp</prop>
@@ -153,5 +153,15 @@
 			</props>
 		</property>
 	</bean>
-
+ <bean
+		class="org.springframework.core.LocalVariableTableParameterNameDiscoverer" />
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>file:${configSettings}</value>
+			</list>
+		</property>
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+	</bean>
 </beans>

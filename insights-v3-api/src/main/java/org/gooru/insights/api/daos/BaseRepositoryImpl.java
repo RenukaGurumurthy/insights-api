@@ -2,8 +2,9 @@ package org.gooru.insights.api.daos;
 
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,11 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class BaseRepositoryImpl implements BaseRepository {
    
-    @Autowired
-    private SessionFactory gooruSessionFactory;
+	@Resource(name = "sessionFactoryReadOnly")
+    private SessionFactory sessionFactoryReadOnly;
     
  	public SessionFactory getSession() {
-		return gooruSessionFactory;
+		return sessionFactoryReadOnly;
 	}
 	
  	public String getTitle(Integer contentId) {
