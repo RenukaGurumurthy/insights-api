@@ -153,8 +153,6 @@
 			</props>
 		</property>
 	</bean>
- <bean
-		class="org.springframework.core.LocalVariableTableParameterNameDiscoverer" />
 	<bean id="propertyConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">

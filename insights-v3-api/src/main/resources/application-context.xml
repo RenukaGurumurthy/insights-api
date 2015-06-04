@@ -144,8 +144,7 @@
 		<property name="from" value="${report.sender.mail.id}"></property>
 		<property name="subject" value="FATAL - Application crash. Save your job !!" />
 	</bean>
-	 <bean
-		class="org.springframework.core.LocalVariableTableParameterNameDiscoverer" />
+
 	<bean id="propertyConfigurer"
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">

@@ -59,14 +59,13 @@ public class CassandraConnectionProvider {
 			logKeyspace = (Keyspace) logContext.getClient();
 			logger.info("Initialized connection to " + logKeyspaceName + " keyspace");
 		} catch (Exception e) {
-			logger.info("Error while initializing cassandra : {}"+ e);
+			logger.error("Error while initializing cassandra : {}", e);
 		}
 	}
     
 	public static Keyspace getLogKeyspace() {
 
 		if (logKeyspace == null) {
-			System.out.println("keyspace is null");
 			initInsights();
 		}
 		return logKeyspace;
