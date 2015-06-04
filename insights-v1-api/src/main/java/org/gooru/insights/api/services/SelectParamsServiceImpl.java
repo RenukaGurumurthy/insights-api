@@ -51,6 +51,7 @@ public class SelectParamsServiceImpl implements SelectParamsService {
 		liveDashboard.put("description", "description");
 		liveDashboard.put("gooruOId", "gooru_oid");
 		liveDashboard.put("title", "title");
+		liveDashboard.put("resourceFormat", "resourceFormat");
 		liveDashboard.put("thumbnail", "url");
 		liveDashboard.put("sharing", "sharing");
 		liveDashboard.put("typeName", "type_name");
@@ -77,6 +78,7 @@ public class SelectParamsServiceImpl implements SelectParamsService {
 		classPageCollectionOEResource.put("avgTimeSpent", "~avg_time_spent");
 		classPageCollectionOEResource.put("collectionGooruOId", "collection_gooru_oid");
 		classPageCollectionOEResource.put("title", "title");
+		classPageCollectionOEResource.put("resourceFormat", "resourceFormat");
 		classPageCollectionOEResource.put("description", "description");
 		classPageCollectionOEResource.put("lastModified", "last_modified");
 		classPageCollectionOEResource.put("category", "category");
@@ -256,8 +258,10 @@ public class SelectParamsServiceImpl implements SelectParamsService {
 
 		// user data
 		classpageResourceUsage.put("lastName", "lastname");
+		classpageResourceUsage.put("createdOn", "createdOn");
 		classpageResourceUsage.put("firstName", "firstname");
 		classpageResourceUsage.put("emailId", "external_id");
+		classpageResourceUsage.put("resourceFormat", "resourceFormat");
 		classpageResourceUsage.put("associatedDate", "association_date");
 		classpageResourceUsage.put("profileUrl", "profile_url");
 		selectParam.put("classpageResourceUsage", classpageResourceUsage);
