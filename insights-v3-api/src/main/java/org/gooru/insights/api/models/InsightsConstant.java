@@ -25,6 +25,17 @@ public interface InsightsConstant {
 	
 	String WILD_CARD = "*";
 	
+	String PARENT_ID = "parentId";
+	
+	String COLLECTION_ID = "collectionId";
+	
+	String USER_UID = "userUid";
+	
+	String SESSION_ID = "sessionId";
+	
+	String START_TIME = "startTime";
+	
+	String SEQUENCE = "sequence";
 	
 	/**
 	 * Serializer Excludes
