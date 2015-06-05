@@ -24,48 +24,6 @@
 	<context:annotation-config />
  	<import resource="hibernate-context.xml" />
  	
-	<!-- schduler for removing files 
-	 <bean id="excelReportController"
-		class="org.gooru.insights.api.controllers.ExcelReportController" />
-
-	<bean id="firstTaskJobDetail"
-		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject" ref="excelReportController" />
-		<property name="targetMethod" value="removeExpiredFiles" />
-	</bean>
-
-	Cron Trigger
-	<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
-		<property name="jobDetail" ref="firstTaskJobDetail" />
-		<property name="cronExpression" value="0 0 12 * * ?" />
-	</bean>
-
-	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
-		<property name="jobDetails">
-			<list>
- 				<ref bean="firstTaskJobDetail" />
- 			</list>
-		</property>
-		<property name="triggers">
-			<list>
-				<ref bean="cronTrigger" /> 
-			</list>
-		</property>
-	</bean>
- -->
-
-	<bean id="tomcatUsername" class="java.lang.String">
-		<constructor-arg>
-			<value>${tomcat.username}</value>
-		</constructor-arg>
-	</bean>
-
-	<bean id="tomcatPassword" class="java.lang.String">
-		<constructor-arg>
-			<value>${tomcat.password}</value>
-		</constructor-arg>
-	</bean>
-	
 	<jee:jndi-lookup id="jndiDataSourceReadOnly" jndi-name="java:comp/env/jdbc/gooruReadOnlyDS" />
 
 	<bean id="sessionFactoryReadOnly" parent="abstractSessionFactory">
