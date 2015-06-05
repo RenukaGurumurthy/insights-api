@@ -1,6 +1,7 @@
 package org.gooru.insights.api.controllers;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,14 +26,14 @@ import org.springframework.web.servlet.ModelAndView;
 public class ClassRestController extends BaseController
 {
 	@Autowired
-	private ClassService classpageService;
+	private ClassService classService;
 	
 	@RequestMapping(value="/title/{collectionId}",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_OE_VIEW)
 	@ResponseBody
 	public ModelAndView getTestContentTitle(HttpServletRequest request,@PathVariable(value="collectionId") Integer collectionId,HttpServletResponse response) throws Exception{
 		Map<String, Object> m = new HashMap<String, Object>();
-		String title = classpageService.getTitle(collectionId);
+		String title = classService.getTitle(collectionId);
 		m.put("collectionId", collectionId);
 		m.put("collectionTitle", title);
 		return getModel(m);
@@ -42,12 +43,9 @@ public class ClassRestController extends BaseController
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_OE_VIEW)
 	@ResponseBody
 	public ModelAndView getSessions(HttpServletRequest request,@RequestBody String data,@PathVariable(value="collectionGooruId") String collectionGooruId,HttpServletResponse response) throws Exception{
-		Map<String, Object> m = new HashMap<String, Object>();
 		RequestParamDTO requestParam = buildSessionActivityFromInputParameters(data);
-		m.put("collectionGooruId", collectionGooruId);
-		m.put("classGooruId", requestParam.getClassGooruId());
-		m.put("reportType", requestParam.getReportType());
-		return getModel(m);
+		requestParam.setCollectionGooruId(collectionGooruId);
+		return getModel(classService.getSessions(requestParam));
 	}
 	
 	private RequestParamDTO buildSessionActivityFromInputParameters(String data) {

@@ -1,7 +1,5 @@
 package org.gooru.insights.api.controllers;
 
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.gooru.insights.api.constants.ApiConstants;
@@ -12,10 +10,10 @@ import flexjson.JSONSerializer;
 
 public class BaseController {
 
-        public ModelAndView getModel(Map<String, Object> content) {
+        public ModelAndView getModel(Object content) {
 
                 ModelAndView model = new ModelAndView(ModelAttributes.CONTENT.getAttribute());
-                if(content != null && !content.isEmpty()){
+                if(content != null){
                         model.addObject(ModelAttributes.CONTENT.getAttribute(), new JSONSerializer().exclude(ApiConstants.EXCLUDE_CLASSES).deepSerialize(content));
                 }else{
                         model.addObject(ModelAttributes.MESSAGE.getAttribute(), ApiConstants.DEFAULT_MAIL_MESSAGE);
