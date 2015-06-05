@@ -53,19 +53,6 @@
 		</property>
 	</bean>
 
-
-	<bean id="tomcatUsername" class="java.lang.String">
-		<constructor-arg>
-			<value>${tomcat.username}</value>
-		</constructor-arg>
-	</bean>
-
-	<bean id="tomcatPassword" class="java.lang.String">
-		<constructor-arg>
-			<value>${tomcat.password}</value>
-		</constructor-arg>
-	</bean>
-
 	<bean id="gooruConstants"
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="properties">

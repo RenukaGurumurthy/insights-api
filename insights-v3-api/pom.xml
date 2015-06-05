@@ -42,28 +42,6 @@
 					</dependentWarExcludes>
 				</configuration>
 			</plugin>
-			<plugin>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.7</version>
-				<executions>
-					<execution>
-						<id>copy-resources</id>
-						<phase>validate</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${basedir}/src/main/webapp</outputDirectory>
-							<resources>
-								<resource>
-									<directory>src/main/resources</directory>
-									<filtering>true</filtering>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 	
@@ -264,6 +242,18 @@
 			<version>1.6.12</version>
 		</dependency>
 
+<!-- Used for FileUtils -->
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib</artifactId>
+			<version>2.2.2</version>
+		</dependency>
+		
 		<!-- Java Mailer API Dependency -->
 		<dependency>
 			<groupId>javax.mail</groupId>
@@ -319,6 +309,23 @@
 			<artifactId>junit</artifactId>
 			<version>3.8.1</version>
 			<scope>test</scope>
+		</dependency>
+		<!-- CORES Dependency for Access Origin -->
+		<dependency>
+		        <groupId>com.thetransactioncompany</groupId>
+		        <artifactId>java-property-utils</artifactId>
+		        <version>1.9.1</version>
+		</dependency>
+		<dependency>
+		        <groupId>com.thetransactioncompany</groupId>
+		        <artifactId>cors-filter</artifactId>
+		        <version>1.8</version>
+		</dependency>
+		<!-- Added Dependency for CORS -->
+		 <dependency>
+		        <groupId>com.thetransactioncompany</groupId>
+		        <artifactId>java-property-utils</artifactId>
+		        <version>1.9.1</version>
 		</dependency>
 	</dependencies>
 	<properties>
