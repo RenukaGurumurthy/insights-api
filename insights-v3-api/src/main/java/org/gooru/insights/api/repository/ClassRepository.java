@@ -8,4 +8,8 @@ public interface ClassRepository {
 
 	Long getContentId(String contentGooruOid);
 
+	List<Object[]> getCollectionAggregatedData(long parentId, long collectionId, String sessionId);
+
+	List<Object[]> getResourceAggregatedData(long parentId, long collectionId, String sessionId);
+
 }
