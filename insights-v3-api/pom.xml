@@ -321,12 +321,6 @@
 		        <artifactId>cors-filter</artifactId>
 		        <version>1.8</version>
 		</dependency>
-		<!-- Added Dependency for CORS -->
-		 <dependency>
-		        <groupId>com.thetransactioncompany</groupId>
-		        <artifactId>java-property-utils</artifactId>
-		        <version>1.9.1</version>
-		</dependency>
 <dependency>
                                         <groupId>com.fasterxml.jackson.core</groupId>
                                         <artifactId>jackson-annotations</artifactId>

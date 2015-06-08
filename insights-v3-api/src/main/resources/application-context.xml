@@ -17,11 +17,6 @@
 		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
 		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.1.xsd">
 
-	<mvc:annotation-driven />
-
-	<context:component-scan base-package="org.gooru.insights.api"/>
-
-	<context:annotation-config />
  	<import resource="hibernate-context.xml" />
  	
 	<jee:jndi-lookup id="jndiDataSourceReadOnly" jndi-name="java:comp/env/jdbc/gooruReadOnlyDS" />
