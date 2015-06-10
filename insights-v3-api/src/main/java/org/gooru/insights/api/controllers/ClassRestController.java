@@ -33,7 +33,7 @@ public class ClassRestController extends BaseController
 		return getModel(classService.getSessions(requestParam));
 	}
 	
-	@RequestMapping(value="/{collectionGooruId}",method ={ RequestMethod.GET,RequestMethod.POST})
+	@RequestMapping(value="/{collectionGooruId}",method ={RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_COLLECTION_VIEW)
 	@ResponseBody
 	public ModelAndView getCollection(HttpServletRequest request,@RequestBody String data,@PathVariable(value="collectionGooruId") String collectionGooruId,HttpServletResponse response) throws Exception{
@@ -42,7 +42,7 @@ public class ClassRestController extends BaseController
 		return getModel(classService.getCollectionSessionData(requestParam));
 	}
 	
-	@RequestMapping(value="/{collectionGooruId}/resources",method ={ RequestMethod.GET,RequestMethod.POST})
+	@RequestMapping(value="/{collectionGooruId}/resources",method ={RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_RESOURCE_VIEW)
 	@ResponseBody
 	public ModelAndView getResources(HttpServletRequest request,@RequestBody String data,@PathVariable(value="collectionGooruId") String collectionGooruId,HttpServletResponse response) throws Exception{

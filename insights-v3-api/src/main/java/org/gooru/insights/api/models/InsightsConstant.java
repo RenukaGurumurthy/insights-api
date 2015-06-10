@@ -42,7 +42,7 @@ public interface InsightsConstant {
 	 String CATEGORY = "category";
 	 String RESOURCE_FORMAT_ID = "resourceFormatId";
 	 String VIEWS = "views";
-	 String AVG_TIMEPENT = "avgTimeSpent";
+	 String AVG_TIMESPENT = "avgTimeSpent";
 	 String AVG_RATING = "avgRating";
 	 String AVG_REACTION = "avgReaction";
 	 String AVG_SCORE = "avgScore";
@@ -59,6 +59,9 @@ public interface InsightsConstant {
 	 String ANSWER_ID = "answerId";
 	 String ANSWER_OPTION_SEQUENCE = "answerOptionSequence";
 	 String ANSWER_TEXT = "answerText";
+	 String TOTAL_ATTEMPT_COUNT = "totalAttemptCount";
+	 String TOTAL_REACTION = "totalReaction";
+	 String TOTAL_VIEWS = "totalViews";
 
 
 

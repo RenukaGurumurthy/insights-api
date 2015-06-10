@@ -26,7 +26,7 @@ public class ClassRepositoryImpl extends BaseRepositoryImpl implements ClassRepo
 	
 	private final String RETRIEVE_RESOURCE_DATA_BY_SESSION = "select r.title,r.thumbnail,r.description,r.category,r.resource_format_id,ctv.value as resource_format ,agg_data.resource_id, agg_data.views_in_session,agg_data.time_spent_in_millis,agg_data.rating,agg_data.reaction,agg_data.score,agg_data.answer_status, agg_data.attempt_count,CAST(agg_data.question_type AS CHAR),agg_data.answer_id,agg_data.answer_option_sequence,agg_data.answer_text from collection_item ci inner join resource r on ci.resource_content_id = r.content_id inner join custom_table_value ctv on r.resource_format_id = ctv.custom_table_value_id left join (select resource_id,views_in_session,time_spent_in_millis,rating,reaction,score,attempt_count,question_type,answer_status,answer_id,answer_option_sequence,answer_text from session_activity_item where session_activity_id =:sessionId) as agg_data on agg_data.resource_id = r.content_id  where ci.collection_content_id =:collectionId";
 	
-	private final String RETRIEVE_RESOURCE_DATA_BY_ALL_SESSION = "select r.title,r.thumbnail,r.description,r.category,r.resource_format_id,ctv.value as resource_format ,agg_data.resource_id, agg_data.views_in_session,agg_data.time_spent_in_millis,agg_data.avg_reaction, agg_data.attempt_count,CAST(agg_data.question_type AS CHAR) from collection_item ci inner join resource r on ci.resource_content_id = r.content_id inner join custom_table_value ctv on r.resource_format_id = ctv.custom_table_value_id left join (select sai.resource_id,SUM(sai.views_in_session) as views_in_session ,(sai.time_spent_in_millis) as time_spent_in_millis,(SUM(sai.reaction)/count(1)) as avg_reaction ,SUM(sai.attempt_count) as attempt_count,sai.question_type from session_activity sa inner join session_activity_item sai on sa.session_activity_id = sai.session_activity_id where sa.parent_id =:parentId and sa.collection_id =:collectionId group by sai.resource_id ) as agg_data on agg_data.resource_id = r.content_id  where ci.collection_content_id =:collectionId";
+	private final String RETRIEVE_RESOURCE_DATA_BY_ALL_SESSION = "select r.title,r.thumbnail,r.description,r.category,r.resource_format_id,ctv.value as resource_format ,agg_data.resource_id, agg_data.views_in_session,agg_data.time_spent_in_millis,agg_data.avg_reaction, agg_data.attempt_count,CAST(agg_data.question_type AS CHAR) from collection_item ci inner join resource r on ci.resource_content_id = r.content_id inner join custom_table_value ctv on r.resource_format_id = ctv.custom_table_value_id left join (select sai.resource_id,SUM(sai.views_in_session) as views_in_session ,SUM(sai.time_spent_in_millis)/SUM(sai.views_in_session) as avg_time_spent_in_millis,(SUM(sai.reaction)/count(1)) as avg_reaction ,SUM(sai.attempt_count) as attempt_count,sai.question_type from session_activity sa inner join session_activity_item sai on sa.session_activity_id = sai.session_activity_id where sa.parent_id =:parentId and sa.collection_id =:collectionId group by sai.resource_id ) as agg_data on agg_data.resource_id = r.content_id  where ci.collection_content_id =:collectionId";
 	
 	@Override
 	public List<Object[]> getSession(long parentId,long collectionId,String userUid) {
@@ -108,7 +108,7 @@ public class ClassRepositoryImpl extends BaseRepositoryImpl implements ClassRepo
 				resultAsMap.put(CATEGORY, resultObject[2]);
 				resultAsMap.put(RESOURCE_FORMAT_ID, resultObject[3]);
 				resultAsMap.put(VIEWS, resultObject[4]);
-				resultAsMap.put(AVG_TIMEPENT, resultObject[5]);
+				resultAsMap.put(AVG_TIMESPENT, resultObject[5]);
 				resultAsMap.put(AVG_RATING, resultObject[6]);
 				resultAsMap.put(AVG_REACTION, resultObject[7]);
 				resultAsMap.put(AVG_SCORE, resultObject[8]);
@@ -149,14 +149,13 @@ public class ClassRepositoryImpl extends BaseRepositoryImpl implements ClassRepo
 				resultAsMap.put(THUMBNAIL, resultObject[1]);
 				resultAsMap.put(DESCRIPTION, resultObject[2]);
 				resultAsMap.put(CATEGORY, resultObject[3]);
-				resultAsMap.put(RESOURCE_FORMAT_ID, resultObject[4]);
 				resultAsMap.put(RESOURCE_FORMAT, resultObject[5]);
 				resultAsMap.put(RESOURCE_ID, resultObject[6]);
 				resultAsMap.put(VIEWS, resultObject[7]);
-				resultAsMap.put(AVG_TIMEPENT, resultObject[8]);
-				resultAsMap.put(AVG_RATING, resultObject[9]);
-				resultAsMap.put(AVG_REACTION, resultObject[10]);
-				resultAsMap.put(AVG_SCORE, resultObject[11]);
+				resultAsMap.put(TIMESPENT, resultObject[8]);
+				resultAsMap.put(RATING, resultObject[9]);
+				resultAsMap.put(REACTION, resultObject[10]);
+				resultAsMap.put(SCORE, resultObject[11]);
 				resultAsMap.put(ANSWER_STATUS, resultObject[12]);
 				resultAsMap.put(ATTEMPT_COUNT, resultObject[13]);
 				resultAsMap.put(QUESTION_TYPE, resultObject[14]);
@@ -184,13 +183,12 @@ public class ClassRepositoryImpl extends BaseRepositoryImpl implements ClassRepo
 				resultAsMap.put(THUMBNAIL, resultObject[1]);
 				resultAsMap.put(DESCRIPTION, resultObject[2]);
 				resultAsMap.put(CATEGORY, resultObject[3]);
-				resultAsMap.put(RESOURCE_FORMAT_ID, resultObject[4]);
 				resultAsMap.put(RESOURCE_FORMAT, resultObject[5]);
 				resultAsMap.put(RESOURCE_ID, resultObject[6]);
-				resultAsMap.put(VIEWS, resultObject[7]);
-				resultAsMap.put(TIMESPENT, resultObject[8]);
-				resultAsMap.put(REACTION, resultObject[9]);
-				resultAsMap.put(ATTEMPT_COUNT, resultObject[10]);
+				resultAsMap.put(TOTAL_VIEWS, resultObject[7]);
+				resultAsMap.put(AVG_TIMESPENT, resultObject[8]);
+				resultAsMap.put(TOTAL_REACTION, resultObject[9]);
+				resultAsMap.put(TOTAL_ATTEMPT_COUNT, resultObject[10]);
 				resultAsMap.put(QUESTION_TYPE, resultObject[11]);
 				resultMapAsList.add(resultAsMap);
 			}
