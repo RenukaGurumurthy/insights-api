@@ -1,11 +1,8 @@
 package org.gooru.insights.api.repository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.daos.BaseRepositoryImpl;
 import org.gooru.insights.api.models.InsightsConstant;
 import org.hibernate.Criteria;

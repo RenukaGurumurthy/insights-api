@@ -4,7 +4,7 @@
 package org.gooru.insights.api.serializer;
 
 
-import org.gooru.insights.api.spring.exception.BadRequestException;
+import org.gooru.insights.api.exception.BadRequestException;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -13,7 +13,7 @@ import flexjson.JSONDeserializer;
 
 
 /**
- * @author Search Team
+ * @author Insights Team
  * 
  */
 public class JsonDeserializer extends JsonProcessor {
