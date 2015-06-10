@@ -8,10 +8,6 @@ public interface ClassRepository {
 	List<Object[]> getSession(long parentId, long collectionId, String userUid);
 
 	Long getContentId(String contentGooruOid);
-
-	List<Object[]> getCollectionAggregatedData(long parentId, long collectionId, String sessionId);
-
-	List<Object[]> getResourceAggregatedData(long parentId, long collectionId, String sessionId);
 	
 	List<Map<String, Object>> getCollectionAggregatedDataByAllSession(long parentId,long collectionId);
 	
@@ -20,4 +16,5 @@ public interface ClassRepository {
 	List<Map<String, Object>> getResourceSessionData(long parentId, long collectionId, long sessionId);		
 
 	List<Map<String, Object>> getResourceAggregatedDataByAllSession(long parentId, long collectionId);
+	
 }
