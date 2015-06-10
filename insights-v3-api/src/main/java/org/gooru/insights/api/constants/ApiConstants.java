@@ -159,6 +159,17 @@ public class ApiConstants {
 	
 	public static final String PARTY_UId = "partyUid";
 	
+	public static final String OPEN_BRACE = "{";
+	
+	public static final String CLOSE_BRACE = "}";
+	
+	public static final String DATA = "data";
+	
+	public static final String COLLECTIONGOORUID = "collectionGooruId";
+
+	public static final String CLASSGOORUID = "classGooruId";
+
+
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
 		

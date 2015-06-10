@@ -1,7 +1,7 @@
 package org.gooru.insights.api.daos;
 
-public interface BaseRepository {
+import org.hibernate.Session;
 
-    public String getTitle(Integer contentId);
-    
+public interface BaseRepository {
+ 	Session getSession();    
 }

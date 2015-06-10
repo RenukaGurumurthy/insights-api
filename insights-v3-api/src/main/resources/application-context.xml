@@ -17,11 +17,6 @@
 		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd
 		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.1.xsd">
 
-	<mvc:annotation-driven />
-
-	<context:component-scan base-package="org.gooru.insights.api"/>
-
-	<context:annotation-config />
  	<import resource="hibernate-context.xml" />
  	
 	<jee:jndi-lookup id="jndiDataSourceReadOnly" jndi-name="java:comp/env/jdbc/gooruReadOnlyDS" />
@@ -37,6 +32,9 @@
 			<props>
 				<prop key="gooruConfigStyleBuild">${buildNumber}</prop>
 				<prop key="insights.api.rest.endpoint">${insights.api.rest.endpoint}</prop>
+				<prop key="message.file.path">${message.file.path}</prop>
+				<prop key="locale.lang">${locale.lang}</prop>
+				<prop key="locale.country">${locale.country}</prop>
 			</props>
 		</property>
 	</bean>

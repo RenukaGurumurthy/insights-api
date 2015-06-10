@@ -1,4 +1,4 @@
-package org.gooru.insights.api.spring.exception;
+package org.gooru.insights.api.exception;
 
 public class InsightsServerException extends RuntimeException {
 
