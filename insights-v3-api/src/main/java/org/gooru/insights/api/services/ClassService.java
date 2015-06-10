@@ -7,7 +7,8 @@ import org.gooru.insights.api.models.RequestParamDTO;
 
 public interface ClassService {
 
-	String getTitle(Integer contentId);
-
 	List<Map<String, Object>> getSessions(RequestParamDTO requestParamDTO);
+	List<Map<String, Object>> getCollectionSessionData(RequestParamDTO requestParamDTO);
+	List<Map<String, Object>> getCollectionResourceSessionData(RequestParamDTO requestParamDTO);
+
 }

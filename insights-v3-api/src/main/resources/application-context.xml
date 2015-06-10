@@ -32,6 +32,9 @@
 			<props>
 				<prop key="gooruConfigStyleBuild">${buildNumber}</prop>
 				<prop key="insights.api.rest.endpoint">${insights.api.rest.endpoint}</prop>
+				<prop key="message.file.path">${message.file.path}</prop>
+				<prop key="locale.lang">${locale.lang}</prop>
+				<prop key="locale.country">${locale.country}</prop>
 			</props>
 		</property>
 	</bean>

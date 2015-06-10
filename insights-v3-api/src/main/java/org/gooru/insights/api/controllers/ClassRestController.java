@@ -1,9 +1,5 @@
 package org.gooru.insights.api.controllers;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -27,17 +23,6 @@ public class ClassRestController extends BaseController
 {
 	@Autowired
 	private ClassService classService;
-	
-	@RequestMapping(value="/title/{collectionId}",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_OE_VIEW)
-	@ResponseBody
-	public ModelAndView getTestContentTitle(HttpServletRequest request,@PathVariable(value="collectionId") Integer collectionId,HttpServletResponse response) throws Exception{
-		Map<String, Object> m = new HashMap<String, Object>();
-		String title = classService.getTitle(collectionId);
-		m.put("collectionId", collectionId);
-		m.put("collectionTitle", title);
-		return getModel(m);
-	}
    
 	@RequestMapping(value="/{collectionGooruId}/sessions",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_OE_VIEW)
@@ -46,6 +31,24 @@ public class ClassRestController extends BaseController
 		RequestParamDTO requestParam = buildSessionActivityFromInputParameters(data);
 		requestParam.setCollectionGooruId(collectionGooruId);
 		return getModel(classService.getSessions(requestParam));
+	}
+	
+	@RequestMapping(value="/{collectionGooruId}",method ={ RequestMethod.GET,RequestMethod.POST})
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_COLLECTION_VIEW)
+	@ResponseBody
+	public ModelAndView getCollection(HttpServletRequest request,@RequestBody String data,@PathVariable(value="collectionGooruId") String collectionGooruId,HttpServletResponse response) throws Exception{
+		RequestParamDTO requestParam = buildSessionActivityFromInputParameters(data);
+		requestParam.setCollectionGooruId(collectionGooruId);
+		return getModel(classService.getCollectionSessionData(requestParam));
+	}
+	
+	@RequestMapping(value="/{collectionGooruId}/resources",method ={ RequestMethod.GET,RequestMethod.POST})
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_RESOURCE_VIEW)
+	@ResponseBody
+	public ModelAndView getResources(HttpServletRequest request,@RequestBody String data,@PathVariable(value="collectionGooruId") String collectionGooruId,HttpServletResponse response) throws Exception{
+		RequestParamDTO requestParam = buildSessionActivityFromInputParameters(data);
+		requestParam.setCollectionGooruId(collectionGooruId);
+		return getModel(classService.getCollectionResourceSessionData(requestParam));
 	}
 	
 	private RequestParamDTO buildSessionActivityFromInputParameters(String data) {

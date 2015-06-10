@@ -37,6 +37,31 @@ public interface InsightsConstant {
 	
 	String SEQUENCE = "sequence";
 	
+	 String TITLE = "title";
+	 String DESCRIPTION = "desription";
+	 String CATEGORY = "category";
+	 String RESOURCE_FORMAT_ID = "resourceFormatId";
+	 String VIEWS = "views";
+	 String AVG_TIMEPENT = "avgTimeSpent";
+	 String AVG_RATING = "avgRating";
+	 String AVG_REACTION = "avgReaction";
+	 String AVG_SCORE = "avgScore";
+	 String TIMESPENT = "timeSpent";
+	 String RATING = "rating";
+	 String REACTION = "reaction";
+	 String SCORE = "score";
+	 String THUMBNAIL = "thumbnail";
+	 String RESOURCE_FORMAT = "resourceFormat";
+	 String RESOURCE_ID = "resourceId";
+	 String ANSWER_STATUS = "answerStatus";
+	 String ATTEMPT_COUNT = "attemptCount";
+	 String QUESTION_TYPE = "questionType";
+	 String ANSWER_ID = "answerId";
+	 String ANSWER_OPTION_SEQUENCE = "answerOptionSequence";
+	 String ANSWER_TEXT = "answerText";
+
+
+
 	/**
 	 * Serializer Excludes
 	 */
