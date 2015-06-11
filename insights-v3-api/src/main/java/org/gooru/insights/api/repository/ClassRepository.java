@@ -16,5 +16,11 @@ public interface ClassRepository {
 	List<Map<String, Object>> getResourceSessionData(long parentId, long collectionId, long sessionId);		
 
 	List<Map<String, Object>> getResourceAggregatedDataByAllSession(long parentId, long collectionId);
+
+	Long getRecentSessionAcitivityId(long parentId, long collectionId,String userUid);
+
+	List<Map<String, Object>> getMastryReportsByRecentSessions(long collectionId,long classId,long sessionActivityId,String reportType);
+
+	List<Map<String, Object>> getMastryReportsByFirstSession(long collectionId,long classId,String reportType);
 	
 }
