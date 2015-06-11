@@ -37,6 +37,10 @@ public interface InsightsConstant {
 	
 	String SEQUENCE = "sequence";
 	
+	String PROGRESS = "progress";
+	
+	String ASSESSMENT = "assessment";
+	
 	 String TITLE = "title";
 	 String DESCRIPTION = "desription";
 	 String CATEGORY = "category";
