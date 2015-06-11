@@ -73,5 +73,20 @@ public class ClassServiceImpl implements ClassService,InsightsConstant {
 		}
 		return resourceSessionDataList;
 	}
+	
+	@Override
+	public List<Map<String, Object>> getOEQuestionData(RequestParamDTO requestParamDTO) {
+		List<Map<String, Object>> OESessionDataList = null;
+		Long sessionId = 0L;
+		if (requestParamDTO.getSessionId() != null) {
+			sessionId = requestParamDTO.getSessionId();
+		}
+		if (StringUtils.isNotBlank(requestParamDTO.getCollectionGooruId()) && StringUtils.isNotBlank(requestParamDTO.getClassGooruId()) && StringUtils.isNotBlank(requestParamDTO.getResourceGooruId())) {
+			OESessionDataList = classRepository.getOEQuestionData(classRepository.getContentId(requestParamDTO.getClassGooruId()), classRepository.getContentId(requestParamDTO.getCollectionGooruId()), classRepository.getContentId(requestParamDTO.getResourceGooruId()), sessionId);
+		} else {
+			ValidationUtils.rejectInvalidRequest(ErrorConstants.E102, ApiConstants.COLLECTIONGOORUID, ApiConstants.CLASSGOORUID, ApiConstants.RESOURCEGOORUID);
+		}
+		return OESessionDataList;
+	}
 
 }

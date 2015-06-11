@@ -16,5 +16,6 @@ public interface ClassRepository {
 	List<Map<String, Object>> getResourceSessionData(long parentId, long collectionId, long sessionId);		
 
 	List<Map<String, Object>> getResourceAggregatedDataByAllSession(long parentId, long collectionId);
-	
+		
+	List<Map<String, Object>> getOEQuestionData(long parentId, long collectionId, long resourceId, Long sessionId);
 }

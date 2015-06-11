@@ -10,5 +10,6 @@ public interface ClassService {
 	List<Map<String, Object>> getSessions(RequestParamDTO requestParamDTO);
 	List<Map<String, Object>> getCollectionSessionData(RequestParamDTO requestParamDTO);
 	List<Map<String, Object>> getCollectionResourceSessionData(RequestParamDTO requestParamDTO);
+	List<Map<String, Object>> getOEQuestionData(RequestParamDTO requestParamDTO);
 
 }

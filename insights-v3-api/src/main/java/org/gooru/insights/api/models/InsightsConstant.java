@@ -62,6 +62,8 @@ public interface InsightsConstant {
 	 String TOTAL_ATTEMPT_COUNT = "totalAttemptCount";
 	 String TOTAL_REACTION = "totalReaction";
 	 String TOTAL_VIEWS = "totalViews";
+	 String GOORUOID = "gooruOid";
+	 String CONTENTID = "contentId";
 
 
 
