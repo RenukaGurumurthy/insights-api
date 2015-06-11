@@ -51,6 +51,15 @@ public class ClassRestController extends BaseController
 		return getModel(classService.getCollectionResourceSessionData(requestParam));
 	}
 	
+	@RequestMapping(value="/{collectionGooruId}/OE",method ={RequestMethod.POST})
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_RESOURCE_VIEW)
+	@ResponseBody
+	public ModelAndView getOEQuestionData(HttpServletRequest request,@RequestBody String data,@PathVariable(value="collectionGooruId") String collectionGooruId,HttpServletResponse response) throws Exception{
+		RequestParamDTO requestParam = buildSessionActivityFromInputParameters(data);
+		requestParam.setCollectionGooruId(collectionGooruId);
+		return getModel(classService.getOEQuestionData(requestParam));
+	}
+	
 	private RequestParamDTO buildSessionActivityFromInputParameters(String data) {
 		return JsonDeserializer.deserialize(data, RequestParamDTO.class);
 	}

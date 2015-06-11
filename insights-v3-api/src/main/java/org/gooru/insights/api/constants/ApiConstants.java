@@ -89,7 +89,7 @@ public class ApiConstants {
 	
 	public static final String USERCOUNT = "userCount";
 	
-	public static final String GOORUOID = "gooruOId";
+	public static final String GOORU_O_ID = "gooruOId";
 
 	public static final String GOORU_UID = "gooru_uid";
 	
@@ -169,6 +169,7 @@ public class ApiConstants {
 
 	public static final String CLASSGOORUID = "classGooruId";
 
+	public static final String RESOURCEGOORUID = "resourceGooruId";
 
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
