@@ -170,6 +170,8 @@ public class ApiConstants {
 	public static final String CLASSGOORUID = "classGooruId";
 
 	public static final String RESOURCEGOORUID = "resourceGooruId";
+	
+	public static final String REPORTTYPE = "reportType";
 
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");

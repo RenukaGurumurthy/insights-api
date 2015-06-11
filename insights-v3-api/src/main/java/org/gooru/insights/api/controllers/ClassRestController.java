@@ -54,12 +54,20 @@ public class ClassRestController extends BaseController
 	@RequestMapping(value="/{collectionGooruId}/OE",method ={RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_RESOURCE_VIEW)
 	@ResponseBody
-	public ModelAndView getOEQuestionData(HttpServletRequest request,@RequestBody String data,@PathVariable(value="collectionGooruId") String collectionGooruId,HttpServletResponse response) throws Exception{
+	public ModelAndView getOEResponse(HttpServletRequest request,@RequestBody String data,@PathVariable(value="collectionGooruId") String collectionGooruId,HttpServletResponse response) throws Exception{
 		RequestParamDTO requestParam = buildSessionActivityFromInputParameters(data);
 		requestParam.setCollectionGooruId(collectionGooruId);
-		return getModel(classService.getOEQuestionData(requestParam));
+		return getModel(classService.getOEResponseData(requestParam));
 	}
 	
+	@RequestMapping(value="/{classGooruId}/report",method ={RequestMethod.POST})
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_RESOURCE_VIEW)
+	@ResponseBody
+	public ModelAndView getMasteryReport(HttpServletRequest request,@RequestBody String data,@PathVariable(value="classGooruId") String classGooruId,HttpServletResponse response) throws Exception{
+		RequestParamDTO requestParam = buildSessionActivityFromInputParameters(data);
+		requestParam.setClassGooruId(classGooruId);
+		return getModel(classService.getMasteryReportDataForFirstSession(requestParam));
+	}
 	private RequestParamDTO buildSessionActivityFromInputParameters(String data) {
 		return JsonDeserializer.deserialize(data, RequestParamDTO.class);
 	}

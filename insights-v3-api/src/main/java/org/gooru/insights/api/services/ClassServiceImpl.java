@@ -75,7 +75,7 @@ public class ClassServiceImpl implements ClassService,InsightsConstant {
 	}
 	
 	@Override
-	public List<Map<String, Object>> getOEQuestionData(RequestParamDTO requestParamDTO) {
+	public List<Map<String, Object>> getOEResponseData(RequestParamDTO requestParamDTO) {
 		List<Map<String, Object>> OESessionDataList = null;
 		List<Object[]> userList = null;
 		Long sessionId = 0L;
@@ -86,13 +86,29 @@ public class ClassServiceImpl implements ClassService,InsightsConstant {
 			long parentId = classRepository.getContentId(requestParamDTO.getClassGooruId());
 			long collectionId = classRepository.getContentId(requestParamDTO.getCollectionGooruId());
 			if (sessionId == null || StringUtils.isBlank(sessionId.toString()) || sessionId.equals(0L)) {
-				userList = classRepository.fetchSessionUsers(parentId, collectionId);
+				userList = classRepository.fetchSessionActivityUserList(parentId, collectionId);
+				OESessionDataList = classRepository.getOEResponseByUser(classRepository.getContentId(requestParamDTO.getClassGooruId()), classRepository.getContentId(requestParamDTO.getCollectionGooruId()), classRepository.getContentId(requestParamDTO.getResourceGooruId()), userList);
+			} else {
+				OESessionDataList = classRepository.getOEResponseBySession(classRepository.getContentId(requestParamDTO.getClassGooruId()), classRepository.getContentId(requestParamDTO.getCollectionGooruId()), classRepository.getContentId(requestParamDTO.getResourceGooruId()), sessionId);
 			}
-			OESessionDataList = classRepository.getOEQuestionData(classRepository.getContentId(requestParamDTO.getClassGooruId()), classRepository.getContentId(requestParamDTO.getCollectionGooruId()), classRepository.getContentId(requestParamDTO.getResourceGooruId()), sessionId, userList);
 		} else {
 			ValidationUtils.rejectInvalidRequest(ErrorConstants.E102, ApiConstants.COLLECTIONGOORUID, ApiConstants.CLASSGOORUID, ApiConstants.RESOURCEGOORUID);
 		}
 		return OESessionDataList;
+	}
+	
+	@Override
+	public List<Map<String, Object>> getMasteryReportDataForFirstSession(RequestParamDTO requestParamDTO) {
+		List<Map<String, Object>> reportDataList = null;
+		if (requestParamDTO.getClassGooruId() != null && requestParamDTO.getCollectionGooruId() != null && requestParamDTO.getReportType() != null) {
+			long classId = classRepository.getContentId(requestParamDTO.getClassGooruId());
+			long collectionId = classRepository.getContentId(requestParamDTO.getCollectionGooruId());
+			String reportType = requestParamDTO.getReportType();
+			reportDataList = classRepository.getMasteryReportsByFirstSession(collectionId, classId, reportType);
+		} else {
+			ValidationUtils.rejectInvalidRequest(ErrorConstants.E102, ApiConstants.COLLECTIONGOORUID, ApiConstants.CLASSGOORUID, ApiConstants.REPORTTYPE);
+		}
+		return reportDataList;
 	}
 
 }
