@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.daos.BaseRepositoryImpl;
 import org.gooru.insights.api.models.InsightsConstant;
 import org.hibernate.Criteria;
@@ -16,7 +15,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ClassRepositoryImpl extends BaseRepositoryImpl implements ClassRepository,InsightsConstant {
 
-	private final String FETCH_SESSIONS = "SELECT session_activity_id, start_time, sequence FROM session_activity WHERE parent_id =:parentId AND collection_id =:collectionId";
+	private final String FETCH_SESSIONS = "SELECT session_activity_id as sessionId, start_time as startTime, sequence FROM session_activity WHERE parent_id =:parentId AND collection_id =:collectionId";
 
 	private final String FETCH_CONTENT_ID = "SELECT content_id AS contentId FROM content WHERE gooru_oid =:gooruOid";
 	
@@ -28,15 +27,15 @@ public class ClassRepositoryImpl extends BaseRepositoryImpl implements ClassRepo
 	
 	private final String FETCH_RESOURCE_DATA_BY_ALL_SESSION = "SELECT r.title, r.thumbnail, r.description, r.category, r.resource_format_id AS resourceFormatId, ctv.value AS resourceFormat ,agg_data.resource_id AS resourceId, agg_data.views_in_session AS totalViews, agg_data.avg_time_spent_in_millis AS avgTimesspent,agg_data.avg_reaction AS avgReaction, agg_data.attempt_count AS totalAttemptCount, CAST(agg_data.question_type AS CHAR) AS questionType FROM collection_item ci INNER JOIN resource r ON ci.resource_content_id = r.content_id INNER JOIN custom_table_value ctv ON r.resource_format_id = ctv.custom_table_value_id LEFT JOIN (SELECT sai.resource_id, SUM(sai.views_in_session) AS views_in_session, SUM(sai.time_spent_in_millis)/SUM(sai.views_in_session) AS avg_time_spent_in_millis, (SUM(sai.reaction)/count(1)) AS avg_reaction, SUM(sai.attempt_count) AS attempt_count, sai.question_type FROM session_activity sa INNER JOIN session_activity_item sai ON sa.session_activity_id = sai.session_activity_id WHERE sa.parent_id =:parentId AND sa.collection_id =:collectionId GROUP BY sai.resource_id) AS agg_data ON agg_data.resource_id = r.content_id  WHERE ci.collection_content_id =:collectionId";
 	
-	private final String FETCH_OE_QUESTION_DATA = "SELECT u.username, CAST(sa.user_uid AS CHAR) AS gooruUId, CAST(sai.feedback_provided_user_uid AS CHAR) AS feedbackProviderUId, feedback_provided_time AS feedbackTimestamp, feedback_text AS feedbackText, answer_text AS OEText FROM session_activity AS sa INNER JOIN session_activity_item sai ON sai.session_activity_id = sa.session_activity_id INNER JOIN user u ON u.gooru_uid = sa.user_uid WHERE sai.session_activity_id =:sessionId AND sai.resource_id =:resourceId AND sa.parent_id =:parentId AND sa.collection_id =:collectionId";
+	private final String FETCH_OE_RESPONSE_BY_SESSION = "SELECT u.username, CAST(sa.user_uid AS CHAR) AS gooruUId, CAST(sai.feedback_provided_user_uid AS CHAR) AS feedbackProviderUId, feedback_provided_time AS feedbackTimestamp, feedback_text AS feedbackText, answer_text AS OEText FROM session_activity AS sa INNER JOIN session_activity_item sai ON sai.session_activity_id = sa.session_activity_id INNER JOIN user u ON u.gooru_uid = sa.user_uid WHERE sai.session_activity_id =:sessionId AND sai.resource_id =:resourceId AND sa.parent_id =:parentId AND sa.collection_id =:collectionId";
 
 	private final String FETCH_SESSION_USERS = "SELECT distinct CAST(sa.user_uid AS CHAR) AS gooruUId FROM session_activity AS sa WHERE sa.parent_id =:parentId AND sa.collection_id =:collectionId";
 	
-	private final String FETCH_OE_SESSION_DATA = "SELECT u.username, CAST(sa.user_uid AS CHAR) AS gooruUId, CAST(sai.feedback_provided_user_uid AS CHAR) AS feedbackProviderUId, feedback_provided_time AS feedbackTimestamp, feedback_text AS feedbackText, answer_text AS OEText FROM session_activity sa INNER JOIN  session_activity_item sai ON sai.session_activity_id = sa.session_activity_id INNER JOIN user u ON u.gooru_uid = sa.user_uid WHERE sai.resource_id =:resourceId AND sa.parent_id =:parentId AND sa.collection_id =:collectionId AND sai.question_type = 'OE' AND sa.user_uid =:userUid ORDER BY sa.sequence DESC LIMIT 1";
+	private final String FETCH_RECENT_OE_RESPONSE_BY_USER = "SELECT u.username, CAST(sa.user_uid AS CHAR) AS gooruUId, CAST(sai.feedback_provided_user_uid AS CHAR) AS feedbackProviderUId, feedback_provided_time AS feedbackTimestamp, feedback_text AS feedbackText, answer_text AS OEText FROM session_activity sa INNER JOIN  session_activity_item sai ON sai.session_activity_id = sa.session_activity_id INNER JOIN user u ON u.gooru_uid = sa.user_uid WHERE sai.resource_id =:resourceId AND sa.parent_id =:parentId AND sa.collection_id =:collectionId AND sai.question_type = 'OE' AND sa.user_uid =:userUid ORDER BY sa.sequence DESC LIMIT 1";
 	
 	private final String RETRIEVE_LAST_SESSION_ACTIVITY_ID = "select session_activity_id AS sessionActivityId,sequence from session_activity where user_uid =:userUid and parent_id =:parentId and collection_id =:collectionId order by sequence desc LIMIT 1";
 	
-	private final String RETRIEVE_PROGRESS_REPORT_BY_FIRST_SESSION = "select u.username,r.title as resourceTitle,agg_data.session_activity_id as sessionActivityId, IFNULL(agg_data.views_in_session,0) AS Views ,IFNULL(agg_data.time_spent_in_millis,0) AS totalTimeSpentInMs ,IFNULL(agg_data.reaction,0) AS reaction,agg_data.question_type AS questionType,agg_data.answer_status AS answerStatus ,IFNULL(agg_data.score,0) as Score,agg_data.answer_option_sequence as answerOptionSequence,agg_data.answer_text as answerText from classpage cl inner join user_group ug on cl.classpage_code = ug.user_group_code inner join user_group_association uga on ug.user_group_uid = uga.user_group_uid inner join user u on u.gooru_uid = uga.gooru_uid inner join collection_item ci on ci.collection_content_id = cl.classpage_content_id and ci.resource_content_id =:collectionId inner join collection_item resource_item on resource_item.collection_content_id = ci.resource_content_id inner join resource r on resource_item.resource_content_id = r.content_id left join (select  sa.session_activity_id, sa.user_uid,sa.collection_id,sai.views_in_session ,sai.time_spent_in_millis ,sai.question_type,sai.reaction,sai.answer_status,sai.answer_option_sequence,sai.answer_text ,(sai.score) as score,sai.resource_id as resource_id from session_activity sa inner join session_activity_item sai on sa.session_activity_id = sai.session_activity_id where sa.parent_id =:parentId and sa.collection_id =:collectionId and sa.sequence = 1  group by sa.collection_id,sai.resource_id,sa.user_uid) as agg_data on agg_data.user_uid = u.gooru_uid and r.content_id = agg_data.resource_id where classpage_content_id =:parentId";
+	private final String RETRIEVE_PROGRESS_REPORT_BY_FIRST_SESSION = "select u.username,r.title as resourceTitle,agg_data.session_activity_id as sessionActivityId, IFNULL(agg_data.views_in_session,0) AS Views ,IFNULL(agg_data.time_spent_in_millis,0) AS totalTimeSpentInMs ,IFNULL(agg_data.reaction,0) AS reaction,agg_data.question_type AS questionType,agg_data.answer_status AS answerStatus ,IFNULL(agg_data.score,0) as Score,agg_data.answer_option_sequence as answerOptionSequence,agg_data.answer_text as answerText from classpage cl inner join user_group ug on cl.classpage_code = ug.user_group_code inner join user_group_association uga on ug.user_group_uid = uga.user_group_uid inner join user u on u.gooru_uid = uga.gooru_uid inner join collection_item ci on ci.collection_content_id = cl.classpage_content_id and ci.resource_content_id =:collectionId inner join collection_item resource_item on resource_item.collection_content_id = ci.resource_content_id inner join resource r on resource_item.resource_content_id = r.content_id left join (select  sa.session_activity_id, sa.user_uid,sa.collection_id,sai.views_in_session ,sai.time_spent_in_millis ,sai.question_type,sai.reaction,sai.answer_status,sai.answer_option_sequence,sai.answer_text ,(sai.score) as score,sai.resource_id as resource_id from session_activity sa inner join session_activity_item sai on sa.session_activity_id = sai.session_activity_id where sa.parent_id =:parentId and sa.collection_id =:collectionId and sa.sequence = 1  group by sa.collection_id,sai.resource_id,sa.user_uid) as agg_data on agg_data.user_uid = u.gooru_uid and r.content_id = agg_data.resource_id where classpage_content_id =:parentId and uga.is_group_owner = 0";
 
 	private final String RETRIEVE_PROGRESS_REPORT_BY_RECENT_SESSION = "select u.username,r.title as resourceTitle,agg_data.session_activity_id as sessionActivityId, IFNULL(agg_data.views_in_session,0) AS Views ,IFNULL(agg_data.time_spent_in_millis,0) AS totalTimeSpentInMs ,IFNULL(agg_data.reaction,0) AS reaction,agg_data.question_type AS questionType,agg_data.answer_status AS answerStatus ,IFNULL(agg_data.score,0) as Score,agg_data.answer_option_sequence as answerOptionSequence,agg_data.answer_text as answerText from classpage cl inner join user_group ug on cl.classpage_code = ug.user_group_code inner join user_group_association uga on ug.user_group_uid = uga.user_group_uid inner join user u on u.gooru_uid = uga.gooru_uid inner join collection_item ci on ci.collection_content_id = cl.classpage_content_id and ci.resource_content_id =:collectionId inner join collection_item resource_item on resource_item.collection_content_id = ci.resource_content_id inner join resource r on resource_item.resource_content_id = r.content_id left join (select  sa.session_activity_id, sa.user_uid,sa.collection_id,sai.views_in_session ,sai.time_spent_in_millis ,sai.question_type,sai.reaction,sai.answer_status,sai.answer_option_sequence,sai.answer_text ,(sai.score) as score,sai.resource_id as resource_id from session_activity sa inner join session_activity_item sai on sa.session_activity_id = sai.session_activity_id where sa.session_activity_id =:sessionId   group by sa.collection_id,sai.resource_id,sa.user_uid) as agg_data on agg_data.user_uid = u.gooru_uid and r.content_id = agg_data.resource_id where classpage_content_id =:parentId";
 	
@@ -44,13 +43,14 @@ public class ClassRepositoryImpl extends BaseRepositoryImpl implements ClassRepo
 
 
 	@Override
-	public List<Object[]> getSession(long parentId,long collectionId,String userUid) {
+	public List<Map<String, Object>> getSession(long parentId,long collectionId,String userUid) {
 		Session session = getSession();
 		Query query = session.createSQLQuery(FETCH_SESSIONS);
 		query.setParameter(PARENT_ID, parentId);
 		query.setParameter(COLLECTION_ID, collectionId);
-		List<Object[]> result = query.list();
-		return result;
+		query.setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP);
+		List<Map<String, Object>> resultMapAsList = query.list().size() > 0 ? query.list() : null;
+		return resultMapAsList;
 
 	}
 	
@@ -108,32 +108,38 @@ public class ClassRepositoryImpl extends BaseRepositoryImpl implements ClassRepo
 		return resultMapAsList;
 	}
 	
-	public List<Map<String, Object>> getOEQuestionData(long parentId, long collectionId, long resourceId, Long sessionId, List<Object[]> userList) {
-		List<Map<String, Object>> resultMapAsList  = new ArrayList<Map<String, Object>>();
+	@Override
+	public List<Map<String, Object>> getOEResponseBySession(long parentId, long collectionId, long resourceId, Long sessionId) {
+		List<Map<String, Object>> resultMapAsList = new ArrayList<Map<String, Object>>();
 		Session session = getSession();
-		if (sessionId == null || StringUtils.isBlank(sessionId.toString()) || sessionId.equals(0L)) {
-			if (userList != null && userList.size() > 0) {
-				for (Object user : userList) {
-					Query fetchOEDataQuery = session.createSQLQuery(FETCH_OE_SESSION_DATA);
-					fetchOEDataQuery.setParameter(PARENT_ID, parentId);
-					fetchOEDataQuery.setParameter(COLLECTION_ID, collectionId);
-					fetchOEDataQuery.setParameter(RESOURCE_ID, resourceId);
-					fetchOEDataQuery.setParameter(USER_UID, user);
-					fetchOEDataQuery.setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP);
-					List<Map<String, Object>> resultMapList = fetchOEDataQuery.list().size() > 0 ? fetchOEDataQuery.list() : null;
-					if (resultMapList != null && resultMapList.size() > 0) {
-						resultMapAsList.add(resultMapList.get(0));
-					}
+		Query query = session.createSQLQuery(FETCH_OE_RESPONSE_BY_SESSION);
+		query.setParameter(PARENT_ID, parentId);
+		query.setParameter(COLLECTION_ID, collectionId);
+		query.setParameter(RESOURCE_ID, resourceId);
+		query.setParameter(SESSION_ID, sessionId);
+		query.setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP);
+		resultMapAsList = query.list().size() > 0 ? query.list() : null;
+		return resultMapAsList;
+	}
+	
+	@Override
+	public List<Map<String, Object>> getOEResponseByUser(long parentId, long collectionId, long resourceId, List<Object[]> userList) {
+		List<Map<String, Object>> resultMapAsList = null;
+		Session session = getSession();
+		if (userList != null && userList.size() > 0) {
+			resultMapAsList = new ArrayList<Map<String, Object>>();
+			for (Object user : userList) {
+				Query query = session.createSQLQuery(FETCH_RECENT_OE_RESPONSE_BY_USER);
+				query.setParameter(PARENT_ID, parentId);
+				query.setParameter(COLLECTION_ID, collectionId);
+				query.setParameter(RESOURCE_ID, resourceId);
+				query.setParameter(USER_UID, user);
+				query.setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP);
+				List<Map<String, Object>> resultMapList = query.list().size() > 0 ? query.list() : null;
+				if (resultMapList != null && resultMapList.size() > 0) {
+					resultMapAsList.add(resultMapList.get(0));
 				}
 			}
-		} else {
-			Query fetchOEDataQuery = session.createSQLQuery(FETCH_OE_QUESTION_DATA);
-			fetchOEDataQuery.setParameter(PARENT_ID, parentId);
-			fetchOEDataQuery.setParameter(COLLECTION_ID, collectionId);
-			fetchOEDataQuery.setParameter(RESOURCE_ID, resourceId);
-			fetchOEDataQuery.setParameter(SESSION_ID, sessionId);
-			fetchOEDataQuery.setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP);
-			resultMapAsList = fetchOEDataQuery.list().size() > 0 ? fetchOEDataQuery.list() : null;;
 		}
 		return resultMapAsList;
 	}
@@ -161,13 +167,14 @@ public class ClassRepositoryImpl extends BaseRepositoryImpl implements ClassRepo
 		}
 		query.setParameter(PARENT_ID, parentId);
 		query.setParameter(SESSION_ID, sessionActivityId);
+		query.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); 
 		query.setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP);
 		List<Map<String, Object>> resultMapAsList = query.list().size() > 0 ? query.list() : null;
 		return resultMapAsList;
 	}
 
 	@Override
-	public List<Map<String, Object>> getMastryReportsByFirstSession(long collectionId,long parentId, String reportType) {
+	public List<Map<String, Object>> getMasteryReportsByFirstSession(long collectionId,long parentId, String reportType) {
 		Session session = getSession();
 		Query query = null;
 		if(reportType.equalsIgnoreCase(PROGRESS)){
@@ -177,19 +184,20 @@ public class ClassRepositoryImpl extends BaseRepositoryImpl implements ClassRepo
 			query = session.createSQLQuery(RETRIEVE_ASSESSMENT_REPORT_BY_FIRST_SESSION);
 		}
 		query.setParameter(PARENT_ID, parentId);
+		query.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY); 
 		query.setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP);
 		List<Map<String, Object>> resultMapAsList = query.list().size() > 0 ? query.list() : null;
 		return resultMapAsList;
 	}
 
 	@Override
-	public List<Object[]> fetchSessionUsers(long parentId, long collectionId) {
+	public List<Object[]> fetchSessionActivityUserList(long parentId, long collectionId) {
         Session session = getSession();
-        Query fetchUsersQuery = session.createSQLQuery(FETCH_SESSION_USERS);
-        fetchUsersQuery.setParameter(PARENT_ID, parentId);
-        fetchUsersQuery.setParameter(COLLECTION_ID, collectionId);
-        List<Object[]> usersList = fetchUsersQuery.list().size() > 0 ? fetchUsersQuery.list() : null;
-        return usersList;
+        Query query = session.createSQLQuery(FETCH_SESSION_USERS);
+        query.setParameter(PARENT_ID, parentId);
+        query.setParameter(COLLECTION_ID, collectionId);
+        List<Object[]> userList = query.list().size() > 0 ? query.list() : null;
+        return userList;
 	}
 	
 }
