@@ -51,21 +51,23 @@ public class ClassRestController extends BaseController
 		return getModel(classService.getCollectionResourceSessionData(requestParam));
 	}
 	
-	@RequestMapping(value="/{collectionGooruId}/OE",method ={RequestMethod.POST})
+	@RequestMapping(value="/{collectionGooruId}/{resourceGooruId}/response",method ={RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_RESOURCE_VIEW)
 	@ResponseBody
-	public ModelAndView getOEResponse(HttpServletRequest request,@RequestBody String data,@PathVariable(value="collectionGooruId") String collectionGooruId,HttpServletResponse response) throws Exception{
+	public ModelAndView getOEResponse(HttpServletRequest request,@RequestBody String data,@PathVariable(value="collectionGooruId") String collectionGooruId,@PathVariable(value="resourceGooruId") String resourceGooruId, HttpServletResponse response) throws Exception{
 		RequestParamDTO requestParam = buildSessionActivityFromInputParameters(data);
 		requestParam.setCollectionGooruId(collectionGooruId);
+		requestParam.setResourceGooruId(resourceGooruId);
 		return getModel(classService.getOEResponseData(requestParam));
 	}
 	
-	@RequestMapping(value="/{classGooruId}/report",method ={RequestMethod.POST})
+	@RequestMapping(value="/{classGooruId}/report/{reportType}",method ={RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_RESOURCE_VIEW)
 	@ResponseBody
-	public ModelAndView getMasteryReport(HttpServletRequest request,@RequestBody String data,@PathVariable(value="classGooruId") String classGooruId,HttpServletResponse response) throws Exception{
+	public ModelAndView getMasteryReport(HttpServletRequest request,@RequestBody String data, @PathVariable(value="classGooruId") String classGooruId, @PathVariable(value="reportType") String reportType, HttpServletResponse response) throws Exception{
 		RequestParamDTO requestParam = buildSessionActivityFromInputParameters(data);
 		requestParam.setClassGooruId(classGooruId);
+		requestParam.setReportType(reportType);
 		return getModel(classService.getMasteryReportDataForFirstSession(requestParam));
 	}
 	private RequestParamDTO buildSessionActivityFromInputParameters(String data) {

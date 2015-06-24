@@ -15,7 +15,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ClassRepositoryImpl extends BaseRepositoryImpl implements ClassRepository,InsightsConstant {
 
-	private final String FETCH_SESSIONS = "SELECT session_activity_id, start_time, sequence FROM session_activity WHERE parent_id =:parentId AND collection_id =:collectionId";
+	private final String FETCH_SESSIONS = "SELECT session_activity_id as sessionId, start_time as startTime, sequence FROM session_activity WHERE parent_id =:parentId AND collection_id =:collectionId";
 
 	private final String FETCH_CONTENT_ID = "SELECT content_id AS contentId FROM content WHERE gooru_oid =:gooruOid";
 	
@@ -43,13 +43,14 @@ public class ClassRepositoryImpl extends BaseRepositoryImpl implements ClassRepo
 
 
 	@Override
-	public List<Object[]> getSession(long parentId,long collectionId,String userUid) {
+	public List<Map<String, Object>> getSession(long parentId,long collectionId,String userUid) {
 		Session session = getSession();
 		Query query = session.createSQLQuery(FETCH_SESSIONS);
 		query.setParameter(PARENT_ID, parentId);
 		query.setParameter(COLLECTION_ID, collectionId);
-		List<Object[]> result = query.list();
-		return result;
+		query.setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP);
+		List<Map<String, Object>> resultMapAsList = query.list().size() > 0 ? query.list() : null;
+		return resultMapAsList;
 
 	}
 	

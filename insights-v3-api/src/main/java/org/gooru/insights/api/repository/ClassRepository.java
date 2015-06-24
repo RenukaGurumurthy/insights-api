@@ -5,7 +5,7 @@ import java.util.Map;
 
 public interface ClassRepository {
 
-	List<Object[]> getSession(long parentId, long collectionId, String userUid);
+	List<Map<String, Object>> getSession(long parentId, long collectionId, String userUid);
 
 	Long getContentId(String contentGooruOid);
 	

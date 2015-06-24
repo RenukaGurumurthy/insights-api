@@ -45,6 +45,11 @@ public class ApiConstants {
 	public static final String MAIL_TEXT = "Hi,This report will take some more time to get process,we will send you this report to insights@goorulearning.org, Thanks";
 	
 	/**
+	 * User Message Constants
+	 */
+	public static final String DEFAULT_NOT_FOUND_MESSAGE = "No results for your request!";
+	
+	/**
 	 * view constants
 	 */
 	public enum ModelAttributes{
@@ -172,6 +177,8 @@ public class ApiConstants {
 	public static final String RESOURCEGOORUID = "resourceGooruId";
 	
 	public static final String REPORTTYPE = "reportType";
+	
+	public static final String DEVELOPER_MESSAGE = "developerMessage";
 
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
