@@ -6,8 +6,8 @@
     <transactionManager type="JDBC">
         <dataSource type="SIMPLE">
           <property name="JDBC.Driver" value="org.postgresql.Driver"/>
-          <property name="JDBC.ConnectionURL" value="jdbc:postgresql://localhost:5432/gooru_insights_db"/>
-          <property name="JDBC.Username" value="daniel"/>
+          <property name="JDBC.ConnectionURL" value="jdbc:postgresql://host:5432/dbname"/>
+          <property name="JDBC.Username" value="username"/>
           <property name="JDBC.Password" value="password"/>
         </dataSource>
       </transactionManager> 
