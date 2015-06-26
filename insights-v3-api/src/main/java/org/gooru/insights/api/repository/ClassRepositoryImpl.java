@@ -1,16 +1,22 @@
 package org.gooru.insights.api.repository;
 
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.gooru.insights.api.daos.BaseRepositoryImpl;
 import org.gooru.insights.api.models.InsightsConstant;
+import org.gooru.insights.api.models.SessionActivity;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.type.StandardBasicTypes;
 import org.springframework.stereotype.Repository;
+
+import com.ibatis.common.resources.Resources;
+import com.ibatis.sqlmap.client.SqlMapClient;
+import com.ibatis.sqlmap.client.SqlMapClientBuilder;
 
 @Repository
 public class ClassRepositoryImpl extends BaseRepositoryImpl implements ClassRepository,InsightsConstant {
@@ -200,4 +206,15 @@ public class ClassRepositoryImpl extends BaseRepositoryImpl implements ClassRepo
         return userList;
 	}
 	
+	@Override
+	public List<SessionActivity> getSessionActivity(Long id) {
+		try {			
+			System.out.println("Going to read records.....");
+			List<SessionActivity>  ems = (List<SessionActivity>) getSQLMapClient().queryForList("SessionActivity.getAllSessionActivity", id);
+			return ems;
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+		return null;
+	}	
 }

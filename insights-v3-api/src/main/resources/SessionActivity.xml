@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="SessionActivity">
+   	<select id="getAll" resultClass="org.gooru.insights.api.models.SessionActivity">
+      	SELECT * FROM session_activity
+   	</select>
+   		
+   <!-- Using ResultMap -->
+   <resultMap id="result" class="org.gooru.insights.api.models.SessionActivity">
+      <result property="sessionActivityId" column="session_activity_id"/>
+      <result property="score" column="score"/>
+      <result property="status" column="status"/>
+      <result property="mode" column="mode"/>
+   </resultMap> 
+	
+   <select id="getAllSessionActivity" resultMap="result">
+     SELECT * FROM session_activity 
+    <!--  WHERE session_activity_id=#id# -->
+   </select>
+   
+</sqlMap>
