@@ -93,7 +93,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 
 		//fetch course usage data
 		if(getUsageData) {
-			String courseSessionKey = classId + ApiConstants.TILDA + courseId;
+			String courseKey = classId + ApiConstants.TILDA + courseId;
 			List<Map<String, Object>> resultMapList = new ArrayList<Map<String, Object>>();
 			for(Map<String, Object> rawDataMap : rawDataMapAsList) {
 				Map<String, Object> usageAsMap = new HashMap<String, Object>(1);
@@ -105,23 +105,23 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				long lessonCount = lessons.size();
 				usageDataAsMap.put(ApiConstants.COURSE_COUNT, unitCount);
 				usageDataAsMap.put(ApiConstants.LESSON_COUNT, lessonCount);
-				String recentCourseSessionKey = SessionAttributes.RS + ApiConstants.TILDA + courseSessionKey;
+				String classCourseKey = courseKey;
 				//fetch course usage data
 				if (StringUtils.isNotBlank(userUid)) {
-					recentCourseSessionKey += ApiConstants.TILDA + userUid;
+					classCourseKey += ApiConstants.TILDA + userUid;
 				}
 				Map<String, Object> courseUsageAsMap = new HashMap<String, Object>();
-				courseUsageAsMap = getSessionMetricsAsMap(traceId, recentCourseSessionKey, courseId);
+				courseUsageAsMap = getClassActivityMetricsAsMap(traceId, classCourseKey, courseId);
 				if(!courseUsageAsMap.isEmpty()) {
 					usageDataAsMap.put(ApiConstants.COURSE_USAGE_DATA, courseUsageAsMap);
 				}
-				String unitSessionKey = SessionAttributes.RS + ApiConstants.TILDA + courseSessionKey + ApiConstants.TILDA + unitGooruOid;
+				String classUnitKey = courseKey + ApiConstants.TILDA + unitGooruOid;
 				//fetch unit usage data
 				if (StringUtils.isNotBlank(userUid)) {
-					unitSessionKey += ApiConstants.TILDA + userUid;
+					classUnitKey += ApiConstants.TILDA + userUid;
 				}
 				Map<String, Object> unitUsageAsMap = new HashMap<String, Object>();
-				unitUsageAsMap = getSessionMetricsAsMap(traceId, unitSessionKey, unitGooruOid);
+				unitUsageAsMap = getClassActivityMetricsAsMap(traceId, classUnitKey, unitGooruOid);
 				if(!unitUsageAsMap.isEmpty()) {
 					usageDataAsMap.put(ApiConstants.UNIT_USAGE_DATA, unitUsageAsMap);
 				}
@@ -164,10 +164,10 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 
 		//fetch usage data of unit
 		if(getUsageData) {
-			String unitSessionKey = classId + ApiConstants.TILDA +courseId + ApiConstants.TILDA + unitId;
+			String unitKey = classId + ApiConstants.TILDA +courseId + ApiConstants.TILDA + unitId;
 			
+			String classUnitKey = unitKey;
 			//fetch unit's item views/attempts count
-			String classUnitKey = unitSessionKey;
 			if(StringUtils.isNotBlank(userUid)) {
 				classUnitKey += ApiConstants.TILDA + userUid;
 			}
@@ -179,20 +179,15 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			List<Map<String, Object>> resultMapList = new ArrayList<Map<String, Object>>();
 			List<Map<String, Object>> lessonResultMapList = new ArrayList<Map<String, Object>>();
 			Map<String, Object> unitUsageDataAsMap = new HashMap<String, Object>(2);
-			String recentUnitSessionKey = SessionAttributes.RS + ApiConstants.TILDA + unitSessionKey;
 			//fetch unit usage data
-			if (StringUtils.isNotBlank(userUid)) {
-				recentUnitSessionKey += ApiConstants.TILDA + userUid;
-			}
 			Map<String, Object> unitUsageAsMap = new HashMap<String, Object>();
 			unitUsageAsMap.put(ApiConstants.LESSON_COUNT, lessonCount);
 			unitUsageAsMap.put(ApiConstants.COLLECTIONS_VIEWED, collectionsViewedInUnit);
 			unitUsageAsMap.put(ApiConstants.ASSESSMENTS_ATTEMPTED, assessmentsAttemptedInUnit);
-			unitUsageAsMap.putAll(getSessionMetricsAsMap(traceId, recentUnitSessionKey, unitId));
+			unitUsageAsMap.putAll(getClassActivityMetricsAsMap(traceId, classUnitKey, unitId));
 			if(!unitUsageAsMap.isEmpty()) {
 				unitUsageDataAsMap.put(ApiConstants.UNIT_USAGE_DATA, unitUsageAsMap);
 			}
-			resultMapList.add(unitUsageDataAsMap);
 			for(Map<String, Object> rawDataMap : rawDataMapAsList) {
 				Map<String, Object> usageAsMap = new HashMap<String, Object>();
 				String lessonGooruOid = rawDataMap.get(ApiConstants.GOORUOID).toString();
@@ -201,13 +196,13 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				long assessmentCount = assessments.size();
 
 				//fetch lesson usage data
-				String lessonSessionKey = SessionAttributes.RS + ApiConstants.TILDA + unitSessionKey + ApiConstants.TILDA + lessonGooruOid;
+				String classLessonKey = unitKey + ApiConstants.TILDA + lessonGooruOid;
 				if (StringUtils.isNotBlank(userUid)) {
-					lessonSessionKey += ApiConstants.TILDA + userUid;
+					classLessonKey += ApiConstants.TILDA + userUid;
 				}
 				Map<String, Object> lessonUsageAsMap = new HashMap<String, Object>();
 				lessonUsageAsMap.put(ApiConstants.ASSESSMENT_COUNT, assessmentCount);
-				lessonUsageAsMap.putAll(getSessionMetricsAsMap(traceId, lessonSessionKey, lessonGooruOid));
+				lessonUsageAsMap.putAll(getClassActivityMetricsAsMap(traceId, classLessonKey, lessonGooruOid));
 				
 				usageAsMap.putAll(rawDataMap);
 				if(!lessonUsageAsMap.isEmpty()) {
@@ -216,6 +211,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				lessonResultMapList.add(usageAsMap);
 			}
 			unitUsageDataAsMap.put(ApiConstants.LESSON, lessonResultMapList);
+			resultMapList.add(unitUsageDataAsMap);
 			responseParamDTO.setContent(resultMapList);
 		}
 		return responseParamDTO;
@@ -257,10 +253,10 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			if(!classData.getResult().isEmpty() && classData.getResult().size() > 0) {
 				classMinScore = classData.getResult().getLongValue(ApiConstants.MINIMUM_SCORE, 0L);
 			}
-			String lessonSessionKey = classId + ApiConstants.TILDA + courseId + ApiConstants.TILDA + unitId + ApiConstants.TILDA + lessonId;
+			String lessonKey = classId + ApiConstants.TILDA + courseId + ApiConstants.TILDA + unitId + ApiConstants.TILDA + lessonId;
 			
 			//fetch unit's item views/attempts count
-			String classLessonKey = lessonSessionKey;
+			String classLessonKey = lessonKey;
 			if(StringUtils.isNotBlank(userUid)) {
 				classLessonKey += ApiConstants.TILDA + userUid;
 			}
@@ -278,7 +274,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			Rows<String, String> lessons = lessonData.getResult();
 			long lessonCount = lessons.size();
 			
-			String recentLessonSessionKey = SessionAttributes.RS + ApiConstants.TILDA + lessonSessionKey;
 			for (Map<String, Object> rawDataMap : rawDataMapAsList) {
 				Map<String, Object> usageAsMap = new HashMap<String, Object>(1);
 				Map<String, Object> usageDataAsMap = new HashMap<String, Object>(4);
@@ -290,19 +285,16 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				usageDataAsMap.put(ApiConstants.COLLECTION_COUNT, collectionCount);
 
 				// fetch lesson usage data
-				if (StringUtils.isNotBlank(userUid)) {
-					recentLessonSessionKey += ApiConstants.TILDA + userUid;
-				}
 				Map<String, Object> lessonUsageAsMap = new HashMap<String, Object>();
-				lessonUsageAsMap = getSessionMetricsAsMap(traceId, recentLessonSessionKey, lessonId);
+				lessonUsageAsMap = getClassActivityMetricsAsMap(traceId, classLessonKey, lessonId);
 				if (!lessonUsageAsMap.isEmpty()) {
 					usageDataAsMap.put(ApiConstants.LESSON_USAGE_DATA, lessonUsageAsMap);
 				}
 
 				// fetch collection usage data
-				String collectionSessionKey = SessionAttributes.RS + ApiConstants.TILDA + lessonSessionKey + itemGooruOid;
+				String classCollectionKey = lessonKey + itemGooruOid;
 				if (StringUtils.isNotBlank(userUid)) {
-					collectionSessionKey += ApiConstants.TILDA + userUid;
+					classCollectionKey += ApiConstants.TILDA + userUid;
 				}
 				Map<String, Object> collectionUsageAsMap = new HashMap<String, Object>();
 				long assessmentScore = 0;
@@ -322,7 +314,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					}
 					collectionUsageAsMap.put(ApiConstants.SCORE_STATUS, scoreStatus);
 				}
-				collectionUsageAsMap.putAll(getSessionMetricsAsMap(traceId, collectionSessionKey, itemGooruOid));
+				collectionUsageAsMap.putAll(getSessionMetricsAsMap(traceId, classCollectionKey, itemGooruOid));
 				if (!collectionUsageAsMap.isEmpty()) {
 					usageDataAsMap.put(ApiConstants.COLLECTION_USAGE_DATA, collectionUsageAsMap);
 				}
