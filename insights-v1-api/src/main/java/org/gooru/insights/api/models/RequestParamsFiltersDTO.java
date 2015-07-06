@@ -1,6 +1,5 @@
 package org.gooru.insights.api.models;
 
-import com.netflix.astyanax.model.ColumnList;
 
 public class RequestParamsFiltersDTO {
 
@@ -31,6 +30,14 @@ public class RequestParamsFiltersDTO {
 	private String eventName;
 	
 	private String eventParam;
+	
+	private String courseId;
+
+	private String unitId;
+
+	private String lessonId;
+	
+	private Boolean getUsageData;
 	
 	public String getClassId() {
 		return classId;
@@ -138,6 +145,38 @@ public class RequestParamsFiltersDTO {
 
 	public void setEventParam(String eventParam) {
 		this.eventParam = eventParam;
+	}
+
+	public String getCourseId() {
+		return courseId;
+	}
+
+	public void setCourseId(String courseId) {
+		this.courseId = courseId;
+	}
+
+	public String getUnitId() {
+		return unitId;
+	}
+
+	public void setUnitId(String unitId) {
+		this.unitId = unitId;
+	}
+
+	public String getLessonId() {
+		return lessonId;
+	}
+
+	public void setLessonId(String lessonId) {
+		this.lessonId = lessonId;
+	}
+
+	public Boolean getGetUsageData() {
+		return getUsageData;
+	}
+
+	public void setGetUsageData(Boolean getUsageData) {
+		this.getUsageData = getUsageData;
 	}
 
 }

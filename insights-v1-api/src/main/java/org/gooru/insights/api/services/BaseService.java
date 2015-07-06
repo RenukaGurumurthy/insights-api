@@ -124,4 +124,6 @@ public interface BaseService {
 	List<Map<String, Object>> addCustomKeyInMapList(List<Map<String, Object>> rawRows, String columnName, String columnValue) ;
 	
 	void existsFilter(RequestParamsDTO requestParamsDTO)throws Exception;
+	
+	String addComma(String... text);
 }

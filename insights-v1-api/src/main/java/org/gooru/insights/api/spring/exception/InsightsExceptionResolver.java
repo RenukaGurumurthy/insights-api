@@ -53,6 +53,8 @@ public class InsightsExceptionResolver extends SimpleMappingExceptionResolver {
 	private static final String STATUS_CODE = "statusCode";
 	
 	private static final String DEFAULT_TRACEID = "traceId Not-Specified";
+	
+	private static final String CONTENT_UNAVAILABLE = "Content Unavailable!";
 
 	public ModelAndView doResolveException(HttpServletRequest request,
 			HttpServletResponse response, Object handler, Exception ex) {
@@ -64,7 +66,9 @@ public class InsightsExceptionResolver extends SimpleMappingExceptionResolver {
 			statusCode = HttpServletResponse.SC_BAD_REQUEST;
 		} else if (ex instanceof AccessDeniedException) {
 			statusCode = HttpServletResponse.SC_FORBIDDEN;
-		}else {
+		} else if (ex instanceof NotFoundException) {
+			statusCode = HttpServletResponse.SC_NO_CONTENT;
+		} else {
 			statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 		}
 
@@ -74,6 +78,9 @@ public class InsightsExceptionResolver extends SimpleMappingExceptionResolver {
 		} else if (statusCode.toString().startsWith(Numbers.FIVE.getNumber())) {
 			InsightsLogger.error(traceId, ex);
 			errorMap.put(DEVELOPER_MESSAGE, DEFAULT_ERROR);
+		} else if (statusCode.equals(HttpServletResponse.SC_NO_CONTENT)) {
+			InsightsLogger.error(traceId, ex);
+			errorMap.put(DEVELOPER_MESSAGE, CONTENT_UNAVAILABLE);
 		}
 		errorMap.put(STATUS_CODE, statusCode);
 		errorMap.put(MAIL_To, SUPPORT_EMAIL_ID);

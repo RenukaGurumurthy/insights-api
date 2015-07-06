@@ -1633,4 +1633,16 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 			}
 	 		return rawRowsMapList;
 		}
+		
+		public String addComma(String... textString) {
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < textString.length; i++) {
+				if (sb.length() > 0) {
+					sb.append(ApiConstants.COMMA);
+				}
+				sb.append(textString[i]);
+			}
+			return sb.toString();
+		}
+
 }
