@@ -47,7 +47,7 @@ public class ClassController extends BaseController{
 	@ResponseBody
 	public ModelAndView getClasspageUnitUsage(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId, 
-			@RequestParam(value="userUid", required = false) String userUid,
+			@RequestParam(value="userUid", required = true) String userUid,
 			@RequestParam(value="getUsageData", required = false) Boolean getUsageData, @RequestBody String rawData,HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
 		return getModel(getClassService().getUnitUsage(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid, getUsageData, request.isSecure()));
@@ -58,7 +58,7 @@ public class ClassController extends BaseController{
 	@ResponseBody
 	public ModelAndView getClasspageLessonUsage(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId, 
-			@PathVariable(value="lessonGooruId") String lessonGooruId, @RequestParam(value="userUid", required = false) String userUid,
+			@PathVariable(value="lessonGooruId") String lessonGooruId, @RequestParam(value="userUid", required = true) String userUid,
 			@RequestParam(value="getUsageData", required = false) Boolean getUsageData, 
 			@RequestBody String rawData,HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
