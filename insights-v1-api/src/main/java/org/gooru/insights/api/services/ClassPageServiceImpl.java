@@ -502,7 +502,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			 */
 			Map<String, String> surName = new HashMap<String, String>();
 			Collection<String> additionParameter = new ArrayList<String>();
-			additionParameter.add("answer");
+			additionParameter.add("providedAnswer");
 			surName.put("~A", "A");
 			surName.put("~B", "B");
 			surName.put("~C", "C");
@@ -510,7 +510,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			surName.put("~E", "E");
 			resultData = getBaseService().InnerJoinContainsKey(resultData, itemData, "gooru_oid", "resource_gooru_oid");
 			aggregateData = getBaseService().buildJSON(traceId, resultData, additionParameter, surName, singleSession);
-			selectValues.put("options", "answer");
+			selectValues.put("options", "providedAnswer");
 			surName = new HashMap<String, String>();
 			surName.put("correct", "is_correct");
 			surName.put("resourceGooruOId", "question_gooru_oid");
