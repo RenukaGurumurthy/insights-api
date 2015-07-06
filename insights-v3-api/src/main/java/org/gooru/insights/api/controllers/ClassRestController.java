@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -41,10 +40,6 @@ public class ClassRestController extends BaseController
 		RequestParamDTO requestParam = buildSessionActivityFromInputParameters(data);
 		requestParam.setCollectionGooruId(collectionGooruId);
 		return getModel(classService.getCollectionSessionData(requestParam));
-	}
-	@RequestMapping(value="/all/activity",method ={RequestMethod.GET})
-	public ModelAndView getSessionActivity(HttpServletRequest request,@RequestParam(value = "id") final Long id,  HttpServletResponse response) throws Exception{
-		return getModel(classService.getSessionActivity(id));
 	}
 	
 	@RequestMapping(value="/{collectionGooruId}/resources",method ={RequestMethod.POST})
