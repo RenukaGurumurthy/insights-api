@@ -164,6 +164,49 @@ public class ApiConstants {
 	
 	public static final String PARTY_UId = "partyUid";
 	
+	public static final String USER_PROFILE_URL_PATH = "insights.profile.url.path";
+	
+	public static final String LESSON = "lesson";
+	public static final String COURSE = "course";
+	public static final String UNIT = "unit";
+	public static final String CLASS = "class";
+
+	public static final String SESSIONID = "sessionId";
+	public static final String COLLECTION = "collecton";
+	public static final String ASSESSMENT = "assessment";
+	public static final String ASSESSMENT_URL = "assessment/url";
+	public static final String LESSON_COUNT = "lessonCount";
+	public static final String UNIT_COUNT = "unitCount";
+	public static final String COURSE_COUNT = "courseCount";
+	public static final String COLLECTION_COUNT = "collectionCount";
+	public static final String ASSESSMENT_COUNT = "assessmentCount";
+	public static final String EXTERNAL_ASSESSMENT_COUNT = "externalAssessmentCount";
+	public static final String ITEM_COUNT = "itemCount";
+	public static final String COLLECTIONS_VIEWED = "collectionsViewed";
+	public static final String ASSESSMENTS_ATTEMPTED = "assessmentsAttempted";
+	public static final String SCORE_MET = "ScoreMet";
+	public static final String SCORE_NOT_MET = "ScoreNotMet";
+	public static final String NOT_ATTEMPTED = "NotAttempted";
+	public static final String NOT_SCORED = "NotScored";
+	public static final String SCORE_STATUS = "scoreStatus";
+
+	public static final String USAGEDATA = "usageData";
+	public static final String TITLE = "title";
+	public static final String RESOURCETYPE = "resourceType";
+	public static final String VIEWS = "views";
+	public static final String TIME_SPENT = "time_spent";
+	public static final String ATTEMPT_COUNT = "attempt_count";
+	public static final String SCORE = "score";
+	public static final String CLASS_USAGE_DATA = "classUsageData";
+	public static final String COURSE_USAGE_DATA = "courseUsageData";
+	public static final String UNIT_USAGE_DATA = "unitUsageData";
+	public static final String LESSON_USAGE_DATA = "lessonUsageData";
+	public static final String COLLECTION_USAGE_DATA = "collectionUsageData";
+	public static final String ASSESSMENT_USAGE_DATA = "assessmentUsageData";
+	public static final String OPEN_BRACE = "{";
+	public static final String CLOSE_BRACE = "}";
+
+	
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
 		

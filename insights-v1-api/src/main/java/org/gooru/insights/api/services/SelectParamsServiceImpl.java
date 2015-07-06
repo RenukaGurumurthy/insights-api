@@ -292,6 +292,7 @@ public class SelectParamsServiceImpl implements SelectParamsService {
 		classpageUser.put("userGroupUId", "user_group_uid");
 		classpageUser.put("organizationUId", "organization_uid");
 		classpageUser.put("status", "active_flag");
+		classpageUser.put("profileUrl", "profile_url");
 		selectParam.put("classpageUser", classpageUser);
 	}
 
