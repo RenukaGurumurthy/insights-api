@@ -172,6 +172,7 @@ public class ApiConstants {
 	public static final String CLASS = "class";
 
 	public static final String SESSIONID = "sessionId";
+	public static final String ITEM = "item";
 	public static final String COLLECTION = "collecton";
 	public static final String ASSESSMENT = "assessment";
 	public static final String ASSESSMENT_URL = "assessment/url";

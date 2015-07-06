@@ -65,16 +65,25 @@ public class ClassController extends BaseController{
 		return getModel(getClassService().getLessonUsage(getTraceId(request), classGooruId, courseGooruId, unitGooruId, lessonGooruId, userUid, getUsageData, request.isSecure()));
 	}
 	
+	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/planView",method ={ RequestMethod.GET,RequestMethod.POST})
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@ResponseBody
+	public ModelAndView getCoursePlanView(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
+			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="userUid", required = false) String userUid,
+			@RequestBody String rawData,HttpServletResponse response) throws Exception{
+		setAllowOrigin(response);
+		return getModel(getClassService().getCoursePlanView(getTraceId(request), classGooruId, courseGooruId, userUid, request.isSecure()));
+	}
+	
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/planView",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
-	public ModelAndView getPlanView(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
+	public ModelAndView getUnitPlanView(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId,
 			@RequestParam(value="userUid", required = false) String userUid,
-			@RequestParam(value="getUsageData", required = false) Boolean getUsageData, 
 			@RequestBody String rawData,HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		return getModel(getClassService().getUnitPlanView(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid, getUsageData, request.isSecure()));
+		return getModel(getClassService().getUnitPlanView(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid, request.isSecure()));
 	}
 	
 }
