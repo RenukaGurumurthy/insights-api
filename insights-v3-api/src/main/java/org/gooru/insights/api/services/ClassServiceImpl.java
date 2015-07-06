@@ -10,7 +10,6 @@ import org.gooru.insights.api.constants.ErrorConstants;
 import org.gooru.insights.api.models.InsightsConstant;
 import org.gooru.insights.api.models.RequestParamDTO;
 import org.gooru.insights.api.models.ResponseParamDTO;
-import org.gooru.insights.api.models.SessionActivity;
 import org.gooru.insights.api.repository.ClassRepository;
 import org.gooru.insights.api.utils.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,8 +145,4 @@ public class ClassServiceImpl implements ClassService,InsightsConstant {
 		return responseParamDTO;
 	}
 
-	@Override
-	public List<SessionActivity> getSessionActivity(Long id){
-		return classRepository.getSessionActivity(id);
-	}
 }

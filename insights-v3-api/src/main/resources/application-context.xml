@@ -27,24 +27,7 @@
 		<property name="dataSource" ref="jndiDataSourceReadOnly" />
 	</bean> 
 
-	<jee:jndi-lookup id="jndiPSQLDataSourceReadOnly" jndi-name="java:comp/env/jdbc/gooruReadOnlyPSQLDS" />
 
-	<bean id="sessionFactoryPSQLReadOnly" parent="abstractSessionFactory">
-		<qualifier value="sessionFactoryPSQLReadOnly" />
-		<property name="dataSource" ref="jndiPSQLDataSourceReadOnly" />
-	</bean> 
-	
-	<!-- <bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
-		<property name="configLocation" value="classpath:SqlMapConfig.xml"/>
-		<property name="dataSource" ref="jndiPSQLDataSourceReadOnly"/>
-		<property name="useTransactionAwareDataSource" value="true"/>
-	</bean>
-	        
-	 <bean id="baseRepository"
-        class="org.gooru.insights.api.daos.BaseRepositoryImpl">
-        <property name="sqlMapClient" ref="sqlMapClient" />
-    </bean>
-     -->
 	<bean id="gooruConstants"
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="properties">

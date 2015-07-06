@@ -3,8 +3,6 @@ package org.gooru.insights.api.repository;
 import java.util.List;
 import java.util.Map;
 
-import org.gooru.insights.api.models.SessionActivity;
-
 public interface ClassRepository {
 
 	List<Map<String, Object>> getSession(long parentId, long collectionId, String userUid);
@@ -31,5 +29,4 @@ public interface ClassRepository {
 	
 	List<Map<String, Object>> getOEResponseByUser(long parentId, long collectionId, long resourceId, List<Object[]> userList);
 
-	List<SessionActivity> getSessionActivity(Long id);
 }
