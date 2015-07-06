@@ -1634,13 +1634,23 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 	 		return rawRowsMapList;
 		}
 		
-		public String addComma(String... textString) {
+		public String addComma(String... texts) {
 			StringBuffer sb = new StringBuffer();
-			for (int i = 0; i < textString.length; i++) {
+			for (String text : texts) {
 				if (sb.length() > 0) {
 					sb.append(ApiConstants.COMMA);
 				}
-				sb.append(textString[i]);
+				sb.append(text);
+			}
+			return sb.toString();
+		}
+		public String appendTilda(String... texts) {
+			StringBuffer sb = new StringBuffer();
+			for (String text : texts) {
+				if (sb.length() > 0) {
+					sb.append(ApiConstants.TILDA);
+				}
+				sb.append(text);
 			}
 			return sb.toString();
 		}

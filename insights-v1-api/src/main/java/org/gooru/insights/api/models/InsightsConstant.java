@@ -21,6 +21,10 @@ public interface InsightsConstant {
 
 	String GOORUUID = "gooruUId";
 	
+	String GOORUOID = "gooruOid";
+	
+	String SEQUENCE = "sequence";
+	
 	String NEW_QUERY = "new query:";
 	
 	String WILD_CARD = "*";
@@ -41,7 +45,8 @@ public interface InsightsConstant {
 		RESOURCE("resource"), DIM_RESOURCE("dim_resource"), REAL_TIME_DASHBOARD(
 				"real_time_aggregator"), CUSTOM_FIELDS("custom_fields_data"), LIVE_DASHBOARD(
 				"live_dashboard"), COLLECTION("collection"), COLLECTION_ITEM(
-				"collection_item"), CLASSPAGE("classpage"), ASSESSMENT_ANSWER(
+				"collection_item"),COLLECTION_ITEM_ASSOC(
+						"collection_item_assoc"), CLASSPAGE("classpage"), ASSESSMENT_ANSWER(
 				"assessment_answer"), MICRO_AGGREGATION("micro_aggregation"), FORMULA_DETAIL(
 				"formula_detail"), EVENT_TIMELINE("event_timeline"), EVENT_DETAIL(
 				"event_detail"), USERPROFILE("user_profile_settings"), USER_COLLECTION_ITEM_ASSOC(
