@@ -125,5 +125,7 @@ public interface BaseService {
 	
 	void existsFilter(RequestParamsDTO requestParamsDTO)throws Exception;
 	
-	String addComma(String... text);
+	public String addComma(String... text);
+	
+	public String appendTilda(String... texts);
 }

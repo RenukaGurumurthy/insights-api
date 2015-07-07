@@ -44,6 +44,29 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return cassandraService;
 	}
 
+	public ResponseParamDTO<Map<String,Object>> getItemsUsage(String traceId, String baseKey, String userUid, boolean isUsageRequired,boolean isMetaRequired, boolean isSecure,String parentGooruIds) throws Exception {
+		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		for (String parentGooruId : parentGooruIds.split(COMMA)) {
+			ColumnList<String> items = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), parentGooruId).getResult();
+			for (Column<String> item : items) {
+				Map<String, Object> dataMap = new HashMap<String, Object>();
+				dataMap.put(GOORUOID, item.getName());
+				dataMap.put(SEQUENCE, item.getIntegerValue());
+				if(isMetaRequired){
+					getResourceMetaData(dataMap, traceId, item.getName());
+				}
+				if(isUsageRequired){
+					getClassUsageData(dataMap, traceId, getBaseService().appendTilda(baseKey,parentGooruId,item.getName(),userUid));
+				}
+				dataMapAsList.add(dataMap);
+			}
+		}
+		responseParamDTO.setContent(dataMapAsList);
+		return responseParamDTO;
+	}
+	
+	
 	public ResponseParamDTO<Map<String,Object>> getCourseUsage(String traceId, String classId, String courseId, String userUid, Boolean getUsageData, boolean isSecure) throws Exception {		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> rawDataMapAsList = new ArrayList<Map<String, Object>>();
@@ -687,6 +710,54 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return rawDataMapAsList;
 	}
 	
+	private Map<String, Object> getClassUsageData(Map<String, Object> dataMap, String traceId, String key) {
+		ColumnList<String> resourceColumn = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), key).getResult();
+		for (Column<String> column : resourceColumn) {
+			if (column.getName().contains("collection_type")) {
+				dataMap.put(column.getName(), column.getStringValue());
+			}else{
+				dataMap.put(column.getName(), column.getStringValue());
+			}
+		}
+		return dataMap;
+	}
+	
+	private Map<String, Object> getResourceMetaData(Map<String, Object> dataMap, String traceId, String key) {
+		// fetch metadata
+		Collection<String> resourceColumns = new ArrayList<String>();
+		resourceColumns.add(ApiConstants.TITLE);
+		resourceColumns.add(ApiConstants.RESOURCETYPE);
+		resourceColumns.add(ApiConstants.THUMBNAIL);
+		ColumnList<String> resourceColumn = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), key, resourceColumns).getResult();
+		for (Column<String> column : resourceColumn) {
+			dataMap.put(column.getName(), column.getStringValue());
+		}
+		return dataMap;
+	}
+	private Map<String, Object> getClassMetaData(Map<String, Object> dataMap, String traceId, String key) {
+		// fetch metadata
+		Collection<String> resourceColumns = new ArrayList<String>();
+		resourceColumns.add(ApiConstants.TITLE);
+		resourceColumns.add(ApiConstants.RESOURCETYPE);
+		resourceColumns.add(ApiConstants.THUMBNAIL);
+		ColumnList<String> resourceColumn = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), key, resourceColumns).getResult();
+		for (Column<String> column : resourceColumn) {
+			dataMap.put(column.getName(), column.getStringValue());
+		}
+		return dataMap;
+	}
+	private Map<String, Object> getCollectionItemMetaData(Map<String, Object> dataMap, String traceId, String key) {
+		// fetch metadata
+		Collection<String> resourceColumns = new ArrayList<String>();
+		resourceColumns.add(ApiConstants.TITLE);
+		resourceColumns.add(ApiConstants.RESOURCETYPE);
+		resourceColumns.add(ApiConstants.THUMBNAIL);
+		ColumnList<String> resourceColumn = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), key, resourceColumns).getResult();
+		for (Column<String> column : resourceColumn) {
+			dataMap.put(column.getName(), column.getStringValue());
+		}
+		return dataMap;
+	}
 	private Map<String, Object> getSessionMetricsAsMap(String traceId, String sessionKey, String contentGooruOid) {
 		Map<String, Object> usageAsMap = new HashMap<String, Object>();
 		OperationResult<ColumnList<String>> sessionColumnResult = getCassandraService().read(traceId, ColumnFamily.SESSION.getColumnFamily(), sessionKey);
