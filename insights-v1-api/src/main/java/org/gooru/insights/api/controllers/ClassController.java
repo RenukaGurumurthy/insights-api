@@ -62,7 +62,7 @@ public class ClassController extends BaseController{
 		return getModel(getClassService().getLessonUsage(getTraceId(request), classGooruId, courseGooruId, unitGooruId, lessonGooruId, userUid, getUsageData, request.isSecure()));
 	}
 	
-	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/planView",method ={ RequestMethod.GET,RequestMethod.POST})
+	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/plan",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public ModelAndView getCoursePlanView(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
@@ -71,7 +71,7 @@ public class ClassController extends BaseController{
 		return getModel(getClassService().getCoursePlanView(getTraceId(request), classGooruId, courseGooruId, userUid, request.isSecure()));
 	}
 	
-	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/planView",method ={ RequestMethod.GET,RequestMethod.POST})
+	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/plan",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public ModelAndView getUnitPlanView(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
@@ -91,7 +91,7 @@ public class ClassController extends BaseController{
 		return getModel(getClassService().getItemsUsage(getTraceId(request), baseService.appendTilda(classGooruId,courseGooruId),userUid, isUsageRequired, isMetaRequired, request.isSecure(), unitGooruId));
 	}
 	
-	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/progressView",method ={ RequestMethod.GET,RequestMethod.POST})
+	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/progress",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public ModelAndView getCourseProgressView(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
@@ -100,11 +100,11 @@ public class ClassController extends BaseController{
 		return getModel(getClassService().getCourseProgressView(getTraceId(request), classGooruId, courseGooruId, userUid, request.isSecure()));
 	}
 	
-	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unitProgressView",method ={ RequestMethod.GET,RequestMethod.POST})
+	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/progress",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public ModelAndView getUnitProgressView(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
-			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="unitGooruId") String unitGooruId,
+			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId,
 			@RequestParam(value="userUid", required = false) String userUid, HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
 		return getModel(getClassService().getUnitProgressView(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid, request.isSecure()));
