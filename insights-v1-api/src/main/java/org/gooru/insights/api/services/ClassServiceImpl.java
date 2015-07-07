@@ -98,6 +98,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				Map<String, Object> usageAsMap = new HashMap<String, Object>(1);
 				Map<String, Object> usageDataAsMap = new HashMap<String, Object>(4);
 				rawDataMap.put(ApiConstants.TYPE, ApiConstants.UNIT);
+				usageDataAsMap.putAll(rawDataMap);
 				String unitGooruOid = rawDataMap.get(ApiConstants.GOORUOID).toString();
 				OperationResult<ColumnList<String>> lessonData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), unitGooruOid);
 				ColumnList<String> lessons = lessonData.getResult();
@@ -124,7 +125,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				if(!unitUsageAsMap.isEmpty()) {
 					usageDataAsMap.put(ApiConstants.UNIT_USAGE_DATA, unitUsageAsMap);
 				}
-				usageAsMap.putAll(rawDataMap);
 				usageAsMap.put(ApiConstants.USAGEDATA, usageDataAsMap);
 				resultMapList.add(usageAsMap);
 			}
@@ -140,8 +140,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		}
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> rawDataMapAsList = new ArrayList<Map<String, Object>>();
-		List<Map<String, Object>> unitRawDataMapAsList = new ArrayList<Map<String, Object>>();
-
+		
 		//fetch lesson ids 
 		OperationResult<ColumnList<String>> lessonData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), unitId);
 		ColumnList<String> lessons = lessonData.getResult();
@@ -154,16 +153,12 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			lessonGooruOids.append(lesson.getName());
 		}
 		
-		//fetch metadata of unit
+		//fetch metadata of lessons
 		Collection<String> resourceColumns = new ArrayList<String>();
 		resourceColumns.add(ApiConstants.TITLE);
 		resourceColumns.add(ApiConstants.RESOURCETYPE);
 		resourceColumns.add(ApiConstants.THUMBNAIL);
 		resourceColumns.add(ApiConstants.GOORUOID);
-		unitRawDataMapAsList = getResourceData(traceId, isSecure, unitRawDataMapAsList, unitId, resourceColumns);
-
-		
-		//fetch metadata of lessons
 		rawDataMapAsList = getResourceData(traceId, isSecure, rawDataMapAsList, lessonGooruOids.toString(), resourceColumns);
 		responseParamDTO.setContent(rawDataMapAsList);
 
@@ -216,9 +211,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				lessonResultMapList.add(usageAsMap);
 			}
 			unitUsageDataAsMap.put(ApiConstants.LESSON, lessonResultMapList);
-			if(!unitRawDataMapAsList.isEmpty() && unitRawDataMapAsList.size() > 0) {
-				unitUsageDataAsMap.putAll(unitRawDataMapAsList.get(0));
-			}
 			resultMapList.add(unitUsageDataAsMap);
 			responseParamDTO.setContent(resultMapList);
 		}
@@ -337,17 +329,17 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		}
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> unitDataMapAsList = new ArrayList<Map<String, Object>>();
-		OperationResult<ColumnList<String>>  classData = getCassandraService().read(traceId, ColumnFamily.CLASS.getColumnFamily(), classId);
+		OperationResult<ColumnList<String>>  classData = getCassandraService().read(traceId, ColumnFamily.CLASSPAGE.getColumnFamily(), classId);
 		Long classMinScore = 0L;
 		if(!classData.getResult().isEmpty() && classData.getResult().size() > 0) {
 			classMinScore = classData.getResult().getLongValue(ApiConstants.MINIMUM_SCORE, 0L);
 		}
-		OperationResult<ColumnList<String>> unitData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), courseId);
-		ColumnList<String> units = unitData.getResult();
-		for (Column<String> unit : units) {
+		OperationResult<Rows<String, String>> unitData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM.getColumnFamily(), ApiConstants.COLLECTIONGOORUOID, courseId);
+		Rows<String, String> units = unitData.getResult();
+		for (Row<String, String> unit : units) {
 			List<Map<String, Object>> lessonDataMapAsList = new ArrayList<Map<String, Object>>();
 			Map<String, Object> unitDataAsMap = new HashMap<String, Object>();
-			String unitGooruOid = unit.getName();
+			String unitGooruOid = unit.getColumns().getColumnByName(ApiConstants.RESOURCEGOORUOID).getStringValue();
 			Collection<String> resourceColumns = new ArrayList<String>();
 			resourceColumns.add(ApiConstants.TITLE);
 			resourceColumns.add(ApiConstants.GOORUOID);
@@ -433,7 +425,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> lessonDataMapAsList = new ArrayList<Map<String, Object>>();
 		List<Map<String, Object>> itemDataMapAsList = new ArrayList<Map<String, Object>>();
-		OperationResult<ColumnList<String>> classData = getCassandraService().read(traceId, ColumnFamily.CLASS.getColumnFamily(), classId);
+		OperationResult<ColumnList<String>> classData = getCassandraService().read(traceId, ColumnFamily.CLASSPAGE.getColumnFamily(), classId);
 		Long classMinScore = 0L;
 		if (!classData.getResult().isEmpty() && classData.getResult().size() > 0) {
 			classMinScore = classData.getResult().getLongValue(ApiConstants.MINIMUM_SCORE, 0L);
@@ -461,7 +453,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				ColumnList<String> lessonMetaDataColumns = lessonMetaData.getResult();
 				lessonDataAsMap.put(ApiConstants.TITLE, lessonMetaDataColumns.getColumnByName(ApiConstants.TITLE));
 				lessonDataAsMap.put(ApiConstants.GOORUOID, lessonMetaDataColumns.getColumnByName(ApiConstants.GOORUOID));
-				lessonDataAsMap.put(ApiConstants.TYPE, ApiConstants.LESSON);
 
 				OperationResult<ColumnList<String>> itemData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), lessonGooruOid);
 				ColumnList<String> items = itemData.getResult();
@@ -473,7 +464,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						ColumnList<String> itemMetaDataColumns = itemMetaData.getResult();
 						itemDataAsMap.put(ApiConstants.TITLE, itemMetaDataColumns.getColumnByName(ApiConstants.TITLE));
 						itemDataAsMap.put(ApiConstants.GOORUOID, itemMetaDataColumns.getColumnByName(ApiConstants.GOORUOID));
-						itemDataAsMap.put(ApiConstants.TYPE, itemMetaDataColumns.getColumnByName(ApiConstants.RESOURCETYPE));
 					}
 					
 					OperationResult<ColumnList<String>> assessmentMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
@@ -818,22 +808,22 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			String collectionType = itemMetricColumns.getStringValue(ApiConstants.COLLECTION_TYPE, null);
 			usageAsMap.put(ApiConstants.GOORUOID, contentGooruOid);
 			usageAsMap.put(ApiConstants.VIEWS, views);
-			usageAsMap.put(ApiConstants.TIMESPENT, timeSpent);
-			usageAsMap.put(ApiConstants.COLLECTIONTYPE, collectionType);
+			usageAsMap.put(ApiConstants.TIME_SPENT, timeSpent);
+			usageAsMap.put(ApiConstants.COLLECTION_TYPE, collectionType);
 			return usageAsMap;
 		}
 		return usageAsMap;
 	}
 	
 	private void getTypeBasedItemGooruOids(String traceId, String lessonId, StringBuffer itemGooruOids, StringBuffer collectionGooruOids, StringBuffer assessmentGooruOids, StringBuffer assessmentUrlGooruOids) {
-		OperationResult<ColumnList<String>> contentItemRows = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), lessonId);
+		OperationResult<Rows<String, String>> contentItemRows = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM.getColumnFamily(), ApiConstants.COLLECTIONGOORUOID, lessonId);
 		if (!contentItemRows.getResult().isEmpty()) {
 			
 			//fetch item ids w.r.t their resource type
-			ColumnList<String> contentItems = contentItemRows.getResult();
-			for (Column<String> item : contentItems) {
+			Rows<String, String> contentItems = contentItemRows.getResult();
+			for (Row<String, String> item : contentItems) {
 				String contentType = null;
-				String itemGooruOid = item.getName();
+				String itemGooruOid = item.getColumns().getColumnByName(ApiConstants.RESOURCEGOORUOID).getStringValue();
 				ColumnList<String> resourceData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), itemGooruOid).getResult();
 				if (!resourceData.isEmpty() && resourceData.size() > 0) {
 					contentType = resourceData.getColumnByName(ApiConstants.RESOURCETYPE).getStringValue();

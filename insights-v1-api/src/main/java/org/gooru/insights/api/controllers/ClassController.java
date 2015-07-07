@@ -33,17 +33,6 @@ public class ClassController extends BaseController{
 		return classService;
 	}
 	
-	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/test/{test1}/test2",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	@ResponseBody
-	public ModelAndView test(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
-			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="test1") String test1, HttpServletResponse response) throws Exception{
-		setAllowOrigin(response);
-		Map<String, String> m = new HashMap<String, String>();
-		m.put("test1", test1);
-		return getModel(m);
-	}
-	
 	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
@@ -114,11 +103,11 @@ public class ClassController extends BaseController{
 		return getModel(getClassService().getCourseProgressView(getTraceId(request), classGooruId, courseGooruId, userUid, request.isSecure()));
 	}
 	
-	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unitProgressView",method ={ RequestMethod.GET,RequestMethod.POST})
+	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/progressView",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public ModelAndView getUnitProgressView(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
-			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="unitGooruId") String unitGooruId,
+			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId,
 			@RequestParam(value="userUid", required = false) String userUid, HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
 		return getModel(getClassService().getUnitProgressView(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid, request.isSecure()));
