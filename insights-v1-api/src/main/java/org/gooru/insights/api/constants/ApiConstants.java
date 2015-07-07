@@ -181,6 +181,7 @@ public class ApiConstants {
 	public static final String COURSE_COUNT = "courseCount";
 	public static final String COLLECTION_COUNT = "collectionCount";
 	public static final String ASSESSMENT_COUNT = "assessmentCount";
+
 	public static final String EXTERNAL_ASSESSMENT_COUNT = "externalAssessmentCount";
 	public static final String ITEM_COUNT = "itemCount";
 	public static final String COLLECTIONS_VIEWED = "collectionsViewed";
@@ -194,11 +195,16 @@ public class ApiConstants {
 
 	public static final String USAGEDATA = "usageData";
 	public static final String TITLE = "title";
+	public static final String TYPE = "type";
 	public static final String RESOURCETYPE = "resourceType";
 	public static final String VIEWS = "views";
+	public static final String TIMESPENT = "timeSpent";
 	public static final String TIME_SPENT = "time_spent";
-	public static final String ATTEMPT_COUNT = "attempt_count";
-	public static final String SCORE = "score";
+	public static final String TOTALSTUDYTIME = "totalStudyTime";
+	public static final String TOTALSCORE = "totalScore";
+	public static final String COLLECTION_TYPE = "collection_type";
+	public static final String SCOREINPERCENTAGE = "scoreInPercentage";
+	public static final String SCORE_IN_PERCENTAGE = "score_in_percentage";
 	public static final String CLASS_USAGE_DATA = "classUsageData";
 	public static final String COURSE_USAGE_DATA = "courseUsageData";
 	public static final String UNIT_USAGE_DATA = "unitUsageData";

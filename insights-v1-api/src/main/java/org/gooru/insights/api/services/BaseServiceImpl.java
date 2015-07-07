@@ -1624,6 +1624,7 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 			for(Map<String, Object> rawRow : rawRows) {
 				Map<String, Object> rawDataMap = new HashMap<String, Object>();
 				rawDataMap.putAll(rawRow);
+				rawDataMap.remove("key");
 				if(rawRow.containsKey("key")) {
 					rawDataMap.put(columnName, rawRow.get("key"));
 				} else {
