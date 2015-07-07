@@ -16,5 +16,8 @@ public interface ClassService {
 	
 	ResponseParamDTO<Map<String,Object>> getUnitPlanView(String traceId, String classId, String courseId, String unitId, String userUid, boolean isSecure) throws Exception;
 
+	ResponseParamDTO<Map<String,Object>> getCourseProgressView(String traceId, String classId, String courseId, String userUid, boolean isSecure) throws Exception;
+
+	ResponseParamDTO<Map<String,Object>> getUnitProgressView(String traceId, String classId, String courseId, String unitId, String userUid, boolean isSecure) throws Exception;
 
 }

@@ -47,7 +47,8 @@ public interface InsightsConstant {
 				"event_detail"), USERPROFILE("user_profile_settings"), USER_COLLECTION_ITEM_ASSOC(
 				"user_collection_item_assoc"), CONFIG_SETTING(
 				"job_config_settings"), USER("user"), SESSION("session"), SESSION_ACTIVITY("session_activity")
-				,CLASS_ACTIVITY("class_activity"), SESSION_ACTIVITY_COUNTER("session_activity_counter");
+				,CLASS_ACTIVITY("class_activity"), SESSION_ACTIVITY_COUNTER("session_activity_counter"), COLLECTION_ITEM_ASSOC(
+						"collection_item_assoc"), CLASS("class");
 
 		private String columnFamily;
 
