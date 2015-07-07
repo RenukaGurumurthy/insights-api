@@ -15,6 +15,8 @@ public interface ClassService {
 	ResponseParamDTO<Map<String,Object>> getCoursePlanView(String traceId, String classId, String courseId, String userUid, boolean isSecure) throws Exception;
 	
 	ResponseParamDTO<Map<String,Object>> getUnitPlanView(String traceId, String classId, String courseId, String unitId, String userUid, boolean isSecure) throws Exception;
+	
+	ResponseParamDTO<Map<String,Object>> getItemsUsage(String traceId, String baseKey, String userUid, boolean isUsageRequired,boolean isMetaRequired, boolean isSecure,String parentGooruIds) throws Exception;
 
 
 }

@@ -85,5 +85,15 @@ public class ClassController extends BaseController{
 		setAllowOrigin(response);
 		return getModel(getClassService().getUnitPlanView(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid, request.isSecure()));
 	}
-	
+
+	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/lesson",method ={ RequestMethod.GET,RequestMethod.POST})
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@ResponseBody
+	public ModelAndView getLessonAndUsage(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
+			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="unitGooruId") String unitGooruId, 
+			@RequestParam(value="userUid", required = true) String userUid,@RequestParam(value="isUsageRequired", required = false) boolean isUsageRequired,@RequestParam(value="isMetaRequired", required = false) boolean isMetaRequired
+			,HttpServletResponse response) throws Exception{
+		setAllowOrigin(response);
+		return getModel(getClassService().getItemsUsage(getTraceId(request), baseService.appendTilda(classGooruId,courseGooruId),userUid, isUsageRequired, isMetaRequired, request.isSecure(), unitGooruId));
+	}
 }
