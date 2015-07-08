@@ -598,7 +598,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	
 	@Override
 	public ResponseParamDTO<Map<String, Object>> getUserSessions(String traceId, String classId, String courseId, String unitId, String lessonId, String collectionId, String collectionType,
-			String userUid,boolean openSession, boolean isSecure) throws Exception {
+			String userUid, boolean fetchOpenSession, boolean isSecure) throws Exception {
 		String key = baseService.appendTilda(classId, courseId, unitId, lessonId, collectionId, userUid);
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		OperationResult<ColumnList<String>> sessions = getCassandraService().read(traceId, ColumnFamily.SESSION.getColumnFamily(), key);
@@ -607,7 +607,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			ColumnList<String> sessionList = sessions.getResult();
 			if (!sessionList.isEmpty()) {
 				resultSet = new ArrayList<Map<String, Object>>();
-				if (!openSession) {
+				if (!fetchOpenSession) {
 					int sequence = 0;
 					for (Column<String> sessionColumn : sessionList) {
 						resultSet.add(generateSessionMap(sequence++,sessionColumn.getName(), sessionColumn.getLongValue()));
@@ -731,7 +731,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return responseParamDTO;
 	}
 	
-	public ResponseParamDTO<Map<String, Object>> getAssessmentDetails(String traceId, String classId, String courseId, String unitId, String lessonId, String assessmentId, String userUid,
+	public ResponseParamDTO<Map<String, Object>> getStudentAssessmentData(String traceId, String classId, String courseId, String unitId, String lessonId, String assessmentId, String userUid,
 			boolean isSecure) throws Exception {
 		// Fetch goal for the class
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
@@ -749,10 +749,12 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			classLessonKey = getBaseService().appendTilda(classLessonKey, userUid);
 		}
 		Long scoreInPercentage = null;
+		Long score = null;
 		String evidence = null;
 		OperationResult<ColumnList<String>> itemsColumnList = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), classLessonKey);
 		if (!itemsColumnList.getResult().isEmpty() && itemsColumnList.getResult().size() > 0) {
 			ColumnList<String> lessonMetricColumns = itemsColumnList.getResult();
+			score = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants.SCORE), null);
 			scoreInPercentage = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants.SCORE_IN_PERCENTAGE), null);
 			evidence = lessonMetricColumns.getStringValue(getBaseService().appendTilda(assessmentId, ApiConstants.EVIDENCE), null);
 		}
@@ -768,6 +770,12 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		if (!rawDataMapAsList.isEmpty() && rawDataMapAsList.size() > 0) {
 			itemDetailAsMap.putAll(rawDataMapAsList.get(0));
 		}
+		//Fetch assessment count
+		Long assessmentCount = null;
+		Map<String, Long> contentMetaAsMap = getContentMeta(traceId, assessmentId, ApiConstants.ASSESSMENT_COUNT);
+		if(!contentMetaAsMap.isEmpty()) {
+			assessmentCount = contentMetaAsMap.get(ApiConstants.ASSESSMENT_COUNT);
+		}
 		
 		//Fetch username and profile url
 		String username = null;
@@ -775,15 +783,33 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		if (!userColumnList.getResult().isEmpty() && userColumnList.getResult().size() > 0) {
 			username = userColumnList.getResult().getStringValue(ApiConstants.USERNAME, null);
 		}
+		
+		//Get sessions 
+		ResponseParamDTO<Map<String, Object>> sessionResponse = getUserSessions(traceId, classId, courseId, unitId, lessonId, assessmentId, ApiConstants.ASSESSMENT, userUid, false, isSecure);
 		itemDetailAsMap.put(ApiConstants.GOORUOID, assessmentId);
 		itemDetailAsMap.put(ApiConstants.USERNAME, username);
 		itemDetailAsMap.put(ApiConstants.PROFILEURL, filePath.getProperty(ApiConstants.USER_PROFILE_URL_PATH).replaceAll(ApiConstants.ID, userUid));
 		itemDetailAsMap.put(ApiConstants.GOAL, classMinScore);
 		itemDetailAsMap.put(ApiConstants.SCOREINPERCENTAGE, scoreInPercentage);
 		itemDetailAsMap.put(ApiConstants.EVIDENCE, evidence);
+		itemDetailAsMap.put(ApiConstants.SCORE, score);
+		itemDetailAsMap.put(ApiConstants.ASSESSMENT_COUNT, assessmentCount);
+		itemDetailAsMap.put(ApiConstants.SESSION, sessionResponse.getContent());
 		itemDataMapAsList.add(itemDetailAsMap);
 		responseParamDTO.setContent(itemDataMapAsList);
 		return responseParamDTO;
+	}
+	
+	private Map<String, Long> getContentMeta(String traceId, String key, String fetchColumnList) {
+		Map<String, Long> contentMetaAsMap = new HashMap<String, Long>();
+		OperationResult<ColumnList<String>> contentMetaColumnList = getCassandraService().read(traceId, ColumnFamily.CONTENT_META.getColumnFamily(), key);
+		if (!contentMetaColumnList.getResult().isEmpty() && contentMetaColumnList.getResult().size() > 0) {
+			ColumnList<String> contentMetaColumns = contentMetaColumnList.getResult();
+			for(String columnNameTofetch : fetchColumnList.split(ApiConstants.COMMA)) {
+				contentMetaAsMap.put(columnNameTofetch, contentMetaColumns.getLongValue(columnNameTofetch, null));
+			}
+		}
+		return contentMetaAsMap;
 	}
 	
 	private List<Map<String, Object>> getResourceData(String traceId, boolean isSecure, List<Map<String, Object>> rawDataMapAsList, String keys, Collection<String> columnsToFetch) {
