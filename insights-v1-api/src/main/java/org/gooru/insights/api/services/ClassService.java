@@ -12,17 +12,16 @@ public interface ClassService {
 	
 	ResponseParamDTO<Map<String,Object>> getLessonUsage(String traceId, String classId, String courseId, String unitId, String lessonId, String userUid, Boolean getUsageData, boolean isSecure) throws Exception;
 	
-	ResponseParamDTO<Map<String,Object>> getCoursePlanView(String traceId, String classId, String courseId, String userUid, boolean isSecure) throws Exception;
+	ResponseParamDTO<Map<String,Object>> getCoursePlan(String traceId, String classId, String courseId, String userUid, boolean isSecure) throws Exception;
 	
-	ResponseParamDTO<Map<String,Object>> getUnitPlanView(String traceId, String classId, String courseId, String unitId, String userUid, boolean isSecure) throws Exception;
+	ResponseParamDTO<Map<String,Object>> getUnitPlan(String traceId, String classId, String courseId, String unitId, String userUid, boolean isSecure) throws Exception;
 	
-	ResponseParamDTO<Map<String,Object>> getItemsUsage(String traceId, String baseKey, String userUid, boolean isUsageRequired,boolean isMetaRequired, boolean isSecure,String parentGooruIds) throws Exception;
+	ResponseParamDTO<Map<String,Object>> getCourseProgress(String traceId, String classId, String courseId, String userUid, boolean isSecure) throws Exception;
 
-	ResponseParamDTO<Map<String,Object>> getCourseProgressView(String traceId, String classId, String courseId, String userUid, boolean isSecure) throws Exception;
-
-	ResponseParamDTO<Map<String,Object>> getUnitProgressView(String traceId, String classId, String courseId, String unitId, String userUid, boolean isSecure) throws Exception;
+	ResponseParamDTO<Map<String,Object>> getUnitProgress(String traceId, String classId, String courseId, String unitId, String userUid, boolean isSecure) throws Exception;
 
 	ResponseParamDTO<Map<String, Object>> getUserSessions(String traceId, String classId, String courseId, String unitId, String lessonId, String collectionId, String collectionType, String userUid,
 			boolean openSession,boolean isSecure) throws Exception;
 
+	ResponseParamDTO<Map<String,Object>> getLessonPlan(String traceId, String classId, String courseId, String unitId, String lessonId, String assessmentIds, String userUid, boolean isSecure) throws Exception;
 }
