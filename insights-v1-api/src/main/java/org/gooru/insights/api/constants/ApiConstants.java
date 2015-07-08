@@ -114,6 +114,8 @@ public class ApiConstants {
 	
 	public static final String ASC = "ASC";
 	
+	public static final String DESC = "DESC";
+	
 	public static final String FILTERS = "filters";
 	
 	public static final String GOORU_OID = "gooru_oid";

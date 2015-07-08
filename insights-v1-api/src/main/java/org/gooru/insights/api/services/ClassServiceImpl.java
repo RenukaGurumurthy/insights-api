@@ -605,6 +605,46 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return responseParamDTO;
 	}
 	
+	@Override
+	public ResponseParamDTO<Map<String, Object>> getUserSessions(String traceId, String classId, String courseId, String unitId, String lessonId, String collectionId, String collectionType,
+			String userUid,boolean openSession, boolean isSecure) throws Exception {
+		String key = baseService.appendTilda(classId, courseId, unitId, lessonId, collectionId, userUid);
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		OperationResult<ColumnList<String>> sessions = getCassandraService().read(traceId, ColumnFamily.SESSION.getColumnFamily(), key);
+		List<Map<String, Object>> resultSet = null;
+		if (sessions != null) {
+			ColumnList<String> sessionList = sessions.getResult();
+			if (!sessionList.isEmpty()) {
+				resultSet = new ArrayList<Map<String, Object>>();
+				if (!openSession) {
+					int sequence = 0;
+					for (Column<String> sessionColumn : sessionList) {
+						resultSet.add(generateSessionMap(sequence++,sessionColumn.getName(), sessionColumn.getLongValue()));
+					}
+				}else{
+					ColumnList<String> sessionsInfo = getCassandraService().read(traceId, ColumnFamily.SESSION.getColumnFamily(), baseService.appendTilda(key,INFO)).getResult();
+					for (Column<String> sessionColumn : sessionList) {
+						int sequence = 0;
+						if(sessionsInfo.getStringValue(baseService.appendTilda(sessionColumn.getName(),TYPE), null).equalsIgnoreCase(START)){
+							resultSet.add(generateSessionMap(sequence++,sessionColumn.getName(), sessionColumn.getLongValue()));	
+						}
+					}
+				}
+				if(resultSet != null){
+					responseParamDTO.setContent(baseService.sortBy(resultSet, EVENT_TIME, ApiConstants.ASC));
+				}
+			}
+		}
+		return responseParamDTO;
+	}
+	
+	private Map<String,Object> generateSessionMap(int sequence,String sessionId,Long eventTime){
+		HashMap<String, Object> session = new HashMap<String, Object>();
+		session.put(SEQUENCE, sequence);
+		session.put(SESSION_ID, sessionId);
+		session.put(EVENT_TIME, eventTime);
+		return session;
+	}
 	public ResponseParamDTO<Map<String,Object>> getUnitProgress(String traceId, String classId, String courseId, String unitId, String userUid, boolean isSecure) throws Exception {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> resultDataMapAsList = new ArrayList<Map<String, Object>>();

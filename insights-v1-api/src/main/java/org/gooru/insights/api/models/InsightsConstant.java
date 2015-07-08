@@ -25,6 +25,16 @@ public interface InsightsConstant {
 	
 	String SEQUENCE = "sequence";
 	
+	String SESSION_ID = "sessionId";
+	
+	String EVENT_TIME = "eventTime";
+	
+	String TYPE = "type";
+	
+	String START = "start";
+	
+	String INFO = "info";
+	
 	String NEW_QUERY = "new query:";
 	
 	String WILD_CARD = "*";
@@ -51,7 +61,7 @@ public interface InsightsConstant {
 				"formula_detail"), EVENT_TIMELINE("event_timeline"), EVENT_DETAIL(
 				"event_detail"), USERPROFILE("user_profile_settings"), USER_COLLECTION_ITEM_ASSOC(
 				"user_collection_item_assoc"), CONFIG_SETTING(
-				"job_config_settings"), USER("user"), SESSION("session"), SESSION_ACTIVITY("session_activity")
+				"job_config_settings"), USER("user"), SESSION("sessions"), SESSION_ACTIVITY("session_activity")
 				,CLASS_ACTIVITY("class_activity"), SESSION_ACTIVITY_COUNTER("session_activity_counter"), CLASS("class");
 
 		private String columnFamily;
