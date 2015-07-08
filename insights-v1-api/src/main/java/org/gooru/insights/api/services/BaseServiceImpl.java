@@ -1655,5 +1655,59 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 			}
 			return sb.toString();
 		}
+		
+		public String errorHandler(String message, String... replace){
+			
+			for(int i=0; i<replace.length;i++){
+				message = message.replace(ApiConstants.OPEN_BRACE+i+ApiConstants.CLOSE_BRACE, replace[i]);
+			}
+			return message;
+		}
 
+		public List<Map<String,Object>> convertMapToList(Map<String,Map<String,Object>> requestMap,String key){
+			List<Map<String,Object>> dataList = new ArrayList<Map<String,Object>>();
+			for(String mapKey : requestMap.keySet()){
+				Map<String,Object> dataMap = requestMap.get(mapKey);
+				if(!dataMap.isEmpty()){
+					dataMap.put(key, mapKey);
+					dataList.add(dataMap);
+				}
+			}
+			return dataList;
+		}
+		
+		public List<Map<String,Object>> convertMapToList(Map<String,Object> requestMap,String key,String objectKey){
+			List<Map<String,Object>> dataList = new ArrayList<Map<String,Object>>();
+			for(String mapKey : requestMap.keySet()){
+				Map<String,Object> dataMap = new HashMap<String,Object>();
+				List<Map<String,Object>> tempList = (List<Map<String, Object>>)requestMap.get(mapKey);
+				if(!tempList.isEmpty()){
+					dataMap.put(key, mapKey);
+					dataMap.put(objectKey, tempList);
+					dataList.add(dataMap);
+				}
+			}
+			return dataList;
+		}
+		
+		public List<Map<String,Object>> groupDataDependOnkey(List<Map<String,Object>> requestData,String fetchKey,String objectKey){
+			Map<String,Object> customizedMap = new HashMap<String,Object>();
+			for(Map<String,Object> requestMap : requestData){
+				if(requestMap.get(fetchKey) != null){
+					String key = requestMap.get(fetchKey).toString();
+					List<Map<String,Object>> dataList = new ArrayList<Map<String,Object>>();
+					if(customizedMap.containsKey(key)){
+						
+						dataList.addAll((Collection<? extends Map<String, Object>>)customizedMap.get(key));
+						requestMap.remove(fetchKey);
+						dataList.add(requestMap);
+					}else{
+						requestMap.remove(fetchKey);
+						dataList.add(requestMap);
+					}
+					customizedMap.put(key, dataList);
+				}
+			}
+			return convertMapToList(customizedMap,fetchKey,objectKey);
+		}
 }

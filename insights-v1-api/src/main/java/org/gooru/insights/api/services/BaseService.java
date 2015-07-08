@@ -125,7 +125,13 @@ public interface BaseService {
 	
 	void existsFilter(RequestParamsDTO requestParamsDTO)throws Exception;
 	
-	public String addComma(String... text);
+	String addComma(String... text);
 	
-	public String appendTilda(String... texts);
+	String appendTilda(String... texts);
+	
+	String errorHandler(String message, String... replace);
+	
+	List<Map<String,Object>> convertMapToList(Map<String,Map<String,Object>> requestMap,String key);
+	
+	List<Map<String,Object>> groupDataDependOnkey(List<Map<String,Object>> requestData,String fetchKey,String objectKey);
 }

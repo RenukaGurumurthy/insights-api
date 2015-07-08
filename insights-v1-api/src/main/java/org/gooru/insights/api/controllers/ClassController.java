@@ -46,9 +46,10 @@ public class ClassController extends BaseController{
 	public ModelAndView getClasspageUnitUsage(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId, 
 			@RequestParam(value="userUid", required = false) String userUid,
+			@RequestParam(value="collectionType", required = false) String collectionType,
 			@RequestParam(value="getUsageData", required = false) Boolean getUsageData, HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		return getModel(getClassService().getUnitUsage(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid, getUsageData, request.isSecure()));
+		return getModel(getClassService().getUnitUsage(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid,collectionType, getUsageData, request.isSecure()));
 	}
 	
 	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}",method ={ RequestMethod.GET,RequestMethod.POST})
