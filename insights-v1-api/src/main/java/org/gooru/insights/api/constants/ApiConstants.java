@@ -92,6 +92,8 @@ public class ApiConstants {
 	
 	public static final String DELETED = "deleted";
 	
+	public static final String ASSESMENT_TYPE_MATCHER = "assessment/url|assessment";
+	
 	public static final String USERCOUNT = "userCount";
 	
 	public static final String GOORUOID = "gooruOId";
@@ -99,6 +101,8 @@ public class ApiConstants {
 	public static final String GOORU_UID = "gooru_uid";
 	
 	public static final String GOORUUID = "gooruUid";
+	
+	public static final String ORDER = "order";
 	
 	public static final String USERNAME = "userName";
 	
@@ -133,6 +137,8 @@ public class ApiConstants {
 	public static final String RESOURCEGOORUOID = "resource_gooru_oid";
 	
 	public static final String HTTP = "http";
+	
+	public static final String SEQUENCE = "sequence";
 	
 	public static final String HTTPS = "https";
 	
@@ -178,7 +184,7 @@ public class ApiConstants {
 
 	public static final String SESSIONID = "sessionId";
 	public static final String ITEM = "item";
-	public static final String COLLECTION = "collecton";
+	public static final String COLLECTION = "collection";
 	public static final String ASSESSMENT = "assessment";
 	public static final String ASSESSMENT_URL = "assessment/url";
 	public static final String LESSON_COUNT = "lessonCount";
