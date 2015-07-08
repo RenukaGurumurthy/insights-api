@@ -106,7 +106,7 @@ public class ApiConstants {
 	
 	public static final String USERNAME = "userName";
 	
-	public static final String LAST_ACCESSED = "lastAccessed";
+	public static final String LASTACCESSED = "lastAccessed";
 	
 	public static final String LAST_MODIFIED = "lastModified";
 	
@@ -117,6 +117,8 @@ public class ApiConstants {
 	public static final String THUMBNAIL = "thumbnail";
 	
 	public static final String ASC = "ASC";
+	
+	public static final String DESC = "DESC";
 	
 	public static final String FILTERS = "filters";
 	
@@ -170,8 +172,11 @@ public class ApiConstants {
 	
 	public static final String PARTY_UId = "partyUid";
 	
+	public static final String ID = "id";
+
 	public static final String USER_PROFILE_URL_PATH = "insights.profile.url.path";
-	
+	public static final String PROFILEURL = "profileUrl";
+
 	public static final String LESSON = "lesson";
 	public static final String COURSE = "course";
 	public static final String UNIT = "unit";
@@ -198,7 +203,9 @@ public class ApiConstants {
 	public static final String NOT_SCORED = "NotScored";
 	public static final String SCORE_STATUS = "scoreStatus";
 	public static final String MINIMUM_SCORE = "minimum_score";
-
+	public static final String GOAL = "goal";
+	public static final String LAST_ACCESSED = "last_accessed";
+	public static final String EVIDENCE = "evidence";
 	public static final String USAGEDATA = "usageData";
 	public static final String TITLE = "title";
 	public static final String TYPE = "type";
@@ -208,10 +215,12 @@ public class ApiConstants {
 	public static final String TIME_SPENT = "time_spent";
 	public static final String TOTALSTUDYTIME = "totalStudyTime";
 	public static final String TOTALSCORE = "totalScore";
+	public static final String AVGSCORE = "avgScore";
 	public static final String COLLECTION_TYPE = "collection_type";
 	public static final String COLLECTIONTYPE = "collectionType";
 	public static final String SCOREINPERCENTAGE = "scoreInPercentage";
 	public static final String SCORE_IN_PERCENTAGE = "score_in_percentage";
+	public static final String SCORE = "score";
 	public static final String CLASS_USAGE_DATA = "classUsageData";
 	public static final String COURSE_USAGE_DATA = "courseUsageData";
 	public static final String UNIT_USAGE_DATA = "unitUsageData";

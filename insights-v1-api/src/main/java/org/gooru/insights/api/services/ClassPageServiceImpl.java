@@ -110,7 +110,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		 * Add lastAccessed field with the value of lastModified if it is NULL!!
 		 */
 		Map<String,String> fieldList = new HashMap<String, String>();
-		fieldList.put(ApiConstants.LAST_ACCESSED,ApiConstants.LAST_MODIFIED);
+		fieldList.put(ApiConstants.LASTACCESSED,ApiConstants.LAST_MODIFIED);
 		rawData  = getBaseService().replaceIfNull(rawData,fieldList);
 		
 		/**
