@@ -111,7 +111,7 @@ public class ClassController extends BaseController{
 		return getModel(getClassService().getLessonPlan(getTraceId(request), classGooruId, courseGooruId, unitGooruId, lessonGooruId, assessmentIds, userUid, request.isSecure()));
 	}
 	
-	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/{collectionType}/{contentGooruId}",method ={ RequestMethod.GET,RequestMethod.POST})
+	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/{collectionType}/{contentGooruId}/sessions",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public ModelAndView getUserSessions(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
@@ -120,6 +120,18 @@ public class ClassController extends BaseController{
 			HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
 		return getModel(getClassService().getUserSessions(getTraceId(request), classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, collectionType, userUid,openSession, request.isSecure()));
+	}
+	
+	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/{collectionType}/{contentGooruId}/",method ={ RequestMethod.GET,RequestMethod.POST})
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@ResponseBody
+	public ModelAndView getAssessmentDetails(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
+			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId, 
+			@PathVariable(value="lessonGooruId") String lessonGooruId, @PathVariable(value="collectionType") String collectionType,
+			@PathVariable(value="contentGooruId") String contentGooruId, @RequestParam(value="userUid", required = false) String userUid, 
+			HttpServletResponse response) throws Exception {
+		setAllowOrigin(response);
+		return getModel(getClassService().getAssessmentDetails(getTraceId(request), classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, userUid, request.isSecure()));
 	}
 	
 }

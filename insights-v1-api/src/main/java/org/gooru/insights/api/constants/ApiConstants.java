@@ -166,8 +166,11 @@ public class ApiConstants {
 	
 	public static final String PARTY_UId = "partyUid";
 	
+	public static final String ID = "id";
+
 	public static final String USER_PROFILE_URL_PATH = "insights.profile.url.path";
-	
+	public static final String PROFILEURL = "profileUrl";
+
 	public static final String LESSON = "lesson";
 	public static final String COURSE = "course";
 	public static final String UNIT = "unit";
@@ -194,7 +197,9 @@ public class ApiConstants {
 	public static final String NOT_SCORED = "NotScored";
 	public static final String SCORE_STATUS = "scoreStatus";
 	public static final String MINIMUM_SCORE = "minimum_score";
+	public static final String GOAL = "goal";
 	public static final String LAST_ACCESSED = "last_accessed";
+	public static final String EVIDENCE = "evidence";
 	public static final String USAGEDATA = "usageData";
 	public static final String TITLE = "title";
 	public static final String TYPE = "type";
