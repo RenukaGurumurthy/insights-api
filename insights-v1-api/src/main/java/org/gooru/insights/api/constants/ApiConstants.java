@@ -202,10 +202,12 @@ public class ApiConstants {
 	public static final String TIME_SPENT = "time_spent";
 	public static final String TOTALSTUDYTIME = "totalStudyTime";
 	public static final String TOTALSCORE = "totalScore";
+	public static final String AVGSCORE = "avgScore";
 	public static final String COLLECTION_TYPE = "collection_type";
 	public static final String COLLECTIONTYPE = "collectionType";
 	public static final String SCOREINPERCENTAGE = "scoreInPercentage";
 	public static final String SCORE_IN_PERCENTAGE = "score_in_percentage";
+	public static final String SCORE = "score";
 	public static final String CLASS_USAGE_DATA = "classUsageData";
 	public static final String COURSE_USAGE_DATA = "courseUsageData";
 	public static final String UNIT_USAGE_DATA = "unitUsageData";

@@ -21,8 +21,6 @@ import org.springframework.stereotype.Service;
 import com.netflix.astyanax.connectionpool.OperationResult;
 import com.netflix.astyanax.model.Column;
 import com.netflix.astyanax.model.ColumnList;
-import com.netflix.astyanax.model.Row;
-import com.netflix.astyanax.model.Rows;
 
 @Service
 public class ClassServiceImpl implements ClassService, InsightsConstant {
@@ -43,29 +41,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	private CassandraService getCassandraService() {
 		return cassandraService;
 	}
-
-	public ResponseParamDTO<Map<String,Object>> getItemsUsage(String traceId, String baseKey, String userUid, boolean isUsageRequired,boolean isMetaRequired, boolean isSecure,String parentGooruIds) throws Exception {
-		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		for (String parentGooruId : parentGooruIds.split(COMMA)) {
-			ColumnList<String> items = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), parentGooruId).getResult();
-			for (Column<String> item : items) {
-				Map<String, Object> dataMap = new HashMap<String, Object>();
-				dataMap.put(GOORUOID, item.getName());
-				dataMap.put(SEQUENCE, item.getIntegerValue());
-				if(isMetaRequired){
-					getResourceMetaData(dataMap, traceId, item.getName());
-				}
-				if(isUsageRequired){
-					getClassUsageData(dataMap, traceId, getBaseService().appendTilda(baseKey,parentGooruId,item.getName(),userUid));
-				}
-				dataMapAsList.add(dataMap);
-			}
-		}
-		responseParamDTO.setContent(dataMapAsList);
-		return responseParamDTO;
-	}
-	
 	
 	public ResponseParamDTO<Map<String,Object>> getCourseUsage(String traceId, String classId, String courseId, String userUid, Boolean getUsageData, boolean isSecure) throws Exception {		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
@@ -609,18 +584,22 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				
 				//Fetch total of assessments score
 				long totalScore = 0L;
+				float avgScore = 0;
 				if (assessmentMetricColumnList != null && assessmentMetricColumnList.size() > 0) {
 					for(Column<String> assessmentMetricColumn : assessmentMetricColumnList) {
 						totalScore += assessmentMetricColumn.getLongValue();
 					}
+					if(unitAssessmentCount != 0) {
+						avgScore = totalScore/unitAssessmentCount;
+					}
 				}
 				
-				unitDataAsMap.put(ApiConstants.ASSESSMENTS_ATTEMPTED, assessmentAttempted);
 				unitDataAsMap.put(ApiConstants.COLLECTIONS_VIEWED, collectionsViewed);
+				unitDataAsMap.put(ApiConstants.TOTALSTUDYTIME, totalStudyTime);
+				unitDataAsMap.put(ApiConstants.ASSESSMENTS_ATTEMPTED, assessmentAttempted);
+				unitDataAsMap.put(ApiConstants.AVGSCORE, avgScore);
 				unitDataAsMap.put(ApiConstants.ASSESSMENT_COUNT, unitAssessmentCount);
 				unitDataAsMap.put(ApiConstants.COLLECTION_COUNT, unitCollectionCount);
-				unitDataAsMap.put(ApiConstants.TOTALSTUDYTIME, totalStudyTime);
-				unitDataAsMap.put(ApiConstants.TOTALSCORE, totalScore);
 				unitDataMapAsList.add(unitDataAsMap);
 			}
 			responseParamDTO.setContent(unitDataMapAsList);
@@ -713,6 +692,10 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return responseParamDTO;
 	}
 	
+	public ResponseParamDTO<Map<String,Object>> getLessonPlanView(String traceId, String classId, String courseId, String unitId, String lessonId, String assessmentIds, String userUid, boolean isSecure) throws Exception {
+		return null;
+	}
+	
 	private List<Map<String, Object>> getResourceData(String traceId, boolean isSecure, List<Map<String, Object>> rawDataMapAsList, String keys, Collection<String> columnsToFetch) {
 		rawDataMapAsList = getBaseService().getRowsColumnValues(traceId, getCassandraService().readAll(traceId, ColumnFamily.RESOURCE.getColumnFamily(), null, keys, new String(), columnsToFetch));
 		Map<String, Map<Integer, String>> combineMap = new HashMap<String, Map<Integer, String>>();
@@ -726,54 +709,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return rawDataMapAsList;
 	}
 	
-	private Map<String, Object> getClassUsageData(Map<String, Object> dataMap, String traceId, String key) {
-		ColumnList<String> resourceColumn = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), key).getResult();
-		for (Column<String> column : resourceColumn) {
-			if (column.getName().contains("collection_type")) {
-				dataMap.put(column.getName(), column.getStringValue());
-			}else{
-				dataMap.put(column.getName(), column.getStringValue());
-			}
-		}
-		return dataMap;
-	}
-	
-	private Map<String, Object> getResourceMetaData(Map<String, Object> dataMap, String traceId, String key) {
-		// fetch metadata
-		Collection<String> resourceColumns = new ArrayList<String>();
-		resourceColumns.add(ApiConstants.TITLE);
-		resourceColumns.add(ApiConstants.RESOURCETYPE);
-		resourceColumns.add(ApiConstants.THUMBNAIL);
-		ColumnList<String> resourceColumn = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), key, resourceColumns).getResult();
-		for (Column<String> column : resourceColumn) {
-			dataMap.put(column.getName(), column.getStringValue());
-		}
-		return dataMap;
-	}
-	private Map<String, Object> getClassMetaData(Map<String, Object> dataMap, String traceId, String key) {
-		// fetch metadata
-		Collection<String> resourceColumns = new ArrayList<String>();
-		resourceColumns.add(ApiConstants.TITLE);
-		resourceColumns.add(ApiConstants.RESOURCETYPE);
-		resourceColumns.add(ApiConstants.THUMBNAIL);
-		ColumnList<String> resourceColumn = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), key, resourceColumns).getResult();
-		for (Column<String> column : resourceColumn) {
-			dataMap.put(column.getName(), column.getStringValue());
-		}
-		return dataMap;
-	}
-	private Map<String, Object> getCollectionItemMetaData(Map<String, Object> dataMap, String traceId, String key) {
-		// fetch metadata
-		Collection<String> resourceColumns = new ArrayList<String>();
-		resourceColumns.add(ApiConstants.TITLE);
-		resourceColumns.add(ApiConstants.RESOURCETYPE);
-		resourceColumns.add(ApiConstants.THUMBNAIL);
-		ColumnList<String> resourceColumn = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), key, resourceColumns).getResult();
-		for (Column<String> column : resourceColumn) {
-			dataMap.put(column.getName(), column.getStringValue());
-		}
-		return dataMap;
-	}
 	private Map<String, Object> getSessionMetricsAsMap(String traceId, String sessionKey, String contentGooruOid) {
 		Map<String, Object> usageAsMap = new HashMap<String, Object>();
 		OperationResult<ColumnList<String>> sessionColumnResult = getCassandraService().read(traceId, ColumnFamily.SESSION.getColumnFamily(), sessionKey);
@@ -850,16 +785,11 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 							collectionGooruOids.append(COMMA);
 						}
 						collectionGooruOids.append(itemGooruOid);
-					} else if (contentType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) {
+					} else if (contentType.equalsIgnoreCase(ApiConstants.ASSESSMENT) || contentType.equalsIgnoreCase(ApiConstants.ASSESSMENT_URL)) {
 						if (assessmentGooruOids.length() > 0) {
 							assessmentGooruOids.append(COMMA);
 						}
 						assessmentGooruOids.append(itemGooruOid);
-					} else if (contentType.equalsIgnoreCase(ApiConstants.ASSESSMENT_URL)) {
-						if (assessmentUrlGooruOids.length() > 0) {
-							assessmentUrlGooruOids.append(COMMA);
-						}
-						assessmentUrlGooruOids.append(itemGooruOid);
 					}
 				}
 				if (itemGooruOids.length() > 0) {
