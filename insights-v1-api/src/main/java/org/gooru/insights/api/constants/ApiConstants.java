@@ -102,7 +102,7 @@ public class ApiConstants {
 	
 	public static final String USERNAME = "userName";
 	
-	public static final String LAST_ACCESSED = "lastAccessed";
+	public static final String LASTACCESSED = "lastAccessed";
 	
 	public static final String LAST_MODIFIED = "lastModified";
 	
@@ -192,7 +192,7 @@ public class ApiConstants {
 	public static final String NOT_SCORED = "NotScored";
 	public static final String SCORE_STATUS = "scoreStatus";
 	public static final String MINIMUM_SCORE = "minimum_score";
-
+	public static final String LAST_ACCESSED = "last_accessed";
 	public static final String USAGEDATA = "usageData";
 	public static final String TITLE = "title";
 	public static final String TYPE = "type";
