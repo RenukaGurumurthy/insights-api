@@ -1635,7 +1635,7 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 	 		return rawRowsMapList;
 		}
 		
-		public String addComma(String... texts) {
+		public String appendComma(String... texts) {
 			StringBuffer sb = new StringBuffer();
 			for (String text : texts) {
 				if (sb.length() > 0) {
@@ -1645,6 +1645,7 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 			}
 			return sb.toString();
 		}
+		
 		public String appendTilda(String... texts) {
 			StringBuffer sb = new StringBuffer();
 			for (String text : texts) {

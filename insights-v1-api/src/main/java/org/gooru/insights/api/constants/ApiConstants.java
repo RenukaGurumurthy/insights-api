@@ -195,6 +195,7 @@ public class ApiConstants {
 	public static final String SCORE_STATUS = "scoreStatus";
 	public static final String MINIMUM_SCORE = "minimum_score";
 	public static final String LAST_ACCESSED = "last_accessed";
+	public static final String EVIDENCE = "evidence";
 	public static final String USAGEDATA = "usageData";
 	public static final String TITLE = "title";
 	public static final String TYPE = "type";
