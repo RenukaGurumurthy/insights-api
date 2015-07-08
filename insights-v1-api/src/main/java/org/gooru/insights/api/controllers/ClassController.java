@@ -65,49 +65,50 @@ public class ClassController extends BaseController{
 	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/plan",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
-	public ModelAndView getCoursePlanView(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
-			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="userUid", required = false) String userUid, HttpServletResponse response) throws Exception{
+	public ModelAndView getCoursePlan(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
+			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="userUid", required = true) String userUid, HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		return getModel(getClassService().getCoursePlanView(getTraceId(request), classGooruId, courseGooruId, userUid, request.isSecure()));
+		return getModel(getClassService().getCoursePlan(getTraceId(request), classGooruId, courseGooruId, userUid, request.isSecure()));
 	}
 	
 	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/plan",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
-	public ModelAndView getUnitPlanView(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
+	public ModelAndView getUnitPlan(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId,
-			@RequestParam(value="userUid", required = false) String userUid, HttpServletResponse response) throws Exception{
+			@RequestParam(value="userUid", required = true) String userUid, HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		return getModel(getClassService().getUnitPlanView(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid, request.isSecure()));
-	}
-
-	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/lesson",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	public ModelAndView getLessonAndUsage(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
-			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="unitGooruId") String unitGooruId, 
-			@RequestParam(value="userUid", required = true) String userUid,@RequestParam(value="isUsageRequired", required = false) boolean isUsageRequired,@RequestParam(value="isMetaRequired", required = false) boolean isMetaRequired
-			,HttpServletResponse response) throws Exception{
-		setAllowOrigin(response);
-		return getModel(getClassService().getItemsUsage(getTraceId(request), baseService.appendTilda(classGooruId,courseGooruId),userUid, isUsageRequired, isMetaRequired, request.isSecure(), unitGooruId));
+		return getModel(getClassService().getUnitPlan(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid, request.isSecure()));
 	}
 	
 	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/progress",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
-	public ModelAndView getCourseProgressView(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
-			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="userUid", required = false) String userUid, HttpServletResponse response) throws Exception{
+	public ModelAndView getCourseProgress(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
+			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="userUid", required = true) String userUid, HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		return getModel(getClassService().getCourseProgressView(getTraceId(request), classGooruId, courseGooruId, userUid, request.isSecure()));
+		return getModel(getClassService().getCourseProgress(getTraceId(request), classGooruId, courseGooruId, userUid, request.isSecure()));
 	}
 	
 	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/progress",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
-	public ModelAndView getUnitProgressView(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
+	public ModelAndView getUnitProgress(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId,
-			@RequestParam(value="userUid", required = false) String userUid, HttpServletResponse response) throws Exception {
+			@RequestParam(value="userUid", required = true) String userUid, HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getUnitProgressView(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid, request.isSecure()));
+		return getModel(getClassService().getUnitProgress(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid, request.isSecure()));
+	}
+	
+	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/plan",method ={ RequestMethod.GET,RequestMethod.POST})
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@ResponseBody
+	public ModelAndView getLessonPlan(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
+			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId,
+			@PathVariable(value="lessonGooruId") String lessonGooruId, @RequestParam(value="assessmentIds") String assessmentIds,
+			@RequestParam(value="userUid", required = true) String userUid, HttpServletResponse response) throws Exception {
+		setAllowOrigin(response);
+		return getModel(getClassService().getLessonPlan(getTraceId(request), classGooruId, courseGooruId, unitGooruId, lessonGooruId, assessmentIds, userUid, request.isSecure()));
 	}
 	
 }
