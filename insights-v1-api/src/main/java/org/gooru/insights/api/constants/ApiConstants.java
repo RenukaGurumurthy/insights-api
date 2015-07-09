@@ -106,7 +106,7 @@ public class ApiConstants {
 	
 	public static final String USERNAME = "userName";
 	
-	public static final String LASTACCESSED = "lastAccessed";
+	public static final String LAST_ACCESSED = "lastAccessed";
 	
 	public static final String LAST_MODIFIED = "lastModified";
 	
@@ -175,7 +175,7 @@ public class ApiConstants {
 	public static final String ID = "id";
 
 	public static final String USER_PROFILE_URL_PATH = "insights.profile.url.path";
-	public static final String PROFILEURL = "profileUrl";
+	public static final String PROFILE_URL = "profileUrl";
 
 	public static final String LESSON = "lesson";
 	public static final String COURSE = "course";
@@ -186,7 +186,7 @@ public class ApiConstants {
 	public static final String ITEM = "item";
 	public static final String COLLECTION = "collection";
 	public static final String ASSESSMENT = "assessment";
-	public static final String ASSESSMENT_URL = "assessment/url";
+	public static final String ASSESSMENT_SLASH_URL = "assessment/url";
 	public static final String LESSON_COUNT = "lessonCount";
 	public static final String UNIT_COUNT = "unitCount";
 	public static final String COURSE_COUNT = "courseCount";
@@ -195,6 +195,10 @@ public class ApiConstants {
 	public static final String RESOURCE_COUNT = "resourceCount";
 	public static final String QUESTION_COUNT = "questionCount";
 	public static final String OE_COUNT = "oeCount";
+	public static final String _RESOURCE_COUNT = "resource_count";
+	public static final String _QUESTION_COUNT = "question_count";
+	public static final String _OE_COUNT = "oe_count";
+	
 	public static final String SCORABLE_QUESTION_COUNT = "scorableQuestionCount";
 
 	public static final String EXTERNAL_ASSESSMENT_COUNT = "externalAssessmentCount";
@@ -208,22 +212,22 @@ public class ApiConstants {
 	public static final String SCORE_STATUS = "scoreStatus";
 	public static final String MINIMUM_SCORE = "minimum_score";
 	public static final String GOAL = "goal";
-	public static final String LAST_ACCESSED = "last_accessed";
+	public static final String _LAST_ACCESSED = "last_accessed";
 	public static final String EVIDENCE = "evidence";
-	public static final String USAGEDATA = "usageData";
+	public static final String USAGE_DATA = "usageData";
 	public static final String TITLE = "title";
 	public static final String TYPE = "type";
-	public static final String RESOURCETYPE = "resourceType";
+	public static final String RESOURCE_TYPE = "resourceType";
 	public static final String VIEWS = "views";
-	public static final String TIMESPENT = "timeSpent";
-	public static final String TIME_SPENT = "time_spent";
-	public static final String TOTALSTUDYTIME = "totalStudyTime";
-	public static final String TOTALSCORE = "totalScore";
-	public static final String AVGSCORE = "avgScore";
-	public static final String COLLECTION_TYPE = "collection_type";
-	public static final String COLLECTIONTYPE = "collectionType";
-	public static final String SCOREINPERCENTAGE = "scoreInPercentage";
-	public static final String SCORE_IN_PERCENTAGE = "score_in_percentage";
+	public static final String TIMESPENT = "timespent";
+	public static final String _TIME_SPENT = "time_spent";
+	public static final String TOTAL_STUDY_TIME = "totalStudyTime";
+	public static final String TOTAL_SCORE = "totalScore";
+	public static final String AVG_SCORE = "avgScore";
+	public static final String _COLLECTION_TYPE = "collection_type";
+	public static final String COLLECTION_TYPE = "collectionType";
+	public static final String SCORE_IN_PERCENTAGE = "scoreInPercentage";
+	public static final String _SCORE_IN_PERCENTAGE = "score_in_percentage";
 	public static final String SCORE = "score";
 	public static final String CLASS_USAGE_DATA = "classUsageData";
 	public static final String COURSE_USAGE_DATA = "courseUsageData";
