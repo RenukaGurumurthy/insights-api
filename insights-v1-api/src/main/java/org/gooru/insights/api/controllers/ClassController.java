@@ -86,9 +86,9 @@ public class ClassController extends BaseController{
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public ModelAndView getCourseProgress(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
-			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="userUid", required = true) String userUid, HttpServletResponse response) throws Exception{
+			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="userUid", required = false) String userUid,@RequestParam(value="collectionType", required = false) String collectionType, HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		return getModel(getClassService().getCourseProgress(getTraceId(request), classGooruId, courseGooruId, userUid, request.isSecure()));
+		return getModel(getClassService().getCourseProgress(getTraceId(request), classGooruId, courseGooruId, collectionType,userUid, request.isSecure()));
 	}
 	
 	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/progress",method ={ RequestMethod.GET,RequestMethod.POST})

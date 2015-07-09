@@ -528,114 +528,118 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return responseParamDTO;
 	}
 	
-	public ResponseParamDTO<Map<String,Object>> getCourseProgress(String traceId, String classId, String courseId, String userUid, boolean isSecure) throws Exception {
+	public ResponseParamDTO<Map<String,Object>> getCourseProgress(String traceId, String classId, String courseId,String collectionType, String userUid, boolean isSecure) throws Exception {
 		
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		List<Map<String, Object>> unitDataMapAsList = new ArrayList<Map<String, Object>>();
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = null;
+		if (StringUtils.isNotBlank(userUid)) {
+			responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+			List<Map<String, Object>> unitDataMapAsList = new ArrayList<Map<String, Object>>();
+			Collection<String> resourceColumns = new ArrayList<String>();
+			resourceColumns.add(ApiConstants.TITLE);
+			resourceColumns.add(ApiConstants.GOORUOID);
 
-		Collection<String> resourceColumns = new ArrayList<String>();
-		resourceColumns.add(ApiConstants.TITLE);
-		resourceColumns.add(ApiConstants.GOORUOID);
-		
-		OperationResult<ColumnList<String>> unitData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), courseId);
-		ColumnList<String> units = unitData.getResult();
-		if(!units.isEmpty() && units.size() > 0) {
-			for (String unitGooruOid : units.getColumnNames()) {
-				Map<String, Object> unitDataAsMap = new HashMap<String, Object>();
+			OperationResult<ColumnList<String>> unitData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), courseId);
+			ColumnList<String> units = unitData.getResult();
+			if (!units.isEmpty() && units.size() > 0) {
+				for (String unitGooruOid : units.getColumnNames()) {
+					Map<String, Object> unitDataAsMap = new HashMap<String, Object>();
 
-				//Form unit class key
-				String classUnitKey = getBaseService().appendTilda(classId, courseId, unitGooruOid);
-				if (StringUtils.isNotBlank(userUid)) {
-					classUnitKey = getBaseService().appendTilda(classUnitKey, userUid);
-				}
-				//Fetch unit metadata
-				OperationResult<ColumnList<String>> unitMetaData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), unitGooruOid, resourceColumns);
-				if (!unitMetaData.getResult().isEmpty() && unitMetaData.getResult().size() > 0) {
-					ColumnList<String> unitMetaDataColumns = unitMetaData.getResult();
-					unitDataAsMap.put(ApiConstants.TITLE, unitMetaDataColumns.getColumnByName(ApiConstants.TITLE).getStringValue());
-				}
-				unitDataAsMap.put(ApiConstants.GOORUOID, unitGooruOid);
-				unitDataAsMap.put(ApiConstants.TYPE, ApiConstants.UNIT);
-				long unitAssessmentCount = 0L;
-				long unitCollectionCount = 0L;
-				long unitAssessmentUrlCount = 0L;
-				long unitItemCount = 0L;
-				
-				//Fetch lesson for item count details for this unit
-				OperationResult<ColumnList<String>> lessonData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), unitGooruOid);
-				ColumnList<String> lessons = lessonData.getResult();
-				if(!lessons.isEmpty() && lessons.size() > 0) {
-					StringBuffer collectionGooruOids = new StringBuffer();
-					StringBuffer assessmentGooruOids = new StringBuffer();
-					StringBuffer assessmentUrlGooruOids = new StringBuffer();
-					StringBuffer itemGooruOids = new StringBuffer();
-					for (String lessonGooruId : lessons.getColumnNames()) {
-						// fetch item ids w.r.t their resource type
-						getTypeBasedItemGooruOids(traceId, lessonGooruId, itemGooruOids, collectionGooruOids, assessmentGooruOids, assessmentUrlGooruOids);
-						long assessmentCount = assessmentGooruOids.toString().split(ApiConstants.COMMA).length;
-						long assessmentUrlCount = assessmentUrlGooruOids.toString().split(ApiConstants.COMMA).length;
-						long collectionCount = collectionGooruOids.toString().split(ApiConstants.COMMA).length;
-						long itemCount = itemGooruOids.toString().split(ApiConstants.COMMA).length;
-						unitAssessmentCount += assessmentCount;
-						unitCollectionCount += collectionCount;
-						unitAssessmentUrlCount += assessmentUrlCount;
-						unitItemCount += itemCount;
+					// Form unit class key
+					String classUnitKey = getBaseService().appendTilda(classId, courseId, unitGooruOid);
+					if (StringUtils.isNotBlank(userUid)) {
+						classUnitKey = getBaseService().appendTilda(classUnitKey, userUid);
 					}
-				}
-				
-				//Fetch collections viewed count
-				OperationResult<ColumnList<String>> collectionMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
-						getBaseService().appendTilda(classUnitKey, ApiConstants.COLLECTION, ApiConstants.TIME_SPENT));
-				ColumnList<String> collectionMetricColumnList = null;
-				if (collectionMetricsData != null && !collectionMetricsData.getResult().isEmpty()) {
-					collectionMetricColumnList = collectionMetricsData.getResult();
-				}
-				long collectionsViewed = 0L;
-				if(collectionMetricColumnList != null) {
-					collectionsViewed = collectionMetricColumnList.size();
-				}
-				
-				//Fetch collection study time
-				long totalStudyTime = 0L;
-				if (collectionMetricColumnList != null && collectionMetricColumnList.size() > 0) {
-					for(Column<String> collectionMetricColumn : collectionMetricColumnList) {
-						totalStudyTime += collectionMetricColumn.getLongValue();
+					// Fetch unit metadata
+					OperationResult<ColumnList<String>> unitMetaData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), unitGooruOid, resourceColumns);
+					if (!unitMetaData.getResult().isEmpty() && unitMetaData.getResult().size() > 0) {
+						ColumnList<String> unitMetaDataColumns = unitMetaData.getResult();
+						unitDataAsMap.put(ApiConstants.TITLE, unitMetaDataColumns.getColumnByName(ApiConstants.TITLE).getStringValue());
 					}
-				}
-				
-				//Fetch assessments attempted count
-				OperationResult<ColumnList<String>> assessmentMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
-						getBaseService().appendTilda(classUnitKey, ApiConstants.ASSESSMENT, ApiConstants.SCORE_IN_PERCENTAGE));
-				ColumnList<String> assessmentMetricColumnList = null;
-				if (assessmentMetricsData != null && !assessmentMetricsData.getResult().isEmpty()) {
-					assessmentMetricColumnList = assessmentMetricsData.getResult();
-				}
-				long assessmentAttempted = 0L;
-				if(assessmentMetricColumnList != null) {
-					assessmentAttempted = assessmentMetricColumnList.size();
-				}
-				
-				//Fetch total of assessments score
-				long totalScore = 0L;
-				float avgScore = 0;
-				if (assessmentMetricColumnList != null && assessmentMetricColumnList.size() > 0) {
-					for(Column<String> assessmentMetricColumn : assessmentMetricColumnList) {
-						totalScore += assessmentMetricColumn.getLongValue();
+					unitDataAsMap.put(ApiConstants.GOORUOID, unitGooruOid);
+					unitDataAsMap.put(ApiConstants.TYPE, ApiConstants.UNIT);
+					long unitAssessmentCount = 0L;
+					long unitCollectionCount = 0L;
+					long unitAssessmentUrlCount = 0L;
+					long unitItemCount = 0L;
+
+					// Fetch lesson for item count details for this unit
+					OperationResult<ColumnList<String>> lessonData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), unitGooruOid);
+					ColumnList<String> lessons = lessonData.getResult();
+					if (!lessons.isEmpty() && lessons.size() > 0) {
+						StringBuffer collectionGooruOids = new StringBuffer();
+						StringBuffer assessmentGooruOids = new StringBuffer();
+						StringBuffer assessmentUrlGooruOids = new StringBuffer();
+						StringBuffer itemGooruOids = new StringBuffer();
+						for (String lessonGooruId : lessons.getColumnNames()) {
+							// fetch item ids w.r.t their resource type
+							getTypeBasedItemGooruOids(traceId, lessonGooruId, itemGooruOids, collectionGooruOids, assessmentGooruOids, assessmentUrlGooruOids);
+							long assessmentCount = assessmentGooruOids.toString().split(ApiConstants.COMMA).length;
+							long assessmentUrlCount = assessmentUrlGooruOids.toString().split(ApiConstants.COMMA).length;
+							long collectionCount = collectionGooruOids.toString().split(ApiConstants.COMMA).length;
+							long itemCount = itemGooruOids.toString().split(ApiConstants.COMMA).length;
+							unitAssessmentCount += assessmentCount;
+							unitCollectionCount += collectionCount;
+							unitAssessmentUrlCount += assessmentUrlCount;
+							unitItemCount += itemCount;
+						}
 					}
-					if(unitAssessmentCount != 0) {
-						avgScore = totalScore/unitAssessmentCount;
+
+					// Fetch collections viewed count
+					OperationResult<ColumnList<String>> collectionMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
+							getBaseService().appendTilda(classUnitKey, ApiConstants.COLLECTION, ApiConstants.TIME_SPENT));
+					ColumnList<String> collectionMetricColumnList = null;
+					if (collectionMetricsData != null && !collectionMetricsData.getResult().isEmpty()) {
+						collectionMetricColumnList = collectionMetricsData.getResult();
 					}
+					long collectionsViewed = 0L;
+					if (collectionMetricColumnList != null) {
+						collectionsViewed = collectionMetricColumnList.size();
+					}
+
+					// Fetch collection study time
+					long totalStudyTime = 0L;
+					if (collectionMetricColumnList != null && collectionMetricColumnList.size() > 0) {
+						for (Column<String> collectionMetricColumn : collectionMetricColumnList) {
+							totalStudyTime += collectionMetricColumn.getLongValue();
+						}
+					}
+
+					// Fetch assessments attempted count
+					OperationResult<ColumnList<String>> assessmentMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
+							getBaseService().appendTilda(classUnitKey, ApiConstants.ASSESSMENT, ApiConstants.SCORE_IN_PERCENTAGE));
+					ColumnList<String> assessmentMetricColumnList = null;
+					if (assessmentMetricsData != null && !assessmentMetricsData.getResult().isEmpty()) {
+						assessmentMetricColumnList = assessmentMetricsData.getResult();
+					}
+					long assessmentAttempted = 0L;
+					if (assessmentMetricColumnList != null) {
+						assessmentAttempted = assessmentMetricColumnList.size();
+					}
+
+					// Fetch total of assessments score
+					long totalScore = 0L;
+					float avgScore = 0;
+					if (assessmentMetricColumnList != null && assessmentMetricColumnList.size() > 0) {
+						for (Column<String> assessmentMetricColumn : assessmentMetricColumnList) {
+							totalScore += assessmentMetricColumn.getLongValue();
+						}
+						if (unitAssessmentCount != 0) {
+							avgScore = totalScore / unitAssessmentCount;
+						}
+					}
+
+					unitDataAsMap.put(ApiConstants.COLLECTIONS_VIEWED, collectionsViewed);
+					unitDataAsMap.put(ApiConstants.TOTALSTUDYTIME, totalStudyTime);
+					unitDataAsMap.put(ApiConstants.ASSESSMENTS_ATTEMPTED, assessmentAttempted);
+					unitDataAsMap.put(ApiConstants.AVGSCORE, avgScore);
+					unitDataAsMap.put(ApiConstants.ASSESSMENT_COUNT, unitAssessmentCount);
+					unitDataAsMap.put(ApiConstants.COLLECTION_COUNT, unitCollectionCount);
+					unitDataMapAsList.add(unitDataAsMap);
 				}
-				
-				unitDataAsMap.put(ApiConstants.COLLECTIONS_VIEWED, collectionsViewed);
-				unitDataAsMap.put(ApiConstants.TOTALSTUDYTIME, totalStudyTime);
-				unitDataAsMap.put(ApiConstants.ASSESSMENTS_ATTEMPTED, assessmentAttempted);
-				unitDataAsMap.put(ApiConstants.AVGSCORE, avgScore);
-				unitDataAsMap.put(ApiConstants.ASSESSMENT_COUNT, unitAssessmentCount);
-				unitDataAsMap.put(ApiConstants.COLLECTION_COUNT, unitCollectionCount);
-				unitDataMapAsList.add(unitDataAsMap);
+				responseParamDTO.setContent(unitDataMapAsList);
 			}
-			responseParamDTO.setContent(unitDataMapAsList);
+		}else{
+			responseParamDTO = getAllStudentProgressByUnit(traceId, classId, courseId, collectionType, isSecure);	
 		}
 		return responseParamDTO;
 	}
