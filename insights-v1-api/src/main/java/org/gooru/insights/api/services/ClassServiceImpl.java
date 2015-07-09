@@ -820,7 +820,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		}
 		//Fetch assessment count
 		Long assessmentCount = null;
-		Map<String, Long> contentMetaAsMap = getContentMeta(traceId, assessmentId, ApiConstants.ASSESSMENT_COUNT);
+		Map<String, Long> contentMetaAsMap = getContentMeta(traceId, lessonId, ApiConstants.ASSESSMENT_COUNT);
 		if(!contentMetaAsMap.isEmpty()) {
 			assessmentCount = contentMetaAsMap.get(ApiConstants.ASSESSMENT_COUNT);
 		}
