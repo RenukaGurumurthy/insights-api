@@ -11,4 +11,6 @@ public class ErrorCodes {
 	public static final String E106 = "E106";
 	public static final String E107 = "E107";
 	public static final String E108 = "E108";
+	public static final String E109 = "E109";
+	public static final String E110 = "E110";
 }
