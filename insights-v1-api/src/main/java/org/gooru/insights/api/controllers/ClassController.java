@@ -83,7 +83,7 @@ public class ClassController extends BaseController{
 	}
 	
 	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/progress",method ={ RequestMethod.GET,RequestMethod.POST})
-	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public ModelAndView getCourseProgress(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="userUid", required = false) String userUid, HttpServletResponse response) throws Exception{
