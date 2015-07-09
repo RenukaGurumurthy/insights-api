@@ -106,10 +106,10 @@ public class ClassController extends BaseController{
 	@ResponseBody
 	public ModelAndView getLessonPlan(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId,
-			@PathVariable(value="lessonGooruId") String lessonGooruId, @RequestParam(value="assessmentIds") String assessmentIds,
+			@PathVariable(value="lessonGooruId") String lessonGooruId, @RequestParam(value="contentGooruIds") String contentGooruIds,
 			@RequestParam(value="userUid", required = true) String userUid, HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getLessonPlan(getTraceId(request), classGooruId, courseGooruId, unitGooruId, lessonGooruId, assessmentIds, userUid, request.isSecure()));
+		return getModel(getClassService().getLessonPlan(getTraceId(request), classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruIds, userUid, request.isSecure()));
 	}
 	
 	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/{collectionType}/{contentGooruId}/sessions",method ={ RequestMethod.GET,RequestMethod.POST})
@@ -125,12 +125,13 @@ public class ClassController extends BaseController{
 		return getModel(getClassService().getUserSessions(getTraceId(request), classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, collectionType, userUid, fetchOpenSession, request.isSecure()));
 	}
 	
-	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/assessment/{contentGooruId}",method ={ RequestMethod.GET,RequestMethod.POST})
+	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/{collectionType}/{contentGooruId}",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public ModelAndView getStudentAssessmentData(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId, 
 			@PathVariable(value="lessonGooruId") String lessonGooruId, @PathVariable(value="contentGooruId") String contentGooruId,
+			@PathVariable(value="collectionType") String collectionType,
 			@RequestParam(value="userUid", required = true) String userUid, 
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);

@@ -9,12 +9,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
-import org.gooru.insights.api.constants.ApiConstants.apiHeaders;
 import org.gooru.insights.api.constants.ErrorCodes;
 import org.gooru.insights.api.constants.ErrorMessages;
 import org.gooru.insights.api.models.InsightsConstant;
@@ -935,7 +933,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			usageAsMap.put(ApiConstants.VIEWS, views);
 			usageAsMap.put(ApiConstants.TIMESPENT, timeSpent);
 			usageAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, score);
-			usageAsMap.put(ApiConstants.COLLECTION_TYPE, collectionType);
+			usageAsMap.put(ApiConstants.TYPE, collectionType);
 			return usageAsMap;
 		}
 		return usageAsMap;
@@ -959,7 +957,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				usageAsMap.put(ApiConstants.VIEWS, views);
 				usageAsMap.put(ApiConstants.TIMESPENT, timeSpent);
 				usageAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, score);
-				usageAsMap.put(ApiConstants.COLLECTION_TYPE, collectionType);
+				usageAsMap.put(ApiConstants.TYPE, collectionType);
 				usageAsMap.put(ApiConstants.LAST_ACCESSED, lastAccessed);
 				usageAsMap.put(ApiConstants.EVIDENCE, evidence);
 				usageAsMapAsList.add(usageAsMap);
@@ -979,7 +977,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			String collectionType = itemMetricColumns.getStringValue(ApiConstants._COLLECTION_TYPE, null);
 			usageAsMap.put(ApiConstants.VIEWS, views);
 			usageAsMap.put(ApiConstants.TIMESPENT, timeSpent);
-			usageAsMap.put(ApiConstants.COLLECTION_TYPE, collectionType);
+			usageAsMap.put(ApiConstants.TYPE, collectionType);
 			return usageAsMap;
 		}
 		return usageAsMap;
@@ -999,7 +997,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					String[] columnMetaInfo = column.split(ApiConstants.TILDA);
 					String metricName = (columnMetaInfo.length > 1) ? columnMetaInfo[columnMetaInfo.length-1] : columnMetaInfo[0];
 					if(metricName.equalsIgnoreCase(ApiConstants._COLLECTION_TYPE)){
-						usageMap.put(ApiConstants.COLLECTION_TYPE, metricRow.getColumns().getStringValue(column, null));
+						usageMap.put(ApiConstants.TYPE, metricRow.getColumns().getStringValue(column, null));
 					}else if(metricName.equalsIgnoreCase(ApiConstants.VIEWS)){
 						usageMap.put(ApiConstants.VIEWS, metricRow.getColumns().getLongValue(column.trim(), 0L));
 					}else if(metricName.equalsIgnoreCase(ApiConstants._SCORE_IN_PERCENTAGE)){
@@ -1123,7 +1121,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					ColumnList<String> unitMetaDataColumns = unitMetaData.getResult();
 					unitDataAsMap.put(ApiConstants.GOORUOID, unitGooruOid);
 					unitDataAsMap.put(ApiConstants.TITLE, unitMetaDataColumns.getStringValue(ApiConstants.TITLE,null));
-					unitDataAsMap.put(ApiConstants.RESOURCE_TYPE, unitMetaDataColumns.getStringValue(ApiConstants.RESOURCE_TYPE, null));
+					unitDataAsMap.put(ApiConstants.TYPE, unitMetaDataColumns.getStringValue(ApiConstants.RESOURCE_TYPE, null));
 					unitDataAsMap.put(SEQUENCE, units.getLongValue(unitGooruOid, 0L));
 						List<Map<String, Object>> unitUsageDetails = new ArrayList<Map<String, Object>>();
 						for (Column<String> user : userGroup) {
