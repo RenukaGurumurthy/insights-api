@@ -528,7 +528,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return responseParamDTO;
 	}
 	
-	public ResponseParamDTO<Map<String,Object>> getCourseProgress(String traceId, String classId, String courseId,String collectionType, String userUid, boolean isSecure) throws Exception {
+	public ResponseParamDTO<Map<String,Object>> getCourseProgress(String traceId, String classId, String courseId, String userUid, boolean isSecure) throws Exception {
 		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = null;
 		if (StringUtils.isNotBlank(userUid)) {
@@ -639,7 +639,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				responseParamDTO.setContent(unitDataMapAsList);
 			}
 		}else{
-			responseParamDTO = getAllStudentProgressByUnit(traceId, classId, courseId, collectionType, isSecure);	
+			responseParamDTO = getAllStudentProgressByUnit(traceId, classId, courseId, isSecure);	
 		}
 		return responseParamDTO;
 	}
@@ -1093,7 +1093,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		}
 		return contentItems;
 	}
-	private ResponseParamDTO<Map<String,Object>> getAllStudentProgressByUnit(String traceId, String classId, String courseId, String collectionType,boolean isSecure) throws Exception {
+	private ResponseParamDTO<Map<String,Object>> getAllStudentProgressByUnit(String traceId, String classId, String courseId,boolean isSecure) throws Exception {
 		
 		List<Map<String, Object>> unitDetails = new ArrayList<Map<String, Object>>();
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
@@ -1101,7 +1101,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		OperationResult<ColumnList<String>> unitData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), courseId);
 		ColumnList<String> units = unitData.getResult();
 		
-		OperationResult<ColumnList<String>> userGroupAssociation = getCassandraService().read(traceId, ColumnFamily.CLASSPAGE.getColumnFamily(), classId);
+		OperationResult<ColumnList<String>> userGroupAssociation = getCassandraService().read(traceId, ColumnFamily.USER_GROUP_ASSOCIATION.getColumnFamily(), classId);
 		ColumnList<String> userGroup = userGroupAssociation.getResult();
 		
 		if(!units.isEmpty() && units.size() > 0) {
@@ -1112,15 +1112,14 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				 */
 				Collection<String> resourceColumns = new ArrayList<String>();
 				resourceColumns.add(ApiConstants.TITLE);
-				resourceColumns.add(ApiConstants.GOORUOID);
 				resourceColumns.add(ApiConstants.RESOURCETYPE);
 				OperationResult<ColumnList<String>> unitMetaData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), unitGooruOid, resourceColumns);
 				if (!unitMetaData.getResult().isEmpty() && unitMetaData.getResult().size() > 0) {
 					ColumnList<String> unitMetaDataColumns = unitMetaData.getResult();
-					unitDataAsMap.put(ApiConstants.TITLE, unitMetaDataColumns.getColumnByName(ApiConstants.TITLE).getStringValue());
-					unitDataAsMap.put(ApiConstants.RESOURCETYPE, unitMetaDataColumns.getColumnByName(ApiConstants.RESOURCETYPE).getStringValue());
+					unitDataAsMap.put(ApiConstants.GOORUOID, unitGooruOid);
+					unitDataAsMap.put(ApiConstants.TITLE, unitMetaDataColumns.getStringValue(ApiConstants.TITLE,null));
+					unitDataAsMap.put(ApiConstants.RESOURCETYPE, unitMetaDataColumns.getStringValue(ApiConstants.RESOURCETYPE, null));
 					unitDataAsMap.put(SEQUENCE, units.getLongValue(unitGooruOid, 0L));
-					if (unitMetaDataColumns.getColumnByName(ApiConstants.RESOURCETYPE).getStringValue().contains(collectionType)) {
 						List<Map<String, Object>> unitUsageDetails = new ArrayList<Map<String, Object>>();
 						for (Column<String> user : userGroup) {
 							/**
@@ -1130,24 +1129,19 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 							unitUsageData.put(ApiConstants.USERUID, user.getName());
 							unitUsageData.put(ApiConstants.USERNAME, user.getStringValue());
 
-							Long timeSpent = 0L;Long scoreInPercentage = 0L;Long views = 0L;
+							Long scoreInPercentage = 0L;
 							OperationResult<ColumnList<String>> unitActivityDetails = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
 									baseService.appendTilda(classId, courseId, unitGooruOid,user.getName()));
 							if(unitActivityDetails != null){
 								ColumnList<String> unitActivity = unitActivityDetails.getResult();
 								if(!unitActivity.isEmpty()){
-									timeSpent = unitActivity.getLongValue(ApiConstants.TIME_SPENT, 0L);
 									scoreInPercentage = unitActivity.getLongValue(ApiConstants.SCORE_IN_PERCENTAGE, 0L);
-									views = unitActivity.getLongValue(ApiConstants.VIEWS, 0L);
 								}
 							}
-							unitUsageData.put(ApiConstants.TIMESPENT, timeSpent);
 							unitUsageData.put(ApiConstants.SCOREINPERCENTAGE, scoreInPercentage);
-							unitUsageData.put(ApiConstants.VIEWS, views);
 							unitUsageDetails.add(unitUsageData);
 						}
 						unitDataAsMap.put(ApiConstants.USAGEDATA, unitUsageDetails);
-					}
 				}
 				unitDetails.add(unitDataAsMap);
 			}
