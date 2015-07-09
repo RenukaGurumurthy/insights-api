@@ -9,10 +9,12 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
+import org.gooru.insights.api.constants.ApiConstants.apiHeaders;
 import org.gooru.insights.api.constants.ErrorCodes;
 import org.gooru.insights.api.constants.ErrorMessages;
 import org.gooru.insights.api.models.InsightsConstant;
@@ -1150,6 +1152,30 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			}
 		}
 		responseParamDTO.setContent(unitDetails);
+		return responseParamDTO;
+	}
+
+	@Override
+	public ResponseParamDTO<Map<String, Object>> getSessionStatus(String traceId, String sessionId, String contentGooruId, String collectionType, boolean isSecure) throws Exception {
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		Map<String, Object> sessionDataMap = new HashMap<String, Object>();
+
+		OperationResult<ColumnList<String>> sessionDetails = getCassandraService().read(traceId, ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), sessionId);
+		if (sessionDetails != null) {
+			ColumnList<String> sessionList = sessionDetails.getResult();
+			String status = sessionList.getStringValue(baseService.appendTilda(contentGooruId,STATUS), null);
+			sessionDataMap.put(ApiConstants.SESSIONID, sessionId);
+			if (status != null) {
+				status = status.equalsIgnoreCase(ApiConstants.STOP) ? ApiConstants.COMPLETED : ApiConstants.INPROGRESS;
+			} else {
+				ValidationUtils.rejectInvalidRequest(ErrorCodes.E109, contentGooruId);
+			}
+			sessionDataMap.put(STATUS, status);
+			responseParamDTO.setMessage(sessionDataMap);
+			;
+		} else {
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E110, sessionId);
+		}
 		return responseParamDTO;
 	}
 }

@@ -181,7 +181,11 @@ public class ApiConstants {
 	public static final String COURSE = "course";
 	public static final String UNIT = "unit";
 	public static final String CLASS = "class";
-
+	public static final String INPROGRESS = "in-progress";
+	public static final String COMPLETED = "completed";
+	public static final String START = "start";
+	public static final String STOP = "stop";
+	
 	public static final String SESSIONID = "sessionId";
 	public static final String ITEM = "item";
 	public static final String COLLECTION = "collection";
