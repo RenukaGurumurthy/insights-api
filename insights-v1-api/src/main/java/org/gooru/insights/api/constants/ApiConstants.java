@@ -97,7 +97,9 @@ public class ApiConstants {
 	public static final String USERCOUNT = "userCount";
 	
 	public static final String GOORUOID = "gooruOId";
-
+	
+	public static final String _GOORUOID = "gooruOid";
+	
 	public static final String GOORU_UID = "gooru_uid";
 	
 	public static final String GOORUUID = "gooruUid";
