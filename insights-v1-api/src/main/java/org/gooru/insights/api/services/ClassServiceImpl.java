@@ -1163,7 +1163,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		Map<String, Object> sessionDataMap = new HashMap<String, Object>();
 
 		OperationResult<ColumnList<String>> sessionDetails = getCassandraService().read(traceId, ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), sessionId);
-		if (sessionDetails != null) {
+		if (sessionDetails != null && !sessionDetails.getResult().isEmpty()) {
 			ColumnList<String> sessionList = sessionDetails.getResult();
 			String status = sessionList.getStringValue(baseService.appendTilda(contentGooruId,STATUS), null);
 			sessionDataMap.put(ApiConstants.SESSIONID, sessionId);
