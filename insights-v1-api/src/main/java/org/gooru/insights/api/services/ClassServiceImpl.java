@@ -796,9 +796,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		if (StringUtils.isNotBlank(userUid)) {
 			classLessonKey = getBaseService().appendTilda(classLessonKey, userUid);
 		}
-		Long scoreInPercentage = null;
-		Long score = null;
-		String evidence = null;
+		Long scoreInPercentage = null; Long score = null; String evidence = null;
 		OperationResult<ColumnList<String>> itemsColumnList = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), classLessonKey);
 		if (!itemsColumnList.getResult().isEmpty() && itemsColumnList.getResult().size() > 0) {
 			ColumnList<String> lessonMetricColumns = itemsColumnList.getResult();
@@ -819,10 +817,14 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			itemDetailAsMap.putAll(rawDataMapAsList.get(0));
 		}
 		//Fetch assessment count
-		Long assessmentCount = null;
-		Map<String, Long> contentMetaAsMap = getContentMeta(traceId, assessmentId, ApiConstants.ASSESSMENT_COUNT);
+		Long questionCount = null; Long scorableQuestionCount = null; Long oeCount = null;
+		Map<String, Long> contentMetaAsMap = getContentMeta(traceId, assessmentId, ApiConstants.QUESTION_COUNT);
 		if(!contentMetaAsMap.isEmpty()) {
-			assessmentCount = contentMetaAsMap.get(ApiConstants.ASSESSMENT_COUNT);
+			questionCount = contentMetaAsMap.get(ApiConstants.QUESTION_COUNT);
+			oeCount = contentMetaAsMap.get(ApiConstants.OE_COUNT);
+			if(questionCount > 0) {
+				scorableQuestionCount = questionCount - oeCount;
+			}
 		}
 		
 		//Fetch username and profile url
@@ -834,6 +836,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		
 		//Get sessions 
 		ResponseParamDTO<Map<String, Object>> sessionResponse = getUserSessions(traceId, classId, courseId, unitId, lessonId, assessmentId, ApiConstants.ASSESSMENT, userUid, false, isSecure);
+		
 		itemDetailAsMap.put(ApiConstants.GOORUOID, assessmentId);
 		itemDetailAsMap.put(ApiConstants.USERNAME, username);
 		itemDetailAsMap.put(ApiConstants.PROFILEURL, filePath.getProperty(ApiConstants.USER_PROFILE_URL_PATH).replaceAll(ApiConstants.ID, userUid));
@@ -841,7 +844,9 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		itemDetailAsMap.put(ApiConstants.SCOREINPERCENTAGE, scoreInPercentage);
 		itemDetailAsMap.put(ApiConstants.EVIDENCE, evidence);
 		itemDetailAsMap.put(ApiConstants.SCORE, score);
-		itemDetailAsMap.put(ApiConstants.ASSESSMENT_COUNT, assessmentCount);
+		itemDetailAsMap.put(ApiConstants.QUESTION_COUNT, questionCount);
+		itemDetailAsMap.put(ApiConstants.OE_COUNT, oeCount);
+		itemDetailAsMap.put(ApiConstants.SCORABLE_QUESTION_COUNT, scorableQuestionCount);
 		itemDetailAsMap.put(ApiConstants.SESSION, sessionResponse.getContent());
 		itemDataMapAsList.add(itemDetailAsMap);
 		responseParamDTO.setContent(itemDataMapAsList);

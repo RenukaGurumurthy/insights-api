@@ -192,6 +192,10 @@ public class ApiConstants {
 	public static final String COURSE_COUNT = "courseCount";
 	public static final String COLLECTION_COUNT = "collectionCount";
 	public static final String ASSESSMENT_COUNT = "assessmentCount";
+	public static final String RESOURCE_COUNT = "resourceCount";
+	public static final String QUESTION_COUNT = "questionCount";
+	public static final String OE_COUNT = "oeCount";
+	public static final String SCORABLE_QUESTION_COUNT = "scorableQuestionCount";
 
 	public static final String EXTERNAL_ASSESSMENT_COUNT = "externalAssessmentCount";
 	public static final String ITEM_COUNT = "itemCount";
