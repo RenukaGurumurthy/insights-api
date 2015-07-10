@@ -1081,8 +1081,12 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				if(dataMap.isEmpty()){
 					continue;
 				}
-			}                        
-			dataMap.put(ApiConstants.SEQUENCE, column.getIntegerValue());
+			}                 
+			try {
+				dataMap.put(ApiConstants.SEQUENCE, column.getIntegerValue());
+			}catch(Exception e) {
+				dataMap.put(ApiConstants.SEQUENCE, column.getLongValue());
+			}
 			dataMap.put(ApiConstants.GOORUOID, column.getName());
 			contentItems.add(dataMap);
 		}
