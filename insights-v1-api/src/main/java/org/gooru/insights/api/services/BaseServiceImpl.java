@@ -569,6 +569,62 @@ public class BaseServiceImpl implements BaseService {
 		return resultList;
 	}
 
+	public List<Map<String, Object>> includeDefaultData(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey, String childKey){
+		
+		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
+		if(parent == null){
+			return child;
+		}else if(child == null){
+			return parent;
+		}
+		for (Map<String, Object> childEntry : child) {
+			Set<Object> childIds = new HashSet<Object>();
+			Set<Object> parentIds = new HashSet<Object>();
+			Map<String,Object> checkerMap = new HashMap<String,Object>();
+			if(childEntry.containsKey(childKey)){
+					for (Map<String, Object> parentEntry : parent) {
+						Map<String, Object> appended = new HashMap<String, Object>();
+						if(parentIds.contains(parentEntry.get(parentKey))){
+							continue;
+						}
+					if(parentEntry.get(childKey) != null && childEntry.get(childKey) != null){
+						if(parentEntry.get(childKey).toString().equalsIgnoreCase(childEntry.get(childKey).toString())){
+							appended.putAll(parentEntry);
+							appended.putAll(childEntry);
+							parentIds.add(parentEntry.get(parentKey));
+							resultList.add(appended);
+						}else{
+							List<Map<String,Object>> checkerList = new ArrayList<Map<String,Object>>();
+							Map<String,Object> tempMap = new HashMap<String,Object>();
+							tempMap.put(parentKey, parentEntry.get(parentKey));
+							tempMap.putAll(childEntry);
+							checkerList.add(tempMap);
+							checkerMap.put(parentEntry.get(parentKey).toString(), checkerList);
+						}
+					}else{
+						if(childIds.contains(childEntry.get(childKey)) && childIds.contains(parentEntry.get(parentKey))){
+							continue;
+						}
+						Map<String,Object> temp = new HashMap<String,Object>();
+						childIds.add(childEntry.get(childKey));
+						childIds.add(parentEntry.get(parentKey));
+						temp.putAll(childEntry);
+						temp.putAll(parentEntry);
+						resultList.add(temp);
+					}
+				}
+			}
+			if(!checkerMap.isEmpty()){
+				for(String key : checkerMap.keySet()){
+					if(!parentIds.contains(key)){
+						resultList.addAll((Collection<? extends Map<String, Object>>) checkerMap.get(key));
+					}
+				}
+			}
+		}
+		return resultList;
+	}
+
 	public List<Map<String, Object>> removeUnknownKeyList(List<Map<String, Object>> requestData, String key, String exceptionalkey, Object value, boolean status) {
 		List<Map<String, Object>> responseData = new ArrayList<Map<String, Object>>();
 		for (Map<String, Object> map : requestData) {
@@ -1665,10 +1721,10 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 			return message;
 		}
 
-		public List<Map<String,Object>> convertMapToList(Map<String,Map<String,Object>> requestMap,String key){
+		public List<Map<String,Object>> convertMapToList(Map<String,?> requestMap,String key){
 			List<Map<String,Object>> dataList = new ArrayList<Map<String,Object>>();
 			for(String mapKey : requestMap.keySet()){
-				Map<String,Object> dataMap = requestMap.get(mapKey);
+				Map<String,Object> dataMap = (Map<String, Object>) requestMap.get(mapKey);
 				if(!dataMap.isEmpty()){
 					dataMap.put(key, mapKey);
 					dataList.add(dataMap);

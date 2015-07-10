@@ -131,7 +131,9 @@ public interface BaseService {
 	
 	String errorHandler(String message, String... replace);
 	
-	List<Map<String,Object>> convertMapToList(Map<String,Map<String,Object>> requestMap,String key);
+	List<Map<String,Object>> convertMapToList(Map<String,?> requestMap,String key);
 	
 	List<Map<String,Object>> groupDataDependOnkey(List<Map<String,Object>> requestData,String fetchKey,String objectKey);
+	
+	List<Map<String, Object>> includeDefaultData(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey, String childKey);
 }
