@@ -40,9 +40,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	@Autowired
 	private CassandraService cassandraService;
 	
-	@Autowired
-	private SelectParamsService selectParamsService;
-	
 	@Resource
 	private Properties filePath;
 
@@ -52,10 +49,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 
 	private CassandraService getCassandraService() {
 		return cassandraService;
-	}
-	
-	private SelectParamsService getSelectParamsService() {
-		return selectParamsService;
 	}
 	
 	public ResponseParamDTO<Map<String,Object>> getCourseUsage(String traceId, String classId, String courseId, String userUid, Boolean getUsageData, boolean isSecure) throws Exception {		
@@ -372,12 +365,17 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			resourceColumns.add(ApiConstants.TITLE);
 			resourceColumns.add(ApiConstants.GOORUOID);
 			resourceColumns.add(ApiConstants.THUMBNAIL);
+			unitDataAsMap.put(ApiConstants.GOORUOID, unitGooruOid);
+			unitDataAsMap.put(ApiConstants.TYPE, ApiConstants.UNIT);
+			try{
+				unitDataAsMap.put(ApiConstants.SEQUENCE, unit.getLongValue());
+			} catch(Exception e) {
+				unitDataAsMap.put(ApiConstants.SEQUENCE, unit.getIntegerValue());
+			}
 			OperationResult<ColumnList<String>>  unitMetaData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), unitGooruOid, resourceColumns);
 			if(!unitMetaData.getResult().isEmpty() && unitMetaData.getResult().size() > 0) {
 				ColumnList<String> unitMetaDataColumns = unitMetaData.getResult();
 				unitDataAsMap.put(ApiConstants.TITLE, unitMetaDataColumns.getColumnByName(ApiConstants.TITLE).getStringValue());
-				unitDataAsMap.put(ApiConstants.GOORUOID, unitGooruOid);
-				unitDataAsMap.put(ApiConstants.TYPE, ApiConstants.UNIT);
 
 				long scoreMet = 0;
 				long scoreNotMet = 0;
@@ -395,6 +393,11 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					OperationResult<ColumnList<String>>  lessonMetaData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), lessonGooruOid, resourceColumns);
 					lessonDataAsMap.put(ApiConstants.GOORUOID, lessonGooruOid);
                     lessonDataAsMap.put(ApiConstants.TYPE, ApiConstants.LESSON);
+                    try{
+        				lessonDataAsMap.put(ApiConstants.SEQUENCE, lesson.getLongValue());
+        			} catch(Exception e) {
+        				lessonDataAsMap.put(ApiConstants.SEQUENCE, lesson.getIntegerValue());
+        			}
 					if(!lessonMetaData.getResult().isEmpty() && lessonMetaData.getResult().size() > 0) {
 						ColumnList<String> lessonMetaDataColumns = lessonMetaData.getResult();
 						lessonDataAsMap.put(ApiConstants.TITLE, lessonMetaDataColumns.getColumnByName(ApiConstants.TITLE).toString());
@@ -474,12 +477,17 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			if (StringUtils.isNotBlank(userUid)) {
 				classLessonKey = getBaseService().appendTilda(classLessonKey, userUid);
 			}
+			lessonDataAsMap.put(ApiConstants.GOORUOID, lessonGooruOid);
+			lessonDataAsMap.put(ApiConstants.TYPE, ApiConstants.LESSON);
+			try{
+				lessonDataAsMap.put(ApiConstants.SEQUENCE, lesson.getLongValue());
+			} catch(Exception e) {
+				lessonDataAsMap.put(ApiConstants.SEQUENCE, lesson.getIntegerValue());
+			}
 			OperationResult<ColumnList<String>> lessonMetaData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), lessonGooruOid, resourceColumns);
 			if (!lessonMetaData.getResult().isEmpty() && lessonMetaData.getResult().size() > 0) {
 				ColumnList<String> lessonMetaDataColumns = lessonMetaData.getResult();
 				lessonDataAsMap.put(ApiConstants.TITLE, lessonMetaDataColumns.getColumnByName(ApiConstants.TITLE).getStringValue());
-				lessonDataAsMap.put(ApiConstants.GOORUOID, lessonGooruOid);
-				lessonDataAsMap.put(ApiConstants.TYPE, ApiConstants.LESSON);
 
 				OperationResult<ColumnList<String>> itemData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), lessonGooruOid);
 				ColumnList<String> items = itemData.getResult();
@@ -548,9 +556,9 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			OperationResult<ColumnList<String>> unitData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), courseId);
 			ColumnList<String> units = unitData.getResult();
 			if (!units.isEmpty() && units.size() > 0) {
-				for (String unitGooruOid : units.getColumnNames()) {
+				for (Column<String> unit : units) {
 					Map<String, Object> unitDataAsMap = new HashMap<String, Object>();
-
+					String unitGooruOid = unit.getName();
 					// Form unit class key
 					String classUnitKey = getBaseService().appendTilda(classId, courseId, unitGooruOid);
 					if (StringUtils.isNotBlank(userUid)) {
@@ -564,6 +572,11 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					}
 					unitDataAsMap.put(ApiConstants.GOORUOID, unitGooruOid);
 					unitDataAsMap.put(ApiConstants.TYPE, ApiConstants.UNIT);
+					try{
+						unitDataAsMap.put(ApiConstants.SEQUENCE, unit.getLongValue());
+					}catch (Exception e) {
+						unitDataAsMap.put(ApiConstants.SEQUENCE, unit.getIntegerValue());
+					}
 					long unitAssessmentCount = 0L;
 					long unitCollectionCount = 0L;
 					long unitAssessmentUrlCount = 0L;
@@ -716,6 +729,11 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			long attempted = 0;
 			
 			String lessonGooruOid = lesson.getName();
+			try{
+				lessonDataAsMap.put(ApiConstants.SEQUENCE, lesson.getLongValue());
+			}catch (Exception e) {
+				lessonDataAsMap.put(ApiConstants.SEQUENCE, lesson.getIntegerValue());
+			}
 			String classLessonKey = getBaseService().appendTilda(classId, courseId, unitId, lessonGooruOid);
 			if (StringUtils.isNotBlank(userUid)) {
 				classLessonKey = getBaseService().appendTilda(classLessonKey, userUid);
@@ -786,7 +804,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	}
 	
 	public ResponseParamDTO<Map<String, Object>> getStudentAssessmentData(String traceId, String classId, String courseId, String unitId, String lessonId, String assessmentId, String userUid,
-			boolean isSecure) throws Exception {
+			String collectionType, boolean isSecure) throws Exception {
 		// Fetch goal for the class
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> itemDataMapAsList = new ArrayList<Map<String, Object>>();
@@ -802,13 +820,14 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		if (StringUtils.isNotBlank(userUid)) {
 			classLessonKey = getBaseService().appendTilda(classLessonKey, userUid);
 		}
-		Long scoreInPercentage = null; Long score = null; String evidence = null;
+		Long scoreInPercentage = null; Long score = null; String evidence = null; Long timespent = 0L;
 		OperationResult<ColumnList<String>> itemsColumnList = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), classLessonKey);
 		if (!itemsColumnList.getResult().isEmpty() && itemsColumnList.getResult().size() > 0) {
 			ColumnList<String> lessonMetricColumns = itemsColumnList.getResult();
-			score = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants.SCORE), null);
-			scoreInPercentage = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants._SCORE_IN_PERCENTAGE), null);
+			score = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants.SCORE), 0L);
+			scoreInPercentage = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants._SCORE_IN_PERCENTAGE), 0L);
 			evidence = lessonMetricColumns.getStringValue(getBaseService().appendTilda(assessmentId, ApiConstants.EVIDENCE), null);
+			timespent = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants.TIMESPENT), 0L);
 		}
 		
 		//Fetch assessment metadata
@@ -822,16 +841,22 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		if (!rawDataMapAsList.isEmpty() && rawDataMapAsList.size() > 0) {
 			itemDetailAsMap.putAll(rawDataMapAsList.get(0));
 		}
-		//Fetch assessment count
-		Long questionCount = null; Long scorableQuestionCount = null; Long oeCount = null;
-		Map<String, Long> contentMetaAsMap = getContentMeta(traceId, assessmentId, getBaseService().appendComma(ApiConstants.QUESTION_COUNT, ApiConstants._OE_COUNT));
-		if(!contentMetaAsMap.isEmpty()) {
-			questionCount = contentMetaAsMap.get(ApiConstants.QUESTION_COUNT);
-			oeCount = contentMetaAsMap.get(ApiConstants._OE_COUNT);
-			if(questionCount > 0) {
-				scorableQuestionCount = questionCount - oeCount;
+			// Fetch assessment count
+			Long questionCount = null;
+			Long scorableQuestionCount = null;
+			Long oeCount = null;
+			Map<String, Long> contentMetaAsMap = getContentMeta(traceId, assessmentId, getBaseService().appendComma(ApiConstants.QUESTION_COUNT, ApiConstants._OE_COUNT));
+			if (!contentMetaAsMap.isEmpty()) {
+				questionCount = contentMetaAsMap.containsKey(ApiConstants.QUESTION_COUNT) ? contentMetaAsMap.get(ApiConstants.QUESTION_COUNT) : 0L;
+				oeCount = contentMetaAsMap.containsKey(ApiConstants.OE_COUNT) ? contentMetaAsMap.get(ApiConstants._OE_COUNT) : 0L;
+				if (questionCount > 0) {
+					scorableQuestionCount = questionCount - oeCount;
+				}
 			}
-		}
+			itemDetailAsMap.put(ApiConstants.QUESTION_COUNT, questionCount);
+			itemDetailAsMap.put(ApiConstants.OE_COUNT, oeCount);
+			itemDetailAsMap.put(ApiConstants.SCORABLE_QUESTION_COUNT, scorableQuestionCount);
+		
 		
 		//Fetch username and profile url
 		String username = null;
@@ -850,9 +875,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		itemDetailAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, scoreInPercentage);
 		itemDetailAsMap.put(ApiConstants.EVIDENCE, evidence);
 		itemDetailAsMap.put(ApiConstants.SCORE, score);
-		itemDetailAsMap.put(ApiConstants.QUESTION_COUNT, questionCount);
-		itemDetailAsMap.put(ApiConstants.OE_COUNT, oeCount);
-		itemDetailAsMap.put(ApiConstants.SCORABLE_QUESTION_COUNT, scorableQuestionCount);
+		itemDetailAsMap.put(ApiConstants.TIMESPENT, timespent);
 		itemDetailAsMap.put(ApiConstants.SESSION, sessionResponse.getContent());
 		itemDataMapAsList.add(itemDetailAsMap);
 		responseParamDTO.setContent(itemDataMapAsList);
