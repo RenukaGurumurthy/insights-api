@@ -1323,7 +1323,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						usageMap.put("answerObject", metricRow.getColumns().getStringValue(column.trim(), null));
 					} else {
 						try {
-							usageMap.put(metricName, metricRow.getColumns().getLongValue(column, 0L));
+							usageMap.put(metricName, metricRow.getColumns().getLongValue(column, null));
 						} catch (Exception e) {
 							InsightsLogger.error(traceId, getBaseService().errorHandler(ErrorMessages.UNHANDLED_EXCEPTION, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), column), e);
 						}
