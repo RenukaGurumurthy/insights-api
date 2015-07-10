@@ -1225,7 +1225,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 													getCassandraService().readAll(traceId, ColumnFamily.ASSESSMENT_ANSWER.getColumnFamily(), ApiConstants.COLLECTIONGOORUOID, assessmentId,
 															new ArrayList<String>())), ApiConstants.QUESTION_GOORU_OID);
 
-									itemDataMapAsList = getBaseService().JoinWithSingleKey(rawDataMapAsList, usageDataList, ApiConstants.GOORUOID);
+									itemDataMapAsList = getBaseService().LeftJoin(rawDataMapAsList, usageDataList, ApiConstants.GOORUOID, ApiConstants.GOORUOID);
 									itemDataMapAsList = getBaseService().LeftJoin(itemDataMapAsList, answerRawData, ApiConstants.GOORUOID, ApiConstants.QUESTION_GOORU_OID);
 									
 									/**

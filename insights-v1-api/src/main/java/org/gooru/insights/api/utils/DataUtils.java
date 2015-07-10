@@ -47,39 +47,6 @@ public class DataUtils {
 		sessionActivityMetrics.put("D", "options");
 		sessionActivityMetrics.put("E", "options");
 		sessionActivityMetrics.put("F", "options");
-		sessionActivityMetrics.put("G", "options");
-		sessionActivityMetrics.put("H", "options");
-	}
-	
-	private static Map<String,String> sessionActivityMetricsDataType;
-
-	static {
-		sessionActivityMetricsDataType = new HashMap<String, String>();
-		sessionActivityMetricsDataType.put(ApiConstants._COLLECTION_TYPE, "String");
-		sessionActivityMetricsDataType.put(ApiConstants.VIEWS, ApiConstants.VIEWS);
-		sessionActivityMetricsDataType.put(ApiConstants._SCORE_IN_PERCENTAGE, ApiConstants.SCORE_IN_PERCENTAGE);
-		sessionActivityMetricsDataType.put(ApiConstants._TIME_SPENT, ApiConstants.TIMESPENT);
-		sessionActivityMetricsDataType.put(ApiConstants.RA, ApiConstants.REACTION);
-		sessionActivityMetricsDataType.put(ApiConstants.CHOICE, ApiConstants.TEXT);
-		sessionActivityMetricsDataType.put(ApiConstants.TYPE, ApiConstants.QUESTION_TYPE);
-		sessionActivityMetricsDataType.put(ApiConstants._FEEDBACK_PROVIDER, ApiConstants.FEEDBACKPROVIDER);
-		sessionActivityMetricsDataType.put(ApiConstants._QUESTION_STATUS, ApiConstants.STATUS);
-		sessionActivityMetricsDataType.put(ApiConstants.SCORE, ApiConstants.SCORE);
-		sessionActivityMetricsDataType.put(ApiConstants.TAU, ApiConstants.TOTAL_ATTEMPT_USER_COUNT);
-		sessionActivityMetricsDataType.put(ApiConstants.SKIPPED, ApiConstants.SKIPPED);
-		sessionActivityMetricsDataType.put("attempts", "attempts");
-		sessionActivityMetricsDataType.put("correct", "totalCorrectCount");
-		sessionActivityMetricsDataType.put("in_correct", "totalInCorrectCount");
-		sessionActivityMetricsDataType.put("answer_object", "answerObject");
-		sessionActivityMetricsDataType.put("options", "options");
-		sessionActivityMetricsDataType.put("~A", "options");
-		sessionActivityMetricsDataType.put("~B", "options");
-		sessionActivityMetricsDataType.put("~C", "options");
-		sessionActivityMetricsDataType.put("~D", "options");
-		sessionActivityMetricsDataType.put("~E", "options");
-		sessionActivityMetricsDataType.put("~F", "options");
-		sessionActivityMetricsDataType.put("~G", "options");
-		sessionActivityMetricsDataType.put("~H", "options");
 	}
 	
 	public static String getAssessmentAnswerSelect(String key) {
