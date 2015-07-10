@@ -351,16 +351,6 @@
                                 <artifactId>jackson-core-asl</artifactId>
                                 <version>1.9.13</version>
                         </dependency>
-<dependency>
-<groupId>io.reactivex</groupId>
-<artifactId>rxjava</artifactId>
-<version>1.0.12</version>
-</dependency>
-<dependency>
-    <groupId>com.github.davidmoten</groupId>
-    <artifactId>rxjava-jdbc</artifactId>
-    <version>0.6.1</version>
-</dependency>
 	</dependencies>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
