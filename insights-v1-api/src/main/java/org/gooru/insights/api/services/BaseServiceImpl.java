@@ -25,6 +25,7 @@ import org.gooru.insights.api.constants.ErrorMessages;
 import org.gooru.insights.api.models.RequestParamsDTO;
 import org.gooru.insights.api.spring.exception.BadRequestException;
 import org.gooru.insights.api.spring.exception.InsightsServerException;
+import org.gooru.insights.api.utils.DataUtils;
 import org.gooru.insights.api.utils.InsightsLogger;
 import org.gooru.insights.api.utils.JsonDeserializer;
 import org.json.JSONArray;
@@ -393,7 +394,7 @@ public class BaseServiceImpl implements BaseService {
 							}
 						} else if(column.getName().endsWith("statistics.hasFrameBreakerN")){
 							dataSet.put(column.getName(), column.getIntegerValue());
-						} else if(column.getName().endsWith("lastModified") || column.getName().endsWith("createdOn") || column.getName().endsWith("association_date") || column.getName().endsWith("lastAccessed")){
+						} else if(column.getName().endsWith("lastModified") || column.getName().endsWith("createdOn") || column.getName().endsWith("association_date") || column.getName().endsWith("lastAccessed") || column.getName().endsWith("endTime")){
 							dataSet.put(column.getName(), column.getDateValue().getTime());
 						} else if(column.getName().endsWith("isDeleted") || column.getName().endsWith("isDeleted")){
 							try {
@@ -884,7 +885,9 @@ public class BaseServiceImpl implements BaseService {
 					}
 					firstEntry = true;
 				}
-				resultMap.put(value.getKey(), value.getValue());
+				if(!value.getKey().equalsIgnoreCase("key")) {
+					resultMap.put(value.getKey(), value.getValue());
+				}
 			}
 			resultSet.add(resultMap);
 		}
@@ -1710,5 +1713,64 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 				}
 			}
 			return convertMapToList(customizedMap,fetchKey,objectKey);
+		}
+		
+		public List<Map<String, Object>> getQuestionAnswerData(List<Map<String, Object>> requestData, String coreKey) {
+			boolean firstEntry = false;
+			List<Map<String, Object>> resultSet = new ArrayList<Map<String, Object>>();
+			List<Map<String, Object>> finalSet = new ArrayList<Map<String, Object>>();
+			Collections.sort(requestData, new Comparator<Map<String, Object>>() {
+				public int compare(final Map<String, Object> m1, final Map<String, Object> m2) {
+					return String.valueOf(m1.get("question_gooru_oid")).compareTo(String.valueOf(m2.get("question_gooru_oid")));
+				}
+			});
+			String gooruOId = "";
+			for (Map<String, Object> map : requestData) {
+				Map<String, Object> resultMap = new HashMap<String, Object>();
+				Map<String, Object> resultMaps = new TreeMap<String, Object>(map);
+				for (Map.Entry<String, Object> value : resultMaps.entrySet()) {
+					if (value.getKey().equalsIgnoreCase(coreKey)) {
+						if (firstEntry) {
+							if (gooruOId.equalsIgnoreCase(String.valueOf(value.getValue()))) {
+							} else {
+								Map<String, Object> intermediateMap = new HashMap<String, Object>();
+								intermediateMap.put(coreKey, gooruOId);
+								Collections.sort(resultSet, new Comparator<Map<String, Object>>() {
+									public int compare(final Map<String, Object> m1, final Map<String, Object> m2) {
+										return String.valueOf(m1.get("sequence")).compareTo(String.valueOf(m2.get("sequence")));
+									}
+								});
+								intermediateMap.put("metaData", resultSet);
+
+								finalSet.add(intermediateMap);
+								resultSet = new ArrayList<Map<String, Object>>();
+								gooruOId = String.valueOf(value.getValue());
+
+							}
+						} else {
+							gooruOId = String.valueOf(value.getValue());
+						}
+						firstEntry = true;
+					}
+					if (!value.getKey().equalsIgnoreCase("key")) {
+						String selectValue = DataUtils.getAssessmentAnswerSelect(value.getKey());
+						if (selectValue != null) {
+							resultMap.put(selectValue, value.getValue());
+						}
+					}
+				}
+				resultSet.add(resultMap);
+			}
+			Map<String, Object> intermediateMap = new HashMap<String, Object>();
+			intermediateMap.put(coreKey, gooruOId);
+			intermediateMap.put("metaData", resultSet);
+			Collections.sort(resultSet, new Comparator<Map<String, Object>>() {
+				public int compare(final Map<String, Object> m1, final Map<String, Object> m2) {
+					return String.valueOf(m1.get("sequence")).compareTo(String.valueOf(m2.get("sequence")));
+				}
+			});
+
+			finalSet.add(intermediateMap);
+			return finalSet;
 		}
 }

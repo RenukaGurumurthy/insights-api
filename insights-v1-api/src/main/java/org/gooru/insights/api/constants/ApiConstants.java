@@ -106,7 +106,7 @@ public class ApiConstants {
 	
 	public static final String ORDER = "order";
 	
-	public static final String USERNAME = "userName";
+	public static final String USER_NAME = "userName";
 	
 	public static final String LAST_ACCESSED = "lastAccessed";
 	
@@ -150,11 +150,13 @@ public class ApiConstants {
 	
 	public static final String COLLECTIONITEMID = "collection_item_id";
 	
-	public static final String FEEDBACK_PROVIDER = "feedbackProviderUId";
+	public static final String FEEDBACKPROVIDER = "feedbackProviderUId";
+	
+	public static final String _FEEDBACK_PROVIDER = "feed_back_provider";
 	
 	public static final String FEEDBACK_TEACHER_NAME = "feedbackTeacherName";
 	
-	public static final String USER_NAME = "username";
+	public static final String USERNAME = "username";
 	
 	public static final String CATEGORY = "category";
 	
@@ -224,6 +226,7 @@ public class ApiConstants {
 	public static final String TITLE = "title";
 	public static final String TYPE = "type";
 	public static final String RESOURCE_TYPE = "resourceType";
+	public static final String RESOURCE_FORMAT = "resourceFormat";
 	public static final String VIEWS = "views";
 	public static final String TIMESPENT = "timespent";
 	public static final String _TIME_SPENT = "time_spent";
@@ -243,7 +246,19 @@ public class ApiConstants {
 	public static final String ASSESSMENT_USAGE_DATA = "assessmentUsageData";
 	public static final String OPEN_BRACE = "{";
 	public static final String CLOSE_BRACE = "}";
-
+	
+	public static final String HAS_FRAME_BREAKER = "hasFrameBreaker";
+	public static final String _ANSWER_OBJECT = "answer_abject";
+	public static final String REACTION = "reaction";
+	public static final String CHOICE = "choice";
+	public static final String SKIPPED = "skipped";
+	public static final String TEXT = "text";
+	public static final String RA = "RA";
+	public static final String _QUESTION_STATUS = "question_status";
+	public static final String STATUS = "status";
+	public static final String TAU = "tau";
+	public static final String TOTAL_ATTEMPT_USER_COUNT = "totalAttemptUserCount";
+	public static final String OPTIONS_MATCH = "A|B|C|D|E|F";
 	
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
