@@ -224,7 +224,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			 * get teacher response
 			 */
 			StringBuffer teacherUId = new StringBuffer();
-			teacherUId = getBaseService().exportData(resultSet, ApiConstants.FEEDBACK_PROVIDER);
+			teacherUId = getBaseService().exportData(resultSet, ApiConstants.FEEDBACKPROVIDER);
 			if (!teacherUId.toString().isEmpty()) {
 				String teacherUid = "";
 				String[] teacherid = teacherUId.toString().split(",");
@@ -234,11 +234,11 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 						break;
 					}
 				}
-				selectValues.put(ApiConstants.FEEDBACK_TEACHER_NAME, ApiConstants.USER_NAME);
-				selectValues.put(ApiConstants.FEEDBACK_PROVIDER, ApiConstants.GOORUUID);
+				selectValues.put(ApiConstants.FEEDBACK_TEACHER_NAME, ApiConstants.USERNAME);
+				selectValues.put(ApiConstants.FEEDBACKPROVIDER, ApiConstants.GOORUUID);
 				List<Map<String, Object>> teacherData = getBaseService().getColumnValues(traceId, getCassandraService().getClassPageUsage(traceId, "user", "", teacherUid, "", new ArrayList<String>()));
 				teacherData = getBaseService().properName(teacherData, selectValues);
-				resultSet = getBaseService().LeftJoin(resultSet, teacherData, ApiConstants.FEEDBACK_PROVIDER, ApiConstants.FEEDBACK_PROVIDER);
+				resultSet = getBaseService().LeftJoin(resultSet, teacherData, ApiConstants.FEEDBACKPROVIDER, ApiConstants.FEEDBACKPROVIDER);
 			}
 
 			/**
@@ -353,7 +353,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			aggregateData = getBaseService().LeftJoin(classData, aggregateData, ApiConstants.GOORUUID, ApiConstants.GOORUUID);
 			aggregateData = getBaseService().LeftJoin(userData, aggregateData, ApiConstants.GOORUUID, ApiConstants.GOORUUID);
 		}
-		aggregateData = getBaseService().sortBy(aggregateData, ApiConstants.USERNAME, ApiConstants.ASC);
+		aggregateData = getBaseService().sortBy(aggregateData, ApiConstants.USER_NAME, ApiConstants.ASC);
 		responseParamDTO.setContent(aggregateData);
 		return responseParamDTO;
 	}

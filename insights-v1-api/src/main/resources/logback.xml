@@ -35,10 +35,10 @@
 		LEVEL -->
 	<appender name="activity-out"
 		class="ch.qos.logback.core.rolling.RollingFileAppender"> <!-- Rolling file appender for rolling files -->
-		<param name="File" value="${CATALINA_HOME}/insights_logs/insights-api-v1.log" />
+		<param name="File" value="/usr/local/tomcat/insights_logs/insights-api-v1.log" />
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- daily rollover -->
-			<fileNamePattern>${CATALINA_HOME}/insights_logs/insights-api-v1-%d{yyyy-MM-dd}.log
+			<fileNamePattern>/usr/local/tomcat/insights_logs/insights-api-v1-%d{yyyy-MM-dd}.log
 			</fileNamePattern>
 
 			<!-- keep 30 days' worth of history -->
@@ -60,10 +60,10 @@
 	<appender name="error-out"
 		class="ch.qos.logback.core.rolling.RollingFileAppender"> <!-- Rolling file appender for rolling files -->
 		<param name="File"
-			value="${CATALINA_HOME}/insights_logs/insights-api-v1-error.log" />
+			value="/usr/local/tomcat/insights_logs/insights-api-v1-error.log" />
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
 			<!-- daily rollover -->
-			<fileNamePattern>${CATALINA_HOME}/insights_logs/insights-api-v1-error-%d{yyyy-MM-dd}.log
+			<fileNamePattern>/usr/local/tomcat/insights_logs/insights-api-v1-error-%d{yyyy-MM-dd}.log
 			</fileNamePattern>
 			<!-- keep 30 days' worth of history -->
 			<maxHistory>30</maxHistory>
