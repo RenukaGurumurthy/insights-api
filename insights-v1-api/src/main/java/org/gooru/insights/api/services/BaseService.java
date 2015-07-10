@@ -136,4 +136,6 @@ public interface BaseService {
 	List<Map<String,Object>> groupDataDependOnkey(List<Map<String,Object>> requestData,String fetchKey,String objectKey);
 	
 	List<Map<String, Object>> includeDefaultData(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey, String childKey);
+
+	List<Map<String,Object>> getQuestionAnswerData(List<Map<String,Object>> requestData,String coreKey);
 }

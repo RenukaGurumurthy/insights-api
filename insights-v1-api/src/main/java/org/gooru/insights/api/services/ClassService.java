@@ -26,6 +26,8 @@ public interface ClassService {
 			boolean openSession,boolean isSecure) throws Exception;
 	
 	ResponseParamDTO<Map<String,Object>> getStudentAssessmentData(String traceId, String classId, String courseId, String unitId, String lessonId, String assessmentId, String userUid, boolean isSecure) throws Exception;
+	
+	ResponseParamDTO<Map<String,Object>> getStudentAssessmentSummary(String traceId, String classId, String courseId, String unitId, String lessonId, String assessmentId, String userUid, String sessionId, boolean isSecure) throws Exception;
 
 	ResponseParamDTO<Map<String, Object>> getSessionStatus(String traceId, String sessionId, String contentGooruId, String collectionType, boolean isSecure) throws Exception;
 
