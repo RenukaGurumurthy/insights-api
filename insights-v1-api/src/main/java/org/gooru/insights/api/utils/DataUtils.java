@@ -15,9 +15,11 @@ public class DataUtils {
 		assessmentAnswerSelect.put("is_correct", "isCorrect");
 		assessmentAnswerSelect.put("question_gooru_oid", "gooruOId");
 		assessmentAnswerSelect.put("sequence", "sequence");
-		assessmentAnswerSelect.put("answer_text", "text");
+		assessmentAnswerSelect.put("answer_text", "answerText");
 		assessmentAnswerSelect.put("question_type", "questionType");
 		assessmentAnswerSelect.put("type_name", "type");
+		assessmentAnswerSelect.put("answer_id", "answerId");
+		assessmentAnswerSelect.put("question_id", "questionId");
 	}
 	
 	private static Map<String,String> sessionActivityMetrics;
