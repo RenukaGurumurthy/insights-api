@@ -174,7 +174,7 @@ public class ClassController extends BaseController{
 	@ResponseBody
 	public ModelAndView findIfUsage(HttpServletRequest request, @RequestParam(value="classGooruId", required = false) String classGooruId,
 			@RequestParam(value="courseGooruId", required = false) String courseGooruId, @RequestParam(value="unitGooruId", required = false) String unitGooruId, 
-			@RequestParam(value="lessonGooruId", required = false) String lessonGooruId, @RequestParam(value="contentGooruId") String contentGooruId,
+			@RequestParam(value="lessonGooruId", required = false) String lessonGooruId, @RequestParam(value="contentGooruId", required = false) String contentGooruId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
 		return getModel(getClassService().findUsageAvailable(getTraceId(request), classGooruId, courseGooruId,unitGooruId,lessonGooruId,contentGooruId));
