@@ -753,7 +753,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			}
 			OperationResult<ColumnList<String>> lessonMetaData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), lessonGooruOid, resourceColumns);
 			lessonDataAsMap.put(ApiConstants.GOORUOID, lessonGooruOid);
-			lessonDataAsMap.put(ApiConstants.TYPE, ApiConstants.LESSON);
 			lessonDataAsMap.put(ApiConstants.TITLE, null);
 			if (!lessonMetaData.getResult().isEmpty() && lessonMetaData.getResult().size() > 0) {
 				ColumnList<String> lessonMetaDataColumns = lessonMetaData.getResult();
@@ -791,6 +790,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				}
 			}
 			lessonDataAsMap.putAll(getActivityMetricsAsMap(traceId, classLessonKey, lessonGooruOid));
+			lessonDataAsMap.put(ApiConstants.TYPE, ApiConstants.LESSON);
 			lessonDataAsMap.put(ApiConstants.ITEM, itemDataMapAsList);
 			if (attempted == 0) {
 				lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.NOT_ATTEMPTED);
