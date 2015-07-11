@@ -817,18 +817,15 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	
 	public ResponseParamDTO<Map<String, Object>> getStudentAssessmentData(String traceId, String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,
 			String collectionType, boolean isSecure) throws Exception {
-		if(StringUtils.isBlank(classId) || StringUtils.isBlank(courseId) || StringUtils.isBlank(unitId) || StringUtils.isBlank(lessonId)) {
-			ValidationUtils.rejectInvalidRequest(ErrorCodes.E108, getBaseService().appendComma("classId","courseId","unitId","lessonId","assessmentId"));
-		} else if(StringUtils.isBlank(sessionId)){
-			ValidationUtils.rejectInvalidRequest(ErrorCodes.E108, getBaseService().appendComma("assessmentId", "sessionId"));
-		}
-		// Fetch goal for the class
+		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> itemDataMapAsList = new ArrayList<Map<String, Object>>();
 		Map<String, Object> itemDetailAsMap = new HashMap<String, Object>();
+		OperationResult<ColumnList<String>> itemsColumnList = null;
 		Long classMinScore = 0L; String classLessonKey = null;
 		Long scoreInPercentage = 0L; Long score = 0L; String evidence = null; Long timespent = 0L;
 		if (StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) && StringUtils.isNotBlank(unitId) && StringUtils.isNotBlank(lessonId)) {
+			// Fetch goal for the class
 			OperationResult<ColumnList<String>> classData = getCassandraService().read(traceId, ColumnFamily.CLASS.getColumnFamily(), classId);
 			if (!classData.getResult().isEmpty() && classData.getResult().size() > 0) {
 				classMinScore = classData.getResult().getLongValue(ApiConstants.MINIMUM_SCORE, 0L);
@@ -838,14 +835,13 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			if (StringUtils.isNotBlank(userUid)) {
 				classLessonKey = getBaseService().appendTilda(classLessonKey, userUid);
 			}
-			
-		} 
-		OperationResult<ColumnList<String>> itemsColumnList = null;
-		if(sessionId != null){
-			itemsColumnList = getCassandraService().read(traceId, ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), sessionId);
-		} else if (classLessonKey != null) {
 			itemsColumnList = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), classLessonKey);
+		} else if(sessionId != null){
+			itemsColumnList = getCassandraService().read(traceId, ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), sessionId);
+		} else {
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, getBaseService().appendComma("assessmentId", "sessionId"), getBaseService().appendComma("classId","courseId","unitId","lessonId","assessmentId"));
 		}
+		
 		if (!itemsColumnList.getResult().isEmpty() && itemsColumnList.getResult().size() > 0) {
 			ColumnList<String> lessonMetricColumns = itemsColumnList.getResult();
 			score = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants.SCORE), 0L);
@@ -1444,46 +1440,40 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 
 	public ResponseParamDTO<Map<String, Object>> getStudentAssessmentSummary(String traceId, String classId, String courseId, String unitId, String lessonId, String assessmentId, String userUid,
 			String sessionId, boolean isSecure) throws Exception {
-		
-		if(StringUtils.isBlank(classId) || StringUtils.isBlank(courseId) || StringUtils.isBlank(unitId) || StringUtils.isBlank(lessonId)) {
-			ValidationUtils.rejectInvalidRequest(ErrorCodes.E108, getBaseService().appendComma("classId","courseId","unitId","lessonId","assessmentId"));
-		} else if(StringUtils.isBlank(sessionId)){
-			ValidationUtils.rejectInvalidRequest(ErrorCodes.E108, getBaseService().appendComma("assessmentId", "sessionId"));
-		}
-		
+
 		List<Map<String, Object>> itemDataMapAsList = new ArrayList<Map<String, Object>>();
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-
-		if (StringUtils.isNotBlank(sessionId)) {
-			if (StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) && StringUtils.isNotBlank(unitId) && StringUtils.isNotBlank(lessonId)) {
-				List<Map<String, Object>> unitColumnResult = getContentItems(traceId, courseId, null, false);
-				for (Map<String, Object> unit : unitColumnResult) {
-					String unitGooruId = unit.get(ApiConstants.GOORUOID).toString();
-					if (unitGooruId.equalsIgnoreCase(unitId)) {
-						List<Map<String, Object>> lessonColumnResult = getContentItems(traceId, unitGooruId, null, false);
-						for (Map<String, Object> lesson : lessonColumnResult) {
-							String lessonGooruId = lesson.get(ApiConstants.GOORUOID).toString();
-							if (lessonGooruId.equalsIgnoreCase(lessonId)) {
-								List<Map<String, Object>> collectionColumnResult = getContentItems(traceId, lessonGooruId, null, false);
-								for (Map<String, Object> collection : collectionColumnResult) {
-									String collectionGooruId = collection.get(ApiConstants.GOORUOID).toString();
-									if (collectionGooruId.equalsIgnoreCase(assessmentId)) {
-										getCollectionSummaryData(traceId, collectionGooruId, sessionId, itemDataMapAsList, isSecure);
-										break;
-									}
+		if (StringUtils.isNotBlank(sessionId) && StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) && StringUtils.isNotBlank(unitId) && StringUtils.isNotBlank(lessonId)) {
+			List<Map<String, Object>> unitColumnResult = getContentItems(traceId, courseId, null, false);
+			for (Map<String, Object> unit : unitColumnResult) {
+				String unitGooruId = unit.get(ApiConstants.GOORUOID).toString();
+				if (unitGooruId.equalsIgnoreCase(unitId)) {
+					List<Map<String, Object>> lessonColumnResult = getContentItems(traceId, unitGooruId, null, false);
+					for (Map<String, Object> lesson : lessonColumnResult) {
+						String lessonGooruId = lesson.get(ApiConstants.GOORUOID).toString();
+						if (lessonGooruId.equalsIgnoreCase(lessonId)) {
+							List<Map<String, Object>> collectionColumnResult = getContentItems(traceId, lessonGooruId, null, false);
+							for (Map<String, Object> collection : collectionColumnResult) {
+								String collectionGooruId = collection.get(ApiConstants.GOORUOID).toString();
+								if (collectionGooruId.equalsIgnoreCase(assessmentId)) {
+									getCollectionSummaryData(traceId, collectionGooruId, sessionId, itemDataMapAsList, isSecure);
+									break;
 								}
-								responseParamDTO.setContent(itemDataMapAsList);
-								break;
 							}
-
+							responseParamDTO.setContent(itemDataMapAsList);
+							break;
 						}
-						break;
+
 					}
+					break;
 				}
-			} else if(StringUtils.isNotBlank(assessmentId)) {
-				getCollectionSummaryData(traceId, assessmentId, sessionId, itemDataMapAsList, isSecure);
-				responseParamDTO.setContent(itemDataMapAsList);
 			}
+		} else if (StringUtils.isNotBlank(sessionId) && StringUtils.isNotBlank(assessmentId)) {
+			getCollectionSummaryData(traceId, assessmentId, sessionId, itemDataMapAsList, isSecure);
+			responseParamDTO.setContent(itemDataMapAsList);
+		} else {
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, getBaseService().appendComma("assessmentId", "sessionId"),
+					getBaseService().appendComma("classId", "courseId", "unitId", "lessonId", "assessmentId"));
 		}
 		return responseParamDTO;
 	}
