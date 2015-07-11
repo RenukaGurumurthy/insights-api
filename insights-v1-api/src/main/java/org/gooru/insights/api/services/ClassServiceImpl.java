@@ -1458,7 +1458,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 							for (Map<String, Object> collection : collectionColumnResult) {
 								String collectionGooruId = collection.get(ApiConstants.GOORUOID).toString();
 								if (collectionGooruId.equalsIgnoreCase(assessmentId)) {
-									getCollectionSummaryData(traceId, collectionGooruId, sessionId, itemDataMapAsList, isSecure);
+									itemDataMapAsList = getCollectionSummaryData(traceId, collectionGooruId, sessionId, itemDataMapAsList, isSecure);
 									break;
 								}
 							}
@@ -1471,7 +1471,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				}
 			}
 		} else if ((sessionId != null && StringUtils.isNotBlank(sessionId.trim())) && (assessmentId != null && StringUtils.isNotBlank(assessmentId.trim()))) {
-			getCollectionSummaryData(traceId, assessmentId, sessionId, itemDataMapAsList, isSecure);
+			itemDataMapAsList = getCollectionSummaryData(traceId, assessmentId, sessionId, itemDataMapAsList, isSecure);
 			responseParamDTO.setContent(itemDataMapAsList);
 		} else {
 			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, getBaseService().appendComma("assessmentId", "sessionId"),
@@ -1480,7 +1480,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return responseParamDTO;
 	}
 	
-	private void getCollectionSummaryData(String traceId, String collectionGooruId, String sessionId, List<Map<String, Object>> itemDataMapAsList, boolean isSecure) {
+	private List<Map<String, Object>> getCollectionSummaryData(String traceId, String collectionGooruId, String sessionId, List<Map<String, Object>> itemDataMapAsList, boolean isSecure) {
 		List<Map<String, Object>> itemColumnResult = getContentItems(traceId, collectionGooruId, null, false);
 		List<Map<String, Object>> rawDataMapAsList = new ArrayList<Map<String, Object>>();
 		StringBuffer itemGooruOids = getBaseService().exportData(itemColumnResult, ApiConstants.GOORUOID);
@@ -1530,6 +1530,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			teacherData = getBaseService().properName(teacherData, selectValues);
 			itemDataMapAsList = getBaseService().LeftJoin(itemDataMapAsList, teacherData, ApiConstants.FEEDBACKPROVIDER, ApiConstants.FEEDBACKPROVIDER);
 		}
+		return itemDataMapAsList;
 	}
 	
 	private List<Map<String, Object>> getSessionActivityMetrics(String traceId, Collection<String> rowKeys, String columnFamily, Collection<String> columns, String userIds) {
