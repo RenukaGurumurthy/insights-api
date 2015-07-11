@@ -128,6 +128,8 @@ public class ApiConstants {
 	
 	public static final String QUESTION_GOORU_OID = "question_gooru_oid";
 	
+	public static final String _QUESTIONGOORUOID = "questionGooruOid";
+	
 	public static final String COLLECTIONGOORUOID = "collection_gooru_oid";
 	
 	public static final String TOTAL_INCORRECT_COUNT = "totalInCorrectCount";
@@ -146,6 +148,26 @@ public class ApiConstants {
 	
 	public static final String _HTTP = "http://";
 	
+	public static final String IS_CORRECT = "is_correct";
+	
+	public static final String _ISCORRECT = "isCorrect";
+	
+	public static final String ANSWER_TEXT = "answer_text";
+	
+	public static final String _ANSWER_OBJECT = "answer_object";
+	
+	public static final String ANSWER_OBJECT = "answerObject";
+	
+	public static final String _AVG_TIME_SPENT = "avg_time_spent";
+	
+	public static final String AVG_TIME_SPENT = "avgTimeSpent";
+	
+	public static final String _ANSWERTEXT = "answerText";
+	
+	public static final String ATTEMPTS = "attempts";
+	
+	public static final String OPTIONS = "options";
+	
 	public static final String COLLECTION_ITEM_ID = "collectionItemId";
 	
 	public static final String COLLECTIONITEMID = "collection_item_id";
@@ -160,11 +182,15 @@ public class ApiConstants {
 	
 	public static final String CATEGORY = "category";
 	
+	public static final String META_DATA = "metaData";
+	
 	public static final String RESPONSE = "response";
 	
 	public static final String QUESTION = "question";
 	
 	public static final String QUESTION_TYPE = "questionType";
+	
+	public static final String _QUESTION_TYPE = "question_type";
 	
 	public static final String FIRST_NAME = "firstName";
 	
@@ -191,6 +217,9 @@ public class ApiConstants {
 	public static final String STOP = "stop";
 	
 	public static final String SESSIONID = "sessionId";
+	
+	public static final String _SESSION_ID = "session_id";
+	
 	public static final String ITEM = "item";
 	public static final String COLLECTION = "collection";
 	public static final String ASSESSMENT = "assessment";
@@ -248,7 +277,6 @@ public class ApiConstants {
 	public static final String CLOSE_BRACE = "}";
 	
 	public static final String HAS_FRAME_BREAKER = "hasFrameBreaker";
-	public static final String _ANSWER_OBJECT = "answer_abject";
 	public static final String REACTION = "reaction";
 	public static final String CHOICE = "choice";
 	public static final String SKIPPED = "skipped";
@@ -322,6 +350,19 @@ public class ApiConstants {
 		}
 		public String getQuestionType(){
 			return questionType;
+		}
+	}
+	
+	public enum options {
+		A("A"),B("B"),C("C"),D("D"),E("E"),F("F");
+		
+		private String option;
+		
+		private options(String option){
+			this.option = option;
+		}
+		public String option(){
+			return option;
 		}
 	}
 }
