@@ -839,7 +839,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		} else if(StringUtils.isNotBlank(sessionId.trim())){
 			itemsColumnList = getCassandraService().read(traceId, ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), sessionId);
 		} else {
-			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, getBaseService().appendComma("assessmentId", "sessionId"), getBaseService().appendComma("classId","courseId","unitId","lessonId","assessmentId"));
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, getBaseService().appendComma("contentGooruId", "sessionId"), getBaseService().appendComma("classId","courseId","unitId","lessonId","contentGooruId"));
 		}
 		
 		if (!itemsColumnList.getResult().isEmpty() && itemsColumnList.getResult().size() > 0) {
