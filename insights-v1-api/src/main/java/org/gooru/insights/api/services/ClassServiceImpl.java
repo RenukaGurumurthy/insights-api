@@ -674,39 +674,39 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	public ResponseParamDTO<Map<String, Object>> getUserSessions(String traceId, String classId, String courseId, String unitId, String lessonId, String collectionId, String collectionType,
 			String userUid, boolean fetchOpenSession, boolean isSecure) throws Exception {
 		String key = null;
-		if(StringUtils.isNotBlank(collectionId) && StringUtils.isNotBlank(userUid) && StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) && StringUtils.isNotBlank(unitId) && StringUtils.isNotBlank(lessonId)) { 
+		if (StringUtils.isNotBlank(collectionId) && StringUtils.isNotBlank(userUid) && StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) && StringUtils.isNotBlank(unitId)
+				&& StringUtils.isNotBlank(lessonId)) {
 			key = baseService.appendTilda(classId, courseId, unitId, lessonId, collectionId, userUid);
-		} else if (StringUtils.isNotBlank(collectionId) && StringUtils.isNotBlank(userUid)){
+		} else if (StringUtils.isNotBlank(collectionId) && StringUtils.isNotBlank(userUid)) {
 			key = baseService.appendTilda(collectionId, userUid);
 		} else {
 			ValidationUtils.rejectInvalidRequest(ErrorCodes.E106);
 		}
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		OperationResult<ColumnList<String>> sessions = getCassandraService().read(traceId, ColumnFamily.SESSION.getColumnFamily(), key);
-		List<Map<String, Object>> resultSet = null;
+		List<Map<String, Object>> resultSet = new ArrayList<Map<String, Object>>();
 		if (sessions != null) {
 			ColumnList<String> sessionList = sessions.getResult();
 			if (!sessionList.isEmpty()) {
-				resultSet = new ArrayList<Map<String, Object>>();
+				int sequence = 1;
 				if (!fetchOpenSession) {
-					int sequence = 0;
 					for (Column<String> sessionColumn : sessionList) {
-						resultSet.add(generateSessionMap(sequence++,sessionColumn.getName(), sessionColumn.getLongValue()));
+						resultSet.add(generateSessionMap(sequence++, sessionColumn.getName(), sessionColumn.getLongValue()));
 					}
-				}else{
+				} else {
 					ColumnList<String> sessionsInfo = getCassandraService().read(traceId, ColumnFamily.SESSION.getColumnFamily(), baseService.appendTilda(key, INFO)).getResult();
 					for (Column<String> sessionColumn : sessionList) {
-						int sequence = 0;
-						if(sessionsInfo.getStringValue(baseService.appendTilda(sessionColumn.getName(),TYPE), null).equalsIgnoreCase(START)){
-							resultSet.add(generateSessionMap(sequence++,sessionColumn.getName(), sessionColumn.getLongValue()));	
+						if (sessionsInfo.getStringValue(baseService.appendTilda(sessionColumn.getName(), TYPE), null).equalsIgnoreCase(START)) {
+							Map<String, Object> sessionInfoMap = generateSessionMap(sequence++, sessionColumn.getName(), sessionColumn.getLongValue());
+							sessionInfoMap.put(LAST_ACCESSED_RESOURCE, sessionsInfo.getStringValue(baseService.appendTilda(sessionColumn.getName(), _LAST_ACCESSED_RESOURCE), null));
+							resultSet.add(sessionInfoMap);
 						}
 					}
 				}
-				if(resultSet != null){
-					responseParamDTO.setContent(baseService.sortBy(resultSet, EVENT_TIME, ApiConstants.ASC));
-				}
+				resultSet = baseService.sortBy(resultSet, EVENT_TIME, ApiConstants.ASC);
 			}
 		}
+		responseParamDTO.setContent(resultSet);
 		return responseParamDTO;
 	}
 	
@@ -1234,6 +1234,29 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		}
 		return responseParamDTO;
 	}
+	
+	@Override
+	public ResponseParamDTO<Map<String, Object>> findUsageAvailable(String traceId, String classGooruId ,String courseGooruId,String unitGooruId,String lessonGooruId,String contentGooruId) throws Exception {
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		String key = null;
+		if (StringUtils.isNotBlank(classGooruId)) {
+			key = baseService.appendTilda(courseGooruId,unitGooruId,lessonGooruId,contentGooruId);
+		} else {
+			key = classGooruId;
+		}
+		OperationResult<ColumnList<String>> sessions = getCassandraService().read(traceId, ColumnFamily.SESSION.getColumnFamily(), key);
+		Map<String, Object> sessionDataMap = new HashMap<String, Object>();
+		sessionDataMap.put(STATUS, false);
+		if (sessions != null) {
+			ColumnList<String> sessionList = sessions.getResult();
+			if (!sessionList.isEmpty()) {
+				sessionDataMap.put(STATUS, true);
+			}
+		}
+		responseParamDTO.setMessage(sessionDataMap);
+		return responseParamDTO;
+	}
+		
 	
 	public ResponseParamDTO<Map<String,Object>> getStudentsCollectionData(String traceId, String classId, String courseId, String unitId, String lessonId, String collectionId, boolean isSecure) throws Exception {
 		
