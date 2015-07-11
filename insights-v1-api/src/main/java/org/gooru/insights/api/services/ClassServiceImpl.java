@@ -817,8 +817,10 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	
 	public ResponseParamDTO<Map<String, Object>> getStudentAssessmentData(String traceId, String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,
 			String collectionType, boolean isSecure) throws Exception {
-		if(StringUtils.isBlank(sessionId) || (StringUtils.isBlank(classId) || StringUtils.isBlank(courseId) || StringUtils.isBlank(unitId) || StringUtils.isBlank(lessonId))) {
-			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, getBaseService().appendComma("assessmentId", "sessionId"), getBaseService().appendComma("classId","courseId","unitId","lessonId","assessmentId"));
+		if(StringUtils.isBlank(classId) || StringUtils.isBlank(courseId) || StringUtils.isBlank(unitId) || StringUtils.isBlank(lessonId)) {
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E108, getBaseService().appendComma("classId","courseId","unitId","lessonId","assessmentId"));
+		} else if(StringUtils.isBlank(sessionId)){
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E108, getBaseService().appendComma("assessmentId", "sessionId"));
 		}
 		// Fetch goal for the class
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
@@ -1443,8 +1445,10 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	public ResponseParamDTO<Map<String, Object>> getStudentAssessmentSummary(String traceId, String classId, String courseId, String unitId, String lessonId, String assessmentId, String userUid,
 			String sessionId, boolean isSecure) throws Exception {
 		
-		if((StringUtils.isBlank(sessionId)) || (StringUtils.isBlank(classId) || StringUtils.isBlank(courseId) || StringUtils.isBlank(unitId) || StringUtils.isBlank(lessonId))) {
-			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, getBaseService().appendComma("assessmentId", "sessionId"), getBaseService().appendComma("classId","courseId","unitId","lessonId","assessmentId"));
+		if(StringUtils.isBlank(classId) || StringUtils.isBlank(courseId) || StringUtils.isBlank(unitId) || StringUtils.isBlank(lessonId)) {
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E108, getBaseService().appendComma("classId","courseId","unitId","lessonId","assessmentId"));
+		} else if(StringUtils.isBlank(sessionId)){
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E108, getBaseService().appendComma("assessmentId", "sessionId"));
 		}
 		
 		List<Map<String, Object>> itemDataMapAsList = new ArrayList<Map<String, Object>>();
