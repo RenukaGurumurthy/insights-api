@@ -169,5 +169,15 @@ public class ClassController extends BaseController{
 		setAllowOrigin(response);
 		return getModel(getClassService().getStudentAssessmentSummary(getTraceId(request), classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, userUid, sessionId, request.isSecure()));
 	}
+	@RequestMapping(value="/find/usage",method ={ RequestMethod.GET,RequestMethod.POST})
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@ResponseBody
+	public ModelAndView findIfUsage(HttpServletRequest request, @RequestParam(value="classGooruId", required = false) String classGooruId,
+			@RequestParam(value="courseGooruId", required = false) String courseGooruId, @RequestParam(value="unitGooruId", required = false) String unitGooruId, 
+			@RequestParam(value="lessonGooruId", required = false) String lessonGooruId, @PathVariable(value="contentGooruId") String contentGooruId,
+			@RequestParam(value="classGooruId", required = false) String sessionId, HttpServletResponse response) throws Exception {
+		setAllowOrigin(response);
+		return getModel(getClassService().findUsageAvailable(getTraceId(request), classGooruId, courseGooruId,unitGooruId,lessonGooruId,contentGooruId));
+	}
 }
 	
