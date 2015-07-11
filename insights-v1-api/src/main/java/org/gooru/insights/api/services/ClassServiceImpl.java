@@ -401,7 +401,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
         			}
 					if(!lessonMetaData.getResult().isEmpty() && lessonMetaData.getResult().size() > 0) {
 						ColumnList<String> lessonMetaDataColumns = lessonMetaData.getResult();
-						lessonDataAsMap.put(ApiConstants.TITLE, lessonMetaDataColumns.getColumnByName(ApiConstants.TITLE).toString());
+						lessonDataAsMap.put(ApiConstants.TITLE, lessonMetaDataColumns.getColumnByName(ApiConstants.TITLE).getStringValue());
 
 						OperationResult<ColumnList<String>> itemData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), lessonGooruOid);
 						ColumnList<String> items = itemData.getResult();
@@ -411,7 +411,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 							OperationResult<ColumnList<String>>  itemMetaData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), itemGooruOid, resourceColumns);
 							if(!itemMetaData.getResult().isEmpty() && itemMetaData.getResult().size() > 0) {
 								ColumnList<String> itemMetaDataColumns = itemMetaData.getResult();
-								itemDataAsMap.put(ApiConstants.TITLE, itemMetaDataColumns.getColumnByName(ApiConstants.TITLE).toString());
+								itemDataAsMap.put(ApiConstants.TITLE, itemMetaDataColumns.getColumnByName(ApiConstants.TITLE).getStringValue());
 							}
 							itemDataAsMap.put(ApiConstants.GOORUOID, itemGooruOid);
 							OperationResult<ColumnList<String>> assessmentMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), classLessonKey + ApiConstants.ASSESSMENT + ApiConstants.TILDA + ApiConstants._SCORE_IN_PERCENTAGE);
@@ -843,9 +843,9 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			itemDetailAsMap.putAll(rawDataMapAsList.get(0));
 		}
 			// Fetch assessment count
-			Long questionCount = null;
-			Long scorableQuestionCount = null;
-			Long oeCount = null;
+			Long questionCount = 0L;
+			Long scorableQuestionCount = 0L;
+			Long oeCount = 0L;
 			Map<String, Long> contentMetaAsMap = getContentMeta(traceId, assessmentId, getBaseService().appendComma(ApiConstants.QUESTION_COUNT, ApiConstants._OE_COUNT));
 			if (!contentMetaAsMap.isEmpty()) {
 				questionCount = contentMetaAsMap.containsKey(ApiConstants.QUESTION_COUNT) ? contentMetaAsMap.get(ApiConstants.QUESTION_COUNT) : 0L;
@@ -935,18 +935,19 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		Map<String, Object> usageAsMap = new HashMap<String, Object>();
 		usageAsMap.put(ApiConstants.GOORUOID, contentGooruOid);
 		OperationResult<ColumnList<String>> itemsColumnList = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), key);
+		Long views = 0L; Long timeSpent = 0L; Long score = 0L; String collectionType = null;
 		if (!itemsColumnList.getResult().isEmpty() && itemsColumnList.getResult().size() > 0) {
 			ColumnList<String> itemMetricColumns = itemsColumnList.getResult();
-			Long views = itemMetricColumns.getLongValue(getBaseService().appendTilda(contentGooruOid, ApiConstants.VIEWS), null);
-			Long timeSpent = itemMetricColumns.getLongValue(getBaseService().appendTilda(contentGooruOid, ApiConstants._TIME_SPENT), null);
-			Long score = itemMetricColumns.getLongValue(getBaseService().appendTilda(contentGooruOid, ApiConstants._SCORE_IN_PERCENTAGE), null);
-			String collectionType = itemMetricColumns.getStringValue(getBaseService().appendTilda(contentGooruOid, ApiConstants._COLLECTION_TYPE), null);
-			usageAsMap.put(ApiConstants.VIEWS, views);
-			usageAsMap.put(ApiConstants.TIMESPENT, timeSpent);
-			usageAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, score);
-			usageAsMap.put(ApiConstants.TYPE, collectionType);
+			views = itemMetricColumns.getLongValue(getBaseService().appendTilda(contentGooruOid, ApiConstants.VIEWS), 0L);
+			timeSpent = itemMetricColumns.getLongValue(getBaseService().appendTilda(contentGooruOid, ApiConstants._TIME_SPENT), 0L);
+			score = itemMetricColumns.getLongValue(getBaseService().appendTilda(contentGooruOid, ApiConstants._SCORE_IN_PERCENTAGE), 0L);
+			collectionType = itemMetricColumns.getStringValue(getBaseService().appendTilda(contentGooruOid, ApiConstants._COLLECTION_TYPE), null);
 			return usageAsMap;
 		}
+		usageAsMap.put(ApiConstants.VIEWS, views);
+		usageAsMap.put(ApiConstants.TIMESPENT, timeSpent);
+		usageAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, score);
+		usageAsMap.put(ApiConstants.TYPE, collectionType);
 		return usageAsMap;
 	}
 	
@@ -957,22 +958,23 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		for (String itemGooruOid : contentGooruOids.split(ApiConstants.COMMA)) {
 			Map<String, Object> usageAsMap = new HashMap<String, Object>();
 			usageAsMap.put(ApiConstants.GOORUOID, itemGooruOid);
+			Long views = 0L; Long timeSpent = 0L; Long score = 0L; String collectionType = null;Long lastAccessed = null;String evidence = null;
 			if (!itemsColumnList.getResult().isEmpty() && itemsColumnList.getResult().size() > 0) {
 				ColumnList<String> itemMetricColumns = itemsColumnList.getResult();
-				Long views = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants.VIEWS), null);
-				Long timeSpent = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._TIME_SPENT), null);
-				Long score = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._SCORE_IN_PERCENTAGE), null);
-				String collectionType = itemMetricColumns.getStringValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._COLLECTION_TYPE), null);
-				Long lastAccessed = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._LAST_ACCESSED), null);
-				String evidence = itemMetricColumns.getStringValue(getBaseService().appendTilda(itemGooruOid, ApiConstants.EVIDENCE), null);
-				usageAsMap.put(ApiConstants.VIEWS, views);
-				usageAsMap.put(ApiConstants.TIMESPENT, timeSpent);
-				usageAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, score);
-				usageAsMap.put(ApiConstants.TYPE, collectionType);
-				usageAsMap.put(ApiConstants.LAST_ACCESSED, lastAccessed);
-				usageAsMap.put(ApiConstants.EVIDENCE, evidence);
-				usageAsMapAsList.add(usageAsMap);
+				views = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants.VIEWS), 0L);
+				timeSpent = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._TIME_SPENT), 0L);
+				score = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._SCORE_IN_PERCENTAGE), 0L);
+				collectionType = itemMetricColumns.getStringValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._COLLECTION_TYPE), null);
+				lastAccessed = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._LAST_ACCESSED), null);
+				evidence = itemMetricColumns.getStringValue(getBaseService().appendTilda(itemGooruOid, ApiConstants.EVIDENCE), null);
 			}
+			usageAsMap.put(ApiConstants.VIEWS, views);
+			usageAsMap.put(ApiConstants.TIMESPENT, timeSpent);
+			usageAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, score);
+			usageAsMap.put(ApiConstants.TYPE, collectionType);
+			usageAsMap.put(ApiConstants.LAST_ACCESSED, lastAccessed);
+			usageAsMap.put(ApiConstants.EVIDENCE, evidence);
+			usageAsMapAsList.add(usageAsMap);
 		}
 		return usageAsMapAsList;
 	}
@@ -980,17 +982,17 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	private Map<String, Object> getActivityMetricsAsMap(String traceId, String key, String contentGooruOid) {
 		Map<String, Object> usageAsMap = new HashMap<String, Object>();
 		usageAsMap.put(ApiConstants.GOORUOID, contentGooruOid);
+		Long views = 0L; Long timeSpent = 0L; String collectionType = null;
 		OperationResult<ColumnList<String>> itemsColumnList = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), key);
 		if (!itemsColumnList.getResult().isEmpty() && itemsColumnList.getResult().size() > 0) {
 			ColumnList<String> itemMetricColumns = itemsColumnList.getResult();
-			Long views = itemMetricColumns.getLongValue(ApiConstants.VIEWS, null);
-			Long timeSpent = itemMetricColumns.getLongValue(ApiConstants._TIME_SPENT, null);
-			String collectionType = itemMetricColumns.getStringValue(ApiConstants._COLLECTION_TYPE, null);
-			usageAsMap.put(ApiConstants.VIEWS, views);
-			usageAsMap.put(ApiConstants.TIMESPENT, timeSpent);
-			usageAsMap.put(ApiConstants.TYPE, collectionType);
-			return usageAsMap;
+			views = itemMetricColumns.getLongValue(ApiConstants.VIEWS, 0L);
+			timeSpent = itemMetricColumns.getLongValue(ApiConstants._TIME_SPENT, 0L);
+			collectionType = itemMetricColumns.getStringValue(ApiConstants._COLLECTION_TYPE, null);
 		}
+		usageAsMap.put(ApiConstants.VIEWS, views);
+		usageAsMap.put(ApiConstants.TIMESPENT, timeSpent);
+		usageAsMap.put(ApiConstants.TYPE, collectionType);
 		return usageAsMap;
 	}
 	
