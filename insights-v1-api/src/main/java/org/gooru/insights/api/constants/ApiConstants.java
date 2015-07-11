@@ -287,6 +287,8 @@ public class ApiConstants {
 	public static final String TAU = "tau";
 	public static final String TOTAL_ATTEMPT_USER_COUNT = "totalAttemptUserCount";
 	public static final String OPTIONS_MATCH = "A|B|C|D|E|F";
+	public static final String RESOURCE = "resources";
+	public static final String _ITEM_COUNT = "item_count";
 	
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
