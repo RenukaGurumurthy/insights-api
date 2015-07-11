@@ -824,7 +824,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		OperationResult<ColumnList<String>> itemsColumnList = null;
 		Long classMinScore = 0L; String classLessonKey = null;
 		Long scoreInPercentage = 0L; Long score = 0L; String evidence = null; Long timespent = 0L;
-		if (StringUtils.isNotBlank(classId.trim()) && StringUtils.isNotBlank(courseId.trim()) && StringUtils.isNotBlank(unitId.trim()) && StringUtils.isNotBlank(lessonId.trim())) {
+		if ((classId != null && StringUtils.isNotBlank(classId.trim())) && (courseId != null && StringUtils.isNotBlank(courseId.trim())) 
+				&& (unitId != null && StringUtils.isNotBlank(unitId.trim())) && (lessonId != null && StringUtils.isNotBlank(lessonId.trim()))) {
 			// Fetch goal for the class
 			OperationResult<ColumnList<String>> classData = getCassandraService().read(traceId, ColumnFamily.CLASS.getColumnFamily(), classId);
 			if (!classData.getResult().isEmpty() && classData.getResult().size() > 0) {
@@ -836,7 +837,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				classLessonKey = getBaseService().appendTilda(classLessonKey, userUid);
 			}
 			itemsColumnList = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), classLessonKey);
-		} else if(StringUtils.isNotBlank(sessionId.trim())){
+		} else if ((sessionId != null && StringUtils.isNotBlank(sessionId.trim()))) {
 			itemsColumnList = getCassandraService().read(traceId, ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), sessionId);
 		} else {
 			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, getBaseService().appendComma("contentGooruId", "sessionId"), getBaseService().appendComma("classId","courseId","unitId","lessonId","contentGooruId"));
@@ -1443,7 +1444,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 
 		List<Map<String, Object>> itemDataMapAsList = new ArrayList<Map<String, Object>>();
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		if (StringUtils.isNotBlank(sessionId.trim()) && StringUtils.isNotBlank(classId.trim()) && StringUtils.isNotBlank(courseId.trim()) && StringUtils.isNotBlank(unitId.trim()) && StringUtils.isNotBlank(lessonId.trim())) {
+		if ((sessionId != null && StringUtils.isNotBlank(sessionId.trim())) && (classId != null && StringUtils.isNotBlank(classId.trim())) && (courseId != null && StringUtils.isNotBlank(courseId.trim())) 
+				&& (unitId != null && StringUtils.isNotBlank(unitId.trim())) && (lessonId != null && StringUtils.isNotBlank(lessonId.trim()))) {
 			List<Map<String, Object>> unitColumnResult = getContentItems(traceId, courseId, null, false);
 			for (Map<String, Object> unit : unitColumnResult) {
 				String unitGooruId = unit.get(ApiConstants.GOORUOID).toString();
@@ -1468,7 +1470,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					break;
 				}
 			}
-		} else if (StringUtils.isNotBlank(sessionId) && StringUtils.isNotBlank(assessmentId)) {
+		} else if ((sessionId != null && StringUtils.isNotBlank(sessionId.trim())) && (assessmentId != null && StringUtils.isNotBlank(assessmentId.trim()))) {
 			getCollectionSummaryData(traceId, assessmentId, sessionId, itemDataMapAsList, isSecure);
 			responseParamDTO.setContent(itemDataMapAsList);
 		} else {
