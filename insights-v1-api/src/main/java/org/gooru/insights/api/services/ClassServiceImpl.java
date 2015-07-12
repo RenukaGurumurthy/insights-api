@@ -1533,6 +1533,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		resourceColumns.add(ApiConstants.RESOURCE_FORMAT);
 		resourceColumns.add(ApiConstants.CATEGORY);
 		resourceColumns.add(ApiConstants.HAS_FRAME_BREAKER);
+		resourceColumns.add("question.type");
 		rawDataMapAsList = getResourceData(traceId, isSecure, rawDataMapAsList, itemGooruOids.toString(), resourceColumns, ApiConstants.RESOURCE);
 		
 		//Usage Data
@@ -1626,8 +1627,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						usageMap.put(ApiConstants.STATUS, metricRow.getColumns().getStringValue(column, null));
 					} else if (metricName.equalsIgnoreCase(ApiConstants.SCORE)) {
 						usageMap.put(ApiConstants.SCORE, metricRow.getColumns().getLongValue(column.trim(), 0L));
-					}else if (metricName.equalsIgnoreCase(ApiConstants.TYPE)) {
-						usageMap.put(ApiConstants.TYPE, metricRow.getColumns().getStringValue(column.trim(), null));
 					} else if (metricName.equalsIgnoreCase(ApiConstants.TAU)) {
 						usageMap.put(ApiConstants.TOTAL_ATTEMPT_USER_COUNT, metricRow.getColumns().getLongValue(column.trim(), 0L));
 					} else if (metricName.equalsIgnoreCase("correct")) {
