@@ -1585,6 +1585,13 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					Map<String, Object> optionsAsMap = new HashMap<String, Object>();
 					String[] columnMetaInfo = column.split(ApiConstants.TILDA);
 					String metricName = (columnMetaInfo.length > 1) ? columnMetaInfo[columnMetaInfo.length - 1] : columnMetaInfo[0];
+					/*if(DataUtils.getStringColumns().containsKey(metricName)){
+						usageMap.put(DataUtils.getStringColumns().get(metricName), metricRow.getColumns().getStringValue(ApiConstants.GOORU_UID, null));
+					}else if(DataUtils.getLongColumns().containsKey(metricName)){
+						usageMap.put(DataUtils.getStringColumns().get(metricName), metricRow.getColumns().getLongValue(column.trim(), 0L));
+					}else{
+						
+					}*/
 					if (metricName.equalsIgnoreCase(ApiConstants.VIEWS)) {
 						usageMap.put(ApiConstants.VIEWS, metricRow.getColumns().getLongValue(column.trim(), 0L));
 					} else if (metricName.equalsIgnoreCase(ApiConstants._SCORE_IN_PERCENTAGE)) {
@@ -1617,6 +1624,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						usageMap.put(ApiConstants.STATUS, metricRow.getColumns().getStringValue(column, null));
 					} else if (metricName.equalsIgnoreCase(ApiConstants.SCORE)) {
 						usageMap.put(ApiConstants.SCORE, metricRow.getColumns().getLongValue(column.trim(), 0L));
+					}else if (metricName.equalsIgnoreCase(ApiConstants.TYPE)) {
+						usageMap.put(ApiConstants.QUESTION_TYPE, metricRow.getColumns().getStringValue(column.trim(), null));
 					} else if (metricName.equalsIgnoreCase(ApiConstants.TAU)) {
 						usageMap.put(ApiConstants.TOTAL_ATTEMPT_USER_COUNT, metricRow.getColumns().getLongValue(column.trim(), 0L));
 					} else if (metricName.equalsIgnoreCase("correct")) {
@@ -1627,7 +1636,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						usageMap.put("answerObject", metricRow.getColumns().getStringValue(column.trim(), null));
 					} else {
 						try {
-							usageMap.put(metricName, metricRow.getColumns().getLongValue(column, null));
+							usageMap.put(metricName, metricRow.getColumns().getLongValue(column, 0L));
 						} catch (Exception e) {
 							InsightsLogger.error(traceId, getBaseService().errorHandler(ErrorMessages.UNHANDLED_EXCEPTION, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), column), e);
 						}
