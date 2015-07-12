@@ -403,6 +403,8 @@ public class BaseServiceImpl implements BaseService {
 								dataSet.put(column.getName(), column.getLongValue());
 							}
 						
+						} else if(column.getName().equalsIgnoreCase("question.type")){
+							dataSet.put("type", column.getStringValue());
 						}
 						else {
 							dataSet.put("key", key);
