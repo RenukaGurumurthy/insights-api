@@ -180,7 +180,9 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				OperationResult<ColumnList<String>> assessmentData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), lessonGooruOid);
 				ColumnList<String> assessments = assessmentData.getResult();
 				Map<String, Object> usageAsMap = new HashMap<String, Object>();
-				usageAsMap.put(ApiConstants.SEQUENCE, lessons.getIntegerValue(lessonGooruOid, 0));
+				if (lessons != null) {
+						usageAsMap.put(ApiConstants.SEQUENCE, lessons.getColumnByName(lessonGooruOid) != null ? lessons.getLongValue(lessonGooruOid, 0L) : 0L);
+				}
 				usageAsMap.put(ApiConstants.ASSESSMENT_COUNT, assessments.size());
 				usageAsMap.put(ApiConstants.GOORUOID, lessonGooruOid);
 				
