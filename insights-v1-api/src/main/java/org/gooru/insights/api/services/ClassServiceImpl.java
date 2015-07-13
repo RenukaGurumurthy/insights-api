@@ -1585,96 +1585,41 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			for (Row<String, String> metricRow : itemMetricRows) {
 				String userId = null;
 				Map<String, Map<String, Object>> KeyUsageAsMap = new HashMap<String, Map<String, Object>>();
-				if(!metricRow.getColumns().isEmpty() && metricRow.getColumns().size() > 0) {
-				for (String column : columns) {
-					Map<String, Object> usageMap = new HashMap<String, Object>();
-					Map<String, Object> optionsAsMap = new HashMap<String, Object>();
-					String[] columnMetaInfo = column.split(ApiConstants.TILDA);
-					String metricName = (columnMetaInfo.length > 1) ? columnMetaInfo[columnMetaInfo.length - 1] : columnMetaInfo[0];
-					/*if(DataUtils.getStringColumns().containsKey(metricName)){
-						usageMap.put(DataUtils.getStringColumns().get(metricName), metricRow.getColumns().getStringValue(ApiConstants.GOORU_UID, null));
-					}else if(DataUtils.getLongColumns().containsKey(metricName)){
-						usageMap.put(DataUtils.getStringColumns().get(metricName), metricRow.getColumns().getLongValue(column.trim(), 0L));
-					}else{
-						
-					}*/
-					if (metricName.equalsIgnoreCase(ApiConstants.VIEWS)) {
-						usageMap.put(ApiConstants.VIEWS, metricRow.getColumns().getLongValue(column.trim(), 0L));
-					} else if (metricName.equalsIgnoreCase(ApiConstants._SCORE_IN_PERCENTAGE)) {
-						usageMap.put(ApiConstants.SCORE_IN_PERCENTAGE, metricRow.getColumns().getLongValue(column.trim(), 0L));
-					} else if (metricName.equalsIgnoreCase(ApiConstants._TIME_SPENT)) {
-						usageMap.put(ApiConstants.TIMESPENT, metricRow.getColumns().getLongValue(column.trim(), 0L));
-					} else if (metricName.equalsIgnoreCase(ApiConstants.GOORU_UID)) {
-						usageMap.put(ApiConstants.USERUID, metricRow.getColumns().getStringValue(ApiConstants.GOORU_UID, null));
-					} else if (metricName.equalsIgnoreCase(ApiConstants.RA)) {
-						usageMap.put(ApiConstants.REACTION, metricRow.getColumns().getLongValue(column, 0L));
-					} else if (metricName.equalsIgnoreCase(ApiConstants.CHOICE)) {
-						usageMap.put(ApiConstants.TEXT, metricRow.getColumns().getStringValue(column.trim(), null));
-					} else if (metricName.equalsIgnoreCase(ApiConstants.SKIPPED)) {
-						usageMap.put(ApiConstants.SKIPPED, metricRow.getColumns().getLongValue(column, 0L));
-					} else if (metricName.equalsIgnoreCase("feed_back_provider")) {
-						usageMap.put("feedbackProviderUId", metricRow.getColumns().getStringValue(column.trim(), null));
-					} else if (metricName.equalsIgnoreCase("A")) {
-						optionsAsMap.put("A", metricRow.getColumns().getLongValue(column.trim(), 0L));
-					} else if (metricName.equalsIgnoreCase("B")) {
-						optionsAsMap.put("B", metricRow.getColumns().getLongValue(column.trim(), 0L));
-					} else if (metricName.equalsIgnoreCase("C")) {
-						optionsAsMap.put("C", metricRow.getColumns().getLongValue(column.trim(), 0L));
-					} else if (metricName.equalsIgnoreCase("D")) {
-						optionsAsMap.put("D", metricRow.getColumns().getLongValue(column.trim(), 0L));
-					} else if (metricName.equalsIgnoreCase("E")) {
-						optionsAsMap.put("E", metricRow.getColumns().getLongValue(column.trim(), 0L));
-					} else if (metricName.equalsIgnoreCase("F")) {
-						optionsAsMap.put("F", metricRow.getColumns().getLongValue(column.trim(), 0L));
-					} else if (metricName.equalsIgnoreCase(ApiConstants._QUESTION_STATUS)) {
-						usageMap.put(ApiConstants.STATUS, metricRow.getColumns().getStringValue(column, null));
-					} else if (metricName.equalsIgnoreCase(ApiConstants.SCORE)) {
-						usageMap.put(ApiConstants.SCORE, metricRow.getColumns().getLongValue(column.trim(), 0L));
-					} else if (metricName.equalsIgnoreCase(ApiConstants.TAU)) {
-						usageMap.put(ApiConstants.TOTAL_ATTEMPT_USER_COUNT, metricRow.getColumns().getLongValue(column.trim(), 0L));
-					} else if (metricName.equalsIgnoreCase("correct")) {
-						usageMap.put(ApiConstants.TOTAL_CORRECT_COUNT, metricRow.getColumns().getLongValue(column.trim(), 0L));
-					} else if (metricName.equalsIgnoreCase("in_correct")) {
-						usageMap.put(ApiConstants.TOTAL_INCORRECT_COUNT, metricRow.getColumns().getLongValue(column.trim(), 0L));
-					} else if (metricName.equalsIgnoreCase("answer_object")) {
-						usageMap.put("answerObject", metricRow.getColumns().getStringValue(column.trim(), null));
-					} else {
-						try {
-							usageMap.put(metricName, metricRow.getColumns().getLongValue(column, 0L));
-						} catch (Exception e) {
-							try{
-								usageMap.put(metricName, metricRow.getColumns().getIntegerValue(column, 0));
-							}catch(Exception e2){
-								try{
-									usageMap.put(metricName, metricRow.getColumns().getStringValue(column, null));
-								}catch(Exception e3){
-									InsightsLogger.error(traceId, getBaseService().errorHandler(ErrorMessages.UNHANDLED_EXCEPTION, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), column), e);
+				if (!metricRow.getColumns().isEmpty() && metricRow.getColumns().size() > 0) {
+					for (String column : columns) {
+						Map<String, Object> usageMap = new HashMap<String, Object>();
+						Map<String, Object> optionsAsMap = new HashMap<String, Object>();
+						String[] columnMetaInfo = column.split(ApiConstants.TILDA);
+						String metricName = (columnMetaInfo.length > 1) ? columnMetaInfo[columnMetaInfo.length - 1] : columnMetaInfo[0];
+						if (DataUtils.getStringColumns().containsKey(metricName)) {
+							usageMap.put(DataUtils.getStringColumns().get(metricName), metricRow.getColumns().getStringValue(column.trim(), null));
+						} else if (metricName.matches(ApiConstants.OPTIONS_MATCH) && metricRow.getColumns().getColumnNames().contains(column.trim())) {
+							optionsAsMap.put(metricName, metricRow.getColumns().getLongValue(column.trim(), 0L));
+						} else if (DataUtils.getLongColumns().containsKey(metricName)) {
+							usageMap.put(DataUtils.getLongColumns().get(metricName), metricRow.getColumns().getLongValue(column.trim(), 0L));
+						}
+						if (userIds != null) {
+							for (String id : userIds.split(ApiConstants.COMMA)) {
+								if (metricRow.getKey().contains(id)) {
+									userId = id;
+									break;
 								}
 							}
-						}
-					}
-					if (!optionsAsMap.isEmpty()) {
-						usageMap.put("options", optionsAsMap);
-					}
-					if (userIds != null) {
-						for (String id : userIds.split(ApiConstants.COMMA)) {
-							if (metricRow.getKey().contains(id)) {
-								userId = id;
-								break;
+							usageMap.put(ApiConstants.USERUID, userId);
+						} else {
+							if (metricRow.getColumns().getColumnNames().contains(ApiConstants.GOORU_UID)) {
+								usageMap.put(ApiConstants.USERUID, metricRow.getColumns().getStringValue(ApiConstants.GOORU_UID, null));
 							}
 						}
-						usageMap.put(ApiConstants.USERUID, userId);
-					} else {
-						if (metricRow.getColumns().getColumnNames().contains(ApiConstants.GOORU_UID)) {
-							usageMap.put(ApiConstants.USERUID, metricRow.getColumns().getStringValue(ApiConstants.GOORU_UID, null));
-						}
-					}
 
-					if (KeyUsageAsMap.containsKey(columnMetaInfo[0])) {
-						usageMap.putAll(KeyUsageAsMap.get(columnMetaInfo[0]));
+						if (KeyUsageAsMap.containsKey(columnMetaInfo[0])) {
+							usageMap.putAll(KeyUsageAsMap.get(columnMetaInfo[0]));
+						}
+						if (!optionsAsMap.isEmpty()) {
+							usageMap.put("options", optionsAsMap);
+						}
+						KeyUsageAsMap.put(columnMetaInfo[0], usageMap);
 					}
-					KeyUsageAsMap.put(columnMetaInfo[0], usageMap);
-				}
 				}
 				outputUsageDataAsList.addAll(getBaseService().convertMapToList(KeyUsageAsMap, ApiConstants.GOORUOID));
 			}
