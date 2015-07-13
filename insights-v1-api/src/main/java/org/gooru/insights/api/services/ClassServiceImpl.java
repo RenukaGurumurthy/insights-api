@@ -405,13 +405,13 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				ColumnList<String> unitMetaDataColumns = unitMetaData.getResult();
 				unitDataAsMap.put(ApiConstants.TITLE, unitMetaDataColumns.getColumnByName(ApiConstants.TITLE).getStringValue());
 			}
-			long scoreMet = 0;
-			long scoreNotMet = 0;
-			long attempted = 0;
-			long notScored = 0;
+			
 			OperationResult<ColumnList<String>> lessonData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), unitGooruOid);
 			ColumnList<String> lessons = lessonData.getResult();
 			for (Column<String> lesson : lessons) {
+				long scoreMet = 0;
+				long scoreNotMet = 0;
+				long attempted = 0;
 				Map<String, Object> lessonDataAsMap = new HashMap<String, Object>();
 				String lessonGooruOid = lesson.getName();
 				String classLessonKey = getBaseService().appendTilda(classId, courseId, unitGooruOid, lessonGooruOid);
@@ -454,10 +454,9 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						}
 					}
 				}
-
 				if (attempted == 0) {
 					lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.NOT_ATTEMPTED);
-				} else if (scoreMet > 0 && scoreNotMet == 0 && notScored == 0) {
+				} else if (scoreMet > 0 && scoreNotMet == 0 && (scoreMet == items.size())) {
 					lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.SCORE_MET);
 				}
 				lessonDataMapAsList.add(lessonDataAsMap);
@@ -486,12 +485,14 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		resourceColumns.add(ApiConstants.THUMBNAIL);
 		resourceColumns.add(ApiConstants.RESOURCE_TYPE);
 
-		long scoreMet = 0;
-		long scoreNotMet = 0;
-		long attempted = 0;
+		
 		OperationResult<ColumnList<String>> lessonData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), unitId);
 		ColumnList<String> lessons = lessonData.getResult();
 		for (Column<String> lesson : lessons) {
+			long scoreNotMet = 0;
+			long scoreMet = 0;
+			long attempted = 0;
+			long notAttempted = 0;
 			List<Map<String, Object>> itemDataMapAsList = new ArrayList<Map<String, Object>>();
 			Map<String, Object> lessonDataAsMap = new HashMap<String, Object>();
 			String lessonGooruOid = lesson.getName();
@@ -551,20 +552,22 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						scoreNotMet += 1;
 						attempted += 1;
 						assessmentScoreStatus = ApiConstants.SCORE_NOT_MET;
-						lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.SCORE_NOT_MET);
-						break;
 					}
 				}
 				if (assessmentScore == null) {
+					scoreNotMet += 1; 
+					notAttempted += 1;
 					assessmentScoreStatus = ApiConstants.NOT_ATTEMPTED;
 				}
 				itemDataAsMap.put(ApiConstants.SCORE_STATUS, assessmentScoreStatus);
 				itemDataMapAsList.add(itemDataAsMap);
 			}
 			lessonDataAsMap.put(ApiConstants.ITEM, itemDataMapAsList);
-			if (attempted == 0) {
+			if (attempted == 0 && (itemDataMapAsList.size() == notAttempted)) {
 				lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.NOT_ATTEMPTED);
-			} else if (scoreMet > 0 && scoreNotMet == 0) {
+			} else if(scoreNotMet > 1) { 
+				lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.SCORE_NOT_MET);
+			} else if (scoreMet > 0 && scoreNotMet == 0 && (itemDataMapAsList.size() == scoreMet)) {
 				lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.SCORE_MET);
 			}
 			lessonDataMapAsList.add(lessonDataAsMap);
@@ -898,7 +901,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		
 		// Fetch assessment count
 		Long questionCount = 0L; Long scorableQuestionCount = 0L; Long oeCount = 0L; Long resourceCount = 0L; Long itemCount = 0L; 
-		Map<String, Long> contentMetaAsMap = getContentMeta(traceId, assessmentId, getBaseService().appendComma(ApiConstants.QUESTION_COUNT, ApiConstants._OE_COUNT));
+		Map<String, Long> contentMetaAsMap = getContentMeta(traceId, assessmentId, getBaseService().appendComma(ApiConstants.QUESTION_COUNT, ApiConstants._OE_COUNT, ApiConstants.RESOURCE_COUNT, ApiConstants._ITEM_COUNT));
 		if (!contentMetaAsMap.isEmpty()) {
 			questionCount = (contentMetaAsMap.containsKey(ApiConstants.QUESTION_COUNT) && contentMetaAsMap.get(ApiConstants.QUESTION_COUNT) != null) ? contentMetaAsMap.get(ApiConstants.QUESTION_COUNT) : 0L;
 			oeCount = (contentMetaAsMap.containsKey(ApiConstants._OE_COUNT) && contentMetaAsMap.get(ApiConstants._OE_COUNT) != null) ? contentMetaAsMap.get(ApiConstants._OE_COUNT) : 0L;
@@ -1630,6 +1633,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						} else if (DataUtils.getLongColumns().containsKey(metricName)) {
 							usageMap.put(DataUtils.getLongColumns().get(metricName), metricRow.getColumns().getLongValue(column.trim(), 0L));
 						}
+						
 						if (userIds != null) {
 							for (String id : userIds.split(ApiConstants.COMMA)) {
 								if (metricRow.getKey().contains(id)) {
@@ -1643,13 +1647,11 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 								usageMap.put(ApiConstants.USERUID, metricRow.getColumns().getStringValue(ApiConstants.GOORU_UID, null));
 							}
 						}
-
 						if (KeyUsageAsMap.containsKey(columnMetaInfo[0])) {
 							usageMap.putAll(KeyUsageAsMap.get(columnMetaInfo[0]));
 						}
-						if (!optionsAsMap.isEmpty()) {
-							usageMap.put("options", optionsAsMap);
-						}
+						usageMap.put("options", optionsAsMap);
+						
 						KeyUsageAsMap.put(columnMetaInfo[0], usageMap);
 					}
 				}
