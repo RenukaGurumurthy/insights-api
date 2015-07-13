@@ -225,6 +225,7 @@ public class ApiConstants {
 	public static final String _SESSION_ID = "session_id";
 	
 	public static final String ITEM = "item";
+	public static final String COLLECTION_MATCH = "collection|scollection";
 	public static final String COLLECTION = "collection";
 	public static final String ASSESSMENT = "assessment";
 	

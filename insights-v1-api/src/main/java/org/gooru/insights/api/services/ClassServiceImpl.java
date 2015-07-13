@@ -120,6 +120,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	public ResponseParamDTO<Map<String,Object>> getUnitUsage(String traceId, String classId, String courseId, String unitId, String userUid, String collectionType, Boolean getUsageData, boolean isSecure) throws Exception {
 		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		List<Map<String,Object>> students = null;
+		List<Map<String,Object>> resultData = new ArrayList<Map<String, Object>>();
 		List<Map<String, Object>> rawDataMapAsList = new ArrayList<Map<String, Object>>();
 		List<Map<String, Object>> unitRawDataMapAsList = new ArrayList<Map<String, Object>>();
 
@@ -162,6 +164,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			OperationResult<ColumnList<String>> assessmentMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), getBaseService().appendTilda(classUnitKey, ApiConstants.ASSESSMENT, ApiConstants._SCORE_IN_PERCENTAGE));
 			long assessmentsAttemptedInUnit = assessmentMetricsData != null ? assessmentMetricsData.getResult().size() : 0L;
 			
+			
 			List<Map<String, Object>> resultMapList = new ArrayList<Map<String, Object>>();
 			List<Map<String, Object>> lessonResultMapList = new ArrayList<Map<String, Object>>();
 			Map<String, Object> unitUsageDataAsMap = new HashMap<String, Object>(2);
@@ -195,21 +198,23 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					lessonUsageAsMap.putAll(getActivityMetricsAsMap(traceId, classLessonKey, lessonGooruOid));
 					
 					usageAsMap.put(ApiConstants.USAGE_DATA, lessonUsageAsMap);
+
+					usageAsMap.putAll(rawDataMap);
+					lessonResultMapList.add(usageAsMap);
 				}else {
 						/**
 						 * Fetch the list of user usage data and store it in lessonUsageAsMap as userUsage
 						 */
-					List<Map<String,Object>> assessmentUsage = null;
 					String contentType = null;
 					if(collectionType !=null){
 						if(collectionType.equalsIgnoreCase(ApiConstants.ASSESSMENT)){
 							contentType = ApiConstants.ASSESMENT_TYPE_MATCHER;
-						}else if(collectionType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
-							contentType = ApiConstants.COLLECTION;
+						}else if(collectionType.matches(ApiConstants.COLLECTION_MATCH)) {
+							contentType = ApiConstants.COLLECTION_MATCH;
 						}
 					}
-					List<Map<String,Object>> collections = getContentItems(traceId,lessonGooruOid,contentType,false);
-					List<Map<String,Object>> students = getStudents(traceId,classId);
+					List<Map<String,Object>> collections = getContentItems(traceId,lessonGooruOid,contentType,true);
+					students = getStudents(traceId,classId);
 					if(!(students.isEmpty() || collections.isEmpty())){
 						Set<String> columnSuffix = new HashSet<String>();
 						columnSuffix.add(ApiConstants._TIME_SPENT);
@@ -221,7 +226,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						/**
 						 * Get collection activity
 						 */
-						assessmentUsage = getCollectionActivityMetrics(traceId, rowKeys,ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), columns, studentIds.toString(),true,collectionIds.toString(),true);
+						List<Map<String,Object>> assessmentUsage = getCollectionActivityMetrics(traceId, rowKeys,ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), columns, studentIds.toString(),true,collectionIds.toString(),true);
 						/**
 						 * Existing JSON Structure, will be removed while the API got stabilized
 						 */
@@ -235,24 +240,32 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						 */
 						assessmentUsage = getBaseService().includeDefaultData(assessmentUsage, collections, ApiConstants.USERUID, ApiConstants.GOORUOID);
 						assessmentUsage = getBaseService().groupDataDependOnkey(assessmentUsage,ApiConstants.USERUID,ApiConstants.USAGE_DATA);
-						assessmentUsage = getBaseService().LeftJoin(assessmentUsage,students,ApiConstants.USERUID,ApiConstants.USERUID);
+						usageAsMap.putAll(rawDataMap);
+						assessmentUsage = getBaseService().injectRecord(assessmentUsage, usageAsMap);
+						resultData.addAll(assessmentUsage);
 					}
-					usageAsMap.put(ApiConstants.USAGE_DATA, assessmentUsage);
 				}
-				
-				usageAsMap.putAll(rawDataMap);
-				lessonResultMapList.add(usageAsMap);
 			}
+			if (StringUtils.isNotBlank(userUid)) {
 			unitUsageDataAsMap.put(ApiConstants.LESSON, lessonResultMapList);
-			if(!unitRawDataMapAsList.isEmpty() && unitRawDataMapAsList.size() > 0) {
-				unitUsageDataAsMap.putAll(unitRawDataMapAsList.get(0));
-				if(unitUsageDataAsMap.containsKey(ApiConstants.RESOURCE_TYPE) && unitUsageDataAsMap.get(ApiConstants.RESOURCE_TYPE) != null) {
-					unitUsageDataAsMap.put(ApiConstants.TYPE , unitUsageDataAsMap.get(ApiConstants.RESOURCE_TYPE));
-					unitUsageDataAsMap.remove(ApiConstants.RESOURCE_TYPE);
+				if(!unitRawDataMapAsList.isEmpty() && unitRawDataMapAsList.size() > 0) {
+					unitUsageDataAsMap.putAll(unitRawDataMapAsList.get(0));
+					if(unitUsageDataAsMap.containsKey(ApiConstants.RESOURCE_TYPE) && unitUsageDataAsMap.get(ApiConstants.RESOURCE_TYPE) != null) {
+						unitUsageDataAsMap.put(ApiConstants.TYPE , unitUsageDataAsMap.get(ApiConstants.RESOURCE_TYPE));
+						unitUsageDataAsMap.remove(ApiConstants.RESOURCE_TYPE);
+					}
+				}
+				resultMapList.add(unitUsageDataAsMap);
+				responseParamDTO.setContent(resultMapList);
+			}else{
+				resultData = getBaseService().groupDataDependOnkey(resultData,ApiConstants.USERUID,ApiConstants.USAGE_DATA);
+				resultData = getBaseService().LeftJoin(resultData,students,ApiConstants.USERUID,ApiConstants.USERUID);
+				if(!resultData.isEmpty()){
+					responseParamDTO.setContent(resultData);
+				}else{
+					responseParamDTO.setContent(null);
 				}
 			}
-			resultMapList.add(unitUsageDataAsMap);
-			responseParamDTO.setContent(resultMapList);
 		}
 		return responseParamDTO;
 	}
@@ -959,10 +972,9 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		Collection<String> resourceColumns = new ArrayList<String>();
 		resourceColumns.add(ApiConstants.TITLE);
 		resourceColumns.add(ApiConstants.RESOURCE_TYPE);
-		resourceColumns.add(ApiConstants.THUMBNAIL);
 		ColumnList<String> resourceColumn = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), key, resourceColumns).getResult();
 		if(type != null){
-			String resourceType = resourceColumn.getStringValue(ApiConstants.RESOURCE_TYPE, "");
+			String resourceType = resourceColumn.getStringValue(ApiConstants.RESOURCE_TYPE, ApiConstants.STRING_EMPTY);
 			if(!resourceType.matches(type)){
 					return;
 				}
