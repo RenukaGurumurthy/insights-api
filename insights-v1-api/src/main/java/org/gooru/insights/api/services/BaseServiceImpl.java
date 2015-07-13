@@ -403,6 +403,8 @@ public class BaseServiceImpl implements BaseService {
 								dataSet.put(column.getName(), column.getLongValue());
 							}
 						
+						} else if(column.getName().equalsIgnoreCase("question.type")){
+							dataSet.put("type", column.getStringValue());
 						}
 						else {
 							dataSet.put("key", key);
@@ -1694,27 +1696,31 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 	 		return rawRowsMapList;
 		}
 		
-		public String appendComma(String... texts) {
-			StringBuffer sb = new StringBuffer();
-			for (String text : texts) {
+	public String appendComma(String... texts) {
+		StringBuffer sb = new StringBuffer();
+		for (String text : texts) {
+			if (StringUtils.isNotBlank(text)) {
 				if (sb.length() > 0) {
 					sb.append(ApiConstants.COMMA);
 				}
 				sb.append(text);
 			}
-			return sb.toString();
 		}
+		return sb.toString();
+	}
 		
-		public String appendTilda(String... texts) {
-			StringBuffer sb = new StringBuffer();
-			for (String text : texts) {
+	public String appendTilda(String... texts) {
+		StringBuffer sb = new StringBuffer();
+		for (String text : texts) {
+			if (StringUtils.isNotBlank(text)) {
 				if (sb.length() > 0) {
 					sb.append(ApiConstants.TILDA);
 				}
 				sb.append(text);
 			}
-			return sb.toString();
 		}
+		return sb.toString();
+	}
 		
 		public String buildString(Object... texts){
 			StringBuffer sb = new StringBuffer();

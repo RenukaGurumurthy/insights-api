@@ -299,6 +299,7 @@ public class ApiConstants {
 	public static final String AVG_REACTION = "avgReaction";
 	public static final String RESOURCE = "resource";
 	public static final String CSV_EXT = ".csv";
+	public static final String _ITEM_COUNT = "item_count";
 	
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");

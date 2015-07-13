@@ -29,6 +29,10 @@ public interface InsightsConstant {
 	
 	String EVENT_TIME = "eventTime";
 	
+	String LAST_ACCESSED_RESOURCE = "lastAccessedResource";
+	
+	String _LAST_ACCESSED_RESOURCE = "last_accessed_resource";
+	
 	String TYPE = "type";
 	
 	String START = "start";

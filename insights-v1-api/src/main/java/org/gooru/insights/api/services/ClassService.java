@@ -27,7 +27,7 @@ public interface ClassService {
 	ResponseParamDTO<Map<String, Object>> getUserSessions(String traceId, String classId, String courseId, String unitId, String lessonId, String collectionId, String collectionType, String userUid,
 			boolean openSession,boolean isSecure) throws Exception;
 	
-	ResponseParamDTO<Map<String,Object>> getStudentAssessmentData(String traceId, String classId, String courseId, String unitId, String lessonId, String assessmentId, String userUid, boolean isSecure) throws Exception;
+	ResponseParamDTO<Map<String,Object>> getStudentAssessmentData(String traceId, String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid, String collectionType, boolean isSecure) throws Exception;
 	
 	ResponseParamDTO<Map<String,Object>> getStudentAssessmentSummary(String traceId, String classId, String courseId, String unitId, String lessonId, String assessmentId, String userUid, String sessionId, boolean isSecure) throws Exception;
 
@@ -42,4 +42,9 @@ public interface ClassService {
 	List<String> getSessions(String traceId, Collection<String> rowKeys);
 
 	List<Map<String,Object>> getCollectionActivityMetrics(String traceId, Collection<String> rowKeys,String columnFamily, Collection<String> columns, String userIds,boolean isUserIdInKey,String collectionIds, boolean userProcess);
+
+	ResponseParamDTO<Map<String, Object>> findUsageAvailable(String traceId, String classGooruId ,String courseGooruId,String unitGooruId,String lessonGooruId,String contentGooruId) throws Exception;
+
 }
+
+

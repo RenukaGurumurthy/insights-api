@@ -1,6 +1,8 @@
 package org.gooru.insights.api.utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.gooru.insights.api.constants.ApiConstants;
@@ -9,15 +11,48 @@ public class DataUtils {
 
 	private static Map<String,String> assessmentAnswerSelect;
 
+	private static Map<String,String> stringColumns;
+
+	private static Map<String,String> longColumns;
+
+	static{
+		longColumns = new HashMap<String, String>();
+		longColumns.put(ApiConstants.VIEWS, ApiConstants.VIEWS);
+		longColumns.put(ApiConstants._SCORE_IN_PERCENTAGE, ApiConstants.SCORE_IN_PERCENTAGE);
+		longColumns.put(ApiConstants._TIME_SPENT, ApiConstants.TIMESPENT);
+		longColumns.put(ApiConstants.RA, ApiConstants.REACTION);
+		longColumns.put(ApiConstants.SCORE, ApiConstants.SCORE);
+		longColumns.put(ApiConstants.SKIPPED, ApiConstants.SKIPPED);
+		longColumns.put("attempts", "attempts");
+		longColumns.put("correct", "totalCorrectCount");
+		longColumns.put("in_correct", "totalInCorrectCount");
+		longColumns.put("A", "options");
+		longColumns.put("B", "options");
+		longColumns.put("C", "options");
+		longColumns.put("D", "options");
+		longColumns.put("E", "options");
+		longColumns.put("F", "options");
+	}
+	static{
+		stringColumns = new HashMap<String, String>();
+		stringColumns.put(ApiConstants._COLLECTION_TYPE, ApiConstants.COLLECTION_TYPE);
+		stringColumns.put(ApiConstants.CHOICE, ApiConstants.TEXT);
+		stringColumns.put(ApiConstants.TYPE, ApiConstants.QUESTION_TYPE);
+		stringColumns.put(ApiConstants._FEEDBACK_PROVIDER, ApiConstants.FEEDBACKPROVIDER);
+		stringColumns.put(ApiConstants._QUESTION_STATUS, ApiConstants.STATUS);
+		stringColumns.put("answer_object", "answerObject");
+	}
 	static {
 		assessmentAnswerSelect = new HashMap<String, String>();
 		assessmentAnswerSelect.put("collection_gooru_oid", "collectionGooruOId");
 		assessmentAnswerSelect.put("is_correct", "isCorrect");
 		assessmentAnswerSelect.put("question_gooru_oid", "gooruOId");
 		assessmentAnswerSelect.put("sequence", "sequence");
-		assessmentAnswerSelect.put("answer_text", "text");
+		assessmentAnswerSelect.put("answer_text", "answerText");
 		assessmentAnswerSelect.put("question_type", "questionType");
 		assessmentAnswerSelect.put("type_name", "type");
+		assessmentAnswerSelect.put("answer_id", "answerId");
+		assessmentAnswerSelect.put("question_id", "questionId");
 	}
 	
 	private static Map<String,String> sessionActivityMetrics;
@@ -61,4 +96,11 @@ public class DataUtils {
 		return sessionActivityMetrics;
 	}
 
+	public static Map<String,String> getStringColumns() {
+		return stringColumns;
+	}
+	public static Map<String,String> getLongColumns() {
+		return longColumns;
+	}
+	
 }
