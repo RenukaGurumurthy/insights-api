@@ -1156,58 +1156,61 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		}
 		return contentItems;
 	}
-	private ResponseParamDTO<Map<String,Object>> getAllStudentProgressByUnit(String traceId, String classId, String courseId,boolean isSecure) throws Exception {
-		
+
+	private ResponseParamDTO<Map<String, Object>> getAllStudentProgressByUnit(String traceId, String classId, String courseId, boolean isSecure) throws Exception {
+
 		List<Map<String, Object>> unitDetails = new ArrayList<Map<String, Object>>();
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		
+
 		OperationResult<ColumnList<String>> unitData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), courseId);
 		ColumnList<String> units = unitData.getResult();
-		
+
 		OperationResult<ColumnList<String>> userGroupAssociation = getCassandraService().read(traceId, ColumnFamily.USER_GROUP_ASSOCIATION.getColumnFamily(), classId);
 		ColumnList<String> userGroup = userGroupAssociation.getResult();
-		
-		if(!units.isEmpty() && units.size() > 0) {
-			for (String unitGooruOid : units.getColumnNames()) {
-				Map<String, Object> unitDataAsMap = new HashMap<String, Object>();
-				/**
-				 * Get Resource Meta data
-				 */
-				Collection<String> resourceColumns = new ArrayList<String>();
-				resourceColumns.add(ApiConstants.TITLE);
-				resourceColumns.add(ApiConstants.RESOURCE_TYPE);
-				OperationResult<ColumnList<String>> unitMetaData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), unitGooruOid, resourceColumns);
-				if (!unitMetaData.getResult().isEmpty() && unitMetaData.getResult().size() > 0) {
-					ColumnList<String> unitMetaDataColumns = unitMetaData.getResult();
-					unitDataAsMap.put(ApiConstants.GOORUOID, unitGooruOid);
-					unitDataAsMap.put(ApiConstants.TITLE, unitMetaDataColumns.getStringValue(ApiConstants.TITLE,null));
-					unitDataAsMap.put(ApiConstants.TYPE, unitMetaDataColumns.getStringValue(ApiConstants.RESOURCE_TYPE, null));
-					unitDataAsMap.put(SEQUENCE, units.getLongValue(unitGooruOid, 0L));
-						List<Map<String, Object>> unitUsageDetails = new ArrayList<Map<String, Object>>();
-						for (Column<String> user : userGroup) {
-							/**
-							 * Get activity details
-							 */
-							Map<String, Object> unitUsageData = new HashMap<String, Object>();
-							unitUsageData.put(ApiConstants.USERUID, user.getName());
-							unitUsageData.put(ApiConstants.USER_NAME, user.getStringValue());
 
-							Long scoreInPercentage = 0L;
-							OperationResult<ColumnList<String>> unitActivityDetails = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
-									baseService.appendTilda(classId, courseId, unitGooruOid,user.getName()));
-							if(unitActivityDetails != null){
-								ColumnList<String> unitActivity = unitActivityDetails.getResult();
-								if(!unitActivity.isEmpty()){
-									scoreInPercentage = unitActivity.getLongValue(ApiConstants._SCORE_IN_PERCENTAGE, 0L);
-								}
+		if (!units.isEmpty() && units.size() > 0 && !userGroup.isEmpty() && userGroup.size() > 0) {
+
+			Map<String, Object> userMetadataDetails = new HashMap<String, Object>();
+			for (Column<String> user : userGroup) {
+				/**
+				 * Get activity details
+				 */
+				userMetadataDetails.put(ApiConstants.USERUID, user.getName());
+				userMetadataDetails.put(ApiConstants.USER_NAME, user.getStringValue());
+
+				List<Map<String, Object>> userUnitUsageDetails = new ArrayList<Map<String, Object>>();
+				for (String unitGooruOid : units.getColumnNames()) {
+					Map<String, Object> unitDataAsMap = new HashMap<String, Object>();
+					/**
+					 * Get Resource Meta data
+					 */
+					Collection<String> resourceColumns = new ArrayList<String>();
+					resourceColumns.add(ApiConstants.TITLE);
+					resourceColumns.add(ApiConstants.RESOURCE_TYPE);
+					OperationResult<ColumnList<String>> unitMetaData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), unitGooruOid, resourceColumns);
+					if (!unitMetaData.getResult().isEmpty() && unitMetaData.getResult().size() > 0) {
+						ColumnList<String> unitMetaDataColumns = unitMetaData.getResult();
+						unitDataAsMap.put(ApiConstants.GOORUOID, unitGooruOid);
+						unitDataAsMap.put(ApiConstants.TITLE, unitMetaDataColumns.getStringValue(ApiConstants.TITLE, null));
+						unitDataAsMap.put(ApiConstants.TYPE, unitMetaDataColumns.getStringValue(ApiConstants.RESOURCE_TYPE, null));
+						unitDataAsMap.put(SEQUENCE, units.getLongValue(unitGooruOid, 0L));
+
+						Long scoreInPercentage = 0L;
+						OperationResult<ColumnList<String>> unitActivityDetails = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
+								baseService.appendTilda(classId, courseId, unitGooruOid, user.getName()));
+						if (unitActivityDetails != null) {
+							ColumnList<String> unitActivity = unitActivityDetails.getResult();
+							if (!unitActivity.isEmpty()) {
+								scoreInPercentage = unitActivity.getLongValue(ApiConstants._SCORE_IN_PERCENTAGE, 0L);
 							}
-							unitUsageData.put(ApiConstants.SCORE_IN_PERCENTAGE, scoreInPercentage);
-							unitUsageDetails.add(unitUsageData);
 						}
-						unitDataAsMap.put(ApiConstants.USAGE_DATA, unitUsageDetails);
+						unitDataAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, scoreInPercentage);
+					}
+					userUnitUsageDetails.add(unitDataAsMap);
 				}
-				unitDetails.add(unitDataAsMap);
+				userMetadataDetails.put(ApiConstants.USAGE_DATA, userUnitUsageDetails);
 			}
+			unitDetails.add(userMetadataDetails);
 		}
 		responseParamDTO.setContent(unitDetails);
 		return responseParamDTO;
