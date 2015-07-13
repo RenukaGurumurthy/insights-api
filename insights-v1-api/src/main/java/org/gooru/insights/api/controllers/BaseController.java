@@ -86,6 +86,7 @@ public class BaseController {
 		
 		InputStream sheet = new FileInputStream(excelFile);
 		response.setContentType(apiHeaders.CSV_RESPONSE.apiHeader());
+		response.setHeader("Content-Disposition", "attachment; filename=\""+excelFile+"\"");
 		IOUtils.copy(sheet, response.getOutputStream());
 		response.getOutputStream().flush();
 		response.getOutputStream().close();

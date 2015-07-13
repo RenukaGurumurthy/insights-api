@@ -1,5 +1,7 @@
 package org.gooru.insights.api.services;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.gooru.insights.api.models.ResponseParamDTO;
@@ -32,6 +34,14 @@ public interface ClassService {
 	ResponseParamDTO<Map<String, Object>> getSessionStatus(String traceId, String sessionId, String contentGooruId, String collectionType, boolean isSecure) throws Exception;
 
 	ResponseParamDTO<Map<String,Object>> getStudentsCollectionData(String traceId, String classId, String courseId, String unitId, String lessonId, String collectionId, boolean isSecure) throws Exception;
+
+	List<Map<String,Object>> getContentItems(String traceId,String rowKey,String type,boolean fetchMetaData);
+
+	List<Map<String,Object>> getStudents(String traceId, String classId);
+
+	List<String> getSessions(String traceId, Collection<String> rowKeys);
+
+	List<Map<String,Object>> getCollectionActivityMetrics(String traceId, Collection<String> rowKeys,String columnFamily, Collection<String> columns, String userIds,boolean isUserIdInKey,String collectionIds, boolean userProcess);
 
 	ResponseParamDTO<Map<String, Object>> findUsageAvailable(String traceId, String classGooruId ,String courseGooruId,String unitGooruId,String lessonGooruId,String contentGooruId) throws Exception;
 
