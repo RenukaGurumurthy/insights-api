@@ -234,9 +234,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						 * Newer JSON Structure
 						 */
 						assessmentUsage = getBaseService().includeDefaultData(assessmentUsage, collections, ApiConstants.USERUID, ApiConstants.GOORUOID);
-						System.out.println("assessmentUsage:"+assessmentUsage);
 						assessmentUsage = getBaseService().groupDataDependOnkey(assessmentUsage,ApiConstants.USERUID,ApiConstants.USAGE_DATA);
-						System.out.println("groupDataDependOnkey:"+assessmentUsage);
 						assessmentUsage = getBaseService().LeftJoin(assessmentUsage,students,ApiConstants.USERUID,ApiConstants.USERUID);
 					}
 					usageAsMap.put(ApiConstants.USAGE_DATA, assessmentUsage);
@@ -887,7 +885,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		
 		// Fetch assessment count
 		Long questionCount = 0L; Long scorableQuestionCount = 0L; Long oeCount = 0L; Long resourceCount = 0L; Long itemCount = 0L; 
-		Map<String, Long> contentMetaAsMap = getContentMeta(traceId, assessmentId, getBaseService().appendComma(ApiConstants.QUESTION_COUNT, ApiConstants._OE_COUNT));
+		Map<String, Long> contentMetaAsMap = getContentMeta(traceId, assessmentId, getBaseService().appendComma(ApiConstants.QUESTION_COUNT, ApiConstants._OE_COUNT, ApiConstants.RESOURCE_COUNT, ApiConstants._ITEM_COUNT));
 		if (!contentMetaAsMap.isEmpty()) {
 			questionCount = (contentMetaAsMap.containsKey(ApiConstants.QUESTION_COUNT) && contentMetaAsMap.get(ApiConstants.QUESTION_COUNT) != null) ? contentMetaAsMap.get(ApiConstants.QUESTION_COUNT) : 0L;
 			oeCount = (contentMetaAsMap.containsKey(ApiConstants._OE_COUNT) && contentMetaAsMap.get(ApiConstants._OE_COUNT) != null) ? contentMetaAsMap.get(ApiConstants._OE_COUNT) : 0L;
@@ -1620,6 +1618,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						} else if (DataUtils.getLongColumns().containsKey(metricName)) {
 							usageMap.put(DataUtils.getLongColumns().get(metricName), metricRow.getColumns().getLongValue(column.trim(), 0L));
 						}
+						
 						if (userIds != null) {
 							for (String id : userIds.split(ApiConstants.COMMA)) {
 								if (metricRow.getKey().contains(id)) {
@@ -1633,7 +1632,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 								usageMap.put(ApiConstants.USERUID, metricRow.getColumns().getStringValue(ApiConstants.GOORU_UID, null));
 							}
 						}
-
 						if (KeyUsageAsMap.containsKey(columnMetaInfo[0])) {
 							usageMap.putAll(KeyUsageAsMap.get(columnMetaInfo[0]));
 						}
