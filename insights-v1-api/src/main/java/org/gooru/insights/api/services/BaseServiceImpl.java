@@ -848,12 +848,8 @@ public class BaseServiceImpl implements BaseService {
 		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
 		for (Map<String, Object> map : aggregateData) {
 			Map<String, Object> resultMap = new HashMap<String, Object>();
-			for (Map.Entry<String, Object> value : map.entrySet()) {
-				resultMap.put(value.getKey(), value.getValue());
-			}
-			for (Map.Entry<String, Object> value : injuctableRecord.entrySet()) {
-				resultMap.put(value.getKey(), value.getValue());
-			}
+			resultMap.putAll(map);
+			resultMap.putAll(injuctableRecord);
 			resultList.add(resultMap);
 		}
 		return resultList;
