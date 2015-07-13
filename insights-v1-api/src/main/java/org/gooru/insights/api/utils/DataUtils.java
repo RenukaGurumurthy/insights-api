@@ -37,7 +37,6 @@ public class DataUtils {
 		stringColumns = new HashMap<String, String>();
 		stringColumns.put(ApiConstants._COLLECTION_TYPE, ApiConstants.COLLECTION_TYPE);
 		stringColumns.put(ApiConstants.CHOICE, ApiConstants.TEXT);
-		stringColumns.put(ApiConstants.TYPE, ApiConstants.QUESTION_TYPE);
 		stringColumns.put(ApiConstants._FEEDBACK_PROVIDER, ApiConstants.FEEDBACKPROVIDER);
 		stringColumns.put(ApiConstants._QUESTION_STATUS, ApiConstants.STATUS);
 		stringColumns.put("answer_object", "answerObject");
