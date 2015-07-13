@@ -1572,6 +1572,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		resourceColumns.add(ApiConstants.CATEGORY);
 		resourceColumns.add(ApiConstants.HAS_FRAME_BREAKER);
 		resourceColumns.add("question.type");
+		resourceColumns.add("question.questionType");
 		rawDataMapAsList = getResourceData(traceId, isSecure, rawDataMapAsList, itemGooruOids.toString(), resourceColumns, ApiConstants.RESOURCE);
 		
 		//Usage Data
