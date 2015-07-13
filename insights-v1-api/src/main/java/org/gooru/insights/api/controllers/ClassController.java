@@ -150,7 +150,7 @@ public class ClassController extends BaseController{
 	@RequestMapping(value="/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/{collectionType}/{collectionId}/users",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
-	public ModelAndView getStudentCollectionData(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
+	public ModelAndView getStudentsCollectionUsage(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId, 
 			@PathVariable(value="lessonGooruId") String lessonGooruId, @PathVariable(value="collectionId") String collectionId,
 			@PathVariable(value="collectionType") String collectionType,

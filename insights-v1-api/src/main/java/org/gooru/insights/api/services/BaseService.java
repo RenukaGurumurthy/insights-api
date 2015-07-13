@@ -129,6 +129,8 @@ public interface BaseService {
 	
 	String appendTilda(String... texts);
 	
+	String buildString(Object... texts);
+	
 	String errorHandler(String message, String... replace);
 	
 	List<Map<String,Object>> convertMapToList(Map<String,?> requestMap,String key);
@@ -138,4 +140,6 @@ public interface BaseService {
 	List<Map<String, Object>> includeDefaultData(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey, String childKey);
 
 	List<Map<String,Object>> getQuestionAnswerData(List<Map<String,Object>> requestData,String coreKey);
+	
+	String getHourlyBasedTimespent(double timeSpent);
 }

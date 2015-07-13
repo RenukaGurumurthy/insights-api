@@ -14,6 +14,10 @@ public class ApiConstants {
 	
 	public static final String TILDA = "~";
 	
+	public static final String HYPHEN = "-";
+	
+	public static final String DOUBLE_QUOTES = "\"";
+	
 	public static final String REPLACER = "{0}";
 	
 	public static final String GOORU_SESSION_TOKEN = "Gooru-Session-Token";
@@ -223,6 +227,9 @@ public class ApiConstants {
 	public static final String ITEM = "item";
 	public static final String COLLECTION = "collection";
 	public static final String ASSESSMENT = "assessment";
+	
+	public static final String ASSESSMENT_MATCH = "assessment/url|assessment-question";
+	
 	public static final String ASSESSMENT_SLASH_URL = "assessment/url";
 	public static final String LESSON_COUNT = "lessonCount";
 	public static final String UNIT_COUNT = "unitCount";
@@ -275,6 +282,7 @@ public class ApiConstants {
 	public static final String ASSESSMENT_USAGE_DATA = "assessmentUsageData";
 	public static final String OPEN_BRACE = "{";
 	public static final String CLOSE_BRACE = "}";
+	public static final String UTF8 = "UTF-8";
 	
 	public static final String HAS_FRAME_BREAKER = "hasFrameBreaker";
 	public static final String REACTION = "reaction";
@@ -287,6 +295,10 @@ public class ApiConstants {
 	public static final String TAU = "tau";
 	public static final String TOTAL_ATTEMPT_USER_COUNT = "totalAttemptUserCount";
 	public static final String OPTIONS_MATCH = "A|B|C|D|E|F";
+	public static final String _AVG_REACTION = "avg_reaction";
+	public static final String AVG_REACTION = "avgReaction";
+	public static final String RESOURCE = "resource";
+	public static final String CSV_EXT = ".csv";
 	
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
@@ -363,6 +375,19 @@ public class ApiConstants {
 		}
 		public String option(){
 			return option;
+		}
+	}
+	
+	public enum reactions {
+		ONE("I need help"),TWO("I dont understand"),THREE("meh"),FOUR("I understand"),FIVE("I can explain"),TEN("-");
+		
+		private String reaction;
+		
+		private reactions(String reaction){
+			this.reaction = reaction;
+		}
+		public String reaction(){
+			return reaction;
 		}
 	}
 }

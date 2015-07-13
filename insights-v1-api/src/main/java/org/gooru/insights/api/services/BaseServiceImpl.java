@@ -1716,6 +1716,14 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 			return sb.toString();
 		}
 		
+		public String buildString(Object... texts){
+			StringBuffer sb = new StringBuffer();
+			for (Object text : texts) {
+				sb.append(text);
+			}
+			return sb.toString();
+		}
+		
 		public String errorHandler(String message, String... replace){
 			
 			for(int i=0; i<replace.length;i++){
@@ -1828,5 +1836,14 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 
 			finalSet.add(intermediateMap);
 			return finalSet;
+		}
+		
+		public String getHourlyBasedTimespent(double timeSpent) {
+
+			long secs = Math.round(timeSpent / 1000);
+			long hrs = (long) Math.floor(secs / 3600);
+			long mins = (long) Math.floor((secs - (hrs * 3600)) / 60);
+			long lsecs = (long) Math.floor(secs - (hrs * 3600) - (mins * 60));
+			return ((hrs < 10) ? 0L + "" + hrs : hrs) + ":" + ((mins < 10) ? 0L + "" + mins : mins) + ":" + ((lsecs < 10) ? 0L + "" + lsecs : lsecs);
 		}
 }
