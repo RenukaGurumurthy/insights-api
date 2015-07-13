@@ -1170,8 +1170,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 
 		if (!units.isEmpty() && units.size() > 0 && !userGroup.isEmpty() && userGroup.size() > 0) {
 
-			Map<String, Object> userMetadataDetails = new HashMap<String, Object>();
 			for (Column<String> user : userGroup) {
+				Map<String, Object> userMetadataDetails = new HashMap<String, Object>();
 				/**
 				 * Get activity details
 				 */
@@ -1209,8 +1209,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					userUnitUsageDetails.add(unitDataAsMap);
 				}
 				userMetadataDetails.put(ApiConstants.USAGE_DATA, userUnitUsageDetails);
+				unitDetails.add(userMetadataDetails);
 			}
-			unitDetails.add(userMetadataDetails);
 		}
 		responseParamDTO.setContent(unitDetails);
 		return responseParamDTO;
