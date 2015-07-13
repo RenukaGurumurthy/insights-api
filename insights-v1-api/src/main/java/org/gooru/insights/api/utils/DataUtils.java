@@ -41,7 +41,6 @@ public class DataUtils {
 		stringColumns.put(ApiConstants._FEEDBACK_PROVIDER, ApiConstants.FEEDBACKPROVIDER);
 		stringColumns.put(ApiConstants._QUESTION_STATUS, ApiConstants.STATUS);
 		stringColumns.put("answer_object", "answerObject");
-		stringColumns.put("options", "options");
 	}
 	static {
 		assessmentAnswerSelect = new HashMap<String, String>();
