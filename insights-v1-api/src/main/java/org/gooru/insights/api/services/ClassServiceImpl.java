@@ -1076,7 +1076,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					if((columnPrefix.length > 1 ? columnPrefix[1].matches(ApiConstants.OPTIONS_MATCH) : columnPrefix[0].matches(ApiConstants.OPTIONS_MATCH))){
 						continue;
 					}
-					usageMap = fetchMetricData(traceId,metricName,metricRow,metricName,column);
+					usageMap = fetchMetricData(traceId,columnMetaInfo[0],metricRow,metricName,column);
 					userId = validateDefaultUser(userProcess,isUserIdInKey,userIds,userId,columnMetaInfo[0],metricRow,usageMap,userSet);
 					if(KeyUsageAsMap.containsKey(columnMetaInfo[0])){
 						usageMap.putAll(KeyUsageAsMap.get(columnMetaInfo[0]));
@@ -1578,7 +1578,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		//Usage Data
 		Set<String> columnSuffix = DataUtils.getSessionActivityMetricsMap().keySet();
 		Collection<String> columns = getBaseService().appendAdditionalField(ApiConstants.TILDA, itemGooruOids.toString(), columnSuffix);
-		List<Map<String,Object>> usageDataList = getSessionActivityMetrics(traceId, getBaseService().convertStringToCollection(sessionId), ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), columns, null);
+		List<Map<String,Object>> usageDataList = getSessionActivityMetrics(traceId, getBaseService().convertStringToCollection(sessionId), ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), columns, itemGooruOids.toString());
+		//List<Map<String,Object>> usageDataList = getCollectionActivityMetrics(traceId, getBaseService().convertStringToCollection(sessionId), ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), columns, null, false, itemGooruOids.toString(), false);
 
 		//Question meta 
 		List<Map<String,Object>> answerRawData = getBaseService().getQuestionAnswerData(
@@ -1596,7 +1597,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		teacherUId = getBaseService().exportData(itemDataMapAsList, ApiConstants.FEEDBACKPROVIDER);
 		if (!teacherUId.toString().isEmpty()) {
 			String teacherUid = "";
-			String[] teacherid = teacherUId.toString().split(",");
+			String[] teacherid = teacherUId.toString().split(COMMA);
 			for (String ids : teacherid) {
 				if (ids != null && !ids.isEmpty() && !ids.contains("null")) {
 					teacherUid = ids;
@@ -1613,47 +1614,32 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return itemDataMapAsList;
 	}
 	
-	private List<Map<String, Object>> getSessionActivityMetrics(String traceId, Collection<String> rowKeys, String columnFamily, Collection<String> columns, String userIds) {
+	private List<Map<String, Object>> getSessionActivityMetrics(String traceId, Collection<String> rowKeys, String columnFamily, Collection<String> columns, String itemGooruOids) {
 		List<Map<String, Object>> outputUsageDataAsList = new ArrayList<Map<String, Object>>();
 		OperationResult<Rows<String, String>> activityData = getCassandraService().readAll(traceId, columnFamily, rowKeys, columns);
 		if (!activityData.getResult().isEmpty()) {
 			Rows<String, String> itemMetricRows = activityData.getResult();
 			for (Row<String, String> metricRow : itemMetricRows) {
-				String userId = null;
 				Map<String, Map<String, Object>> KeyUsageAsMap = new HashMap<String, Map<String, Object>>();
 				if (!metricRow.getColumns().isEmpty() && metricRow.getColumns().size() > 0) {
-					for (String column : columns) {
+					for (String item : itemGooruOids.split(COMMA)) {
 						Map<String, Object> usageMap = new HashMap<String, Object>();
 						Map<String, Object> optionsAsMap = new HashMap<String, Object>();
-						String[] columnMetaInfo = column.split(ApiConstants.TILDA);
-						String metricName = (columnMetaInfo.length > 1) ? columnMetaInfo[columnMetaInfo.length - 1] : columnMetaInfo[0];
-						if (DataUtils.getStringColumns().containsKey(metricName)) {
-							usageMap.put(DataUtils.getStringColumns().get(metricName), metricRow.getColumns().getStringValue(column.trim(), null));
-						} else if (metricName.matches(ApiConstants.OPTIONS_MATCH) && metricRow.getColumns().getColumnNames().contains(column.trim())) {
-							optionsAsMap.put(metricName, metricRow.getColumns().getLongValue(column.trim(), 0L));
-						} else if (DataUtils.getLongColumns().containsKey(metricName)) {
-							usageMap.put(DataUtils.getLongColumns().get(metricName), metricRow.getColumns().getLongValue(column.trim(), 0L));
-						}
-						
-						if (userIds != null) {
-							for (String id : userIds.split(ApiConstants.COMMA)) {
-								if (metricRow.getKey().contains(id)) {
-									userId = id;
-									break;
+						for (String column : columns) {
+							if (column.contains(item)) {
+								String[] columnMetaInfo = column.split(ApiConstants.TILDA);
+								String metricName = (columnMetaInfo.length > 1) ? columnMetaInfo[columnMetaInfo.length - 1] : columnMetaInfo[0];
+								if (DataUtils.getStringColumns().containsKey(metricName)) {
+									usageMap.put(DataUtils.getStringColumns().get(metricName), metricRow.getColumns().getStringValue(column.trim(), null));
+								} else if (metricName.matches(ApiConstants.OPTIONS_MATCH) && metricRow.getColumns().getColumnNames().contains(column.trim())) {
+									optionsAsMap.put(metricName, metricRow.getColumns().getLongValue(column.trim(), 0L));
+								} else if (DataUtils.getLongColumns().containsKey(metricName) && !metricName.matches(ApiConstants.OPTIONS_MATCH)) {
+									usageMap.put(DataUtils.getLongColumns().get(metricName), metricRow.getColumns().getLongValue(column.trim(), 0L));
 								}
-							}
-							usageMap.put(ApiConstants.USERUID, userId);
-						} else {
-							if (metricRow.getColumns().getColumnNames().contains(ApiConstants.GOORU_UID)) {
-								usageMap.put(ApiConstants.USERUID, metricRow.getColumns().getStringValue(ApiConstants.GOORU_UID, null));
-							}
+							}	                                                
 						}
-						if (KeyUsageAsMap.containsKey(columnMetaInfo[0])) {
-							usageMap.putAll(KeyUsageAsMap.get(columnMetaInfo[0]));
-						}
-						usageMap.put("options", optionsAsMap);
-						
-						KeyUsageAsMap.put(columnMetaInfo[0], usageMap);
+						usageMap.put(ApiConstants.OPTIONS, optionsAsMap);
+						KeyUsageAsMap.put(item, usageMap);
 					}
 				}
 				outputUsageDataAsList.addAll(getBaseService().convertMapToList(KeyUsageAsMap, ApiConstants.GOORUOID));

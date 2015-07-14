@@ -14,6 +14,8 @@ public class ApiConstants {
 	
 	public static final String TILDA = "~";
 	
+	public static final String FORWARD_SLASH = "/";
+	
 	public static final String HYPHEN = "-";
 	
 	public static final String DOUBLE_QUOTES = "\"";
@@ -265,7 +267,7 @@ public class ApiConstants {
 	public static final String RESOURCE_TYPE = "resourceType";
 	public static final String RESOURCE_FORMAT = "resourceFormat";
 	public static final String VIEWS = "views";
-	public static final String TIMESPENT = "timespent";
+	public static final String TIMESPENT = "timeSpent";
 	public static final String _TIME_SPENT = "time_spent";
 	public static final String TOTAL_STUDY_TIME = "totalStudyTime";
 	public static final String TOTAL_SCORE = "totalScore";
