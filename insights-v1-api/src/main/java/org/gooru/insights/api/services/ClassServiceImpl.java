@@ -461,8 +461,14 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				}
 				lessonDataMapAsList.add(lessonDataAsMap);
 			}
+			if(!lessonDataMapAsList.isEmpty() && lessonDataMapAsList.size() > 0) {
+				lessonDataMapAsList = baseService.sortBy(lessonDataMapAsList, SEQUENCE, ApiConstants.ASC);
+			}
 			unitDataAsMap.put(ApiConstants.ITEM, lessonDataMapAsList);
 			unitDataMapAsList.add(unitDataAsMap);
+		}
+		if(!unitDataMapAsList.isEmpty() && unitDataMapAsList.size() > 0) {
+			unitDataMapAsList = baseService.sortBy(unitDataMapAsList, SEQUENCE, ApiConstants.ASC);
 		}
 		responseParamDTO.setContent(unitDataMapAsList);
 		return responseParamDTO;		
@@ -555,6 +561,9 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				itemDataAsMap.put(ApiConstants.SCORE_STATUS, assessmentScoreStatus);
 				itemDataMapAsList.add(itemDataAsMap);
 			}
+			if(!itemDataMapAsList.isEmpty() && itemDataMapAsList.size() > 0) {
+				itemDataMapAsList = baseService.sortBy(itemDataMapAsList, SEQUENCE, ApiConstants.ASC);
+			}
 			lessonDataAsMap.put(ApiConstants.ITEM, itemDataMapAsList);
 			if (attempted == 0 && (itemDataMapAsList.size() == notAttempted)) {
 				lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.NOT_ATTEMPTED);
@@ -564,6 +573,9 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.SCORE_MET);
 			}
 			lessonDataMapAsList.add(lessonDataAsMap);
+		}
+		if(!lessonDataMapAsList.isEmpty() && lessonDataMapAsList.size() > 0) {
+			lessonDataMapAsList = baseService.sortBy(lessonDataMapAsList, SEQUENCE, ApiConstants.ASC);
 		}
 		responseParamDTO.setContent(lessonDataMapAsList);
 		return responseParamDTO;
@@ -682,6 +694,9 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					unitDataAsMap.put(ApiConstants.COLLECTION_COUNT, unitCollectionCount);
 					unitDataMapAsList.add(unitDataAsMap);
 				}
+				if(!unitDataMapAsList.isEmpty() && unitDataMapAsList.size() > 0) {
+					unitDataMapAsList = baseService.sortBy(unitDataMapAsList, SEQUENCE, ApiConstants.ASC);
+				}
 				responseParamDTO.setContent(unitDataMapAsList);
 			}
 		}else{
@@ -784,6 +799,10 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			for (Column<String> item : items) {
 				Map<String, Object> itemDataAsMap = new HashMap<String, Object>();
 				String itemGooruOid = item.getName();
+				itemDataAsMap.put(ApiConstants.SEQUENCE, item.getLongValue());
+				//fetch type
+				getResourceMeta(itemDataAsMap, isSecure, traceId, itemGooruOid, getBaseService().convertStringToCollection(ApiConstants.RESOURCE_TYPE));
+				
 				// fetch item usage data
 				itemDataAsMap.putAll(getClassMetricsAsMap(traceId, classLessonKey, itemGooruOid));
 				itemDataMapAsList.add(itemDataAsMap);
@@ -811,6 +830,9 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			}
 			lessonDataAsMap.putAll(getActivityMetricsAsMap(traceId, classLessonKey, lessonGooruOid));
 			lessonDataAsMap.put(ApiConstants.TYPE, ApiConstants.LESSON);
+			if(!itemDataMapAsList.isEmpty() && itemDataMapAsList.size() > 0) {
+				itemDataMapAsList = baseService.sortBy(itemDataMapAsList, SEQUENCE, ApiConstants.ASC);
+			}
 			lessonDataAsMap.put(ApiConstants.ITEM, itemDataMapAsList);
 			if (attempted == 0) {
 				lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.NOT_ATTEMPTED);
@@ -821,6 +843,9 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			if (!lessonDataAsMap.isEmpty() && lessonDataAsMap.size() > 0) {
 				resultDataMapAsList.add(lessonDataAsMap);
 			}
+		}
+		if(!resultDataMapAsList.isEmpty() && resultDataMapAsList.size() > 0) {
+			resultDataMapAsList = baseService.sortBy(resultDataMapAsList, SEQUENCE, ApiConstants.ASC);
 		}
 		responseParamDTO.setContent(resultDataMapAsList);
 		return responseParamDTO;
@@ -1032,18 +1057,16 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		Map<String, Object> usageAsMap = new HashMap<String, Object>();
 		usageAsMap.put(ApiConstants.GOORUOID, contentGooruOid);
 		OperationResult<ColumnList<String>> itemsColumnList = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), key);
-		Long views = 0L; Long timeSpent = 0L; Long score = 0L; String collectionType = null;
+		Long views = 0L; Long timeSpent = 0L; Long score = 0L; 
 		if (!itemsColumnList.getResult().isEmpty() && itemsColumnList.getResult().size() > 0) {
 			ColumnList<String> itemMetricColumns = itemsColumnList.getResult();
 			views = itemMetricColumns.getLongValue(getBaseService().appendTilda(contentGooruOid, ApiConstants.VIEWS), 0L);
 			timeSpent = itemMetricColumns.getLongValue(getBaseService().appendTilda(contentGooruOid, ApiConstants._TIME_SPENT), 0L);
 			score = itemMetricColumns.getLongValue(getBaseService().appendTilda(contentGooruOid, ApiConstants._SCORE_IN_PERCENTAGE), 0L);
-			collectionType = itemMetricColumns.getStringValue(getBaseService().appendTilda(contentGooruOid, ApiConstants._COLLECTION_TYPE), null);
 		}
 		usageAsMap.put(ApiConstants.VIEWS, views);
 		usageAsMap.put(ApiConstants.TIMESPENT, timeSpent);
 		usageAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, score);
-		usageAsMap.put(ApiConstants.TYPE, collectionType);
 		return usageAsMap;
 	}
 	
@@ -1577,7 +1600,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 									break;
 								}
 							}
-							responseParamDTO.setContent(itemDataMapAsList);
 							break;
 						}
 					}
@@ -1586,20 +1608,25 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			}
 		} else if ((sessionId != null && StringUtils.isNotBlank(sessionId.trim())) && (assessmentId != null && StringUtils.isNotBlank(assessmentId.trim()))) {
 			itemDataMapAsList = getCollectionSummaryData(traceId, assessmentId, sessionId, itemDataMapAsList, isSecure);
-			responseParamDTO.setContent(itemDataMapAsList);
 		} else {
 			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, getBaseService().appendComma("assessmentId", "sessionId"),
 					getBaseService().appendComma("classId", "courseId", "unitId", "lessonId", "assessmentId"));
 		}
+		if(!itemDataMapAsList.isEmpty() && itemDataMapAsList.size() > 0) {
+			itemDataMapAsList = baseService.sortBy(itemDataMapAsList, SEQUENCE, ApiConstants.ASC);
+		}
+		responseParamDTO.setContent(itemDataMapAsList);
 		return responseParamDTO;
 	}
 	
 	private List<Map<String, Object>> getCollectionSummaryData(String traceId, String collectionGooruId, String sessionId, List<Map<String, Object>> itemDataMapAsList, boolean isSecure) {
+
+		//Fetch collection items
 		List<Map<String, Object>> itemColumnResult = getContentItems(traceId, collectionGooruId, null, false);
-		List<Map<String, Object>> rawDataMapAsList = new ArrayList<Map<String, Object>>();
 		StringBuffer itemGooruOids = getBaseService().exportData(itemColumnResult, ApiConstants.GOORUOID);
 
 		//Resource metadata
+		List<Map<String, Object>> rawDataMapAsList = new ArrayList<Map<String, Object>>();
 		Collection<String> resourceColumns = new ArrayList<String>();
 		resourceColumns.add(ApiConstants.TITLE);
 		resourceColumns.add(ApiConstants.RESOURCE_TYPE);
@@ -1623,7 +1650,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				getBaseService().getRowsColumnValues(traceId,
 						getCassandraService().readAll(traceId, ColumnFamily.ASSESSMENT_ANSWER.getColumnFamily(), ApiConstants.COLLECTIONGOORUOID, collectionGooruId,
 								new ArrayList<String>())), ApiConstants.QUESTION_GOORU_OID);
-
+		
+		rawDataMapAsList = getBaseService().LeftJoin(itemColumnResult, rawDataMapAsList, ApiConstants.GOORUOID, ApiConstants.GOORUOID);
 		itemDataMapAsList = getBaseService().LeftJoin(rawDataMapAsList, usageDataList, ApiConstants.GOORUOID, ApiConstants.GOORUOID);
 		itemDataMapAsList = getBaseService().LeftJoin(itemDataMapAsList, answerRawData, ApiConstants.GOORUOID, ApiConstants.QUESTION_GOORU_OID);
 		
