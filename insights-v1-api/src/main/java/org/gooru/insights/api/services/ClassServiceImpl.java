@@ -484,7 +484,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		resourceColumns.add(ApiConstants.GOORUOID);
 		resourceColumns.add(ApiConstants.THUMBNAIL);
 		resourceColumns.add(ApiConstants.RESOURCE_TYPE);
-
+		resourceColumns.add(ApiConstants.FOLDER);
 		
 		OperationResult<ColumnList<String>> lessonData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), unitId);
 		ColumnList<String> lessons = lessonData.getResult();
@@ -523,15 +523,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					itemDataAsMap.put(ApiConstants.SEQUENCE, item.getIntegerValue());
 				}
 
-				List<Map<String, Object>> rawDataMapAsList = new ArrayList<Map<String, Object>>();
-				rawDataMapAsList = getResourceData(traceId, isSecure, rawDataMapAsList, itemGooruOid, resourceColumns, ApiConstants.COLLECTION);
-				if (rawDataMapAsList.size() > 0) {
-					itemDataAsMap.putAll(rawDataMapAsList.get(0));
-					if(itemDataAsMap.containsKey(ApiConstants.RESOURCE_TYPE) && itemDataAsMap.get(ApiConstants.RESOURCE_TYPE) != null) {
-						itemDataAsMap.put(ApiConstants.TYPE , itemDataAsMap.get(ApiConstants.RESOURCE_TYPE));
-						itemDataAsMap.remove(ApiConstants.RESOURCE_TYPE);
-					}
-				}
+				getResourceMeta(itemDataAsMap, isSecure, traceId, itemGooruOid, resourceColumns);
 
 				OperationResult<ColumnList<String>> assessmentMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
 						getBaseService().appendTilda(classLessonKey, ApiConstants.ASSESSMENT, ApiConstants._SCORE_IN_PERCENTAGE));
@@ -559,6 +551,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					notAttempted += 1;
 					assessmentScoreStatus = ApiConstants.NOT_ATTEMPTED;
 				}
+				itemDataAsMap.put(ApiConstants.GOORUOID, itemGooruOid);
 				itemDataAsMap.put(ApiConstants.SCORE_STATUS, assessmentScoreStatus);
 				itemDataMapAsList.add(itemDataAsMap);
 			}
@@ -884,20 +877,14 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		}
 		
 		//Fetch assessment metadata
-		List<Map<String, Object>> rawDataMapAsList = new ArrayList<Map<String, Object>>();
 		Collection<String> resourceColumns = new ArrayList<String>();
 		resourceColumns.add(ApiConstants.TITLE);
 		resourceColumns.add(ApiConstants.RESOURCE_TYPE);
 		resourceColumns.add(ApiConstants.THUMBNAIL);
 		resourceColumns.add(ApiConstants.GOORUOID);
-		rawDataMapAsList = getResourceData(traceId, isSecure, rawDataMapAsList, assessmentId, resourceColumns, ApiConstants.COLLECTION);
-		if (!rawDataMapAsList.isEmpty() && rawDataMapAsList.size() > 0) {
-			itemDetailAsMap.putAll(rawDataMapAsList.get(0));
-			if(itemDetailAsMap.containsKey(ApiConstants.RESOURCE_TYPE) && itemDetailAsMap.get(ApiConstants.RESOURCE_TYPE) != null) {
-				itemDetailAsMap.put(ApiConstants.TYPE , itemDetailAsMap.get(ApiConstants.RESOURCE_TYPE));
-				itemDetailAsMap.remove(ApiConstants.RESOURCE_TYPE);
-			}
-		}
+		resourceColumns.add(ApiConstants.FOLDER);
+		getResourceMeta(itemDetailAsMap, isSecure, traceId, assessmentId, resourceColumns);
+
 		
 		// Fetch assessment count
 		Long questionCount = 0L; Long scorableQuestionCount = 0L; Long oeCount = 0L; Long resourceCount = 0L; Long itemCount = 0L; 
@@ -968,6 +955,48 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		rawDataMapAsList = getBaseService().appendInnerData(rawDataMapAsList, combineMap, isSecure ? ApiConstants.HTTPS : ApiConstants.HTTP);
 		rawDataMapAsList = getBaseService().addCustomKeyInMapList(rawDataMapAsList, ApiConstants.GOORUOID, null);
 		return rawDataMapAsList;
+	}
+
+	private void getResourceMeta(Map<String, Object> dataMap, boolean isSecure, String traceId, String key, Collection<String> columnsToFetch) {
+		//Set default
+		for (String column : columnsToFetch) {
+			if (column.equalsIgnoreCase("question.type") || column.equalsIgnoreCase("question.questionType") || column.equalsIgnoreCase("resourceType")) {
+				dataMap.put(ApiConstants.TYPE, null);
+			} else if(column.equalsIgnoreCase(ApiConstants.FOLDER)) { 
+				continue;
+			} else{
+				dataMap.put(column, null);
+			}
+		}
+
+		// fetch metadata
+		ColumnList<String> resourceColumn = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), key, columnsToFetch).getResult();
+		// form thumbnail
+		String thumbnail = resourceColumn.getStringValue(ApiConstants.THUMBNAIL, null);
+		if (StringUtils.isNotBlank(thumbnail)) {
+			String nfsPath = filePath.getProperty(ApiConstants.NFS_BUCKET);
+			String folder = resourceColumn.getStringValue(ApiConstants.FOLDER, null);
+			String thumb = null;
+			if (thumbnail.startsWith(ApiConstants._HTTP)) {
+				thumb = thumbnail;
+			} else {
+				thumb = getBaseService().appendForwardSlash(nfsPath, folder, thumbnail);
+			}
+			if (isSecure) {
+				thumb = thumb.replaceFirst(ApiConstants._HTTP, ApiConstants._HTTPS);
+			}
+			dataMap.put(ApiConstants.THUMBNAIL, thumb);
+		}
+
+		for (Column<String> column : resourceColumn) {
+			if (column.getName().equals(ApiConstants.RESOURCE_TYPE) || column.getName().equalsIgnoreCase("question.type") || column.getName().equalsIgnoreCase("question.questionType")) {
+				dataMap.put(ApiConstants.TYPE, column.getStringValue());
+			} else if (column.getName().equals(ApiConstants.THUMBNAIL) || column.getName().equals(ApiConstants.FOLDER)) {
+				continue;
+			} else {
+				dataMap.put(column.getName(), column.getStringValue());
+			}
+		}
 	}
 	
 	private void getResourceMetaData(Map<String, Object> dataMap, String traceId,String type, String key) {

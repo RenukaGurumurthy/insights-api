@@ -154,6 +154,8 @@ public class ApiConstants {
 	
 	public static final String _HTTP = "http://";
 	
+	public static final String _HTTPS = "https://";
+	
 	public static final String IS_CORRECT = "is_correct";
 	
 	public static final String _ISCORRECT = "isCorrect";
