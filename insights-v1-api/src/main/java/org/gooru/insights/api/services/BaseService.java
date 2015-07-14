@@ -142,4 +142,6 @@ public interface BaseService {
 	List<Map<String,Object>> getQuestionAnswerData(List<Map<String,Object>> requestData,String coreKey);
 	
 	String getHourlyBasedTimespent(double timeSpent);
+	
+	String appendForwardSlash(String... texts);
 }

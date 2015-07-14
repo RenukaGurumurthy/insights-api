@@ -1717,6 +1717,19 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 		}
 		return sb.toString();
 	}
+	
+	public String appendForwardSlash(String... texts) {
+		StringBuffer sb = new StringBuffer();
+		for (String text : texts) {
+			if (StringUtils.isNotBlank(text)) {
+				if (sb.length() > 0) {
+					sb.append(ApiConstants.FORWARD_SLASH);
+				}
+				sb.append(text);
+			}
+		}
+		return sb.toString();
+	}
 		
 		public String buildString(Object... texts){
 			StringBuffer sb = new StringBuffer();
