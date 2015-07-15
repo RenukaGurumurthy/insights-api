@@ -231,9 +231,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						 * Existing JSON Structure, will be removed while the API got stabilized
 						 */
 /*						assessmentUsage = getBaseService().includeDefaultData(assessmentUsage, students, ApiConstants.GOORUOID, ApiConstants.USERUID);
-						System.out.println("assessmentUsage:"+assessmentUsage);
 						assessmentUsage = getBaseService().groupDataDependOnkey(assessmentUsage,ApiConstants.GOORUOID,ApiConstants.USAGE_DATA);
-						System.out.println("groupDataDependOnkey:"+assessmentUsage);
 						assessmentUsage = getBaseService().LeftJoin(collections,assessmentUsage,ApiConstants.GOORUOID,ApiConstants.GOORUOID);
 */						/**
 						 * Newer JSON Structure
@@ -999,7 +997,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		}
 	}
 	
-	private void getResourceMetaData(Map<String, Object> dataMap, String traceId,String type, String key) {
+	public void getResourceMetaData(Map<String, Object> dataMap, String traceId,String type, String key) {
 		// fetch metadata
 		Collection<String> resourceColumns = new ArrayList<String>();
 		resourceColumns.add(ApiConstants.TITLE);

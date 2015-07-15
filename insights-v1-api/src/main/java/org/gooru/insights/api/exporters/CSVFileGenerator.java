@@ -26,17 +26,44 @@ public class CSVFileGenerator {
 	public static final String FILE_REAL_PATH = "insights.file.real.path";
 	public static final String FILE_APP_PATH = "insights.file.app.path";
 	
-	public String generateCSVReport(boolean isNewFile,String fileName, List<Map<String, Object>> resultSet) throws ParseException, IOException {
+	public File generateCSVReport(boolean isNewFile,String fileName, List<Map<String, Object>> resultSet) throws ParseException, IOException {
 
 		boolean headerColumns = false;
-		PrintStream stream = null;
 		File csvfile = new File(setFilePath(fileName));
-		if(isNewFile){
-			stream = new PrintStream(new BufferedOutputStream(new FileOutputStream(csvfile, false)));
-		}else{
-			stream = new PrintStream(new BufferedOutputStream(new FileOutputStream(csvfile, true)));
-		}
+		PrintStream stream = generatePrintStream(isNewFile,csvfile);
 		for (Map<String, Object> map : resultSet) {
+			writeToStream(map,stream,headerColumns);
+			headerColumns = true;
+		}
+		writeToFile(stream);
+		return csvfile;
+	}
+
+	public File generateCSVReport(boolean isNewFile,String fileName, Map<String, Object> resultSet) throws ParseException, IOException {
+
+		boolean headerColumns = false;
+		File csvfile = new File(setFilePath(fileName));
+		PrintStream stream = generatePrintStream(isNewFile,csvfile);
+		writeToStream(resultSet,stream,headerColumns);
+		writeToFile(stream);
+		return csvfile;
+	}
+	
+	public void includeEmptyLine(boolean isNewFile,String fileName, int lineCount) throws FileNotFoundException{
+		
+		File csvfile = new File(setFilePath(fileName));
+		PrintStream stream = generatePrintStream(isNewFile,csvfile);
+		for(int i =0; i < lineCount;i++){
+			stream.println(ApiConstants.STRING_EMPTY);
+		}
+		writeToFile(stream);
+	}
+	
+	private Object appendDQ(Object key) {
+	    return ApiConstants.DOUBLE_QUOTES + key + ApiConstants.DOUBLE_QUOTES;
+	}
+	
+	private void writeToStream(Map<String,Object> map,PrintStream stream,boolean headerColumns){
 			if (!headerColumns) {
 				for (Map.Entry<String, Object> entry : map.entrySet()) {
 					stream.print(appendDQ(entry.getKey()) + ApiConstants.COMMA);
@@ -50,32 +77,24 @@ public class CSVFileGenerator {
 			}
 			// print new line
 			stream.println(ApiConstants.STRING_EMPTY);
-		}
-		stream.flush();
-		stream.close();
-		return getFilePath(csvfile.getName());
 	}
-	
-	public void includeEmptyLine(boolean isNewFile,String fileName, int lineCount) throws FileNotFoundException{
-		
+
+	private PrintStream generatePrintStream(boolean isNewFile,File file) throws FileNotFoundException{
 		PrintStream stream = null;
-		File csvfile = new File(setFilePath(fileName));
+		File csvfile = file;
 		if(isNewFile){
 			stream = new PrintStream(new BufferedOutputStream(new FileOutputStream(csvfile, false)));
 		}else{
 			stream = new PrintStream(new BufferedOutputStream(new FileOutputStream(csvfile, true)));
 		}
-		for(int i =0; i < lineCount;i++){
-			stream.println(ApiConstants.STRING_EMPTY);
-		}
+		return stream;
+	}
+
+	private void writeToFile(PrintStream stream){
 		stream.flush();
 		stream.close();
 	}
 	
-	private Object appendDQ(Object key) {
-	    return ApiConstants.DOUBLE_QUOTES + key + ApiConstants.DOUBLE_QUOTES;
-	}
-
 	public String setFilePath(String file){
 		
 		String fileName = this.getFilePath().getProperty(FILE_REAL_PATH);
@@ -90,10 +109,8 @@ public class CSVFileGenerator {
 	public String getFilePath(String file){
 		
 		String fileName = this.getFilePath().getProperty(FILE_APP_PATH);
-		
 		if(file != null && (!file.isEmpty())){
 			fileName += file;
-		
 		}else{
 			fileName +=DEFAULT_FILE_NAME;
 		}

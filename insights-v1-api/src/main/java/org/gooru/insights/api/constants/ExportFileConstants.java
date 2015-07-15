@@ -12,13 +12,19 @@ public class ExportFileConstants {
 	public static final String AVG_TIME_SPENT = "Avg Time Spent";
 
 	public static final String PROGRESS_FILE_NAME = "collection-progress-";
+	public static final String SUMMARY_FILE_NAME = "collection-summary-";
 	public static final String ANSWER = "answer";
+	public static final String COLLECTION = "collection";
+	public static final String RESOURCE = "resource";
 	public static final String CORRECT_INCORRECT = "Correct / Incorrect";
 	public static final String TIME_SPENT = "Time Spent";
 	public static final String ATTEMPTS = "Attempts";
 	public static final String REACTION = "Reaction";
+	public static final String SCORE_IN_PERCENTAGE = "Score In Percentage";
+	public static final String SCORE = "Score";
 	public static final String STUDENT = "Student";
 	public static final String QUESTION_DATA = "Question Data";
+	public static final String COLLECTION_DATA = "Collection Data";
 	public static final String RESOURCE_DATA = "Resource Data";
 	public static final String SKIPPED = "skipped";
 	public static final String OPTIONS = "options";

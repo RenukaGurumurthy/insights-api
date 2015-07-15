@@ -295,6 +295,7 @@ public class ApiConstants {
 	public static final String SKIPPED = "skipped";
 	public static final String TEXT = "text";
 	public static final String RA = "RA";
+	public static final String _REACTION_COUNT = "reaction_count";
 	public static final String _QUESTION_STATUS = "question_status";
 	public static final String STATUS = "status";
 	public static final String TAU = "tau";

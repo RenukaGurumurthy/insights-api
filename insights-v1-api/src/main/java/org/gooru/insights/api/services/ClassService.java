@@ -45,6 +45,7 @@ public interface ClassService {
 
 	ResponseParamDTO<Map<String, Object>> findUsageAvailable(String traceId, String classGooruId ,String courseGooruId,String unitGooruId,String lessonGooruId,String contentGooruId) throws Exception;
 
+	void getResourceMetaData(Map<String, Object> dataMap, String traceId,String type, String key);
 }
 
 

@@ -1,12 +1,18 @@
 package org.gooru.insights.api.controllers;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.gooru.insights.api.constants.InsightsOperationConstants;
+import org.gooru.insights.api.exporters.ClassExporterProcessor;
 import org.gooru.insights.api.security.AuthorizeOperations;
 import org.gooru.insights.api.services.BaseService;
 import org.gooru.insights.api.services.ClassService;
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +32,9 @@ public class ClassController extends BaseController{
 	@Autowired
 	private BaseService baseService;
 	
+	@Autowired
+	ClassExporterProcessor classExporterProcessor;
+
 	private ClassService getClassService() {
 		return classService;
 	}
@@ -178,6 +187,34 @@ public class ClassController extends BaseController{
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
 		return getModel(getClassService().findUsageAvailable(getTraceId(request), classGooruId, courseGooruId,unitGooruId,lessonGooruId,contentGooruId));
+	}
+
+	@RequestMapping(value="{classId}/course/{courseId}/unit/{unitId}/lesson/{lessonId}/{collectionType}/{collectionId}/users/report", method = {RequestMethod.GET})
+	public void exportClassUserUsageReport(HttpServletRequest request,
+			@PathVariable(value ="classId") String classId,@PathVariable(value ="courseId") String courseId,
+			@PathVariable(value ="unitId") String unitId,@PathVariable(value ="lessonId") String lessonId,
+			@PathVariable(value ="collectionType") String collectionType,@PathVariable(value ="collectionId") String collectionId,HttpServletResponse response) throws JSONException, ParseException, IOException{
+		
+		File file = getClassExporterProcessor().exportClassUserUsageReport(getTraceId(request),classId, courseId, unitId, lessonId, collectionType, collectionId);
+		generateCSVOutput(response,file);
+	}
+
+	@RequestMapping(value="/{collectionId}/resources/report", method = {RequestMethod.GET})
+	public void exportClassUserUsageReport(HttpServletRequest request,
+			@PathVariable(value ="collectionId") String collectionId,
+			@RequestParam(value="sessionId") String sessionId,HttpServletResponse response) throws JSONException, ParseException, IOException{
+		
+		File file = getClassExporterProcessor().exportClassSummaryReport(getTraceId(request),collectionId,sessionId);
+		generateCSVOutput(response,file);
+	}
+	
+	public ClassExporterProcessor getClassExporterProcessor() {
+		return classExporterProcessor;
+	}
+
+	public void setClassExporterProcessor(
+			ClassExporterProcessor classExporterProcessor) {
+		this.classExporterProcessor = classExporterProcessor;
 	}
 }
 	
