@@ -841,7 +841,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		Map<String, Object> itemDetailAsMap = new HashMap<String, Object>();
 		OperationResult<ColumnList<String>> itemsColumnList = null;
 		Long classMinScore = 0L; String sessionKey = null;
-		Long scoreInPercentage = 0L; Long score = 0L; String evidence = null; Long timespent = 0L;
+		Long scoreInPercentage = 0L; Long score = 0L; String evidence = null; Long timespent = 0L; Long scorableCountOnEvent = 0L;
 		
 		if ((sessionId != null && StringUtils.isNotBlank(sessionId.trim()))) {
 			sessionKey = sessionId;
@@ -872,6 +872,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				scoreInPercentage = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants._SCORE_IN_PERCENTAGE), 0L);
 				evidence = lessonMetricColumns.getStringValue(getBaseService().appendTilda(assessmentId, ApiConstants.EVIDENCE), null);
 				timespent = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants._TIME_SPENT), 0L);
+				scorableCountOnEvent = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants._QUESTION_COUNT), 0L);
 			}
 		}
 		
@@ -902,6 +903,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		itemDetailAsMap.put(ApiConstants.SCORABLE_QUESTION_COUNT, scorableQuestionCount);
 		itemDetailAsMap.put(ApiConstants.RESOURCE_COUNT, resourceCount);
 		itemDetailAsMap.put(ApiConstants.ITEM_COUNT, itemCount);
+		itemDetailAsMap.put(ApiConstants.SCORABLE_COUNT_ON_EVENT, scorableCountOnEvent);
 		
 		//Fetch username and profile url
 		String username = null;
