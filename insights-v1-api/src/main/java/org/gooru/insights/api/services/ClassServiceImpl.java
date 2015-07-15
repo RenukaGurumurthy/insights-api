@@ -699,16 +699,15 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		if (sessions != null) {
 			ColumnList<String> sessionList = sessions.getResult();
 			if (!sessionList.isEmpty()) {
-				int sequence = 1;
 				if (!fetchOpenSession) {
 					for (Column<String> sessionColumn : sessionList) {
-						resultSet.add(generateSessionMap(sequence++, sessionColumn.getName(), sessionColumn.getLongValue()));
+						resultSet.add(generateSessionMap(sessionColumn.getName(), sessionColumn.getLongValue()));
 					}
 				} else {
 					ColumnList<String> sessionsInfo = getCassandraService().read(traceId, ColumnFamily.SESSION.getColumnFamily(), baseService.appendTilda(key, INFO)).getResult();
 					for (Column<String> sessionColumn : sessionList) {
 						if (sessionsInfo.getStringValue(baseService.appendTilda(sessionColumn.getName(), TYPE), null).equalsIgnoreCase(START)) {
-							Map<String, Object> sessionInfoMap = generateSessionMap(sequence++, sessionColumn.getName(), sessionColumn.getLongValue());
+							Map<String, Object> sessionInfoMap = generateSessionMap(sessionColumn.getName(), sessionColumn.getLongValue());
 							sessionInfoMap.put(LAST_ACCESSED_RESOURCE, sessionsInfo.getStringValue(baseService.appendTilda(sessionColumn.getName(), _LAST_ACCESSED_RESOURCE), null));
 							resultSet.add(sessionInfoMap);
 						}
@@ -717,13 +716,24 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				resultSet = baseService.sortBy(resultSet, EVENT_TIME, ApiConstants.ASC);
 			}
 		}
-		responseParamDTO.setContent(resultSet);
+		responseParamDTO.setContent(addSequence(resultSet));
 		return responseParamDTO;
 	}
 	
-	private Map<String,Object> generateSessionMap(int sequence,String sessionId,Long eventTime){
+	private List<Map<String, Object>> addSequence(List<Map<String, Object>> resultSet) {
+		List<Map<String, Object>> finalSet = null;
+		if (resultSet != null) {
+			int sequence = 1;
+			finalSet = new ArrayList<Map<String, Object>>();
+			for (Map<String, Object> resultMap : resultSet) {
+				resultMap.put(SEQUENCE, sequence++);
+				finalSet.add(resultMap);
+			}
+		}
+		return finalSet;
+	}
+	private Map<String,Object> generateSessionMap(String sessionId,Long eventTime){
 		HashMap<String, Object> session = new HashMap<String, Object>();
-		session.put(SEQUENCE, sequence);
 		session.put(SESSION_ID, sessionId);
 		session.put(EVENT_TIME, eventTime);
 		return session;
