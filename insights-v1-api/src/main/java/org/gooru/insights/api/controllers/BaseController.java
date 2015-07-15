@@ -82,21 +82,23 @@ public class BaseController {
 		return model;
 	}
 	
-	public void generateCSVOutput(HttpServletResponse response, File excelFile) throws IOException {
-		
-		InputStream sheet = new FileInputStream(excelFile);
+	public void generateCSVOutput(HttpServletResponse response, File csvFile) throws IOException {
+		InputStream sheet = new FileInputStream(csvFile);
 		response.setContentType(apiHeaders.CSV_RESPONSE.apiHeader());
-		response.setHeader("Content-Disposition", "attachment; filename=\""+excelFile+"\"");
+		response.setHeader("Content-Disposition", "attachment; filename=\""+csvFile.getName()+"\"");
 		IOUtils.copy(sheet, response.getOutputStream());
 		response.getOutputStream().flush();
+		csvFile.delete();
 		response.getOutputStream().close();
 	}
 	
 	public void generateExcelOutput(HttpServletResponse response, File excelFile) throws IOException {
 		InputStream sheet = new FileInputStream(excelFile);
 		response.setContentType("application/xls");
+		response.setHeader("Content-Disposition", "attachment; filename=\""+excelFile.getName()+"\"");
 		IOUtils.copy(sheet, response.getOutputStream());
 		response.getOutputStream().flush();
+		excelFile.delete();
 		response.getOutputStream().close();
 	}
 
