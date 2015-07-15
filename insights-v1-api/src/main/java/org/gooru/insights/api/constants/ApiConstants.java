@@ -249,7 +249,7 @@ public class ApiConstants {
 	public static final String _OE_COUNT = "oe_count";
 	
 	public static final String SCORABLE_QUESTION_COUNT = "scorableQuestionCount";
-
+	public static final String SCORABLE_COUNT_ON_EVENT = "scorableCountOnEvent";
 	public static final String EXTERNAL_ASSESSMENT_COUNT = "externalAssessmentCount";
 	public static final String ITEM_COUNT = "itemCount";
 	public static final String COLLECTIONS_VIEWED = "collectionsViewed";
