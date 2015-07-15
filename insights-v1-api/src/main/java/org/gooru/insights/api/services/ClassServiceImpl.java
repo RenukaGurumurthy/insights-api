@@ -599,28 +599,11 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					long unitAssessmentUrlCount = 0L;
 					long unitItemCount = 0L;
 
-					// Fetch lesson for item count details for this unit
-					OperationResult<ColumnList<String>> lessonData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), unitGooruOid);
-					ColumnList<String> lessons = lessonData.getResult();
-					if (!lessons.isEmpty() && lessons.size() > 0) {
-						StringBuffer collectionGooruOids = new StringBuffer();
-						StringBuffer assessmentGooruOids = new StringBuffer();
-						StringBuffer assessmentUrlGooruOids = new StringBuffer();
-						StringBuffer itemGooruOids = new StringBuffer();
-						for (String lessonGooruId : lessons.getColumnNames()) {
-							// fetch item ids w.r.t their resource type
-							getTypeBasedItemGooruOids(traceId, lessonGooruId, itemGooruOids, collectionGooruOids, assessmentGooruOids, assessmentUrlGooruOids);
-							long assessmentCount = assessmentGooruOids.toString().split(ApiConstants.COMMA).length;
-							long assessmentUrlCount = assessmentUrlGooruOids.toString().split(ApiConstants.COMMA).length;
-							long collectionCount = collectionGooruOids.toString().split(ApiConstants.COMMA).length;
-							long itemCount = itemGooruOids.toString().split(ApiConstants.COMMA).length;
-							unitAssessmentCount += assessmentCount;
-							unitCollectionCount += collectionCount;
-							unitAssessmentUrlCount += assessmentUrlCount;
-							unitItemCount += itemCount;
-						}
+					OperationResult<ColumnList<String>> lessonData = getCassandraService().read(traceId, ColumnFamily.CONTENT_META.getColumnFamily(), unitGooruOid);
+					if(!lessonData.getResult().isEmpty()){
+						unitAssessmentCount = lessonData.getResult().getLongValue(ApiConstants.ASSESSMENT_COUNT, 0l);	
+						unitCollectionCount = lessonData.getResult().getLongValue(ApiConstants.COLLECTION_COUNT, 0l);	
 					}
-
 					// Fetch collections viewed count
 					OperationResult<ColumnList<String>> collectionMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
 							getBaseService().appendTilda(classUnitKey, ApiConstants.COLLECTION, ApiConstants._TIME_SPENT));
