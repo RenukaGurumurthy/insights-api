@@ -852,9 +852,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			sessionKey = getSessionIdFromKey(traceId, getBaseService().appendTilda(SessionAttributes.RS.getSession(), classId, courseId, unitId, lessonId, assessmentId, userUid));
 		} else if((userUid != null && StringUtils.isNotBlank(userUid.trim()))) {
 			sessionKey = getSessionIdFromKey(traceId, getBaseService().appendTilda(SessionAttributes.RS.getSession(), assessmentId, userUid));
-		} 
-		
-		if (StringUtils.isBlank(sessionKey)){
+		} else {
 			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, getBaseService().appendComma("contentGooruId", "sessionId")
 					, getBaseService().appendComma("contentGooruId", "userUid"));
 		}
