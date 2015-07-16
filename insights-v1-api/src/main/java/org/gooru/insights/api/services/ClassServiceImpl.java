@@ -662,7 +662,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					unitDataAsMap.put(ApiConstants.COLLECTIONS_VIEWED, collectionsViewed);
 					unitDataAsMap.put(ApiConstants.TOTAL_STUDY_TIME, totalStudyTime);
 					unitDataAsMap.put(ApiConstants.ASSESSMENTS_ATTEMPTED, assessmentAttempted);
-					unitDataAsMap.put(ApiConstants.AVG_SCORE, avgScore);
+					unitDataAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, avgScore);
 					unitDataAsMap.put(ApiConstants.ASSESSMENT_COUNT, unitAssessmentCount);
 					unitDataAsMap.put(ApiConstants.COLLECTION_COUNT, unitCollectionCount);
 					unitDataMapAsList.add(unitDataAsMap);
