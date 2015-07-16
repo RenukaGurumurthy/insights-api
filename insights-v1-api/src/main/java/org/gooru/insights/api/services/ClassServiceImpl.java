@@ -561,10 +561,13 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				lessonScoreStatus = ApiConstants.SCORE_NOT_MET;
 			} else if (scoreMet > 0 && scoreNotMet == 0 && (itemDataMapAsList.size() == scoreMet)) {
 				lessonScoreStatus = ApiConstants.SCORE_MET;
-			} else {
+			} else if (attempted == 0){
 				lessonScoreStatus = ApiConstants.NOT_ATTEMPTED;
+			} else if (attempted > 0) {
+				lessonScoreStatus = ApiConstants.SCORE_NOT_MET;
 			}
 			lessonDataAsMap.put(ApiConstants.SCORE_STATUS, lessonScoreStatus);
+
 			lessonDataMapAsList.add(lessonDataAsMap);
 		}
 		responseParamDTO.setContent(lessonDataMapAsList);
@@ -819,8 +822,10 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				lessonScoreStatus = ApiConstants.SCORE_NOT_MET;
 			} else if (scoreMet > 0 && scoreNotMet == 0 && (itemDataMapAsList.size() == scoreMet)) {
 				lessonScoreStatus = ApiConstants.SCORE_MET;
-			} else {
+			} else if (attempted == 0){
 				lessonScoreStatus = ApiConstants.NOT_ATTEMPTED;
+			} else if (attempted > 0) {
+				lessonScoreStatus = ApiConstants.SCORE_NOT_MET;
 			}
 			lessonDataAsMap.put(ApiConstants.SCORE_STATUS, lessonScoreStatus);
 
