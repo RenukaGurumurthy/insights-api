@@ -438,11 +438,11 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					if (assessmentMetricColumnList != null && assessmentMetricColumnList.size() > 0) {
 						assessmentScore = assessmentMetricColumnList.getLongValue(itemGooruOid, null);
 						if (assessmentScore != null && assessmentScore >= classMinScore) {
-							scoreMet += 1;
-							attempted += 1;
+							scoreMet++;
+							attempted++;
 						} else if (assessmentScore != null && assessmentScore < classMinScore) {
-							scoreNotMet += 1;
-							attempted += 1;
+							scoreNotMet++;
+							attempted++;
 							lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.SCORE_NOT_MET);
 							break;
 						}
@@ -531,32 +531,40 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				if (assessmentMetricColumnList != null && assessmentMetricColumnList.size() > 0) {
 					assessmentScore = assessmentMetricColumnList.getLongValue(itemGooruOid, null);
 					if (assessmentScore != null && assessmentScore >= classMinScore) {
-						scoreMet += 1;
-						attempted += 1;
+						scoreMet++;
+						attempted++;
 						assessmentScoreStatus = ApiConstants.SCORE_MET;
 					} else if (assessmentScore != null && assessmentScore < classMinScore) {
-						scoreNotMet += 1;
-						attempted += 1;
+						scoreNotMet++;
+						attempted++;
 						assessmentScoreStatus = ApiConstants.SCORE_NOT_MET;
 					}
 				}
 				if (assessmentScore == null) {
-					scoreNotMet += 1; 
-					notAttempted += 1;
+					if (attempted == 0) {
+						notAttempted++;
+					} else if (attempted > 0) {
+						scoreNotMet++;
+					}
 					assessmentScoreStatus = ApiConstants.NOT_ATTEMPTED;
 				}
+				
 				itemDataAsMap.put(ApiConstants.GOORUOID, itemGooruOid);
 				itemDataAsMap.put(ApiConstants.SCORE_STATUS, assessmentScoreStatus);
 				itemDataMapAsList.add(itemDataAsMap);
 			}
 			lessonDataAsMap.put(ApiConstants.ITEM, itemDataMapAsList);
+			String lessonScoreStatus = null;
 			if (attempted == 0 && (itemDataMapAsList.size() == notAttempted)) {
-				lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.NOT_ATTEMPTED);
-			} else if(scoreNotMet > 1) { 
-				lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.SCORE_NOT_MET);
+				lessonScoreStatus = ApiConstants.NOT_ATTEMPTED;
+			} else if(scoreNotMet > 0) { 
+				lessonScoreStatus = ApiConstants.SCORE_NOT_MET;
 			} else if (scoreMet > 0 && scoreNotMet == 0 && (itemDataMapAsList.size() == scoreMet)) {
-				lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.SCORE_MET);
+				lessonScoreStatus = ApiConstants.SCORE_MET;
+			} else {
+				lessonScoreStatus = ApiConstants.NOT_ATTEMPTED;
 			}
+			lessonDataAsMap.put(ApiConstants.SCORE_STATUS, lessonScoreStatus);
 			lessonDataMapAsList.add(lessonDataAsMap);
 		}
 		responseParamDTO.setContent(lessonDataMapAsList);
@@ -744,10 +752,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		for (Column<String> lesson : lessons) {
 			Map<String, Object> lessonDataAsMap = new HashMap<String, Object>();
 			List<Map<String, Object>> itemDataMapAsList = new ArrayList<Map<String, Object>>();
-			long scoreMet = 0;
-			long scoreNotMet = 0;
-			long attempted = 0;
-
+			long scoreMet = 0; long scoreNotMet = 0; long attempted = 0; long notAttempted = 0;
 			String lessonGooruOid = lesson.getName();
 			try {
 				lessonDataAsMap.put(ApiConstants.SEQUENCE, lesson.getLongValue());
@@ -790,24 +795,34 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				if (assessmentMetricColumnList != null && assessmentMetricColumnList.size() > 0) {
 					assessmentScore = assessmentMetricColumnList.getLongValue(itemGooruOid, null);
 					if (assessmentScore != null && assessmentScore >= classMinScore) {
-						scoreMet += 1;
-						attempted += 1;
+						scoreMet++;
+						attempted++;
 					} else if (assessmentScore != null && assessmentScore < classMinScore) {
-						scoreNotMet += 1;
-						attempted += 1;
-						lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.SCORE_NOT_MET);
-						break;
+						scoreNotMet++;
+						attempted++;
 					}
 				}
+				if (assessmentScore == null && attempted == 0) {
+					notAttempted++;
+				} else if(assessmentScore == null && attempted > 0 ) {
+					scoreNotMet++; 
+				}
 			}
+			
 			lessonDataAsMap.putAll(getActivityMetricsAsMap(traceId, classLessonKey, lessonGooruOid));
 			lessonDataAsMap.put(ApiConstants.TYPE, ApiConstants.LESSON);
 			lessonDataAsMap.put(ApiConstants.ITEM, itemDataMapAsList);
-			if (attempted == 0) {
-				lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.NOT_ATTEMPTED);
-			} else if (scoreMet > 0 && scoreNotMet == 0) {
-				lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.SCORE_MET);
+			String lessonScoreStatus = null;
+			if (attempted == 0 && (itemDataMapAsList.size() == notAttempted)) {
+				lessonScoreStatus = ApiConstants.NOT_ATTEMPTED;
+			} else if(scoreNotMet > 0) { 
+				lessonScoreStatus = ApiConstants.SCORE_NOT_MET;
+			} else if (scoreMet > 0 && scoreNotMet == 0 && (itemDataMapAsList.size() == scoreMet)) {
+				lessonScoreStatus = ApiConstants.SCORE_MET;
+			} else {
+				lessonScoreStatus = ApiConstants.NOT_ATTEMPTED;
 			}
+			lessonDataAsMap.put(ApiConstants.SCORE_STATUS, lessonScoreStatus);
 
 			if (!lessonDataAsMap.isEmpty() && lessonDataAsMap.size() > 0) {
 				resultDataMapAsList.add(lessonDataAsMap);
@@ -867,6 +882,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				evidence = lessonMetricColumns.getStringValue(getBaseService().appendTilda(assessmentId, ApiConstants.EVIDENCE), null);
 				timespent = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants._TIME_SPENT), 0L);
 				scorableCountOnEvent = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants._QUESTION_COUNT), 0L);
+			} else {
+				logger.info("No session available for key" + sessionKey);
 			}
 		}
 		
