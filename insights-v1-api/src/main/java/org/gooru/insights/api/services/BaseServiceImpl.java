@@ -769,25 +769,25 @@ public class BaseServiceImpl implements BaseService {
 	   public Collection<String> appendAdditionalField(String selectFields, String prefix, String suffix) {
 	       Collection<String> resultFields = new ArrayList<String>();
 	       if (notNull(selectFields)) {
-	           for (String field : selectFields.split(",")) {
+	           for (String field : selectFields.split(ApiConstants.COMMA)) {
 	               if (notNull(prefix) && notNull(suffix)) {
-	                   for (String first : prefix.split(",")) {
+	                   for (String first : prefix.split(ApiConstants.COMMA)) {
 	                       StringBuffer resultField = new StringBuffer();
 	                       resultField.append(first);
 	                       resultField.append(field);
-	                       for (String last : suffix.split(",")) {
+	                       for (String last : suffix.split(ApiConstants.COMMA)) {
 	                           resultFields.add(resultField.toString() + last);
 	                       }
 	                   }
-	               } else if (notNull(prefix) && !notNull(suffix)) {
-	                   for (String first : prefix.split(",")) {
+	               } else if (notNull(prefix) && StringUtils.isBlank(suffix)) {
+	                   for (String first : prefix.split(ApiConstants.COMMA)) {
 	                       StringBuffer resultField = new StringBuffer();
 	                       resultField.append(first);
 	                       resultField.append(field);
 	                       resultFields.add(resultField.toString());
 	                   }
-	               } else if (!notNull(prefix) && notNull(suffix)) {
-	                   for (String first : suffix.split(",")) {
+	               } else if (StringUtils.isBlank(prefix) && notNull(ApiConstants.COMMA)) {
+	                   for (String first : suffix.split(ApiConstants.COMMA)) {
 	                       StringBuffer resultField = new StringBuffer();
 	                       resultField.append(field);
 	                       resultField.append(first);
@@ -847,10 +847,8 @@ public class BaseServiceImpl implements BaseService {
 	public List<Map<String, Object>> injectRecord(List<Map<String, Object>> aggregateData, Map<String, Object> injuctableRecord) {
 		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
 		for (Map<String, Object> map : aggregateData) {
-			Map<String, Object> resultMap = new HashMap<String, Object>();
-			resultMap.putAll(map);
-			resultMap.putAll(injuctableRecord);
-			resultList.add(resultMap);
+			map.putAll(injuctableRecord);
+			resultList.add(map);
 		}
 		return resultList;
 	}
@@ -1489,7 +1487,7 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 		StringBuilder sb = new StringBuilder();
 		for (String key : keyList) {
 			if(sb.length() > 0){
-				sb.append(",");
+				sb.append(ApiConstants.COMMA);
 			}
 		    sb.append(key);
 		}
@@ -1773,24 +1771,31 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 			return dataList;
 		}
 		
-		public List<Map<String,Object>> groupDataDependOnkey(List<Map<String,Object>> requestData,String fetchKey,String objectKey){
+		public List<Map<String,Object>> groupDataDependOnkey(List<Map<String,Object>> contentUsageList,String fetchKey,String objectKey){
+			
+			/**
+			 * The Usage data is grouped depends on fetch key
+			 */
 			Map<String,Object> customizedMap = new HashMap<String,Object>();
-			for(Map<String,Object> requestMap : requestData){
-				if(requestMap.get(fetchKey) != null){
-					String key = requestMap.get(fetchKey).toString();
+			for(Map<String,Object> contentUsage : contentUsageList){
+				if(contentUsage.get(fetchKey) != null){
 					List<Map<String,Object>> dataList = new ArrayList<Map<String,Object>>();
+					String key = contentUsage.get(fetchKey).toString();
 					if(customizedMap.containsKey(key)){
 						
 						dataList.addAll((Collection<? extends Map<String, Object>>)customizedMap.get(key));
-						requestMap.remove(fetchKey);
-						dataList.add(requestMap);
+						contentUsage.remove(fetchKey);
+						dataList.add(contentUsage);
 					}else{
-						requestMap.remove(fetchKey);
-						dataList.add(requestMap);
+						contentUsage.remove(fetchKey);
+						dataList.add(contentUsage);
 					}
 					customizedMap.put(key, dataList);
 				}
 			}
+			/**
+			 * The grouped data from fetch key is convered to list
+			 */
 			return convertMapToList(customizedMap,fetchKey,objectKey);
 		}
 		
