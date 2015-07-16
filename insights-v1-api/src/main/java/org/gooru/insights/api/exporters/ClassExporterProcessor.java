@@ -88,7 +88,7 @@ public class ClassExporterProcessor {
 					}
 				}
 				Collection<String> rowKeys = new ArrayList<String>();
-				rowKeys.add(getBaseService().appendTilda(SessionAttributes.RS.getSession(),classId,courseId,unitId,lessonId,collectionId, student.get(ApiConstants.USERUID).toString()));
+				rowKeys.add(getBaseService().appendTilda(SessionAttributes.RS.getSession(),classId,courseId,unitId,lessonId,collectionId, student.get(ApiConstants.USER_UID).toString()));
 				List<String> sessionIds = getClassService().getSessions(traceId,rowKeys);
 				String sessionId = ApiConstants.DATA;
 				if(sessionIds.size() > 0){
