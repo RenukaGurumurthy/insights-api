@@ -1580,7 +1580,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 				return id.replace(ApiConstants.SessionAttributes.CS.getSession()+ApiConstants.TILDA,ApiConstants.STRING_EMPTY);
 			}
 			if(!hasUserUId && !hasSessionId){
-				throw new BadRequestException(ErrorMessages.E103+ApiConstants.USERUID);
+				throw new BadRequestException(ErrorMessages.E103+ApiConstants.USER_UID);
 			}
 			if(hasClassId && !hasSessionId){
 				OperationResult<ColumnList<String>> recentSessionIds = getCassandraService().getClassPageUsage(

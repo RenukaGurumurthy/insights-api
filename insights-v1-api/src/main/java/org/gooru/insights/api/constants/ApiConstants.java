@@ -86,7 +86,9 @@ public class ApiConstants {
 	
 	public static final String SESSION = "session";
 	
-	public static final String USERUID = "userUId";
+	public static final String USER_UID = "userUId";
+	
+	public static final String USERUID = "userUid";
 	
 	public static final String CLASSID_USERUID = "classId or userUId";
 	
@@ -249,7 +251,7 @@ public class ApiConstants {
 	public static final String _OE_COUNT = "oe_count";
 	
 	public static final String SCORABLE_QUESTION_COUNT = "scorableQuestionCount";
-	public static final String SCORABLE_COUNT_ON_EVENT = "scorableCountOnEvent";
+	public static final String SCORABLE_COUNT_ON_EVENT = "selectedSessionScorableQuestionCount";
 	public static final String EXTERNAL_ASSESSMENT_COUNT = "externalAssessmentCount";
 	public static final String ITEM_COUNT = "itemCount";
 	public static final String COLLECTIONS_VIEWED = "collectionsViewed";
@@ -306,7 +308,9 @@ public class ApiConstants {
 	public static final String RESOURCE = "resource";
 	public static final String CSV_EXT = ".csv";
 	public static final String _ITEM_COUNT = "item_count";
-	
+	public static final String _CREATOR_UID = "creator_uid";
+	public static final String CLASS_GOORU_ID = "classGooruId";
+
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
 		
