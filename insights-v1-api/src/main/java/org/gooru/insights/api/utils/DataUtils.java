@@ -43,7 +43,7 @@ public class DataUtils {
 		longColumns.put(ApiConstants.VIEWS, ApiConstants.VIEWS);
 		longColumns.put(ApiConstants._SCORE_IN_PERCENTAGE, ApiConstants.SCORE_IN_PERCENTAGE);
 		longColumns.put(ApiConstants._TIME_SPENT, ApiConstants.TIMESPENT);
-		longColumns.put(ApiConstants.RA, ApiConstants.REACTION);
+		longColumns.put(ApiConstants.REACTION, ApiConstants.REACTION);
 		longColumns.put(ApiConstants.SCORE, ApiConstants.SCORE);
 		longColumns.put(ApiConstants.SKIPPED, ApiConstants.SKIPPED);
 		longColumns.put("attempts", "attempts");
@@ -84,7 +84,7 @@ public class DataUtils {
 		sessionActivityMetrics.put(ApiConstants.VIEWS, ApiConstants.VIEWS);
 		sessionActivityMetrics.put(ApiConstants._SCORE_IN_PERCENTAGE, ApiConstants.SCORE_IN_PERCENTAGE);
 		sessionActivityMetrics.put(ApiConstants._TIME_SPENT, ApiConstants.TIMESPENT);
-		sessionActivityMetrics.put(ApiConstants.RA, ApiConstants.REACTION);
+		sessionActivityMetrics.put(ApiConstants.REACTION, ApiConstants.REACTION);
 		sessionActivityMetrics.put(ApiConstants.CHOICE, ApiConstants.TEXT);
 		sessionActivityMetrics.put(ApiConstants.TYPE, ApiConstants.QUESTION_TYPE);
 		sessionActivityMetrics.put(ApiConstants._FEEDBACK_PROVIDER, ApiConstants.FEEDBACKPROVIDER);
