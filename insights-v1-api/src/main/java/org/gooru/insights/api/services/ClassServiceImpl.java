@@ -864,17 +864,20 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		} else if ((classId != null && StringUtils.isNotBlank(classId.trim())) && (courseId != null && StringUtils.isNotBlank(courseId.trim())) 
 				&& (unitId != null && StringUtils.isNotBlank(unitId.trim())) && (lessonId != null && StringUtils.isNotBlank(lessonId.trim()))
 				&& (userUid != null && StringUtils.isNotBlank(userUid.trim()))) {
-			// Fetch goal for the class
-			OperationResult<ColumnList<String>> classData = getCassandraService().read(traceId, ColumnFamily.CLASS.getColumnFamily(), classId);
-			if (!classData.getResult().isEmpty() && classData.getResult().size() > 0) {
-				classMinScore = classData.getResult().getLongValue(ApiConstants.MINIMUM_SCORE, 0L);
-			}
 			sessionKey = getSessionIdFromKey(traceId, getBaseService().appendTilda(SessionAttributes.RS.getSession(), classId, courseId, unitId, lessonId, assessmentId, userUid));
 		} else if((userUid != null && StringUtils.isNotBlank(userUid.trim()))) {
 			sessionKey = getSessionIdFromKey(traceId, getBaseService().appendTilda(SessionAttributes.RS.getSession(), assessmentId, userUid));
 		} else {
 			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, getBaseService().appendComma("contentGooruId", "sessionId")
 					, getBaseService().appendComma("contentGooruId", "userUid"));
+		}
+		
+		// Fetch goal for the class
+		if (classId != null && StringUtils.isNotBlank(classId.trim())) {
+			OperationResult<ColumnList<String>> classData = getCassandraService().read(traceId, ColumnFamily.CLASS.getColumnFamily(), classId);
+			if (!classData.getResult().isEmpty() && classData.getResult().size() > 0) {
+				classMinScore = classData.getResult().getLongValue(ApiConstants.MINIMUM_SCORE, 0L);
+			}
 		}
 		
 		//Fetch score and evidence of assessment
