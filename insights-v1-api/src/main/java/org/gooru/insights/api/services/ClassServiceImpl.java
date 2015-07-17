@@ -869,7 +869,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		itemDetailAsMap.put(ApiConstants.RESOURCE_COUNT, resourceCount);
 		itemDetailAsMap.put(ApiConstants.ITEM_COUNT, itemCount);
 		itemDetailAsMap.put(ApiConstants.SCORABLE_COUNT_ON_EVENT, scorableCountOnEvent);
-		
+		itemDetailAsMap.put(ApiConstants.SESSIONID, sessionKey);
 		//Fetch username and profile url
 		String username = null;
 		OperationResult<ColumnList<String>> userColumnList = getCassandraService().read(traceId, ColumnFamily.USER.getColumnFamily(), userUid);
