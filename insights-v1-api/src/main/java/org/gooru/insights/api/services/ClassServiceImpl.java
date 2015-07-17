@@ -121,86 +121,57 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return responseParamDTO;
 	}
 	
-	public ResponseParamDTO<Map<String,Object>> getUnitUsage(String traceId, String classId, String courseId, String unitId, String userUid, String collectionType, Boolean getUsageData, boolean isSecure) throws Exception {
+	public ResponseParamDTO<Map<String,Object>> getUnitUsage(String traceId, String classId, String courseId, String unitId, String studentId, String collectionType, Boolean getUsageData, boolean isSecure) throws Exception {
 		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		List<Map<String,Object>> students = null;
+		List<Map<String,Object>> studentsMetaData = null;
 		List<Map<String,Object>> resultData = new ArrayList<Map<String, Object>>();
-		List<Map<String, Object>> rawDataMapAsList = new ArrayList<Map<String, Object>>();
-		List<Map<String, Object>> unitRawDataMapAsList = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> lessonsRawData = new ArrayList<Map<String, Object>>();
 
-		//fetch lesson ids
-		List<Map<String, Object>> lessonItemColumnResult = getContentItems(traceId, unitId, null, false);
-		StringBuffer lessonGooruOids = getBaseService().exportData(lessonItemColumnResult, ApiConstants.GOORUOID);
-		long lessonCount = lessonGooruOids.toString().split(COMMA).length;
-
+		//fetch list of lessons
+		OperationResult<ColumnList<String>> lessonData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), unitId);
+		ColumnList<String> lessons = lessonData.getResult();
 		
-		//fetch metadata of unit
+		//fetch metadata of lesson
 		Collection<String> resourceColumns = new ArrayList<String>();
 		resourceColumns.add(ApiConstants.TITLE);
 		resourceColumns.add(ApiConstants.RESOURCE_TYPE);
 		resourceColumns.add(ApiConstants.THUMBNAIL);
 		resourceColumns.add(ApiConstants.GOORUOID);
-		unitRawDataMapAsList = getResourceData(traceId, isSecure, unitRawDataMapAsList, unitId, resourceColumns, ApiConstants.UNIT);
+		String lessonGooruOIds = getBaseService().convertListToString(lessons.getColumnNames());
 
+		if(StringUtils.isNotBlank(lessonGooruOIds)){
+			lessonsRawData = getResourceData(traceId, isSecure, lessonsRawData, lessonGooruOIds, resourceColumns, ApiConstants.LESSON);
+		}
+		responseParamDTO.setContent(lessonsRawData);
 		
-		//fetch metadata of lessons
-		rawDataMapAsList = getResourceData(traceId, isSecure, rawDataMapAsList, lessonGooruOids.toString(), resourceColumns, ApiConstants.LESSON);
-		rawDataMapAsList = getBaseService().LeftJoin(lessonItemColumnResult, rawDataMapAsList, ApiConstants.GOORUOID, ApiConstants.GOORUOID);
-		responseParamDTO.setContent(rawDataMapAsList);
-
-		//fetch usage data of unit
+		//fetch usage data of lesson
 		if(getUsageData) {
-			String unitKey = getBaseService().appendTilda(classId, courseId, unitId);
 			
-			String classUnitKey = unitKey;
-			//fetch unit's item views/attempts count
-			if(StringUtils.isNotBlank(userUid)) {
-				classUnitKey += getBaseService().appendTilda(classUnitKey, userUid);
-			}
-			OperationResult<ColumnList<String>> collectionMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), getBaseService().appendTilda(classUnitKey, ApiConstants.COLLECTION, ApiConstants._TIME_SPENT));
-			long collectionsViewedInUnit = collectionMetricsData != null ? collectionMetricsData.getResult().size() : 0L;
-			OperationResult<ColumnList<String>> assessmentMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), getBaseService().appendTilda(classUnitKey, ApiConstants.ASSESSMENT, ApiConstants._SCORE_IN_PERCENTAGE));
-			long assessmentsAttemptedInUnit = assessmentMetricsData != null ? assessmentMetricsData.getResult().size() : 0L;
-			
-			
-			List<Map<String, Object>> resultMapList = new ArrayList<Map<String, Object>>();
-			List<Map<String, Object>> lessonResultMapList = new ArrayList<Map<String, Object>>();
-			Map<String, Object> unitUsageDataAsMap = new HashMap<String, Object>(2);
-			//fetch unit usage data
-			Map<String, Object> unitUsageAsMap = new HashMap<String, Object>();
-			unitUsageAsMap.put(ApiConstants.LESSON_COUNT, lessonCount);
-			unitUsageAsMap.put(ApiConstants.COLLECTIONS_VIEWED, collectionsViewedInUnit);
-			unitUsageAsMap.put(ApiConstants.ASSESSMENTS_ATTEMPTED, assessmentsAttemptedInUnit);
-			unitUsageAsMap.putAll(getActivityMetricsAsMap(traceId, classUnitKey, unitId));
-			if(!unitUsageAsMap.isEmpty()) {
-				unitUsageDataAsMap.put(ApiConstants.UNIT_USAGE_DATA, unitUsageAsMap);
-			}
-			for(Map<String, Object> rawDataMap : rawDataMapAsList) {
+			//Get list of students
+			studentsMetaData = getStudents(traceId,classId);
 
-				String lessonGooruOid = rawDataMap.get(ApiConstants.GOORUOID).toString();
-				OperationResult<ColumnList<String>> assessmentData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), lessonGooruOid);
-				ColumnList<String> assessments = assessmentData.getResult();
-				Map<String, Object> usageAsMap = new HashMap<String, Object>();
-				usageAsMap.put(ApiConstants.ASSESSMENT_COUNT, assessments.size());
-				usageAsMap.put(ApiConstants.GOORUOID, lessonGooruOid);
+			if(!studentsMetaData.isEmpty() || StringUtils.isNotBlank(studentId)){
 				
-
-				//fetch lesson usage data
-				Map<String, Object> lessonUsageAsMap = new HashMap<String, Object>();
-				String classLessonKey = getBaseService().appendTilda(unitKey, lessonGooruOid);
-				if (StringUtils.isNotBlank(userUid)) {
-					classLessonKey += getBaseService().appendTilda(classLessonKey, userUid);
-					lessonUsageAsMap.putAll(getActivityMetricsAsMap(traceId, classLessonKey, lessonGooruOid));
+				if(StringUtils.isBlank(studentId)){
+					studentId = getBaseService().exportData(studentsMetaData, ApiConstants.USERUID).toString();
+				}else{
+				}
+				for(Map<String, Object> lessonrawData : lessonsRawData) {
+	
+					String lessonGooruOid = lessonrawData.get(ApiConstants.GOORUOID).toString();
+					OperationResult<ColumnList<String>> assessmentData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), lessonGooruOid);
+					ColumnList<String> assessments = assessmentData.getResult();
+					if (lessons != null) {
+						lessonrawData.put(ApiConstants.SEQUENCE, lessons.getColumnByName(lessonGooruOid) != null ? lessons.getLongValue(lessonGooruOid, 0L) : 0L);
+					}
+					lessonrawData.put(ApiConstants.ASSESSMENT_COUNT, assessments.size());
+					lessonrawData.put(ApiConstants.GOORUOID, lessonGooruOid);
 					
-					usageAsMap.put(ApiConstants.USAGE_DATA, lessonUsageAsMap);
-
-					usageAsMap.putAll(rawDataMap);
-					lessonResultMapList.add(usageAsMap);
-				}else {
-						/**
-						 * Fetch the list of user usage data and store it in lessonUsageAsMap as userUsage
-						 */
+	
+					//fetch lesson usage data
+					String classLessonKey = getBaseService().appendTilda(classId, courseId, unitId, lessonGooruOid);
+					
 					String contentType = null;
 					if(collectionType !=null){
 						if(collectionType.equalsIgnoreCase(ApiConstants.ASSESSMENT)){
@@ -209,56 +180,31 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 							contentType = ApiConstants.COLLECTION_MATCH;
 						}
 					}
-					List<Map<String,Object>> collections = getContentItems(traceId,lessonGooruOid,contentType,true);
-					students = getStudents(traceId,classId);
-					if(!(students.isEmpty() || collections.isEmpty())){
+					List<Map<String,Object>> contentsMetaData = getContentItems(traceId,lessonGooruOid,contentType,true);
+					if(!contentsMetaData.isEmpty()){
+						
 						Set<String> columnSuffix = new HashSet<String>();
 						columnSuffix.add(ApiConstants._TIME_SPENT);
 						columnSuffix.add(ApiConstants._SCORE_IN_PERCENTAGE);
-						StringBuffer studentIds = getBaseService().exportData(students, ApiConstants.USER_UID);
-						StringBuffer collectionIds = getBaseService().exportData(collections, ApiConstants.GOORUOID);
-						Collection<String> rowKeys = getBaseService().appendAdditionalField(ApiConstants.TILDA,classLessonKey, studentIds.toString());
+						StringBuffer collectionIds = getBaseService().exportData(contentsMetaData, ApiConstants.GOORUOID);
+						Collection<String> rowKeys = getBaseService().appendAdditionalField(ApiConstants.TILDA,classLessonKey, studentId);
 						Collection<String> columns = getBaseService().appendAdditionalField(ApiConstants.TILDA,collectionIds.toString(), columnSuffix);
 						/**
 						 * Get collection activity
 						 */
-						List<Map<String,Object>> assessmentUsage = getCollectionActivityMetrics(traceId, rowKeys,ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), columns, studentIds.toString(),true,collectionIds.toString(),true);
-						/**
-						 * Existing JSON Structure, will be removed while the API got stabilized
-						 */
-/*						assessmentUsage = getBaseService().includeDefaultData(assessmentUsage, students, ApiConstants.GOORUOID, ApiConstants.USERUID);
-						assessmentUsage = getBaseService().groupDataDependOnkey(assessmentUsage,ApiConstants.GOORUOID,ApiConstants.USAGE_DATA);
-						assessmentUsage = getBaseService().LeftJoin(collections,assessmentUsage,ApiConstants.GOORUOID,ApiConstants.GOORUOID);
-*/						/**
-						 * Newer JSON Structure
-						 */
-						assessmentUsage = getBaseService().includeDefaultData(assessmentUsage, collections, ApiConstants.USER_UID, ApiConstants.GOORUOID);
-						assessmentUsage = getBaseService().groupDataDependOnkey(assessmentUsage,ApiConstants.USER_UID,ApiConstants.USAGE_DATA);
-						usageAsMap.putAll(rawDataMap);
-						assessmentUsage = getBaseService().injectRecord(assessmentUsage, usageAsMap);
-						resultData.addAll(assessmentUsage);
+						List<Map<String,Object>> contentUsage = getIdBasedColumnActivityMetrics(traceId, rowKeys,ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), columns, studentId,true,collectionIds.toString(),true);
+						contentUsage = getBaseService().LeftJoin(contentUsage,contentsMetaData,ApiConstants.GOORUOID,ApiConstants.GOORUOID);
+						//group at content level
+						contentUsage = getBaseService().groupDataDependOnkey(contentUsage,ApiConstants.USERUID,ApiConstants.USAGE_DATA);
+						//Inject Lesson data
+						contentUsage = getBaseService().injectRecord(contentUsage, lessonrawData);
+						resultData.addAll(contentUsage);
 					}
 				}
-			}
-			if (StringUtils.isNotBlank(userUid)) {
-				unitUsageDataAsMap.put(ApiConstants.LESSON, lessonResultMapList);
-				if(!unitRawDataMapAsList.isEmpty() && unitRawDataMapAsList.size() > 0) {
-					unitUsageDataAsMap.putAll(unitRawDataMapAsList.get(0));
-					if(unitUsageDataAsMap.containsKey(ApiConstants.RESOURCE_TYPE) && unitUsageDataAsMap.get(ApiConstants.RESOURCE_TYPE) != null) {
-						unitUsageDataAsMap.put(ApiConstants.TYPE , unitUsageDataAsMap.get(ApiConstants.RESOURCE_TYPE));
-						unitUsageDataAsMap.remove(ApiConstants.RESOURCE_TYPE);
-					}
-				}
-				resultMapList.add(unitUsageDataAsMap);
-				responseParamDTO.setContent(resultMapList);
-			}else{
-				resultData = getBaseService().groupDataDependOnkey(resultData,ApiConstants.USER_UID,ApiConstants.USAGE_DATA);
-				resultData = getBaseService().LeftJoin(resultData,students,ApiConstants.USER_UID,ApiConstants.USER_UID);
-				if(!resultData.isEmpty()){
-					responseParamDTO.setContent(resultData);
-				}else{
-					responseParamDTO.setContent(null);
-				}
+				//group at user level
+				resultData = getBaseService().groupDataDependOnkey(resultData,ApiConstants.USERUID,ApiConstants.USAGE_DATA);
+				resultData = getBaseService().LeftJoin(resultData,studentsMetaData,ApiConstants.USERUID,ApiConstants.USERUID);
+				responseParamDTO.setContent(resultData);
 			}
 		}
 		return responseParamDTO;
@@ -1112,57 +1058,71 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return usageAsMap;
 	}
 	
-	public List<Map<String,Object>> getCollectionActivityMetrics(String traceId, Collection<String> rowKeys,String columnFamily, Collection<String> columns, String userIds,boolean isUserIdInKey,String collectionIds, boolean userProcess) {
+	public List<Map<String,Object>> getIdBasedColumnActivityMetrics(String traceId, Collection<String> rowKeys,String columnFamily, Collection<String> requestedColumns, String studentIds,boolean isUserIdInKey,String contentIds, boolean userProcess) {
 
-		List<Map<String,Object>> collectionUsageData = new ArrayList<Map<String,Object>>();
-		OperationResult<Rows<String, String>> activityData = getCassandraService().readAll(traceId, columnFamily, rowKeys, columns);
-		Collection<String> fetchedIds = new ArrayList<String>();
-		Map<String,Set<String>> userSet = new HashMap<String,Set<String>>();
+		Collection<String> fetchedContentIds = new ArrayList<String>();
+		List<Map<String,Object>> contentUsageData = new ArrayList<Map<String,Object>>();
+		Map<String,Set<String>> studentContentMapper = new HashMap<String,Set<String>>();
+
+		/**
+		 * Get Activity data
+		 */
+		OperationResult<Rows<String, String>> activityData = getCassandraService().readAll(traceId, columnFamily, rowKeys, requestedColumns);
 		if (!activityData.getResult().isEmpty()) {
+			
 			Rows<String, String> itemMetricRows = activityData.getResult();
+			//Iterate for Every Row
 			for(Row<String, String> metricRow : itemMetricRows){
 				String userId = null;
 				Map<String,Map<String, Object>> KeyUsageAsMap = new HashMap<String,Map<String, Object>>();
-				for(String column : columns){
+				//Iterate for Fetched column
+				for(String column : requestedColumns){
 					Map<String,Object> usageMap = new HashMap<String,Object>();
 					String[] columnPrefix = column.split(ApiConstants.TILDA);
 					String[] columnMetaInfo = column.split(ApiConstants.TILDA);
 					String metricName = (columnMetaInfo.length > 1) ? columnMetaInfo[columnMetaInfo.length-1] : columnMetaInfo[0];
+					//No Need to process for MA question A,B,C,D option
 					if((columnPrefix.length > 1 ? columnPrefix[1].matches(ApiConstants.OPTIONS_MATCH) : columnPrefix[0].matches(ApiConstants.OPTIONS_MATCH))){
 						continue;
 					}
+					//Get the metric data
 					usageMap = fetchMetricData(traceId,columnMetaInfo[0],metricRow,metricName,column);
-					userId = validateDefaultUser(userProcess,isUserIdInKey,userIds,userId,columnMetaInfo[0],metricRow,usageMap,userSet);
+					//Get the userId for the content usage,If we need user level tril down
+					if(userProcess){
+						userId = includeUserId(userProcess,isUserIdInKey,studentIds,userId,columnMetaInfo[0],metricRow,usageMap,studentContentMapper);
+					}
+					//Since content are stored in column,we need to do a content based separation
 					if(KeyUsageAsMap.containsKey(columnMetaInfo[0])){
 						usageMap.putAll(KeyUsageAsMap.get(columnMetaInfo[0]));
 					}
 					KeyUsageAsMap.put(columnMetaInfo[0], usageMap);
-					if(!fetchedIds.contains(columnMetaInfo[0]) && columnMetaInfo[0].length() > 35){
-						fetchedIds.add(columnMetaInfo[0]);
+					//Storing the Fetched content id to support including default value at content level 
+					if(!fetchedContentIds.contains(columnMetaInfo[0]) && columnMetaInfo[0].length() > 35){
+						fetchedContentIds.add(columnMetaInfo[0]);
 					}
 				}
-				collectionUsageData.addAll(getBaseService().convertMapToList(KeyUsageAsMap, ApiConstants.GOORUOID));
+				contentUsageData.addAll(getBaseService().convertMapToList(KeyUsageAsMap, ApiConstants.GOORUOID));
 			}
 		}
 		
 		/**
-		 * Set default value at user level
+		 * Set default value at user-content level
 		 */
 		if(userProcess){
-			fetchDefaultUserData(collectionIds, userSet, userIds, columns,collectionUsageData);
+			fetchDefaultUserData(contentIds, studentContentMapper, studentIds, requestedColumns,contentUsageData);
 		}else {
 			/**
-			 * Set default value for collection level
+			 * Set default value only at collection level
 			 */
-			for(String id : collectionIds.split(ApiConstants.COMMA)){
-				if(!fetchedIds.contains(id)){
-					Map<String,Object> tempMap = setDefaultValue(id,columns);
+			for(String id : contentIds.split(ApiConstants.COMMA)){
+				if(!fetchedContentIds.contains(id)){
+					Map<String,Object> tempMap = setContentDefaultMetricValue(id,requestedColumns);
 					tempMap.put(ApiConstants.GOORUOID, id);
-					collectionUsageData.add(tempMap);
+					contentUsageData.add(tempMap);
 				}
 			}
 		}
-		return collectionUsageData;
+		return contentUsageData;
 	}
 	
 	
@@ -1345,51 +1305,24 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	public ResponseParamDTO<Map<String,Object>> getStudentsCollectionData(String traceId, String classId, String courseId, String unitId, String lessonId, String collectionId, boolean isSecure) throws Exception {
 		
 		ResponseParamDTO<Map<String,Object>> responseParamDTO = new ResponseParamDTO<Map<String,Object>>();
-		//list the resource and inside of it convert the user as usage data
-		List<Map<String,Object>> resources = getContentItems(traceId,collectionId,null,true);
-		List<Map<String,Object>> students = getStudents(traceId, classId);
-		StringBuffer resourceIds = getBaseService().exportData(resources, ApiConstants.GOORUOID);
-		StringBuffer userIds = getBaseService().exportData(students, ApiConstants.USER_UID);
+		//Get list of resources and students
+		List<Map<String,Object>> resourcesMetaData = getContentItems(traceId,collectionId,null,true);
+		List<Map<String,Object>> studentsMetaData = getStudents(traceId, classId);
 		
-		Set<String> columnSuffix = new HashSet<String>();
-		columnSuffix.add(ApiConstants.VIEWS);
-		columnSuffix.add(ApiConstants._TIME_SPENT);
-		columnSuffix.add(ApiConstants.SCORE);
-		columnSuffix.add(ApiConstants._ANSWER_OBJECT);
-		columnSuffix.add(ApiConstants.CHOICE);
-		columnSuffix.add(ApiConstants.ATTEMPTS);
-		columnSuffix.add(ApiConstants._AVG_TIME_SPENT);
-		columnSuffix.add(ApiConstants._TIME_SPENT);
-		columnSuffix.add(ApiConstants._AVG_REACTION);
-		columnSuffix.add(ApiConstants.RA);
-		columnSuffix.add(ApiConstants.REACTION);
-		columnSuffix.add(ApiConstants.OPTIONS);
-		columnSuffix.add(options.A.name());
-		columnSuffix.add(options.B.name());
-		columnSuffix.add(options.C.name());
-		columnSuffix.add(options.D.name());
-		columnSuffix.add(options.E.name());
-		columnSuffix.add(options.F.name());
-		
-		/**
-		 * Fetch session data
-		 */
-		Collection<String> rowKeys = getBaseService().appendAdditionalField(ApiConstants.TILDA, getBaseService().appendTilda(SessionAttributes.RS.getSession(),classId,courseId,unitId,lessonId,collectionId), userIds.toString());
+		StringBuffer resourceIds = getBaseService().exportData(resourcesMetaData, ApiConstants.GOORUOID);
+		StringBuffer studentIds = getBaseService().exportData(studentsMetaData, ApiConstants.USERUID);
+		Set<String> columnSuffix =  DataUtils.getStudentsCollectionUsageColumnSuffix();
+		//Fetch session data
+		Collection<String> rowKeys = getBaseService().appendAdditionalField(ApiConstants.TILDA, getBaseService().appendTilda(SessionAttributes.RS.getSession(),classId,courseId,unitId,lessonId,collectionId), studentIds.toString());
+		List<String> sessionIds = getSessions(traceId,rowKeys);
+		//Fetch collection actiivity data
 		Collection<String> columns = getBaseService().appendAdditionalField(ApiConstants.TILDA, resourceIds.toString(), columnSuffix);
 		columns.add(ApiConstants.GOORU_UID);
-		List<String> sessionIds = getSessions(traceId,rowKeys);
-		List<Map<String,Object>> assessmentUsage = getCollectionActivityMetrics(traceId, sessionIds,ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), columns, userIds.toString(),false,resourceIds.toString(),true);
-		assessmentUsage = getBaseService().includeDefaultData(assessmentUsage, students, ApiConstants.GOORUOID, ApiConstants.USER_UID);
-//		assessmentUsage = getBaseService().LeftJoin(assessmentUsage, students, ApiConstants.USERUID, ApiConstants.USERUID);
+		List<Map<String,Object>> assessmentUsage = getIdBasedColumnActivityMetrics(traceId, sessionIds,ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), columns, studentIds.toString(),false,resourceIds.toString(),true);
+		assessmentUsage = getBaseService().LeftJoin(assessmentUsage, studentsMetaData, ApiConstants.USERUID, ApiConstants.USERUID);
+		//Group data at user level
 		assessmentUsage = getBaseService().groupDataDependOnkey(assessmentUsage,ApiConstants.GOORUOID,ApiConstants.USAGE_DATA);
-		assessmentUsage = getBaseService().LeftJoin(resources,assessmentUsage,ApiConstants.GOORUOID,ApiConstants.GOORUOID);
-		
-		/**
-		 * Setting of assessment meta info may be tricky
-		 */
-		List<Map<String,Object>> assessmentMetaInfo = getQuestionMetaData(traceId,collectionId);
-		assessmentUsage = getBaseService().LeftJoin(assessmentUsage, assessmentMetaInfo, ApiConstants.GOORUOID, ApiConstants.GOORUOID);
-		
+		assessmentUsage = getBaseService().LeftJoin(resourcesMetaData,assessmentUsage,ApiConstants.GOORUOID,ApiConstants.GOORUOID);
 		responseParamDTO.setContent(assessmentUsage);
 		return responseParamDTO;
 	}
@@ -1440,34 +1373,35 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return getBaseService().convertMapToList(resultMap, ApiConstants.GOORUOID);
 	}
 
-	private Map<String, Object> setDefaultValue(String id,
+	private Map<String, Object> setContentDefaultMetricValue(String id,
 			Collection<String> columns) {
 		Map<String, Object> usageMap = new HashMap<String, Object>();
 		for (String metricName : columns) {
-			
 			if (metricName.endsWith(ApiConstants._COLLECTION_TYPE)) {
 				usageMap.put(ApiConstants.COLLECTION_TYPE, null);
 			} else if (metricName.endsWith(ApiConstants.VIEWS)) {
 				usageMap.put(ApiConstants.VIEWS, 0L);
 			} else if (metricName.endsWith(ApiConstants._SCORE_IN_PERCENTAGE)) {
 				usageMap.put(ApiConstants.SCORE_IN_PERCENTAGE, 0L);
-			} else if (metricName.endsWith(ApiConstants._TIME_SPENT)) {
-				usageMap.put(ApiConstants.TIMESPENT, 0L);
 			} else if (metricName.endsWith(ApiConstants._ANSWER_OBJECT)) {
 				usageMap.put(ApiConstants.ANSWER_OBJECT, null);
 			}else if(metricName.endsWith(ApiConstants.ATTEMPTS)){
 				usageMap.put(ApiConstants.ATTEMPTS, 0L);
-			} else if (metricName.endsWith(ApiConstants._AVG_TIME_SPENT)) {
+			}else if(metricName.endsWith(ApiConstants.SCORE)){
+				usageMap.put(ApiConstants.SCORE, 0L);
+			}else if(metricName.endsWith(ApiConstants._AVG_TIME_SPENT)) {
 				usageMap.put(ApiConstants.AVG_TIME_SPENT, 0L);
-			} else if (metricName.endsWith(ApiConstants.CHOICE)) {
+			}else if(metricName.endsWith(ApiConstants.CHOICE)) {
 				usageMap.put(ApiConstants.TEXT, null);
-			}else if(metricName.equalsIgnoreCase(ApiConstants.RA)){
-				usageMap.put(ApiConstants.REACTION, 0L);
-			}else if(metricName.equalsIgnoreCase(ApiConstants._AVG_REACTION)){
+			}else if(metricName.endsWith(ApiConstants._AVG_REACTION)){
 				usageMap.put(ApiConstants.AVG_REACTION, 0L);
-			} else if (metricName.endsWith(ApiConstants._TIME_SPENT)) {
+			}else if(metricName.endsWith(ApiConstants.REACTION)){
+				usageMap.put(ApiConstants.REACTION, 0L);
+			}else if(metricName.endsWith(ApiConstants._QUESTION_STATUS)){
+				usageMap.put(ApiConstants.STATUS, null);
+			}else if(metricName.endsWith(ApiConstants._TIME_SPENT)) {
 				usageMap.put(ApiConstants.TIMESPENT, 0L);
-			} else if (metricName.endsWith(ApiConstants.OPTIONS)) {
+			} else if(metricName.endsWith(ApiConstants.OPTIONS)) {
 				usageMap.put(ApiConstants.OPTIONS, null);
 			}
 		}
@@ -1480,6 +1414,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			usageMap.put(ApiConstants.COLLECTION_TYPE, metricRow.getColumns().getStringValue(column, null));
 		}else if(metricName.equalsIgnoreCase(ApiConstants.VIEWS)){
 			usageMap.put(ApiConstants.VIEWS, metricRow.getColumns().getLongValue(column.trim(), 0L));
+		}else if(metricName.equalsIgnoreCase(ApiConstants.SCORE)){
+			usageMap.put(ApiConstants.SCORE, metricRow.getColumns().getLongValue(column.trim(), 0L));
 		}else if(metricName.equalsIgnoreCase(ApiConstants._SCORE_IN_PERCENTAGE)){
 			usageMap.put(ApiConstants.SCORE_IN_PERCENTAGE, metricRow.getColumns().getLongValue(column.trim(), 0L));
 		}else if(metricName.equalsIgnoreCase(ApiConstants._TIME_SPENT)){
@@ -1492,10 +1428,12 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			usageMap.put(ApiConstants.ATTEMPTS, metricRow.getColumns().getLongValue(column.trim(), 0L));
 		}else if(metricName.equalsIgnoreCase(ApiConstants.CHOICE)){
 			usageMap.put(ApiConstants.TEXT, metricRow.getColumns().getStringValue(column.trim(), null));
-		}else if(metricName.equalsIgnoreCase(ApiConstants.RA)){
+		}else if(metricName.equalsIgnoreCase(ApiConstants.REACTION)){
 			usageMap.put(ApiConstants.REACTION, metricRow.getColumns().getLongValue(column.trim(), 0L));
 		}else if(metricName.equalsIgnoreCase(ApiConstants._AVG_REACTION)){
-			usageMap.put(ApiConstants.AVG_REACTION, metricRow.getColumns().getStringValue(column.trim(), null));
+			usageMap.put(ApiConstants.AVG_REACTION, metricRow.getColumns().getLongValue(column.trim(), 0L));
+		}else if(metricName.equalsIgnoreCase(ApiConstants._QUESTION_STATUS)){
+			usageMap.put(ApiConstants.STATUS, metricRow.getColumns().getStringValue(column.trim(), null));
 		}else if(metricName.matches(ApiConstants.OPTIONS)){
 			Map<String,Long> optionMap = new HashMap<String,Long>();
 			optionMap.put(ApiConstants.options.A.name(), metricRow.getColumns().getLongValue(getBaseService().appendTilda(id,ApiConstants.options.A.name()), 0L));
@@ -1509,7 +1447,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			usageMap.put(ApiConstants.USER_UID, metricRow.getColumns().getStringValue(ApiConstants.GOORU_UID, null));
 		}else {
 			try{
-				usageMap.put(metricName, metricRow.getColumns().getLongValue(column, 0L));
+				usageMap.put(metricName, metricRow.getColumns().getStringValue(column, null));
 			}catch(Exception e){
 				InsightsLogger.error(traceId, getBaseService().errorHandler(ErrorMessages.UNHANDLED_EXCEPTION, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), column),e);
 			}
@@ -1521,7 +1459,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	
 		for(String collectionId : collectionIds.split(ApiConstants.COMMA)){
 			
-			Map<String,Object> tempMap = setDefaultValue(collectionId,columns);
+			Map<String,Object> tempMap = setContentDefaultMetricValue(collectionId,columns);
 			tempMap.put(ApiConstants.GOORUOID, collectionId);
 			if(userSet.containsKey((collectionId))){
 				insertDefaultUserData(userSet,collectionId,userIds,tempMap,collectionUsageData);
@@ -1542,34 +1480,40 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			}
 		}
 	}
-	private String validateDefaultUser(boolean userProcess,boolean isUserIdInKey,String userIds,String userId,String collectionId,Row<String,String> metricRow,Map<String,Object> usageMap,Map<String,Set<String>> userSet){
+	private String includeUserId(boolean userProcess,boolean isUserIdInKey,String userIds,String userId,String contentId,Row<String,String> metricRow,Map<String,Object> usageMap,Map<String,Set<String>> studentContentMapper){
 		
-	if(userId == null){
-		if(isUserIdInKey){
-			for(String id : userIds.split(ApiConstants.COMMA)){
-				if(metricRow.getKey().contains(id)){
-					userId = id;
-					break;
+		/**
+		 * Assign the User Id, Check is the user exists in key then iterate the userIds
+		 *  or else fetch from column
+		 */
+		if(userId == null){
+			if(isUserIdInKey){
+				for(String id : userIds.split(ApiConstants.COMMA)){
+					if(metricRow.getKey().contains(id)){
+						userId = id;
+						break;
+					}
 				}
-		}
-		}else{
-			if(metricRow.getColumns().getColumnNames().contains(ApiConstants.GOORU_UID)){
-				userId = metricRow.getColumns().getStringValue(ApiConstants.GOORU_UID, null);
+			}else{
+				if(metricRow.getColumns().getColumnNames().contains(ApiConstants.GOORU_UID)){
+					userId = metricRow.getColumns().getStringValue(ApiConstants.GOORU_UID, null);
+				}
 			}
 		}
-	}
-	
-	usageMap.put(ApiConstants.USER_UID, userId);
-	if(userProcess){
-	Set<String>	set = new HashSet<String>();
-	set.add(userId);
-	if(userSet.containsKey(collectionId)){
-		set.addAll(userSet.get(collectionId));
-	}
-	userSet.put(collectionId, set);
-	}
-	return userId;
-	
+		usageMap.put(ApiConstants.USERUID, userId);
+
+		/**
+		 * Store the User Ids to every content,so that it helps to include default value.
+		 */
+		if(userProcess){
+		Set<String>	setHandler = new HashSet<String>();
+		setHandler.add(userId);
+			if(studentContentMapper.containsKey(contentId)){
+				setHandler.addAll(studentContentMapper.get(contentId));
+			}
+		studentContentMapper.put(contentId, setHandler);
+		}
+		return userId;
 	}
 
 	public ResponseParamDTO<Map<String, Object>> getStudentAssessmentSummary(String traceId, String classId, String courseId, String unitId, String lessonId, String assessmentId, String userUid,
