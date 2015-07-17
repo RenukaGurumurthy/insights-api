@@ -1,9 +1,12 @@
 package org.gooru.insights.api.utils;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.gooru.insights.api.constants.ApiConstants;
+import org.gooru.insights.api.constants.ApiConstants.options;
 
 public class DataUtils {
 
@@ -12,13 +15,35 @@ public class DataUtils {
 	private static Map<String,String> stringColumns;
 
 	private static Map<String,String> longColumns;
+	
+	private static Set<String> studentsCollectionUsageColumnSuffix;
+	
+	static{
+		studentsCollectionUsageColumnSuffix = new HashSet<String>();
+		studentsCollectionUsageColumnSuffix.add(ApiConstants.VIEWS);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants._TIME_SPENT);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants.SCORE);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants._QUESTION_STATUS);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants._ANSWER_OBJECT);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants.CHOICE);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants.ATTEMPTS);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants._AVG_TIME_SPENT);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants._TIME_SPENT);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants.OPTIONS);
+		studentsCollectionUsageColumnSuffix.add(options.A.name());
+		studentsCollectionUsageColumnSuffix.add(options.B.name());
+		studentsCollectionUsageColumnSuffix.add(options.C.name());
+		studentsCollectionUsageColumnSuffix.add(options.D.name());
+		studentsCollectionUsageColumnSuffix.add(options.E.name());
+		studentsCollectionUsageColumnSuffix.add(options.F.name());
+	}
 
 	static{
 		longColumns = new HashMap<String, String>();
 		longColumns.put(ApiConstants.VIEWS, ApiConstants.VIEWS);
 		longColumns.put(ApiConstants._SCORE_IN_PERCENTAGE, ApiConstants.SCORE_IN_PERCENTAGE);
 		longColumns.put(ApiConstants._TIME_SPENT, ApiConstants.TIMESPENT);
-		longColumns.put(ApiConstants.REACTION, ApiConstants.REACTION);
+		longColumns.put(ApiConstants.RA, ApiConstants.REACTION);
 		longColumns.put(ApiConstants.SCORE, ApiConstants.SCORE);
 		longColumns.put(ApiConstants.SKIPPED, ApiConstants.SKIPPED);
 		longColumns.put("attempts", "attempts");
@@ -59,7 +84,7 @@ public class DataUtils {
 		sessionActivityMetrics.put(ApiConstants.VIEWS, ApiConstants.VIEWS);
 		sessionActivityMetrics.put(ApiConstants._SCORE_IN_PERCENTAGE, ApiConstants.SCORE_IN_PERCENTAGE);
 		sessionActivityMetrics.put(ApiConstants._TIME_SPENT, ApiConstants.TIMESPENT);
-		sessionActivityMetrics.put(ApiConstants.REACTION, ApiConstants.REACTION);
+		sessionActivityMetrics.put(ApiConstants.RA, ApiConstants.REACTION);
 		sessionActivityMetrics.put(ApiConstants.CHOICE, ApiConstants.TEXT);
 		sessionActivityMetrics.put(ApiConstants.TYPE, ApiConstants.QUESTION_TYPE);
 		sessionActivityMetrics.put(ApiConstants._FEEDBACK_PROVIDER, ApiConstants.FEEDBACKPROVIDER);
@@ -97,6 +122,15 @@ public class DataUtils {
 	}
 	public static Map<String,String> getLongColumns() {
 		return longColumns;
+	}
+
+	public static Set<String> getStudentsCollectionUsageColumnSuffix() {
+		return studentsCollectionUsageColumnSuffix;
+	}
+
+	public static void setStudentsCollectionUsageColumnSuffix(
+			Set<String> studentsCollectionUsageColumnSuffix) {
+		DataUtils.studentsCollectionUsageColumnSuffix = studentsCollectionUsageColumnSuffix;
 	}
 	
 }
