@@ -1,11 +1,12 @@
 package org.gooru.insights.api.utils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.gooru.insights.api.constants.ApiConstants;
+import org.gooru.insights.api.constants.ApiConstants.options;
 
 public class DataUtils {
 
@@ -14,6 +15,28 @@ public class DataUtils {
 	private static Map<String,String> stringColumns;
 
 	private static Map<String,String> longColumns;
+	
+	private static Set<String> studentsCollectionUsageColumnSuffix;
+	
+	static{
+		studentsCollectionUsageColumnSuffix = new HashSet<String>();
+		studentsCollectionUsageColumnSuffix.add(ApiConstants.VIEWS);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants._TIME_SPENT);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants.SCORE);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants._QUESTION_STATUS);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants._ANSWER_OBJECT);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants.CHOICE);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants.ATTEMPTS);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants._AVG_TIME_SPENT);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants._TIME_SPENT);
+		studentsCollectionUsageColumnSuffix.add(ApiConstants.OPTIONS);
+		studentsCollectionUsageColumnSuffix.add(options.A.name());
+		studentsCollectionUsageColumnSuffix.add(options.B.name());
+		studentsCollectionUsageColumnSuffix.add(options.C.name());
+		studentsCollectionUsageColumnSuffix.add(options.D.name());
+		studentsCollectionUsageColumnSuffix.add(options.E.name());
+		studentsCollectionUsageColumnSuffix.add(options.F.name());
+	}
 
 	static{
 		longColumns = new HashMap<String, String>();
@@ -100,6 +123,15 @@ public class DataUtils {
 	}
 	public static Map<String,String> getLongColumns() {
 		return longColumns;
+	}
+
+	public static Set<String> getStudentsCollectionUsageColumnSuffix() {
+		return studentsCollectionUsageColumnSuffix;
+	}
+
+	public static void setStudentsCollectionUsageColumnSuffix(
+			Set<String> studentsCollectionUsageColumnSuffix) {
+		DataUtils.studentsCollectionUsageColumnSuffix = studentsCollectionUsageColumnSuffix;
 	}
 	
 }

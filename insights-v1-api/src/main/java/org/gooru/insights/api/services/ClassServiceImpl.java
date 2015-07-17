@@ -1278,51 +1278,24 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	public ResponseParamDTO<Map<String,Object>> getStudentsCollectionData(String traceId, String classId, String courseId, String unitId, String lessonId, String collectionId, boolean isSecure) throws Exception {
 		
 		ResponseParamDTO<Map<String,Object>> responseParamDTO = new ResponseParamDTO<Map<String,Object>>();
-		//list the resource and inside of it convert the user as usage data
-		List<Map<String,Object>> resources = getContentItems(traceId,collectionId,null,true);
-		List<Map<String,Object>> students = getStudents(traceId, classId);
-		StringBuffer resourceIds = getBaseService().exportData(resources, ApiConstants.GOORUOID);
-		StringBuffer userIds = getBaseService().exportData(students, ApiConstants.USERUID);
+		//Get list of resources and students
+		List<Map<String,Object>> resourcesMetaData = getContentItems(traceId,collectionId,null,true);
+		List<Map<String,Object>> studentsMetaData = getStudents(traceId, classId);
 		
-		Set<String> columnSuffix = new HashSet<String>();
-		columnSuffix.add(ApiConstants.VIEWS);
-		columnSuffix.add(ApiConstants._TIME_SPENT);
-		columnSuffix.add(ApiConstants.SCORE);
-		columnSuffix.add(ApiConstants._ANSWER_OBJECT);
-		columnSuffix.add(ApiConstants.CHOICE);
-		columnSuffix.add(ApiConstants.ATTEMPTS);
-		columnSuffix.add(ApiConstants._AVG_TIME_SPENT);
-		columnSuffix.add(ApiConstants._TIME_SPENT);
-		columnSuffix.add(ApiConstants._AVG_REACTION);
-		columnSuffix.add(ApiConstants.RA);
-		columnSuffix.add(ApiConstants.REACTION);
-		columnSuffix.add(ApiConstants.OPTIONS);
-		columnSuffix.add(options.A.name());
-		columnSuffix.add(options.B.name());
-		columnSuffix.add(options.C.name());
-		columnSuffix.add(options.D.name());
-		columnSuffix.add(options.E.name());
-		columnSuffix.add(options.F.name());
-		
-		/**
-		 * Fetch session data
-		 */
-		Collection<String> rowKeys = getBaseService().appendAdditionalField(ApiConstants.TILDA, getBaseService().appendTilda(SessionAttributes.RS.getSession(),classId,courseId,unitId,lessonId,collectionId), userIds.toString());
+		StringBuffer resourceIds = getBaseService().exportData(resourcesMetaData, ApiConstants.GOORUOID);
+		StringBuffer studentIds = getBaseService().exportData(studentsMetaData, ApiConstants.USERUID);
+		Set<String> columnSuffix =  DataUtils.getStudentsCollectionUsageColumnSuffix();
+		//Fetch session data
+		Collection<String> rowKeys = getBaseService().appendAdditionalField(ApiConstants.TILDA, getBaseService().appendTilda(SessionAttributes.RS.getSession(),classId,courseId,unitId,lessonId,collectionId), studentIds.toString());
+		List<String> sessionIds = getSessions(traceId,rowKeys);
+		//Fetch collection actiivity data
 		Collection<String> columns = getBaseService().appendAdditionalField(ApiConstants.TILDA, resourceIds.toString(), columnSuffix);
 		columns.add(ApiConstants.GOORU_UID);
-		List<String> sessionIds = getSessions(traceId,rowKeys);
-		List<Map<String,Object>> assessmentUsage = getIdBasedColumnActivityMetrics(traceId, sessionIds,ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), columns, userIds.toString(),false,resourceIds.toString(),true);
-		assessmentUsage = getBaseService().includeDefaultData(assessmentUsage, students, ApiConstants.GOORUOID, ApiConstants.USERUID);
-//		assessmentUsage = getBaseService().LeftJoin(assessmentUsage, students, ApiConstants.USERUID, ApiConstants.USERUID);
+		List<Map<String,Object>> assessmentUsage = getIdBasedColumnActivityMetrics(traceId, sessionIds,ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), columns, studentIds.toString(),false,resourceIds.toString(),true);
+		assessmentUsage = getBaseService().LeftJoin(assessmentUsage, studentsMetaData, ApiConstants.USERUID, ApiConstants.USERUID);
+		//Group data at user level
 		assessmentUsage = getBaseService().groupDataDependOnkey(assessmentUsage,ApiConstants.GOORUOID,ApiConstants.USAGE_DATA);
-		assessmentUsage = getBaseService().LeftJoin(resources,assessmentUsage,ApiConstants.GOORUOID,ApiConstants.GOORUOID);
-		
-		/**
-		 * Setting of assessment meta info may be tricky
-		 */
-		List<Map<String,Object>> assessmentMetaInfo = getQuestionMetaData(traceId,collectionId);
-		assessmentUsage = getBaseService().LeftJoin(assessmentUsage, assessmentMetaInfo, ApiConstants.GOORUOID, ApiConstants.GOORUOID);
-		
+		assessmentUsage = getBaseService().LeftJoin(resourcesMetaData,assessmentUsage,ApiConstants.GOORUOID,ApiConstants.GOORUOID);
 		responseParamDTO.setContent(assessmentUsage);
 		return responseParamDTO;
 	}
@@ -1377,30 +1350,31 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			Collection<String> columns) {
 		Map<String, Object> usageMap = new HashMap<String, Object>();
 		for (String metricName : columns) {
-			
 			if (metricName.endsWith(ApiConstants._COLLECTION_TYPE)) {
 				usageMap.put(ApiConstants.COLLECTION_TYPE, null);
 			} else if (metricName.endsWith(ApiConstants.VIEWS)) {
 				usageMap.put(ApiConstants.VIEWS, 0L);
 			} else if (metricName.endsWith(ApiConstants._SCORE_IN_PERCENTAGE)) {
 				usageMap.put(ApiConstants.SCORE_IN_PERCENTAGE, 0L);
-			} else if (metricName.endsWith(ApiConstants._TIME_SPENT)) {
-				usageMap.put(ApiConstants.TIMESPENT, 0L);
 			} else if (metricName.endsWith(ApiConstants._ANSWER_OBJECT)) {
 				usageMap.put(ApiConstants.ANSWER_OBJECT, null);
 			}else if(metricName.endsWith(ApiConstants.ATTEMPTS)){
 				usageMap.put(ApiConstants.ATTEMPTS, 0L);
-			} else if (metricName.endsWith(ApiConstants._AVG_TIME_SPENT)) {
+			}else if(metricName.endsWith(ApiConstants.SCORE)){
+				usageMap.put(ApiConstants.SCORE, 0L);
+			}else if(metricName.endsWith(ApiConstants._AVG_TIME_SPENT)) {
 				usageMap.put(ApiConstants.AVG_TIME_SPENT, 0L);
-			} else if (metricName.endsWith(ApiConstants.CHOICE)) {
+			}else if(metricName.endsWith(ApiConstants.CHOICE)) {
 				usageMap.put(ApiConstants.TEXT, null);
-			}else if(metricName.equalsIgnoreCase(ApiConstants.RA)){
-				usageMap.put(ApiConstants.REACTION, 0L);
-			}else if(metricName.equalsIgnoreCase(ApiConstants._AVG_REACTION)){
+			}else if(metricName.endsWith(ApiConstants._AVG_REACTION)){
 				usageMap.put(ApiConstants.AVG_REACTION, 0L);
-			} else if (metricName.endsWith(ApiConstants._TIME_SPENT)) {
+			}else if(metricName.endsWith(ApiConstants.REACTION)){
+				usageMap.put(ApiConstants.REACTION, 0L);
+			}else if(metricName.endsWith(ApiConstants._QUESTION_STATUS)){
+				usageMap.put(ApiConstants.STATUS, null);
+			}else if(metricName.endsWith(ApiConstants._TIME_SPENT)) {
 				usageMap.put(ApiConstants.TIMESPENT, 0L);
-			} else if (metricName.endsWith(ApiConstants.OPTIONS)) {
+			} else if(metricName.endsWith(ApiConstants.OPTIONS)) {
 				usageMap.put(ApiConstants.OPTIONS, null);
 			}
 		}
@@ -1409,11 +1383,12 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	
 	private Map<String,Object> fetchMetricData(String traceId, String id,Row<String, String> metricRow, String metricName,String column){
 		Map<String,Object> usageMap = new HashMap<String,Object>();
-		
  		if(metricName.equalsIgnoreCase(ApiConstants._COLLECTION_TYPE)){
 			usageMap.put(ApiConstants.COLLECTION_TYPE, metricRow.getColumns().getStringValue(column, null));
 		}else if(metricName.equalsIgnoreCase(ApiConstants.VIEWS)){
 			usageMap.put(ApiConstants.VIEWS, metricRow.getColumns().getLongValue(column.trim(), 0L));
+		}else if(metricName.equalsIgnoreCase(ApiConstants.SCORE)){
+			usageMap.put(ApiConstants.SCORE, metricRow.getColumns().getLongValue(column.trim(), 0L));
 		}else if(metricName.equalsIgnoreCase(ApiConstants._SCORE_IN_PERCENTAGE)){
 			usageMap.put(ApiConstants.SCORE_IN_PERCENTAGE, metricRow.getColumns().getLongValue(column.trim(), 0L));
 		}else if(metricName.equalsIgnoreCase(ApiConstants._TIME_SPENT)){
@@ -1426,10 +1401,12 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			usageMap.put(ApiConstants.ATTEMPTS, metricRow.getColumns().getLongValue(column.trim(), 0L));
 		}else if(metricName.equalsIgnoreCase(ApiConstants.CHOICE)){
 			usageMap.put(ApiConstants.TEXT, metricRow.getColumns().getStringValue(column.trim(), null));
-		}else if(metricName.equalsIgnoreCase(ApiConstants.RA)){
+		}else if(metricName.equalsIgnoreCase(ApiConstants.REACTION)){
 			usageMap.put(ApiConstants.REACTION, metricRow.getColumns().getLongValue(column.trim(), 0L));
 		}else if(metricName.equalsIgnoreCase(ApiConstants._AVG_REACTION)){
-			usageMap.put(ApiConstants.AVG_REACTION, metricRow.getColumns().getStringValue(column.trim(), null));
+			usageMap.put(ApiConstants.AVG_REACTION, metricRow.getColumns().getLongValue(column.trim(), 0L));
+		}else if(metricName.equalsIgnoreCase(ApiConstants._QUESTION_STATUS)){
+			usageMap.put(ApiConstants.STATUS, metricRow.getColumns().getStringValue(column.trim(), null));
 		}else if(metricName.matches(ApiConstants.OPTIONS)){
 			Map<String,Long> optionMap = new HashMap<String,Long>();
 			optionMap.put(ApiConstants.options.A.name(), metricRow.getColumns().getLongValue(getBaseService().appendTilda(id,ApiConstants.options.A.name()), 0L));
