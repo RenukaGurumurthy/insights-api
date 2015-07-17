@@ -154,7 +154,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			if(!studentsMetaData.isEmpty() || StringUtils.isNotBlank(studentId)){
 				
 				if(StringUtils.isBlank(studentId)){
-					studentId = getBaseService().exportData(studentsMetaData, ApiConstants.USERUID).toString();
+					studentId = getBaseService().exportData(studentsMetaData, ApiConstants.USER_UID).toString();
 				}else{
 				}
 				for(Map<String, Object> lessonrawData : lessonsRawData) {
@@ -195,15 +195,15 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						List<Map<String,Object>> contentUsage = getIdBasedColumnActivityMetrics(traceId, rowKeys,ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), columns, studentId,true,collectionIds.toString(),true);
 						contentUsage = getBaseService().LeftJoin(contentUsage,contentsMetaData,ApiConstants.GOORUOID,ApiConstants.GOORUOID);
 						//group at content level
-						contentUsage = getBaseService().groupDataDependOnkey(contentUsage,ApiConstants.USERUID,ApiConstants.USAGE_DATA);
+						contentUsage = getBaseService().groupDataDependOnkey(contentUsage,ApiConstants.USER_UID,ApiConstants.USAGE_DATA);
 						//Inject Lesson data
 						contentUsage = getBaseService().injectRecord(contentUsage, lessonrawData);
 						resultData.addAll(contentUsage);
 					}
 				}
 				//group at user level
-				resultData = getBaseService().groupDataDependOnkey(resultData,ApiConstants.USERUID,ApiConstants.USAGE_DATA);
-				resultData = getBaseService().LeftJoin(resultData,studentsMetaData,ApiConstants.USERUID,ApiConstants.USERUID);
+				resultData = getBaseService().groupDataDependOnkey(resultData,ApiConstants.USER_UID,ApiConstants.USAGE_DATA);
+				resultData = getBaseService().LeftJoin(resultData,studentsMetaData,ApiConstants.USER_UID,ApiConstants.USER_UID);
 				responseParamDTO.setContent(resultData);
 			}
 		}
@@ -1310,7 +1310,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		List<Map<String,Object>> studentsMetaData = getStudents(traceId, classId);
 		
 		StringBuffer resourceIds = getBaseService().exportData(resourcesMetaData, ApiConstants.GOORUOID);
-		StringBuffer studentIds = getBaseService().exportData(studentsMetaData, ApiConstants.USERUID);
+		StringBuffer studentIds = getBaseService().exportData(studentsMetaData, ApiConstants.USER_UID);
 		Set<String> columnSuffix =  DataUtils.getStudentsCollectionUsageColumnSuffix();
 		//Fetch session data
 		Collection<String> rowKeys = getBaseService().appendAdditionalField(ApiConstants.TILDA, getBaseService().appendTilda(SessionAttributes.RS.getSession(),classId,courseId,unitId,lessonId,collectionId), studentIds.toString());
@@ -1319,7 +1319,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		Collection<String> columns = getBaseService().appendAdditionalField(ApiConstants.TILDA, resourceIds.toString(), columnSuffix);
 		columns.add(ApiConstants.GOORU_UID);
 		List<Map<String,Object>> assessmentUsage = getIdBasedColumnActivityMetrics(traceId, sessionIds,ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), columns, studentIds.toString(),false,resourceIds.toString(),true);
-		assessmentUsage = getBaseService().LeftJoin(assessmentUsage, studentsMetaData, ApiConstants.USERUID, ApiConstants.USERUID);
+		assessmentUsage = getBaseService().LeftJoin(assessmentUsage, studentsMetaData, ApiConstants.USER_UID, ApiConstants.USER_UID);
 		//Group data at user level
 		assessmentUsage = getBaseService().groupDataDependOnkey(assessmentUsage,ApiConstants.GOORUOID,ApiConstants.USAGE_DATA);
 		assessmentUsage = getBaseService().LeftJoin(resourcesMetaData,assessmentUsage,ApiConstants.GOORUOID,ApiConstants.GOORUOID);
@@ -1500,7 +1500,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				}
 			}
 		}
-		usageMap.put(ApiConstants.USERUID, userId);
+		usageMap.put(ApiConstants.USER_UID, userId);
 
 		/**
 		 * Store the User Ids to every content,so that it helps to include default value.
