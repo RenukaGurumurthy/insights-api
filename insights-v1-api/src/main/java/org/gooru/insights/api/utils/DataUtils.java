@@ -1,5 +1,7 @@
 package org.gooru.insights.api.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -10,15 +12,41 @@ import org.gooru.insights.api.constants.ApiConstants.options;
 
 public class DataUtils {
 
-	private static Map<String,String> assessmentAnswerSelect;
-
 	private static Map<String,String> stringColumns;
 
 	private static Map<String,String> longColumns;
 	
 	private static Set<String> studentsCollectionUsageColumnSuffix;
 	
+	private static Collection<String> collectionSummaryResourceColumns;
+	
 	static{
+		putStudentCollectionUsageCache();
+		putCollectionSummaryUsageCache();
+	}
+
+	private static void putStudentCollectionUsageCache(){
+		putStudentCollectionColumnSuffix();
+	}
+	
+	private static void putCollectionSummaryUsageCache(){
+		putcollectionSummaryResourceColumn();
+	}
+	
+	private static void putcollectionSummaryResourceColumn(){
+		collectionSummaryResourceColumns = new ArrayList<String>();
+		collectionSummaryResourceColumns.add(ApiConstants.TITLE);
+		collectionSummaryResourceColumns.add(ApiConstants.THUMBNAIL);
+		collectionSummaryResourceColumns.add(ApiConstants.GOORUOID);
+		collectionSummaryResourceColumns.add(ApiConstants.RESOURCE_FORMAT);
+		collectionSummaryResourceColumns.add(ApiConstants.RESOURCE_TYPE);
+		collectionSummaryResourceColumns.add(ApiConstants.CATEGORY);
+		collectionSummaryResourceColumns.add(ApiConstants.HAS_FRAME_BREAKER);
+		collectionSummaryResourceColumns.add(ApiConstants.QUESTION_DOT_TYPE);
+		collectionSummaryResourceColumns.add(ApiConstants.QUESTION_DOT_QUESTION_TYPE);
+	}
+	
+	private static void putStudentCollectionColumnSuffix(){
 		studentsCollectionUsageColumnSuffix = new HashSet<String>();
 		studentsCollectionUsageColumnSuffix.add(ApiConstants.VIEWS);
 		studentsCollectionUsageColumnSuffix.add(ApiConstants._TIME_SPENT);
@@ -37,7 +65,7 @@ public class DataUtils {
 		studentsCollectionUsageColumnSuffix.add(options.E.name());
 		studentsCollectionUsageColumnSuffix.add(options.F.name());
 	}
-
+	
 	static{
 		longColumns = new HashMap<String, String>();
 		longColumns.put(ApiConstants.VIEWS, ApiConstants.VIEWS);
@@ -56,6 +84,7 @@ public class DataUtils {
 		longColumns.put("E", "options");
 		longColumns.put("F", "options");
 	}
+	
 	static{
 		stringColumns = new HashMap<String, String>();
 		stringColumns.put(ApiConstants.CHOICE, ApiConstants.TEXT);
@@ -63,19 +92,7 @@ public class DataUtils {
 		stringColumns.put(ApiConstants._QUESTION_STATUS, ApiConstants.STATUS);
 		stringColumns.put("answer_object", "answerObject");
 	}
-	static {
-		assessmentAnswerSelect = new HashMap<String, String>();
-		assessmentAnswerSelect.put("collection_gooru_oid", "collectionGooruOId");
-		assessmentAnswerSelect.put("is_correct", "isCorrect");
-		assessmentAnswerSelect.put("question_gooru_oid", "gooruOId");
-		assessmentAnswerSelect.put("sequence", "sequence");
-		assessmentAnswerSelect.put("answer_text", "answerText");
-		assessmentAnswerSelect.put("question_type", "questionType");
-		assessmentAnswerSelect.put("type_name", "type");
-		assessmentAnswerSelect.put("answer_id", "answerId");
-		assessmentAnswerSelect.put("question_id", "questionId");
-	}
-	
+
 	private static Map<String,String> sessionActivityMetrics;
 
 	static {
@@ -92,21 +109,17 @@ public class DataUtils {
 		sessionActivityMetrics.put(ApiConstants.SCORE, ApiConstants.SCORE);
 		sessionActivityMetrics.put(ApiConstants.TAU, ApiConstants.TOTAL_ATTEMPT_USER_COUNT);
 		sessionActivityMetrics.put(ApiConstants.SKIPPED, ApiConstants.SKIPPED);
-		sessionActivityMetrics.put("attempts", "attempts");
-		sessionActivityMetrics.put("correct", "totalCorrectCount");
-		sessionActivityMetrics.put("in_correct", "totalInCorrectCount");
-		sessionActivityMetrics.put("answer_object", "answerObject");
-		sessionActivityMetrics.put("options", "options");
-		sessionActivityMetrics.put("A", "options");
-		sessionActivityMetrics.put("B", "options");
-		sessionActivityMetrics.put("C", "options");
-		sessionActivityMetrics.put("D", "options");
-		sessionActivityMetrics.put("E", "options");
-		sessionActivityMetrics.put("F", "options");
-	}
-	
-	public static String getAssessmentAnswerSelect(String key) {
-		return assessmentAnswerSelect.containsKey(key) ? assessmentAnswerSelect.get(key) : null;
+		sessionActivityMetrics.put(ApiConstants.ATTEMPTS, ApiConstants.ATTEMPTS);
+		sessionActivityMetrics.put(ApiConstants.CORRECT, ApiConstants.TOTAL_CORRECT_COUNT);
+		sessionActivityMetrics.put(ApiConstants.IN_CORRECT, ApiConstants.TOTAL_INCORRECT_COUNT);
+		sessionActivityMetrics.put(ApiConstants._ANSWER_OBJECT,ApiConstants.ANSWER_OBJECT);
+		sessionActivityMetrics.put(ApiConstants.OPTIONS, ApiConstants.OPTIONS);
+		sessionActivityMetrics.put(options.A.option(), ApiConstants.OPTIONS);
+		sessionActivityMetrics.put(options.B.option(), ApiConstants.OPTIONS);
+		sessionActivityMetrics.put(options.C.option(), ApiConstants.OPTIONS);
+		sessionActivityMetrics.put(options.D.option(), ApiConstants.OPTIONS);
+		sessionActivityMetrics.put(options.E.option(), ApiConstants.OPTIONS);
+		sessionActivityMetrics.put(options.F.option(), ApiConstants.OPTIONS);
 	}
 	
 	public static String getSessionActivityMetricsMapValue(String key) {
@@ -131,6 +144,15 @@ public class DataUtils {
 	public static void setStudentsCollectionUsageColumnSuffix(
 			Set<String> studentsCollectionUsageColumnSuffix) {
 		DataUtils.studentsCollectionUsageColumnSuffix = studentsCollectionUsageColumnSuffix;
+	}
+
+	public static Collection<String> getCollectionSummaryResourceColumns() {
+		return collectionSummaryResourceColumns;
+	}
+
+	public static void setCollectionSummaryResourceColumns(
+			Collection<String> collectionSummaryResourceColumns) {
+		DataUtils.collectionSummaryResourceColumns = collectionSummaryResourceColumns;
 	}
 	
 }

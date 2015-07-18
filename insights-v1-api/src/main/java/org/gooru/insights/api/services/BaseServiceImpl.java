@@ -529,20 +529,21 @@ public class BaseServiceImpl implements BaseService {
 		for (Map<String, Object> parentEntry : parent) {
 			boolean occured = false;
 			Map<String, Object> appended = new HashMap<String, Object>();
-			for (Map<String, Object> childEntry : child) {
-				if (childEntry.containsKey(childKey) && parentEntry.containsKey(parentKey)) {
-					if (childEntry.get(childKey).equals(parentEntry.get(parentKey))) {
-						occured = true;
-						appended.putAll(childEntry);
-						appended.putAll(parentEntry);
-						break;
+			if(child != null && !child.isEmpty()) {
+				for (Map<String, Object> childEntry : child) {
+					if (childEntry.containsKey(childKey) && parentEntry.containsKey(parentKey)) {
+						if (childEntry.get(childKey).equals(parentEntry.get(parentKey))) {
+							occured = true;
+							appended.putAll(childEntry);
+							appended.putAll(parentEntry);
+							break;
+						}
 					}
 				}
 			}
 			if (!occured) {
 				appended.putAll(parentEntry);
 			}
-
 			resultList.add(appended);
 		}
 		return resultList;
@@ -1040,13 +1041,15 @@ public class BaseServiceImpl implements BaseService {
 	 */
 	public StringBuffer exportData(List<Map<String, Object>> requestData, String requestKey) {
 			StringBuffer exportData = new StringBuffer();
-			for (Map<String, Object> map : requestData) {
-					if (map.containsKey(requestKey) && map.get(requestKey) != null) {
-						if(exportData.length() > 0) {
-							exportData.append(",");
-						} 
-						exportData.append(map.get(requestKey));
-					}
+			if(requestData != null && !requestData.isEmpty()){
+				for (Map<String, Object> map : requestData) {
+						if (map.containsKey(requestKey) && map.get(requestKey) != null) {
+							if(exportData.length() > 0) {
+								exportData.append(ApiConstants.COMMA);
+							} 
+							exportData.append(map.get(requestKey));
+						}
+				}
 			}
 			return exportData;
 	}
@@ -1624,9 +1627,8 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 			for(Map<String,Object> data : requestData){
 
 				for(Entry<String, Map<Integer, String>> map : processMap.entrySet()){
-					
 					if(data.containsKey(map.getKey())){
-						String mergedData="";
+						String mergedData=ApiConstants.STRING_EMPTY;
 						boolean includeThumbnail = true;
 						Map<Integer,String> appendableKey = new TreeMap<Integer, String>();
 						appendableKey = map.getValue();
@@ -1636,9 +1638,8 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 								mergedData=map2.getValue();	
 								continue;
 							}
-							
 							if(data.containsKey(map2.getValue()) && notNull(data.get(map2.getValue()).toString())){
-								if(data.get(map2.getValue()).toString().startsWith("http")){
+								if(data.get(map2.getValue()).toString().startsWith(ApiConstants.HTTP)){
 									mergedData = data.get(map2.getValue()).toString();
 								}else{
 								mergedData+=data.get(map2.getValue());
@@ -1647,12 +1648,10 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 								includeThumbnail = false;
 							}
 						}
-						
 						if(includeThumbnail){
 						data.put(map.getKey(), mergedData);
 						}
 					}
-					
 				}
 				resultList.add(data);
 			}
@@ -1679,9 +1678,9 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 			for(Map<String, Object> rawRow : rawRows) {
 				Map<String, Object> rawDataMap = new HashMap<String, Object>();
 				rawDataMap.putAll(rawRow);
-				rawDataMap.remove("key");
-				if(rawRow.containsKey("key")) {
-					rawDataMap.put(columnName, rawRow.get("key"));
+				rawDataMap.remove(ApiConstants.KEY);
+				if(rawRow.containsKey(ApiConstants.KEY)) {
+					rawDataMap.put(columnName, rawRow.get(ApiConstants.KEY));
 				} else {
 					rawDataMap.put(columnName, columnValue);
 				}
@@ -1797,65 +1796,6 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 			 * The grouped data from fetch key is convered to list
 			 */
 			return convertMapToList(customizedMap,fetchKey,objectKey);
-		}
-		
-		public List<Map<String, Object>> getQuestionAnswerData(List<Map<String, Object>> requestData, String coreKey) {
-			boolean firstEntry = false;
-			List<Map<String, Object>> resultSet = new ArrayList<Map<String, Object>>();
-			List<Map<String, Object>> finalSet = new ArrayList<Map<String, Object>>();
-			Collections.sort(requestData, new Comparator<Map<String, Object>>() {
-				public int compare(final Map<String, Object> m1, final Map<String, Object> m2) {
-					return String.valueOf(m1.get("question_gooru_oid")).compareTo(String.valueOf(m2.get("question_gooru_oid")));
-				}
-			});
-			String gooruOId = "";
-			for (Map<String, Object> map : requestData) {
-				Map<String, Object> resultMap = new HashMap<String, Object>();
-				Map<String, Object> resultMaps = new TreeMap<String, Object>(map);
-				for (Map.Entry<String, Object> value : resultMaps.entrySet()) {
-					if (value.getKey().equalsIgnoreCase(coreKey)) {
-						if (firstEntry) {
-							if (gooruOId.equalsIgnoreCase(String.valueOf(value.getValue()))) {
-							} else {
-								Map<String, Object> intermediateMap = new HashMap<String, Object>();
-								intermediateMap.put(coreKey, gooruOId);
-								Collections.sort(resultSet, new Comparator<Map<String, Object>>() {
-									public int compare(final Map<String, Object> m1, final Map<String, Object> m2) {
-										return String.valueOf(m1.get("sequence")).compareTo(String.valueOf(m2.get("sequence")));
-									}
-								});
-								intermediateMap.put("metaData", resultSet);
-
-								finalSet.add(intermediateMap);
-								resultSet = new ArrayList<Map<String, Object>>();
-								gooruOId = String.valueOf(value.getValue());
-
-							}
-						} else {
-							gooruOId = String.valueOf(value.getValue());
-						}
-						firstEntry = true;
-					}
-					if (!value.getKey().equalsIgnoreCase("key")) {
-						String selectValue = DataUtils.getAssessmentAnswerSelect(value.getKey());
-						if (selectValue != null) {
-							resultMap.put(selectValue, value.getValue());
-						}
-					}
-				}
-				resultSet.add(resultMap);
-			}
-			Map<String, Object> intermediateMap = new HashMap<String, Object>();
-			intermediateMap.put(coreKey, gooruOId);
-			intermediateMap.put("metaData", resultSet);
-			Collections.sort(resultSet, new Comparator<Map<String, Object>>() {
-				public int compare(final Map<String, Object> m1, final Map<String, Object> m2) {
-					return String.valueOf(m1.get("sequence")).compareTo(String.valueOf(m2.get("sequence")));
-				}
-			});
-
-			finalSet.add(intermediateMap);
-			return finalSet;
 		}
 		
 		public String getHourlyBasedTimespent(double timeSpent) {

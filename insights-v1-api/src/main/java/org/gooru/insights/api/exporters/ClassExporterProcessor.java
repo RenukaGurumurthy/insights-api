@@ -56,7 +56,7 @@ public class ClassExporterProcessor {
 	
 	public File exportClassUserUsageReport(String traceId, String classId, String courseId, String unitId, String lessonId, String collectionType, String collectionId) throws ParseException, IOException{
 		
-		List<Map<String,Object>> resources = getClassService().getContentItems(traceId,collectionId,null,true);
+		List<Map<String,Object>> resources = getClassService().getContentItems(traceId,collectionId,null,true,null);
 		List<Map<String,Object>> students = getClassService().getStudents(traceId, classId);
 		resources = getBaseService().sortBy(resources, ApiConstants.SEQUENCE, ApiConstants.ASC);
 		students = getBaseService().sortBy(students, ApiConstants.USER_NAME, ApiConstants.ASC);
@@ -139,7 +139,7 @@ public class ClassExporterProcessor {
 		
 		boolean includCollectionData = false;
 		String fileName = ExportFileConstants.SUMMARY_FILE_NAME+System.currentTimeMillis()+ApiConstants.CSV_EXT;
-		List<Map<String,Object>> resources = getClassService().getContentItems(traceId,collectionId,null,true);
+		List<Map<String,Object>> resources = getClassService().getContentItems(traceId,collectionId,null,true,null);
 		resources = getBaseService().sortBy(resources, ApiConstants.SEQUENCE, ApiConstants.ASC);
 		Map<String,Object> collectionData = new LinkedHashMap<String,Object>();
 		Map<String,Object> questionData = new LinkedHashMap<String,Object>();
