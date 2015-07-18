@@ -57,19 +57,12 @@
 			<id>insights-api</id>
 			<modules>
 				<module>insights-v1-api</module>
- 				<module>insights-v3-api</module>
 			</modules>
 		</profile>
 		<profile>
 			<id>insights-api-v1</id>
 			<modules>
 				<module>insights-v1-api</module>
-			</modules>
-		</profile>
-		<profile>
-			<id>insights-api-v3</id>
-			<modules>
-				<module>insights-v3-api</module>
 			</modules>
 		</profile>
 	</profiles>
