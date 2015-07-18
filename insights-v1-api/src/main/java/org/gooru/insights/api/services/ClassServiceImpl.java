@@ -482,6 +482,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						attempted++;
 						assessmentScoreStatus = ApiConstants.SCORE_NOT_MET;
 					}
+						itemDataAsMap.put(ApiConstants.VIEWS, assessmentMetricColumnList.getLongValue(getBaseService().appendTilda(itemGooruOid,ApiConstants.VIEWS), 0L));					
 				}
 				if (assessmentScore == null) {
 					if (attempted == 0) {
@@ -491,7 +492,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					}
 					assessmentScoreStatus = ApiConstants.NOT_ATTEMPTED;
 				}
-				itemDataAsMap.put(ApiConstants.VIEWS, assessmentMetricColumnList.getLongValue(getBaseService().appendTilda(itemGooruOid,ApiConstants.VIEWS), 0L));
 				itemDataAsMap.put(ApiConstants.GOORUOID, itemGooruOid);
 				itemDataAsMap.put(ApiConstants.SCORE_STATUS, assessmentScoreStatus);
 				itemDataMapAsList.add(itemDataAsMap);
