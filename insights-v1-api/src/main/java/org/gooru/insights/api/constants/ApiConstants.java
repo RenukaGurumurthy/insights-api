@@ -158,9 +158,9 @@ public class ApiConstants {
 	
 	public static final String _HTTPS = "https://";
 	
-	public static final String IS_CORRECT = "is_correct";
+	public static final String _IS_CORRECT = "is_correct";
 	
-	public static final String _ISCORRECT = "isCorrect";
+	public static final String IS_CORRECT = "isCorrect";
 	
 	public static final String ANSWER_TEXT = "answer_text";
 	
@@ -168,6 +168,12 @@ public class ApiConstants {
 	
 	public static final String ANSWER_OBJECT = "answerObject";
 	
+	public static final String _ANSWER_ID = "answer_id";
+	public static final String ANSWER_ID = "answerId";
+	public static final String _QUESTION_ID = "question_id";
+	public static final String QUESTION_ID = "questionId";
+	public static final String _TYPE_NAME = "type_name";
+		
 	public static final String _AVG_TIME_SPENT = "avg_time_spent";
 	
 	public static final String AVG_TIME_SPENT = "avgTimeSpent";
@@ -200,6 +206,8 @@ public class ApiConstants {
 	
 	public static final String QUESTION_TYPE = "questionType";
 	
+	public static final String QUESTION_MATCH = "question.questionType|question.type";
+	
 	public static final String _QUESTION_TYPE = "question_type";
 	
 	public static final String FIRST_NAME = "firstName";
@@ -214,6 +222,7 @@ public class ApiConstants {
 	
 	public static final String ID = "id";
 
+	public static final String KEY = "key";
 	public static final String USER_PROFILE_URL_PATH = "insights.profile.url.path";
 	public static final String PROFILE_URL = "profileUrl";
 
@@ -234,6 +243,8 @@ public class ApiConstants {
 	public static final String COLLECTION_MATCH = "collection|scollection";
 	public static final String COLLECTION = "collection";
 	public static final String ASSESSMENT = "assessment";
+	public static final String CORRECT = "correct";
+	public static final String IN_CORRECT = "in_correct";
 	
 	public static final String ASSESSMENT_MATCH = "assessment/url|assessment-question";
 	
@@ -269,6 +280,7 @@ public class ApiConstants {
 	public static final String TITLE = "title";
 	public static final String TYPE = "type";
 	public static final String RESOURCE_TYPE = "resourceType";
+	public static final String RESOURCE_MATCH = "resourceType";
 	public static final String RESOURCE_FORMAT = "resourceFormat";
 	public static final String VIEWS = "views";
 	public static final String TIMESPENT = "timeSpent";
@@ -292,6 +304,8 @@ public class ApiConstants {
 	public static final String UTF8 = "UTF-8";
 	
 	public static final String HAS_FRAME_BREAKER = "hasFrameBreaker";
+	public static final String QUESTION_DOT_TYPE = "question.type";
+	public static final String QUESTION_DOT_QUESTION_TYPE = "question.questionType";
 	public static final String REACTION = "reaction";
 	public static final String CHOICE = "choice";
 	public static final String SKIPPED = "skipped";

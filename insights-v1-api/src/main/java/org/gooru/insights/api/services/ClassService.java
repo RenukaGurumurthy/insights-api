@@ -35,7 +35,7 @@ public interface ClassService {
 
 	ResponseParamDTO<Map<String,Object>> getStudentsCollectionData(String traceId, String classId, String courseId, String unitId, String lessonId, String collectionId, boolean isSecure) throws Exception;
 
-	List<Map<String,Object>> getContentItems(String traceId,String rowKey,String type,boolean fetchMetaData);
+	List<Map<String,Object>> getContentItems(String traceId,String rowKey,String type,boolean fetchMetaData,Collection<String> columns);
 
 	List<Map<String,Object>> getStudents(String traceId, String classId);
 
@@ -44,6 +44,8 @@ public interface ClassService {
 	List<Map<String,Object>> getIdBasedColumnActivityMetrics(String traceId, Collection<String> rowKeys,String columnFamily, Collection<String> columns, String userIds,boolean isUserIdInKey,String collectionIds, boolean userProcess);
 
 	ResponseParamDTO<Map<String, Object>> findUsageAvailable(String traceId, String classGooruId ,String courseGooruId,String unitGooruId,String lessonGooruId,String contentGooruId) throws Exception;
+
+	List<Map<String,Object>> getResourcesMetaData(String traceId, Collection<String> keys,Collection<String> resourceColumns,String type);
 
 	void getResourceMetaData(Map<String, Object> dataMap, String traceId,String type, String key);
 }
