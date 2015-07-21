@@ -246,7 +246,7 @@ public class ApiConstants {
 	public static final String CORRECT = "correct";
 	public static final String IN_CORRECT = "in_correct";
 	
-	public static final String ASSESSMENT_MATCH = "assessment/url|assessment-question";
+	public static final String ASSESSMENT_MATCH = "assessment/url|assessment";
 	
 	public static final String ASSESSMENT_SLASH_URL = "assessment/url";
 	public static final String LESSON_COUNT = "lessonCount";

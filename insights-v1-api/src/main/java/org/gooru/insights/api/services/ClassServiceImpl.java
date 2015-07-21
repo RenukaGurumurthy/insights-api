@@ -384,7 +384,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						itemType = itemDataAsMap.get(ApiConstants.TYPE).toString();
 					}
 					if (itemType != null) {
-                        if (itemType.equalsIgnoreCase(ApiConstants.ASSESSMENT) || itemType.equalsIgnoreCase(ApiConstants.ASSESSMENT_SLASH_URL)) {
+                        if (itemType.matches(ApiConstants.ASSESSMENT_MATCH)) {
 							assessmentCount++;
 							if (assessmentMetricColumnList != null && assessmentMetricColumnList.size() > 0) {
 								assessmentScore = assessmentMetricColumnList.getLongValue(itemGooruOid, null);
@@ -494,7 +494,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				}
 				String itemScoreStatus = null;
 				if (itemType != null) {
-                    if (itemType.equalsIgnoreCase(ApiConstants.ASSESSMENT) || itemType.equalsIgnoreCase(ApiConstants.ASSESSMENT_SLASH_URL)) {
+                    if (itemType.matches(ApiConstants.ASSESSMENT_MATCH)) {
 						assessmentCount++;
 						Long assessmentScore = null;
 						if (lessonMetricColumnList != null && lessonMetricColumnList.size() > 0) {
@@ -784,7 +784,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					itemType = itemDataAsMap.get(ApiConstants.TYPE).toString();
 				}
 				if (itemType != null) {
-                    if (itemType.equalsIgnoreCase(ApiConstants.ASSESSMENT) || itemType.equalsIgnoreCase(ApiConstants.ASSESSMENT_SLASH_URL)) {
+                    if (itemType.matches(ApiConstants.ASSESSMENT_MATCH)) {
 						// fetch lesson's score status data
 						assessmentCount++;
 						Long assessmentScore = null;
