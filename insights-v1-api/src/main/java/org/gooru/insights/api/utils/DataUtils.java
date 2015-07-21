@@ -239,7 +239,9 @@ public class DataUtils {
 						String apiField = aliesNames.get(dependentColumn[i]) != null ? aliesNames.get(dependentColumn[i]) : dependentColumn[i];
 						fetchData(traceId, columnFamily, dataTypes, dependentColumn[i], apiField, row, dataMap);
 						if(dataMap.get(apiField) != null){
-							columnList.remove(dependentColumn);
+							for(String column : dependentColumn){
+								columnList.remove(column);
+							}
 							break;
 						}
 					}
