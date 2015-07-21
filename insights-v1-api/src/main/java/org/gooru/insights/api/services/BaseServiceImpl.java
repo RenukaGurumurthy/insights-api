@@ -1498,6 +1498,14 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 		return sb.toString();
 	}
 	
+	public Set<Object> convertArrayToSet(Object[] keyList){
+		Set<Object> keySet = new HashSet<Object>();
+			for(Object key : keyList){
+				keySet.add(key);
+			}
+		return keySet;
+	}
+	
 	
 	public String generateTimeConversion(long mseconds) {
 		long hours = 0;

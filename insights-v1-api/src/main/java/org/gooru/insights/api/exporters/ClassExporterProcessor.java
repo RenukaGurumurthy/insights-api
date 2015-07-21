@@ -20,6 +20,7 @@ import org.gooru.insights.api.models.InsightsConstant.ColumnFamily;
 import org.gooru.insights.api.services.BaseService;
 import org.gooru.insights.api.services.CassandraService;
 import org.gooru.insights.api.services.ClassService;
+import org.gooru.insights.api.utils.DataUtils;
 import org.gooru.insights.api.utils.InsightsLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -56,7 +57,7 @@ public class ClassExporterProcessor {
 	
 	public File exportClassUserUsageReport(String traceId, String classId, String courseId, String unitId, String lessonId, String collectionType, String collectionId) throws ParseException, IOException{
 		
-		List<Map<String,Object>> resources = getClassService().getContentItems(traceId,collectionId,null,true,null);
+		List<Map<String,Object>> resources = getClassService().getContentItems(traceId,collectionId,null,true,null,DataUtils.getResourceFields());
 		List<Map<String,Object>> students = getClassService().getStudents(traceId, classId);
 		resources = getBaseService().sortBy(resources, ApiConstants.SEQUENCE, ApiConstants.ASC);
 		students = getBaseService().sortBy(students, ApiConstants.USER_NAME, ApiConstants.ASC);
@@ -139,14 +140,14 @@ public class ClassExporterProcessor {
 		
 		boolean includCollectionData = false;
 		String fileName = ExportFileConstants.SUMMARY_FILE_NAME+System.currentTimeMillis()+ApiConstants.CSV_EXT;
-		List<Map<String,Object>> resources = getClassService().getContentItems(traceId,collectionId,null,true,null);
+		List<Map<String,Object>> resources = getClassService().getContentItems(traceId,collectionId,null,true,null,DataUtils.getResourceFields());
 		resources = getBaseService().sortBy(resources, ApiConstants.SEQUENCE, ApiConstants.ASC);
 		Map<String,Object> collectionData = new LinkedHashMap<String,Object>();
 		Map<String,Object> questionData = new LinkedHashMap<String,Object>();
 		Map<String,Object> resourceData = new LinkedHashMap<String,Object>();
 		
 		Map<String,Object> collectionMetaInfo = new LinkedHashMap<String,Object>();
-		getClassService().getResourceMetaData(collectionMetaInfo, traceId, null, collectionId);
+		getClassService().getResourceMetaData(collectionMetaInfo, traceId, null, collectionId,DataUtils.getResourceFields());
 		String collectionKeyPrefix = getBaseService().buildString(collectionMetaInfo.get(ApiConstants.TITLE),ApiConstants.HYPHEN);
 		collectionData.put(ExportFileConstants.COLLECTION_DATA, ApiConstants.STRING_EMPTY);
 		questionData.put(ExportFileConstants.QUESTION_DATA, ApiConstants.STRING_EMPTY);

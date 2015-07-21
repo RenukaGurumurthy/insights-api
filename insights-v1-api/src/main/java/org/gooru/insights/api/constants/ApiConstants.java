@@ -18,6 +18,8 @@ public class ApiConstants {
 	
 	public static final String HYPHEN = "-";
 	
+	public static final String PIPE = "|"; 
+	
 	public static final String DOUBLE_QUOTES = "\"";
 	
 	public static final String REPLACER = "{0}";
@@ -324,7 +326,8 @@ public class ApiConstants {
 	public static final String _ITEM_COUNT = "item_count";
 	public static final String _CREATOR_UID = "creator_uid";
 	public static final String CLASS_GOORU_ID = "classGooruId";
-
+	public static final String BEAN_INIT = "Bean-init";
+	
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
 		
@@ -415,4 +418,17 @@ public class ApiConstants {
 			return reaction;
 		}
 	}
+	
+	public enum dataTypes{
+		STRING("String"),INT("Integer"),LONG("Long"),DATE("Date");
+		private String dataType;
+		
+		private dataTypes(String dataType){
+			this.dataType = dataType;
+		}
+		public String dataType(){
+			return dataType;
+		}
+	}
+	
 }

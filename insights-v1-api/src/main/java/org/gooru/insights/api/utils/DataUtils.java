@@ -7,9 +7,24 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.options;
+import org.gooru.insights.api.constants.ErrorMessages;
+import org.gooru.insights.api.models.InsightsConstant.ColumnFamily;
+import org.gooru.insights.api.services.BaseService;
+import org.gooru.insights.api.services.CassandraService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import com.netflix.astyanax.connectionpool.OperationResult;
+import com.netflix.astyanax.model.Column;
+import com.netflix.astyanax.model.ColumnList;
+import com.netflix.astyanax.model.Row;
+import com.netflix.astyanax.model.Rows;
+
+@Component
 public class DataUtils {
 
 	private static Map<String,String> stringColumns;
@@ -19,6 +34,62 @@ public class DataUtils {
 	private static Set<String> studentsCollectionUsageColumnSuffix;
 	
 	private static Collection<String> collectionSummaryResourceColumns;
+
+	private static Map<String,Map<String,String>> columnFamilyDataTypes;
+	
+	private static Map<String,String> resourceFields;
+	
+	@Autowired
+	private BaseService baseService;
+	
+	@Autowired
+	private CassandraService cassandraService;
+	
+	@PostConstruct
+	private void init() {
+		includeTableDataType();
+		putResourceFields();
+	}
+	
+	private void includeTableDataType(){
+		if (columnFamilyDataTypes == null) {
+			columnFamilyDataTypes = new HashMap<String, Map<String, String>>();
+			ColumnFamily[] columnFamilies = ColumnFamily.values();
+			Set<String> columnFamiliesName = new HashSet<String>();
+			for (ColumnFamily columnFamily : columnFamilies) {
+				columnFamiliesName.add(columnFamily.getColumnFamily());
+			}
+			OperationResult<Rows<String, String>> tableDataType = getCassandraService()
+					.read(ApiConstants.BEAN_INIT,
+							ColumnFamily.TABLE_DATATYPES.getColumnFamily(),
+							columnFamiliesName);
+			for (Row<String, String> row : tableDataType.getResult()) {
+				Map<String, String> dataType = new HashMap<String, String>();
+				for (Column<String> column : row.getColumns()) {
+					dataType.put(column.getName(), column.getStringValue());
+				}
+				columnFamilyDataTypes.put(row.getKey(), dataType);
+			}
+		}
+	}
+	
+	private void putResourceFields(){
+		
+		resourceFields = new HashMap<String,String>();
+		resourceFields.put(ApiConstants.TITLE,ApiConstants.TITLE);
+		resourceFields.put(ApiConstants.RESOURCE_TYPE,ApiConstants.TYPE);
+		resourceFields.put(ApiConstants.THUMBNAIL,ApiConstants.THUMBNAIL);
+		resourceFields.put(ApiConstants.GOORUOID,ApiConstants.GOORUOID);
+		resourceFields.put(ApiConstants._GOORUOID,ApiConstants.GOORUOID);
+	}
+	
+	public static Set<Object> convertArrayToSet(Object[] keyList){
+		Set<Object> keySet = new HashSet<Object>();
+			for(Object key : keyList){
+				keySet.add(key);
+			}
+		return keySet;
+	}
 	
 	static{
 		putStudentCollectionUsageCache();
@@ -153,6 +224,128 @@ public class DataUtils {
 	public static void setCollectionSummaryResourceColumns(
 			Collection<String> collectionSummaryResourceColumns) {
 		DataUtils.collectionSummaryResourceColumns = collectionSummaryResourceColumns;
+	}
+	
+	public static Map<String,Object> getColumnFamilyContent(String traceId, String columnFamily, Row<String, String> row, Map<String,String> aliesNames, Collection<String> columnNames, Collection<String> conditionalColumns){
+	
+		Map<String,String> dataTypes = getColumnFamilyDataTypes().get(columnFamily);
+		Map<String,Object> dataMap = new HashMap<String,Object>();
+		Collection<String> columnList = new ArrayList<String>(columnNames);
+		if(conditionalColumns != null){
+			for(String conditionalColumn : conditionalColumns){
+				String[] dependentColumn = conditionalColumn.split(ApiConstants.COMMA);
+				for(int i =0; i<dependentColumn.length; i++){
+					if(columnList.contains(dependentColumn[i])){
+						String apiField = aliesNames.get(dependentColumn[i]) != null ? aliesNames.get(dependentColumn[i]) : dependentColumn[i];
+						fetchData(traceId, columnFamily, dataTypes, dependentColumn[i], apiField, row, dataMap);
+						if(dataMap.get(apiField) != null){
+							columnList.remove(dependentColumn);
+							break;
+						}
+					}
+				}
+			}
+		}
+		for(String columnName : columnList){
+			String apiField = aliesNames.get(columnName) != null ? aliesNames.get(columnName) : columnName;
+			fetchData(traceId, columnFamily, dataTypes, columnName, apiField, row, dataMap);
+		}
+		return dataMap;
+	}
+	
+	public static Map<String,Object> getColumnFamilyContent(String traceId, String columnFamily, ColumnList<String> columns, Map<String,String> aliesNames, Collection<String> columnNames, Collection<String> conditionalColumns){
+		
+		Map<String,String> dataTypes = getColumnFamilyDataTypes().get(columnFamily);
+		Map<String,Object> dataMap = new HashMap<String,Object>();
+		Collection<String> columnList = new ArrayList<String>(columnNames);
+		if(conditionalColumns != null){
+			for(String conditionalColumn : conditionalColumns){
+				String[] dependentColumn = conditionalColumn.split(ApiConstants.PIPE);
+				for(int i =0; i<dependentColumn.length; i++){
+					if(columnList.contains(dependentColumn[i])){
+						String apiField = aliesNames.get(dependentColumn[i]) != null ? aliesNames.get(dependentColumn[i]) : dependentColumn[i];
+						fetchData(traceId, columnFamily, dataTypes, dependentColumn[i], apiField, columns, dataMap);
+						if(dataMap.get(apiField) != null){
+							columnList.remove(dependentColumn);
+							break;
+						}
+					}
+				}
+			}
+		}
+		for(String columnName : columnList){
+			String apiField = aliesNames.get(columnName) != null ? aliesNames.get(columnName) : columnName;
+			fetchData(traceId, columnFamily, dataTypes, columnName, apiField, columns, dataMap);
+		}
+		return dataMap;
+	}
+	private static void fetchData(String traceId, String columnFamily, Map<String,String> dataTypes, String columnName, String apiField, ColumnList<String> columns, Map<String,Object> dataMap){
+		if(dataTypes.get(columnName) != null){
+			if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.STRING.dataType())){
+				dataMap.put(apiField, columns.getStringValue(columnName, null));
+			}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.INT.dataType())){
+				dataMap.put(apiField, columns.getIntegerValue(columnName, 0));
+			}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.LONG.dataType())){
+				dataMap.put(apiField, columns.getLongValue(columnName, 0L));
+			}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.DATE.dataType())){
+				dataMap.put(apiField, columns.getDateValue(columnName, null));
+			}else{
+				dataMap.put(apiField, columns.getStringValue(columnName, null));
+				InsightsLogger.debug(traceId, buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
+			}
+		}else {
+			InsightsLogger.debug(traceId, buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
+		}
+	}
+
+	private static void fetchData(String traceId, String columnFamily, Map<String,String> dataTypes, String columnName, String apiField, Row<String, String> row, Map<String,Object> dataMap){
+		if(dataTypes.get(columnName) != null){
+			if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.STRING.dataType())){
+				dataMap.put(apiField, row.getColumns().getStringValue(columnName, null));
+			}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.INT.dataType())){
+				dataMap.put(apiField, row.getColumns().getIntegerValue(columnName, 0));
+			}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.LONG.dataType())){
+				dataMap.put(apiField, row.getColumns().getLongValue(columnName, 0L));
+			}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.DATE.dataType())){
+				dataMap.put(apiField, row.getColumns().getDateValue(columnName, null));
+			}else{
+				dataMap.put(apiField, row.getColumns().getStringValue(columnName, null));
+				InsightsLogger.debug(traceId, buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
+			}
+		}else {
+			dataMap.put(apiField, row.getColumns().getStringValue(columnName, null));
+			InsightsLogger.debug(traceId, buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
+		}
+	}
+	
+	public static String buildMessage(String message, String... replacer){
+		
+		for(int count =0;count<replacer.length;count++){
+			message = message.replace(ApiConstants.OPEN_BRACE+count+ApiConstants.CLOSE_BRACE, replacer[count]);
+		}
+		return message;
+	}
+	
+	public BaseService getBaseService() {
+		return baseService;
+	}
+
+	public void setBaseService(BaseService baseService) {
+		this.baseService = baseService;
+	}
+	public CassandraService getCassandraService() {
+		return cassandraService;
+	}
+	public void setCassandraService(CassandraService cassandraService) {
+		this.cassandraService = cassandraService;
+	}
+
+	public static Map<String, Map<String, String>> getColumnFamilyDataTypes() {
+		return columnFamilyDataTypes;
+	}
+
+	public static Map<String, String> getResourceFields() {
+		return resourceFields;
 	}
 	
 }
