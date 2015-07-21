@@ -13,4 +13,6 @@ public class ErrorMessages {
 	public static final String E105 = "Provide Valid values in {0}:{1}";
 	
 	public static final String UNHANDLED_EXCEPTION = "UnHandled read exception in {0} due to {1}";
+	
+	public static final String UNHANDLED_FIELD = "UnHandled read exception in {0} due to {1}";
 }
