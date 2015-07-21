@@ -273,6 +273,8 @@ public class ApiConstants {
 	public static final String SCORE_NOT_MET = "ScoreNotMet";
 	public static final String NOT_ATTEMPTED = "NotAttempted";
 	public static final String NOT_SCORED = "NotScored";
+	public static final String VIEWED = "Viewed";
+	public static final String NOT_VIEWED = "NotViewed";
 	public static final String SCORE_STATUS = "scoreStatus";
 	public static final String MINIMUM_SCORE = "minimum_score";
 	public static final String GOAL = "goal";
