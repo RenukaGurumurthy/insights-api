@@ -62,5 +62,14 @@ public class InsightsOperationConstants {
 	
 	public static final String OPERATION_INSIGHTS_CONFIG_SETTINGS_VIEW = ENTITY_INSIGHTS_SETTINGS + ENTITY_ACTION_SEPARATOR + ACTION_INSIGHTS_VIEW;
 	
+	
+	
+	public static final String SIMPLE_TEXT = "simpleText";
+	
+	public static final String _ALL = "_all";
+	
+	public static final String MONITOR_JOBS = "monitoring_keys";
+	
+	public static final String CONSTANT_VALUE = "constant_value";
 
 }

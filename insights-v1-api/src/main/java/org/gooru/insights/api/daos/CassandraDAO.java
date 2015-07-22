@@ -55,4 +55,6 @@ public interface CassandraDAO {
 	HashMap<String,String> getMonitorEventProperty(String traceId);
 	
 	OperationResult<Rows<String, String>> read(String traceId, String columnFamilyName, Collection<String> keys);
+	
+	ColumnList<String> getConfigKeys(String key);
 }

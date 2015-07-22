@@ -56,4 +56,6 @@ public interface CassandraService {
 	boolean putStringValue(String traceId, String columnFamily, String key, Map<String, String> columns);
 	
 	ColumnList<String> getDashBoardKeys(String traceId, String key);
+	
+	ColumnList<String> getConfigKeys(String key);
 }

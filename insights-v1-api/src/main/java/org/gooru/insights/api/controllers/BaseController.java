@@ -75,6 +75,14 @@ public class BaseController {
 		return model;
 	}
 	
+	public ModelAndView getSimpleModel(String content) {
+		ModelAndView model = new ModelAndView();
+		if(content != null && !content.isEmpty()){
+			model.addObject(content);
+		}
+		return model;
+	}
+	
 	public <M> ModelAndView getModel(ResponseParamDTO<M> data) {
 
 		ModelAndView model = new ModelAndView(modelAttributes.VIEW_NAME.getAttribute());

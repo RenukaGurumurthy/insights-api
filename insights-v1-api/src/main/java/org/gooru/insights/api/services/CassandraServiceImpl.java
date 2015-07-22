@@ -90,6 +90,10 @@ public class CassandraServiceImpl implements CassandraService{
 
 	}
 
+	public ColumnList<String> getConfigKeys(String key){
+		return cassandraDAO.getConfigKeys(key);
+	}
+	
 	/**
 	 * 
 	 * @param prefix

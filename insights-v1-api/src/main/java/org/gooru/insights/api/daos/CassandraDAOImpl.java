@@ -479,4 +479,18 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 		}
 		return false;
 	}
+	
+	public ColumnList<String> getConfigKeys(String key) {
+
+		ColumnList<String> jobConstants = null;
+		try {
+			jobConstants = getLogKeyspace().prepareQuery(this.accessColumnFamily("job_config_settings")).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5))
+			.getKey(key).execute().getResult();
+		} catch (ConnectionException e) {
+			e.printStackTrace();
+		}
+		
+		return jobConstants;
+		
+	}
 }
