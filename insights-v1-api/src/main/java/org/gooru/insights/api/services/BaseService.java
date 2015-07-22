@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.gooru.insights.api.models.RequestParamsDTO;
 import org.json.JSONObject;
@@ -142,4 +143,6 @@ public interface BaseService {
 	String getHourlyBasedTimespent(double timeSpent);
 	
 	String appendForwardSlash(String... texts);
+	
+	Set<Object> convertArrayToSet(Object[] keyList);
 }
