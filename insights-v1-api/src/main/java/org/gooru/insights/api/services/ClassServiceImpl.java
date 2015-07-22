@@ -1054,6 +1054,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			}
 			Collection<String> conditionalColumn = new ArrayList<String>();
 			conditionalColumn.add(getBaseService().buildString(ApiConstants.GOORUOID,ApiConstants.COMMA,ApiConstants._GOORUOID));
+			conditionalColumn.add(getBaseService().buildString(ApiConstants.QUESTION_DOT_TYPE,ApiConstants.COMMA,ApiConstants.QUESTION_DOT_QUESTION_TYPE));
 			resourceMetaData = DataUtils.getColumnFamilyContent(traceId, ColumnFamily.RESOURCE.getColumnFamily(), row, aliesNames, resourceColumns, conditionalColumn);
 			resourceMetaList.add(resourceMetaData);
 		}
@@ -1424,7 +1425,10 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		
 		ResponseParamDTO<Map<String,Object>> responseParamDTO = new ResponseParamDTO<Map<String,Object>>();
 		//Get list of resources and students
-		List<Map<String,Object>> resourcesMetaData = getContentItems(traceId,collectionId,null,true,null,DataUtils.getResourceFields());
+		Map<String, String> resourceFields = DataUtils.getResourceFields();
+		resourceFields.put(ApiConstants.QUESTION_DOT_TYPE, ApiConstants.QUESTION_TYPE);
+		resourceFields.put(ApiConstants.QUESTION_DOT_QUESTION_TYPE, ApiConstants.QUESTION_TYPE);
+		List<Map<String,Object>> resourcesMetaData = getContentItems(traceId,collectionId,null,true,resourceFields.keySet(),resourceFields);
 		List<Map<String,Object>> studentsMetaData = getStudents(traceId, classId);
 		
 		StringBuffer resourceIds = getBaseService().exportData(resourcesMetaData, ApiConstants.GOORUOID);
