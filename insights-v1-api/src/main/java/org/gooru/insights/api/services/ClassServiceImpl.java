@@ -363,11 +363,10 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					lessonDataAsMap.put(ApiConstants.TITLE, lessonMetaDataColumns.getColumnByName(ApiConstants.TITLE).getStringValue());
 				}
 				//fetch leson item score status
-				OperationResult<ColumnList<String>> assessmentMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
-						getBaseService().appendTilda(classLessonKey, ApiConstants.ASSESSMENT, ApiConstants._SCORE_IN_PERCENTAGE));
-				ColumnList<String> assessmentMetricColumnList = null;
-				if (assessmentMetricsData != null && !assessmentMetricsData.getResult().isEmpty()) {
-					assessmentMetricColumnList = assessmentMetricsData.getResult();
+				OperationResult<ColumnList<String>> lessonMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), classLessonKey);
+				ColumnList<String> lessonMetricColumnList = null;
+				if (lessonMetricsData != null && !lessonMetricsData.getResult().isEmpty()) {
+					lessonMetricColumnList = lessonMetricsData.getResult();
 				}
 				OperationResult<ColumnList<String>> itemData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), lessonGooruOid);
 				ColumnList<String> items = itemData.getResult();
@@ -386,8 +385,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					if (itemType != null) {
                         if (itemType.matches(ApiConstants.ASSESSMENT_MATCH)) {
 							assessmentCount++;
-							if (assessmentMetricColumnList != null && assessmentMetricColumnList.size() > 0) {
-								assessmentScore = assessmentMetricColumnList.getLongValue(itemGooruOid, null);
+							if (lessonMetricColumnList != null && lessonMetricColumnList.size() > 0) {
+								assessmentScore = lessonMetricColumnList.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._SCORE_IN_PERCENTAGE), null);
 								if (assessmentScore != null && assessmentScore >= classMinScore) {
 									scoreMet++;
 									assessmentAttempted++;
