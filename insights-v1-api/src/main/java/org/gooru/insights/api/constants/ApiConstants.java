@@ -330,6 +330,7 @@ public class ApiConstants {
 	public static final String CLASS_GOORU_ID = "classGooruId";
 	public static final String BEAN_INIT = "Bean-init";
 	public static final String _ASSESSMENT_UNIQUE_VIEWS = "assessment_unique_views";
+	public static final String _COLLECTION_UNIQUE_VIEWS = "collection_unique_views";
 	
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");

@@ -1175,7 +1175,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					if(column.equalsIgnoreCase(ApiConstants._SCORE_IN_PERCENTAGE)){
 						usageMap.put(ApiConstants.SCORE_IN_PERCENTAGE, metricRow.getColumns().getLongValue(ApiConstants._SCORE_IN_PERCENTAGE, 0L));
 					} else if(column.equalsIgnoreCase(ApiConstants._ASSESSMENT_UNIQUE_VIEWS)){
-						usageMap.put(ApiConstants._ASSESSMENT_UNIQUE_VIEWS, metricRow.getColumns().getLongValue(ApiConstants._ASSESSMENT_UNIQUE_VIEWS, 0L));
+						usageMap.put(ApiConstants.VIEWS, metricRow.getColumns().getLongValue(ApiConstants._ASSESSMENT_UNIQUE_VIEWS, 0L));
 					}
 				}
 				//Get the userId for the content usage,If we need user level tril down
