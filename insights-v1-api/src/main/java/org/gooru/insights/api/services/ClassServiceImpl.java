@@ -184,6 +184,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						Set<String> columnSuffix = new HashSet<String>();
 						columnSuffix.add(ApiConstants._TIME_SPENT);
 						columnSuffix.add(ApiConstants._SCORE_IN_PERCENTAGE);
+						columnSuffix.add(ApiConstants.VIEWS);
 						StringBuffer collectionIds = getBaseService().exportData(contentsMetaData, ApiConstants.GOORUOID);
 						Collection<String> rowKeys = getBaseService().appendAdditionalField(ApiConstants.TILDA,classLessonKey, studentId);
 						Collection<String> columns = getBaseService().appendAdditionalField(ApiConstants.TILDA,collectionIds.toString(), columnSuffix);
@@ -1173,6 +1174,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					//Get the metric data
 					if(column.equalsIgnoreCase(ApiConstants._SCORE_IN_PERCENTAGE)){
 						usageMap.put(ApiConstants.SCORE_IN_PERCENTAGE, metricRow.getColumns().getLongValue(ApiConstants._SCORE_IN_PERCENTAGE, 0L));
+					} else if(column.equalsIgnoreCase(ApiConstants._ASSESSMENT_UNIQUE_VIEWS)){
+						usageMap.put(ApiConstants._ASSESSMENT_UNIQUE_VIEWS, metricRow.getColumns().getLongValue(ApiConstants._ASSESSMENT_UNIQUE_VIEWS, 0L));
 					}
 				}
 				//Get the userId for the content usage,If we need user level tril down
@@ -1364,6 +1367,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		}
 		UnitStudentKeys.clear();
 		UnitStudentKeys.add(ApiConstants._SCORE_IN_PERCENTAGE);
+		UnitStudentKeys.add(ApiConstants._ASSESSMENT_UNIQUE_VIEWS);
 		contentUsage = getDirectActivityMetrics(traceId, keys,ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), UnitStudentKeys, studentIds.toString(),true,unitIds.toString(),true);
 		contentUsage = getBaseService().LeftJoin(contentUsage,unitsMetaData,ApiConstants.GOORUOID,ApiConstants.GOORUOID);
 		//group at content level
