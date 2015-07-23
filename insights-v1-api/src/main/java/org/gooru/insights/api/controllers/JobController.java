@@ -13,12 +13,15 @@ import org.gooru.insights.api.services.JobService;
 import org.gooru.insights.api.spring.exception.BadRequestException;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+@Controller
+@RequestMapping(value="jobs/")
 public class JobController extends BaseController {
 
 	@Autowired
@@ -32,7 +35,6 @@ public class JobController extends BaseController {
 	public ModelAndView getJobStatus(HttpServletRequest request, @PathVariable(value = "jobType") String jobType, @RequestParam(value = "format", required = false,defaultValue = "json") String format,
  HttpServletResponse response) throws JSONException {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-
 		JobStatus jobStatus = new JobStatus();
 		jobStatus.setQueue(jobType);
 
@@ -43,9 +45,9 @@ public class JobController extends BaseController {
 	
 		responseParamDTO = getJobService().getJobStatus(getTraceId(request),responseParamDTO, jobStatus);
 
-		if (responseParamDTO != null && !responseParamDTO.getMessage().isEmpty()) {
+		if (responseParamDTO != null && responseParamDTO.getMessage() != null && !responseParamDTO.getMessage().isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			throw new BadRequestException(String.valueOf(responseParamDTO.getMessage().get("error")));
+			throw new BadRequestException(String.valueOf(responseParamDTO.getMessage()));
 		}
 		if (format.equalsIgnoreCase(InsightsOperationConstants.SIMPLE_TEXT)) {
 			return getSimpleModel(String.valueOf(responseParamDTO.getContent().get(0).get("lagInSeconds")));

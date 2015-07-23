@@ -1,6 +1,7 @@
 package org.gooru.insights.api.services;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -17,9 +18,11 @@ import org.gooru.insights.api.models.InsightsConstant.ColumnFamily;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.netflix.astyanax.model.ColumnList;
 
+@Service
 public class JobServiceImpl implements JobService {
 
 	@Autowired
@@ -45,7 +48,7 @@ public class JobServiceImpl implements JobService {
 	
 	@SuppressWarnings("unused")
 	public ResponseParamDTO<Map<String, Object>> getJobStatus(String traceId,ResponseParamDTO<Map<String,Object>> responseParamDTO,JobStatus jobStatus) {
-		List<Map<String,Object>> jobList = null;
+		List<Map<String,Object>> jobList = new ArrayList<Map<String,Object>>();
 		Map<String,Object> errorMap = new HashMap<String,Object>();
 		if(jobStatus != null) {
 			if (jobStatus.getQueue().equalsIgnoreCase(InsightsOperationConstants._ALL)) {

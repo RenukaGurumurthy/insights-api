@@ -75,10 +75,10 @@ public class BaseController {
 		return model;
 	}
 	
-	public ModelAndView getSimpleModel(String content) {
-		ModelAndView model = new ModelAndView();
-		if(content != null && !content.isEmpty()){
-			model.addObject(content);
+	public ModelAndView getSimpleModel(Object content) {
+		ModelAndView model = new ModelAndView(modelAttributes.CONTENT.getAttribute());
+		if(content != null){
+			model.addObject(modelAttributes.CONTENT.getAttribute(),content);
 		}
 		return model;
 	}
