@@ -1713,7 +1713,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		return dataReport;
 	}
 	
-	private List<Map<String,Object>> getAnswer(String traceId, List<Map<String,Object>> resultSet,Map<String,String> selectValues,String collectionId,boolean singleSession){
+	private List<Map<String, Object>> getAnswer(String traceId, List<Map<String, Object>> resultSet, Map<String, String> selectValues, String collectionId, boolean singleSession) {
 		Map<String, String> surName = new HashMap<String, String>();
 		Collection<String> additionParameter = new ArrayList<String>();
 		additionParameter.add("dataSet");
@@ -1722,16 +1722,15 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		surName.put("~C", "C");
 		surName.put("~D", "D");
 		surName.put("~E", "E");
-		resultSet = getBaseService().buildJSON(traceId, resultSet,additionParameter, surName, singleSession);
-		
-			List<Map<String,Object>>		rawData = getBaseService().getData(
-							getBaseService().getRowsColumnValues(traceId,
-									getCassandraService().readAll(traceId, ColumnFamily.ASSESSMENT_ANSWER.getColumnFamily(), ApiConstants.COLLECTIONGOORUOID, collectionId,
-											new ArrayList<String>())), ApiConstants.QUESTION_GOORU_OID);
+		resultSet = getBaseService().buildJSON(traceId, resultSet, additionParameter, surName, singleSession);
+		List<Map<String, Object>> rawData = getBaseService().getData(
+				getBaseService().getRowsColumnValues(traceId,
+						getCassandraService().readAll(traceId, ColumnFamily.ASSESSMENT_ANSWER.getColumnFamily(), ApiConstants.COLLECTIONGOORUOID, collectionId, new ArrayList<String>())),
+				ApiConstants.QUESTION_GOORU_OID);
 
-					selectValues.remove("options");
-					selectValues.put("options", "dataSet");
-					resultSet = getBaseService().properNameEndsWith(getBaseService().LeftJoin(resultSet, rawData, ApiConstants.GOORUOID, ApiConstants.QUESTION_GOORU_OID), selectValues);
-					return resultSet;
+		selectValues.remove("options");
+		selectValues.put("options", "dataSet");
+		resultSet = getBaseService().properNameEndsWith(getBaseService().LeftJoin(resultSet, rawData, ApiConstants.GOORUOID, ApiConstants.QUESTION_GOORU_OID), selectValues);
+		return resultSet;
 	}
 }

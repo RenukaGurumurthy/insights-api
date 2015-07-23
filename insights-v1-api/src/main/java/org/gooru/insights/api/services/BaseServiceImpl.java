@@ -1177,7 +1177,7 @@ public class BaseServiceImpl implements BaseService {
 		for (Map<String, Object> map : resultSet) {
 			boolean isChoice = false;
 			boolean hasQuestion = false;
-			JSONObject json = new JSONObject();
+			Map<String,Long> tempMap = new HashMap<String,Long>();
 			Map<String, Object> resultMap = new HashMap<String, Object>();
 			if (map.containsKey("question_type")) {
 				hasQuestion = true;
@@ -1191,14 +1191,10 @@ public class BaseServiceImpl implements BaseService {
 				for (Map.Entry<String, Object> entry : map.entrySet()) {
 					for (String column : additionParameter) {
 						if(entry.getKey().endsWith("~options")){
-							try {
 								if(!entry.getValue().toString().equalsIgnoreCase("skipped")){
-								json.append(entry.getValue().toString(), Long.valueOf(1));
+									tempMap.put(entry.getValue().toString(), Long.valueOf(1));
 								}
-							} catch (JSONException e) {
-								InsightsLogger.error(traceId,"buildJSON exception", e);
-							}
-							resultMap.put(column, json.toString());
+							resultMap.put(column, tempMap);
 						}
 					}
 				}
@@ -1206,16 +1202,10 @@ public class BaseServiceImpl implements BaseService {
 				for (Map.Entry<String, Object> entry : map.entrySet()) {
 					for (String column : additionParameter) {
 							String data[] = entry.getKey().split("~");
-
 								if (surName.containsKey("~" + data[data.length - 1])) {
-									try {
-										json.append(surName.get("~" + data[data.length - 1]), Long.parseLong(String.valueOf(entry.getValue())));
-
-									} catch (JSONException e) {
-										InsightsLogger.error(traceId,"buildJSON exception", e);
-									}
+										tempMap.put(surName.get("~" + data[data.length - 1]), Long.parseLong(String.valueOf(entry.getValue())));
 								}
-						resultMap.put(column, String.valueOf(json));
+						resultMap.put(column, tempMap);
 					}
 				}
 			}

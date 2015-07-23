@@ -518,7 +518,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 							itemScoreStatus = ApiConstants.NOT_ATTEMPTED;
 						}
 					} else if (itemType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
-						collectionNotAttempted++;
 						collectionCount++;
 						if(itemViews > 0) {
 							collectionViewed++;
@@ -542,12 +541,12 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				lessonScoreStatus = ApiConstants.SCORE_NOT_MET;
 			} else if (scoreMet > 0 && scoreNotMet == 0 && assessmentNotAttempted == 0 && (assessmentCount != 0L && scoreMet == assessmentCount)) {
 				lessonScoreStatus = ApiConstants.SCORE_MET;
+			} else if(assessmentNotAttempted > 0) {
+				lessonScoreStatus = ApiConstants.NOT_ATTEMPTED;
 			} else if(collectionViewed == items.size() && collectionNotViewed == 0) {
 				lessonScoreStatus = ApiConstants.VIEWED;
-			} else if(collectionNotViewed == items.size() && collectionViewed == 0){
+			} else if((collectionNotViewed == items.size() && collectionViewed == 0) || collectionNotViewed > 0){
 				lessonScoreStatus = ApiConstants.NOT_VIEWED;
-			} else if(collectionNotAttempted > 0){
-				lessonScoreStatus = ApiConstants.NOT_ATTEMPTED;
 			}
 
 			lessonDataAsMap.put(ApiConstants.SCORE_STATUS, lessonScoreStatus);
@@ -747,7 +746,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			Map<String, Object> lessonDataAsMap = new HashMap<String, Object>();
 			List<Map<String, Object>> itemDataMapAsList = new ArrayList<Map<String, Object>>();
 			long scoreMet = 0; long scoreNotMet = 0; long assessmentAttempted = 0; long assessmentNotAttempted = 0; 
-			long collectionNotViewed = 0; long collectionViewed = 0; long collectionNotAttempted = 0; 
+			long collectionNotViewed = 0; long collectionViewed = 0; 
 			long assessmentCount = 0; long collectionCount = 0; 
 			String lessonGooruOid = lesson.getName();
 			try {
@@ -813,7 +812,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 							assessmentNotAttempted++;
 						}
 					} else if (itemType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
-						collectionCount++;
 						if(itemViews > 0) {
 							collectionViewed++;
 						} else {
@@ -833,13 +831,13 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				lessonScoreStatus = ApiConstants.SCORE_NOT_MET;
 			} else if (scoreMet > 0 && scoreNotMet == 0 && assessmentNotAttempted == 0 && (assessmentCount != 0L && scoreMet == assessmentCount)) {
 				lessonScoreStatus = ApiConstants.SCORE_MET;
+			} else if(assessmentNotAttempted > 0) {
+				lessonScoreStatus = ApiConstants.NOT_ATTEMPTED;
 			} else if(collectionViewed == items.size() && collectionNotViewed == 0) {
 				lessonScoreStatus = ApiConstants.VIEWED;
-			} else if(collectionNotViewed == items.size() && collectionViewed == 0){
+			} else if((collectionNotViewed == items.size() && collectionViewed == 0) || collectionNotViewed > 0){
 				lessonScoreStatus = ApiConstants.NOT_VIEWED;
-			} else if(collectionNotAttempted > 0){
-				lessonScoreStatus = ApiConstants.NOT_ATTEMPTED;
-			}
+			} 
 			
 			lessonDataAsMap.put(ApiConstants.SCORE_STATUS, lessonScoreStatus);
 			if (!lessonDataAsMap.isEmpty() && lessonDataAsMap.size() > 0) {
