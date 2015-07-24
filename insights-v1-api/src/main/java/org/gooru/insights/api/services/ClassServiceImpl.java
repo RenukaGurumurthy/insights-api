@@ -174,7 +174,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					String contentType = null;
 					if(collectionType !=null){
 						if(collectionType.equalsIgnoreCase(ApiConstants.ASSESSMENT)){
-							contentType = ApiConstants.ASSESMENT_TYPE_MATCHER;
+							contentType = ApiConstants.ASSESSMENT_TYPES;
 						}else if(collectionType.matches(ApiConstants.COLLECTION_MATCH)) {
 							contentType = ApiConstants.COLLECTION_MATCH;
 						}
@@ -386,7 +386,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						itemType = itemDataAsMap.get(ApiConstants.TYPE).toString();
 					}
 					if (itemType != null) {
-                        if (itemType.matches(ApiConstants.ASSESSMENT_MATCH)) {
+                        if (itemType.matches(ApiConstants.ASSESSMENT_TYPES)) {
 							assessmentCount++;
 							if (lessonMetricColumnList != null && lessonMetricColumnList.size() > 0) {
 								assessmentScore = lessonMetricColumnList.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._SCORE_IN_PERCENTAGE), null);
@@ -496,7 +496,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				}
 				String itemScoreStatus = null;
 				if (itemType != null) {
-                    if (itemType.matches(ApiConstants.ASSESSMENT_MATCH)) {
+                    if (itemType.matches(ApiConstants.ASSESSMENT_TYPES)) {
 						assessmentCount++;
 						Long assessmentScore = null;
 						if (lessonMetricColumnList != null && lessonMetricColumnList.size() > 0) {
@@ -794,7 +794,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					itemType = itemDataAsMap.get(ApiConstants.TYPE).toString();
 				}
 				if (itemType != null) {
-                    if (itemType.matches(ApiConstants.ASSESSMENT_MATCH)) {
+                    if (itemType.matches(ApiConstants.ASSESSMENT_TYPES)) {
 						// fetch lesson's score status data
 						assessmentCount++;
 						Long assessmentScore = null;
@@ -827,7 +827,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			String lessonScoreStatus = null;
 			if (assessmentAttempted == 0 && (itemDataMapAsList.size() == assessmentNotAttempted)) {
 				lessonScoreStatus = ApiConstants.NOT_ATTEMPTED;
-			} else if(scoreNotMet > 0 || (assessmentNotAttempted > 0 && (assessmentCount != 0L && scoreMet < assessmentCount))) { 
+			} else if(scoreNotMet > 0 || (assessmentAttempted > 0 && (assessmentCount != 0L && scoreMet < assessmentCount))) { 
 				lessonScoreStatus = ApiConstants.SCORE_NOT_MET;
 			} else if (scoreMet > 0 && scoreNotMet == 0 && assessmentNotAttempted == 0 && (assessmentCount != 0L && scoreMet == assessmentCount)) {
 				lessonScoreStatus = ApiConstants.SCORE_MET;
@@ -1647,35 +1647,29 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 
 		List<Map<String, Object>> itemDataMapAsList = new ArrayList<Map<String, Object>>();
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		if (StringUtils.isNotBlank(sessionId) && StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) 
-				&& (StringUtils.isNotBlank(unitId) && StringUtils.isNotBlank(lessonId))) {
-			List<Map<String, Object>> unitColumnResult = getContentItems(traceId, courseId, null, false,null,null);
-			for (Map<String, Object> unit : unitColumnResult) {
-				String unitGooruId = unit.get(ApiConstants.GOORUOID).toString();
-				if (unitGooruId.equalsIgnoreCase(unitId)) {
-					List<Map<String, Object>> lessonColumnResult = getContentItems(traceId, unitGooruId, null, false,null,null);
-					for (Map<String, Object> lesson : lessonColumnResult) {
-						String lessonGooruId = lesson.get(ApiConstants.GOORUOID).toString();
-						if (lessonGooruId.equalsIgnoreCase(lessonId)) {
-							List<Map<String, Object>> collectionColumnResult = getContentItems(traceId, lessonGooruId, null, false,null,null);
-							for (Map<String, Object> collection : collectionColumnResult) {
-								String collectionGooruId = collection.get(ApiConstants.GOORUOID).toString();
-								if (collectionGooruId.equalsIgnoreCase(assessmentId)) {
-									itemDataMapAsList = getCollectionSummaryData(traceId, collectionGooruId, sessionId, itemDataMapAsList, isSecure);
-									break;
-								}
-							}
-							break;
-						}
-					}
-					break;
-				}
-			}
-		} else if (StringUtils.isNotBlank(sessionId) && StringUtils.isNotBlank(assessmentId)) {
-			itemDataMapAsList = getCollectionSummaryData(traceId, assessmentId, sessionId, itemDataMapAsList, isSecure);
+		
+		//Fetch sessionId from recent session if sessionId is not requested in call
+		String recentSessionKey = null;
+		if ((sessionId != null && StringUtils.isNotBlank(sessionId.trim()))) {
+			recentSessionKey = sessionId;
+		} else if (StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) && StringUtils.isNotBlank(unitId) 
+				&&  StringUtils.isNotBlank(lessonId) && StringUtils.isNotBlank(userUid) && StringUtils.isNotBlank(assessmentId)) {
+			recentSessionKey = getSessionIdFromKey(traceId, getBaseService().appendTilda(SessionAttributes.RS.getSession(), classId, courseId, unitId, lessonId, assessmentId, userUid));
+		} else if(StringUtils.isNotBlank(userUid) && StringUtils.isNotBlank(assessmentId)) {
+			recentSessionKey = getSessionIdFromKey(traceId, getBaseService().appendTilda(SessionAttributes.RS.getSession(), assessmentId, userUid));
 		} else {
-			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, getBaseService().appendComma("contentGooruId", "sessionId"),
-					getBaseService().appendComma("contentGooruId", "sessionId", "classGooruId", "courseGooruId", "unitGooruId", "lessonGooruId"));
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E112,  
+					getBaseService().appendComma("contentGooruId", "sessionId"),
+					getBaseService().appendComma("contentGooruId", "sessionId", "classGooruId", "courseGooruId", "unitGooruId", "lessonGooruId"),
+					getBaseService().appendComma("contentGooruId", "userUid"));
+		}
+		
+		//Fetch collection summary data
+		if (recentSessionKey != null) {
+			logger.info("Fetching Collection Summary data for Session Id : " + recentSessionKey);
+			itemDataMapAsList = getCollectionSummaryData(traceId, assessmentId, recentSessionKey, itemDataMapAsList, isSecure);
+		} else {
+			logger.info("Recent session is unavailable for collection : " + assessmentId +" and user : "+userUid);
 		}
 		responseParamDTO.setContent(itemDataMapAsList);
 		return responseParamDTO;
@@ -1690,10 +1684,9 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		//Resource metadata
 		List<Map<String, Object>> rawDataMapAsList = getResourceData(traceId, isSecure, resourceGooruOids.toString(), DataUtils.getCollectionSummaryResourceColumns(), ApiConstants.RESOURCE);
 		//Usage Data
-		Set<String> columnSuffix = DataUtils.getSessionActivityMetricsMap().keySet();
-		Collection<String> columns = getBaseService().appendAdditionalField(ApiConstants.TILDA, resourceGooruOids.toString(), columnSuffix);
-		List<Map<String,Object>> usageDataList = getSessionActivityMetrics(traceId, getBaseService().convertStringToCollection(sessionId), ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), columns, resourceGooruOids.toString());
-//		List<Map<String,Object>> usageDataList = getCollectionActivityMetrics(traceId, getBaseService().convertStringToCollection(sessionId), ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), columns, null, false, itemGooruOids.toString(), false);
+		Collection<String> columnsToFetch = getBaseService().appendAdditionalField(ApiConstants.TILDA, resourceGooruOids.toString(), DataUtils.getSessionActivityMetricsMap().keySet());
+		List<Map<String,Object>> usageDataList = getSessionActivityMetrics(traceId, getBaseService().convertStringToCollection(sessionId), ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), columnsToFetch, resourceGooruOids.toString());
+		//List<Map<String,Object>> usageDataList = getCollectionActivityMetrics(traceId, getBaseService().convertStringToCollection(sessionId), ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), columns, null, false, resourceGooruOids.toString(), false);
 		//Question meta 
 		List<Map<String,Object>> answerRawData = getQuestionMetaData(traceId,collectionGooruId);
 		rawDataMapAsList = getBaseService().LeftJoin(itemColumnResult, rawDataMapAsList, ApiConstants.GOORUOID, ApiConstants.GOORUOID);
