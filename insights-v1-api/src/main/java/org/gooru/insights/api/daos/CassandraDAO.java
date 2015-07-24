@@ -27,6 +27,8 @@ public interface CassandraDAO {
 	OperationResult<Rows<String, String>> readAll(String traceId, String columnFamilyName, Collection<String> keys,Collection<String> columns,int retryCount);
 		
 	OperationResult<Rows<String, String>> read(String traceId, String columnFamilyName, String column, String value,int retryCount);
+	
+	OperationResult<Rows<String, String>> read(String traceId, String columnFamilyName, String column, int value,int retryCount);
 
 	int getRowCount(String traceId, String columnFamilyName,Map<String,Object> whereCondition,Collection<String> columnList,int retryCount);
 	

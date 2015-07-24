@@ -44,6 +44,10 @@ public class CassandraServiceImpl implements CassandraService{
 		return cassandraDAO.read(traceId, columnFamilyName, columnName, columnValue,0);
 	}
 
+	public OperationResult<Rows<String, String>> read(String traceId, String columnFamilyName, String columnName, int columnValue) {
+		return cassandraDAO.read(traceId, columnFamilyName, columnName, columnValue,0);
+	}
+	
 	public int getRowCount(String traceId, String columnFamilyName, Map<String,Object> whereCondition,Collection<String> columnList){
 		return cassandraDAO.getRowCount(traceId, columnFamilyName,whereCondition, columnList,0);
 	}

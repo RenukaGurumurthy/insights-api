@@ -6,21 +6,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
 import org.gooru.insights.api.constants.ErrorMessages;
 import org.gooru.insights.api.constants.InsightsOperationConstants;
+import org.gooru.insights.api.models.InsightsConstant.ColumnFamily;
 import org.gooru.insights.api.models.JobStatus;
 import org.gooru.insights.api.models.ResponseParamDTO;
-import org.gooru.insights.api.models.InsightsConstant.ColumnFamily;
+import org.gooru.insights.api.utils.DataUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.netflix.astyanax.model.ColumnList;
+import com.netflix.astyanax.model.Rows;
 
 @Service
 public class JobServiceImpl implements JobService {
@@ -36,7 +37,9 @@ public class JobServiceImpl implements JobService {
 	
 	SimpleDateFormat minFormatter = new SimpleDateFormat("yyyyMMddkkmm");
 	
-	private static final Logger logger = LoggerFactory.getLogger(LiveDashboardServiceImpl.class);
+	SimpleDateFormat dateToMinFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	
+	private static final Logger logger = LoggerFactory.getLogger(JobServiceImpl.class);
 	
 	@PostConstruct
 	public void init(){
@@ -86,15 +89,70 @@ public class JobServiceImpl implements JobService {
 		String lagTime = null;
 		try {
 			ColumnList<String> settingsMap = cassandraService.read(traceId, ColumnFamily.CONFIG_SETTING.getColumnFamily(), monitoringKeys.get(queue)).getResult();
-			Date currentTime = new Date();
 			Date lastRunTime = minFormatter.parse(settingsMap.getColumnByName(InsightsOperationConstants.CONSTANT_VALUE).getStringValue());
-			long lagInMilliSecs = (currentTime.getTime() - lastRunTime.getTime());
-			lagTime = String.format("%02d", TimeUnit.MILLISECONDS.toSeconds(lagInMilliSecs));
+			lagTime = DataUtils.getTimeDifference(traceId, lastRunTime);
 		} catch (Exception e2) {
 			logger.error("Exception : "+e2);
 			throw new InternalError(e2.getMessage());
 		}
 		return lagTime;
+	}
+
+	@Override
+	public ResponseParamDTO<Map<String, Object>> getJobMonitorStatus(String traceId,ResponseParamDTO<Map<String, Object>> responseParamDTO,JobStatus jobStatus) {
+		List<Map<String,Object>> jobList = new ArrayList<Map<String,Object>>();
+		Map<String,Object> errorMap = new HashMap<String,Object>();
+		if(jobStatus != null) {
+			Rows<String, String> runningJobs = getCassandraService().read(traceId, ColumnFamily.JOB_TRACKER.getColumnFamily(), "running_status", 1).getResult();
+			Map<String,String> jobDetails = new HashMap<String,String>();
+			for(int i=0;i<runningJobs.size();i++) {
+				jobDetails.put(runningJobs.getRowByIndex(i).getKey(), runningJobs.getRowByIndex(i).getColumns().getColumnByName("modified_on").getStringValue());
+			}
+			
+			System.out.println(jobDetails);
+			
+			if(jobStatus.getQueue().equalsIgnoreCase(InsightsOperationConstants._ALL)) {
+				for(Map.Entry<String,String> data : jobDetails.entrySet()) {
+					Map<String,Object> mapData = new HashMap<String,Object>();
+					mapData.put("jobName", data.getKey());
+					mapData.put("lagInSeconds", getMonitorJobStatus(traceId,data.getValue()));
+					jobList.add(mapData);
+				}
+			} else if(!jobStatus.getQueue().equalsIgnoreCase(InsightsOperationConstants._ALL)) {
+				for(String queueName : jobStatus.getQueue().split(",")){
+					if(jobDetails.containsKey(queueName)) {
+						Map<String,Object> mapData = new HashMap<String,Object>();						
+						mapData.put("jobName", queueName);
+						mapData.put("lagInSeconds", getMonitorJobStatus(traceId,jobDetails.get(queueName)));
+						jobList.add(mapData);
+					} else if(!jobDetails.containsKey(queueName)) {
+						errorMap.put(queueName, ErrorMessages.E113);
+					}
+				}
+			}
+			if(jobList != null && jobList.size() > 0) {
+				responseParamDTO.setContent(jobList);
+			} 
+		} else {
+			errorMap.put("error", "Fields must not be empty");
+		}
+		if(!errorMap.isEmpty()) {
+			responseParamDTO.setMessage(errorMap);
+		}
+		return responseParamDTO;
+	}	
+	
+	public String getMonitorJobStatus(String traceId,String lastModified) {
+		String lagTime = null;
+		try {
+			Date lastRunTime = dateToMinFormatter.parse(lastModified);
+			lagTime = DataUtils.getTimeDifference(traceId,lastRunTime);
+		} catch (Exception e2) {
+			logger.error("Exception : "+e2);
+			throw new InternalError(e2.getMessage());
+		}
+		return lagTime;
+
 	}
 	
 }
