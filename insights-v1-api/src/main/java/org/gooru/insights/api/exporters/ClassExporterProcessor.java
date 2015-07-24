@@ -158,7 +158,7 @@ public class ClassExporterProcessor {
 			Map<String,Object> resourceUsage = new LinkedHashMap<String,Object>();
 			boolean asessmentData = false;
 			if(resource.get(ApiConstants.TYPE) != null){
-				if(resource.get(ApiConstants.TYPE).toString().matches(ApiConstants.ASSESSMENT_MATCH)){
+				if(resource.get(ApiConstants.TYPE).toString().matches(ApiConstants.ASSESSMENT_QUESTION_TYPES)){
 					asessmentData = true;
 				}
 			}
