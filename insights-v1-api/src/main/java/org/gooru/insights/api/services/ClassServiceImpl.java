@@ -827,7 +827,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			String lessonScoreStatus = null;
 			if (assessmentAttempted == 0 && (itemDataMapAsList.size() == assessmentNotAttempted)) {
 				lessonScoreStatus = ApiConstants.NOT_ATTEMPTED;
-			} else if(scoreNotMet > 0 || (assessmentNotAttempted > 0 && (assessmentCount != 0L && scoreMet < assessmentCount))) { 
+			} else if(scoreNotMet > 0 || (assessmentAttempted > 0 && (assessmentCount != 0L && scoreMet < assessmentCount))) { 
 				lessonScoreStatus = ApiConstants.SCORE_NOT_MET;
 			} else if (scoreMet > 0 && scoreNotMet == 0 && assessmentNotAttempted == 0 && (assessmentCount != 0L && scoreMet == assessmentCount)) {
 				lessonScoreStatus = ApiConstants.SCORE_MET;
