@@ -608,54 +608,36 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						unitAssessmentCount = lessonData.getResult().getLongValue(ApiConstants.ASSESSMENT_COUNT, 0l);	
 						unitCollectionCount = lessonData.getResult().getLongValue(ApiConstants.COLLECTION_COUNT, 0l);	
 					}
-					// Fetch collections viewed count
+					// Fetch unit's total study time & unique views of collections 
 					OperationResult<ColumnList<String>> collectionMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
-							getBaseService().appendTilda(classUnitKey, ApiConstants.COLLECTION, ApiConstants._TIME_SPENT));
+							getBaseService().appendTilda(classUnitKey, ApiConstants.COLLECTION));
 					ColumnList<String> collectionMetricColumnList = null;
+					long collectionsViewedInUnit = 0L;
+					long unitCollectionsTotalStudyTime = 0L;
 					if (collectionMetricsData != null && !collectionMetricsData.getResult().isEmpty()) {
 						collectionMetricColumnList = collectionMetricsData.getResult();
-					}
-					long collectionsViewed = 0L;
-					if (collectionMetricColumnList != null) {
-						collectionsViewed = collectionMetricColumnList.size();
-					}
-
-					// Fetch collection study time
-					long totalStudyTime = 0L;
-					if (collectionMetricColumnList != null && collectionMetricColumnList.size() > 0) {
-						for (Column<String> collectionMetricColumn : collectionMetricColumnList) {
-							totalStudyTime += collectionMetricColumn.getLongValue();
+						if (collectionMetricColumnList != null && collectionMetricColumnList.size() > 0) {
+							collectionsViewedInUnit = collectionMetricColumnList.getLongValue(ApiConstants._UNIQUE_VIEWS, 0L);
+							unitCollectionsTotalStudyTime = collectionMetricColumnList.getLongValue(ApiConstants._TIME_SPENT, 0L);
 						}
 					}
-
-					// Fetch assessments attempted count
-					OperationResult<ColumnList<String>> assessmentMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
-							getBaseService().appendTilda(classUnitKey, ApiConstants.ASSESSMENT, ApiConstants._SCORE_IN_PERCENTAGE));
+					
+					// Fetch unit's avgScore & unique attempt count of assessments 
+					OperationResult<ColumnList<String>> assessmentMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), getBaseService().appendTilda(classUnitKey, ApiConstants.ASSESSMENT));
 					ColumnList<String> assessmentMetricColumnList = null;
+					Long unitAvgScore = 0L;
+					long assessmentsAttemptedInUnit = 0L;
 					if (assessmentMetricsData != null && !assessmentMetricsData.getResult().isEmpty()) {
 						assessmentMetricColumnList = assessmentMetricsData.getResult();
-					}
-					long assessmentsAttemptedInUnit = 0L;
-					if (assessmentMetricColumnList != null) {
-						assessmentsAttemptedInUnit = assessmentMetricColumnList.size();
-					}
-
-					// Fetch total of assessments score
-					long totalScore = 0L;
-					float avgScore = 0;
-					if (assessmentMetricColumnList != null && assessmentMetricColumnList.size() > 0) {
-						for (Column<String> assessmentMetricColumn : assessmentMetricColumnList) {
-							totalScore += assessmentMetricColumn.getLongValue();
-						}
-						if (assessmentsAttemptedInUnit != 0) {
-							avgScore = totalScore / assessmentsAttemptedInUnit;
+						if (assessmentMetricColumnList != null && assessmentMetricColumnList.size() > 0) {
+							assessmentsAttemptedInUnit = assessmentMetricColumnList.getLongValue(ApiConstants._UNIQUE_VIEWS, 0L);
+							unitAvgScore = assessmentMetricColumnList.getLongValue(ApiConstants._SCORE_IN_PERCENTAGE, 0L);
 						}
 					}
-
-					unitDataAsMap.put(ApiConstants.COLLECTIONS_VIEWED, collectionsViewed);
-					unitDataAsMap.put(ApiConstants.TOTAL_STUDY_TIME, totalStudyTime);
+					unitDataAsMap.put(ApiConstants.COLLECTIONS_VIEWED, collectionsViewedInUnit);
+					unitDataAsMap.put(ApiConstants.TOTAL_STUDY_TIME, unitCollectionsTotalStudyTime);
 					unitDataAsMap.put(ApiConstants.ASSESSMENTS_ATTEMPTED, assessmentsAttemptedInUnit);
-					unitDataAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, avgScore);
+					unitDataAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, unitAvgScore);
 					unitDataAsMap.put(ApiConstants.ASSESSMENT_COUNT, unitAssessmentCount);
 					unitDataAsMap.put(ApiConstants.COLLECTION_COUNT, unitCollectionCount);
 					unitDataMapAsList.add(unitDataAsMap);
@@ -868,8 +850,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		Map<String, Object> itemDetailAsMap = new HashMap<String, Object>();
 		OperationResult<ColumnList<String>> itemsColumnList = null;
 		Long classMinScore = 0L; String sessionKey = null;
-		Long scoreInPercentage = 0L; Long score = 0L; String evidence = null; Long timespent = 0L; Long scorableCountOnEvent = 0L;
-		
+			Long scoreInPercentage = 0L; Long score = 0L; String evidence = null; Long timespent = 0L; Long scorableCountOnEvent = 0L; Long totalReaction = 0L; Long reactedCount = 0L; Long avgReaction = 0L;
+	
 		if ((sessionId != null && StringUtils.isNotBlank(sessionId.trim()))) {
 			sessionKey = sessionId;
 		} else if ((classId != null && StringUtils.isNotBlank(classId.trim())) && (courseId != null && StringUtils.isNotBlank(courseId.trim())) 
@@ -901,6 +883,11 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				evidence = lessonMetricColumns.getStringValue(getBaseService().appendTilda(assessmentId, ApiConstants.EVIDENCE), null);
 				timespent = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants._TIME_SPENT), 0L);
 				scorableCountOnEvent = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants._QUESTION_COUNT), 0L);
+				totalReaction = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants._TOTAL_REACTION), 0L);
+				reactedCount = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants._REACTED_COUNT), 0L);
+				if(reactedCount != 0L) {
+					avgReaction = totalReaction/reactedCount;
+				}
 			} else {
 				logger.info("No session available for key" + sessionKey);
 			}
@@ -954,6 +941,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		itemDetailAsMap.put(ApiConstants.SCORE, score);
 		itemDetailAsMap.put(ApiConstants.TIMESPENT, timespent);
 		itemDetailAsMap.put(ApiConstants.SESSION, sessionResponse.getContent());
+		itemDetailAsMap.put(ApiConstants.AVG_REACTION, avgReaction);
 		itemDataMapAsList.add(itemDetailAsMap);
 		responseParamDTO.setContent(itemDataMapAsList);
 		return responseParamDTO;
