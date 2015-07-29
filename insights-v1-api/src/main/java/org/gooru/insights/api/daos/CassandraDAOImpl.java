@@ -266,6 +266,35 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 		return Columns;
 	}
 
+	public OperationResult<Rows<String, String>> read(String traceId,
+			String columnFamilyName, String column, int value, int retryCount) {
+
+		OperationResult<Rows<String, String>> Columns = null;
+		try {
+			Columns = getLogKeyspace()
+					.prepareQuery(this.accessColumnFamily(columnFamilyName))
+					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
+					.withRetryPolicy(new ConstantBackoff(2000, 5))
+					.searchWithIndex().addExpression().whereColumn(column)
+					.equals().value(value).execute();
+
+		} catch (Exception e) {
+			if (retryCount < 6) {
+				InsightsLogger.error(traceId, e);
+				try {
+					Thread.sleep(3);
+					retryCount++;
+				} catch (InterruptedException e1) {
+
+					InsightsLogger.error(traceId, e);
+				}
+				return read(traceId, columnFamilyName, column, value,
+						retryCount);
+			}
+		}
+		return Columns;
+	}
+	
 	/*
 	 * Read All rows given columName alone withColumnSlice(String... columns)
 	 */
@@ -478,5 +507,19 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 			InsightsLogger.error(traceId,e);
 		}
 		return false;
+	}
+	
+	public ColumnList<String> getConfigKeys(String key) {
+
+		ColumnList<String> jobConstants = null;
+		try {
+			jobConstants = getLogKeyspace().prepareQuery(this.accessColumnFamily("job_config_settings")).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5))
+			.getKey(key).execute().getResult();
+		} catch (ConnectionException e) {
+			e.printStackTrace();
+		}
+		
+		return jobConstants;
+		
 	}
 }

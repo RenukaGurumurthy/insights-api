@@ -15,4 +15,8 @@ public class ErrorMessages {
 	public static final String UNHANDLED_EXCEPTION = "UnHandled read exception in {0} due to {1}";
 	
 	public static final String UNHANDLED_FIELD = "UnHandled read exception in {0} due to {1}";
+	
+	public static final String E112 = "We don't have simple text format support to _all/comma separated inputs.";
+	
+	public static final String E113 = "Invalid job name";
 }
