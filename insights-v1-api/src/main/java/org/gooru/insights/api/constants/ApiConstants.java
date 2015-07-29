@@ -126,6 +126,8 @@ public class ApiConstants {
 	
 	public static final String FOLDER = "folder";
 	
+	public static final String URL = "url";
+	
 	public static final String THUMBNAIL = "thumbnail";
 	
 	public static final String ASC = "ASC";
