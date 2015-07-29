@@ -102,7 +102,7 @@ public class ApiConstants {
 	
 	public static final String DELETED = "deleted";
 	
-	public static final String ASSESMENT_TYPE_MATCHER = "assessment/url|assessment";
+	public static final String ASSESSMENT_TYPES = "assessment/url|assessment";
 	
 	public static final String USERCOUNT = "userCount";
 	
@@ -248,7 +248,7 @@ public class ApiConstants {
 	public static final String CORRECT = "correct";
 	public static final String IN_CORRECT = "in_correct";
 	
-	public static final String ASSESSMENT_MATCH = "assessment/url|assessment";
+	public static final String ASSESSMENT_QUESTION_TYPES = "assessment-question|question";
 	
 	public static final String ASSESSMENT_SLASH_URL = "assessment/url";
 	public static final String LESSON_COUNT = "lessonCount";
@@ -331,7 +331,10 @@ public class ApiConstants {
 	public static final String BEAN_INIT = "Bean-init";
 	public static final String _ASSESSMENT_UNIQUE_VIEWS = "assessment_unique_views";
 	public static final String _COLLECTION_UNIQUE_VIEWS = "collection_unique_views";
-	
+	public static final String _UNIQUE_VIEWS = "unique_views";
+	public static final String _TOTAL_REACTION = "total_reaction";
+	public static final String _REACTED_COUNT = "reacted_count";	
+
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
 		
