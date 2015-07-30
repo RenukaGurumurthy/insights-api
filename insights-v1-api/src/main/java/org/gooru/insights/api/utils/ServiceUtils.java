@@ -115,4 +115,12 @@ public class ServiceUtils {
 		}
 		return includedData;
 	}
+	
+	public static List<String> generateList(Object... objects){
+		List<String> dataObject = new ArrayList<String>();
+		for(int objectCount =0; objectCount<objects.length; objectCount++){
+			dataObject.add(objects[objectCount].toString());
+		}
+		return dataObject;
+	}
 }

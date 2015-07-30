@@ -119,16 +119,10 @@ public class DataUtils {
 	}
 	
 	private void putResourceMergeConfig(Map<String,Map<String,List<String>>> mergeDualColumnValues){
-		
-		List<String> columnNames = new ArrayList<String>();
-		columnNames.add(ApiConstants.GOORUOID);
-		columnNames.add(ApiConstants._GOORUOID);
+
 		Map<String,List<String>> dependentColumn = new HashMap<String,List<String>>();
-		dependentColumn.put(getBaseService().appendComma(ApiConstants.GOORUOID,ApiConstants._GOORUOID), columnNames);
-		columnNames.clear();
-		columnNames.add(ApiConstants.QUESTION_DOT_QUESTION_TYPE);
-		columnNames.add(ApiConstants.QUESTION_DOT_TYPE);
-		dependentColumn.put(getBaseService().appendComma(ApiConstants.QUESTION_DOT_QUESTION_TYPE,ApiConstants.QUESTION_DOT_TYPE), columnNames);
+		dependentColumn.put(getBaseService().appendComma(ApiConstants.GOORUOID,ApiConstants._GOORUOID), ServiceUtils.generateList(ApiConstants.GOORUOID,ApiConstants._GOORUOID));
+		dependentColumn.put(getBaseService().appendComma(ApiConstants.QUESTION_DOT_QUESTION_TYPE,ApiConstants.QUESTION_DOT_TYPE), ServiceUtils.generateList(ApiConstants.QUESTION_DOT_QUESTION_TYPE,ApiConstants.QUESTION_DOT_TYPE));
 		mergeDualColumnValues.put(ColumnFamily.RESOURCE.getColumnFamily(), dependentColumn);
 	}
 	
