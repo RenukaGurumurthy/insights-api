@@ -44,8 +44,12 @@ public class JobServiceImpl implements JobService {
 	@PostConstruct
 	public void init(){
 		ColumnList<String> monitorKeyList = cassandraService.getConfigKeys(InsightsOperationConstants.MONITOR_JOBS);
-		for(int i = 0 ; i < monitorKeyList.size() ; i++) {
-			monitoringKeys.put(monitorKeyList.getColumnByIndex(i).getName(), monitorKeyList.getColumnByIndex(i).getStringValue());
+		if (monitorKeyList != null && !monitorKeyList.isEmpty()) {
+			for (int i = 0; i < monitorKeyList.size(); i++) {
+				monitoringKeys.put(monitorKeyList.getColumnByIndex(i).getName(), monitorKeyList.getColumnByIndex(i).getStringValue());
+			}
+		} else {
+			logger.debug("Monitoring columns are unavailable in job_config_settings columnfamily for key :" + InsightsOperationConstants.MONITOR_JOBS);
 		}
 	}
 	
@@ -109,7 +113,6 @@ public class JobServiceImpl implements JobService {
 				jobDetails.put(runningJobs.getRowByIndex(i).getKey(), runningJobs.getRowByIndex(i).getColumns().getColumnByName("modified_on").getStringValue());
 			}
 			
-			System.out.println(jobDetails);
 			
 			if(jobStatus.getQueue().equalsIgnoreCase(InsightsOperationConstants._ALL)) {
 				for(Map.Entry<String,String> data : jobDetails.entrySet()) {

@@ -316,111 +316,107 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		List<Map<String, Object>> unitDataMapAsList = new ArrayList<Map<String, Object>>();
 		OperationResult<ColumnList<String>>  classMetaData = getCassandraService().read(traceId, ColumnFamily.CLASS.getColumnFamily(), classId);
 		Long classMinScore = 0L;
-		if(classMetaData.getResult() != null && !classMetaData.getResult().isEmpty()) {
+		if(classMetaData != null & classMetaData.getResult() != null && !classMetaData.getResult().isEmpty()) {
 			classMinScore = classMetaData.getResult().getLongValue(ApiConstants.MINIMUM_SCORE, 0L);
 		}
 		
 		OperationResult<ColumnList<String>> unitData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), courseId);
-		ColumnList<String> units = unitData.getResult();
-		for (Column<String> unit : units) {
-			List<Map<String, Object>> lessonDataMapAsList = new ArrayList<Map<String, Object>>();
-			Map<String, Object> unitDataAsMap = new HashMap<String, Object>();
-			String unitGooruOid = unit.getName();
-			Collection<String> resourceColumns = new ArrayList<String>();
-			resourceColumns.add(ApiConstants.TITLE);
-			resourceColumns.add(ApiConstants.GOORUOID);
-			resourceColumns.add(ApiConstants.THUMBNAIL);
-			unitDataAsMap.put(ApiConstants.GOORUOID, unitGooruOid);
-			unitDataAsMap.put(ApiConstants.TYPE, ApiConstants.UNIT);
-			try {
+		if (unitData != null) {
+			ColumnList<String> units = unitData.getResult();
+			for (Column<String> unit : units) {
+				List<Map<String, Object>> lessonDataMapAsList = new ArrayList<Map<String, Object>>();
+				Map<String, Object> unitDataAsMap = new HashMap<String, Object>();
+				String unitGooruOid = unit.getName();
+				Collection<String> resourceColumns = new ArrayList<String>();
+				resourceColumns.add(ApiConstants.TITLE);
+				resourceColumns.add(ApiConstants.GOORUOID);
+				resourceColumns.add(ApiConstants.THUMBNAIL);
+				unitDataAsMap.put(ApiConstants.GOORUOID, unitGooruOid);
+				unitDataAsMap.put(ApiConstants.TYPE, ApiConstants.UNIT);
 				unitDataAsMap.put(ApiConstants.SEQUENCE, unit.getLongValue());
-			} catch (Exception e) {
-				unitDataAsMap.put(ApiConstants.SEQUENCE, unit.getIntegerValue());
-			}
-			OperationResult<ColumnList<String>> unitMetaData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), unitGooruOid, resourceColumns);
-			if (!unitMetaData.getResult().isEmpty() && unitMetaData.getResult().size() > 0) {
-				ColumnList<String> unitMetaDataColumns = unitMetaData.getResult();
-				unitDataAsMap.put(ApiConstants.TITLE, unitMetaDataColumns.getColumnByName(ApiConstants.TITLE).getStringValue());
-			}
-			
-			OperationResult<ColumnList<String>> lessonData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), unitGooruOid);
-			ColumnList<String> lessons = lessonData.getResult();
-			for (Column<String> lesson : lessons) {
-				long assessmentCount = 0; long scoreMet = 0; long scoreNotMet = 0; long assessmentAttempted = 0; long collectionNotAttempted = 0; long assessmentNotAttempted = 0;
-				Map<String, Object> lessonDataAsMap = new HashMap<String, Object>();
-				String lessonGooruOid = lesson.getName();
-				String classLessonKey = getBaseService().appendTilda(classId, courseId, unitGooruOid, lessonGooruOid);
-				if (StringUtils.isNotBlank(userUid)) {
-					classLessonKey = getBaseService().appendTilda(classLessonKey, userUid);
+				
+				OperationResult<ColumnList<String>> unitMetaData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), unitGooruOid, resourceColumns);
+				if (!unitMetaData.getResult().isEmpty() && unitMetaData.getResult().size() > 0) {
+					ColumnList<String> unitMetaDataColumns = unitMetaData.getResult();
+					unitDataAsMap.put(ApiConstants.TITLE, unitMetaDataColumns.getColumnByName(ApiConstants.TITLE).getStringValue());
 				}
-				OperationResult<ColumnList<String>> lessonMetaData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), lessonGooruOid, resourceColumns);
-				lessonDataAsMap.put(ApiConstants.GOORUOID, lessonGooruOid);
-				lessonDataAsMap.put(ApiConstants.TYPE, ApiConstants.LESSON);
-				try {
-					lessonDataAsMap.put(ApiConstants.SEQUENCE, lesson.getLongValue());
-				} catch (Exception e) {
-					lessonDataAsMap.put(ApiConstants.SEQUENCE, lesson.getIntegerValue());
-				}
-				if (!lessonMetaData.getResult().isEmpty() && lessonMetaData.getResult().size() > 0) {
-					ColumnList<String> lessonMetaDataColumns = lessonMetaData.getResult();
-					lessonDataAsMap.put(ApiConstants.TITLE, lessonMetaDataColumns.getColumnByName(ApiConstants.TITLE).getStringValue());
-				}
-				//fetch leson item score status
-				OperationResult<ColumnList<String>> lessonMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), classLessonKey);
-				ColumnList<String> lessonMetricColumnList = null;
-				if (lessonMetricsData != null && !lessonMetricsData.getResult().isEmpty()) {
-					lessonMetricColumnList = lessonMetricsData.getResult();
-				}
-				OperationResult<ColumnList<String>> itemData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), lessonGooruOid);
-				ColumnList<String> items = itemData.getResult();
-				for (Column<String> item : items) {
-					String itemGooruOid = item.getName();
-					Long assessmentScore = null;
-					
-					// fetch type
-					Map<String, Object> itemDataAsMap = new HashMap<String, Object>();
-					getResourceMeta(itemDataAsMap, isSecure, traceId, itemGooruOid, getBaseService().convertStringToCollection(ApiConstants.RESOURCE_TYPE));
 
-					String itemType = null;
-					if (itemDataAsMap.get(ApiConstants.TYPE) != null && StringUtils.isNotBlank(itemDataAsMap.get(ApiConstants.TYPE).toString())) {
-						itemType = itemDataAsMap.get(ApiConstants.TYPE).toString();
+				OperationResult<ColumnList<String>> lessonData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), unitGooruOid);
+				ColumnList<String> lessons = lessonData.getResult();
+				for (Column<String> lesson : lessons) {
+					long assessmentCount = 0; long scoreMet = 0; long scoreNotMet = 0; long assessmentAttempted = 0; long collectionNotAttempted = 0; long assessmentNotAttempted = 0;
+					Map<String, Object> lessonDataAsMap = new HashMap<String, Object>();
+					String lessonGooruOid = lesson.getName();
+					String classLessonKey = getBaseService().appendTilda(classId, courseId, unitGooruOid, lessonGooruOid);
+					if (StringUtils.isNotBlank(userUid)) {
+						classLessonKey = getBaseService().appendTilda(classLessonKey, userUid);
 					}
-					if (itemType != null) {
-                        if (itemType.matches(ApiConstants.ASSESSMENT_TYPES)) {
-							assessmentCount++;
-							if (lessonMetricColumnList != null && lessonMetricColumnList.size() > 0) {
-								assessmentScore = lessonMetricColumnList.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._SCORE_IN_PERCENTAGE), null);
-								if (assessmentScore != null && assessmentScore >= classMinScore) {
-									scoreMet++;
-									assessmentAttempted++;
-								} else if (assessmentScore != null && assessmentScore < classMinScore) {
-									scoreNotMet++;
-									assessmentAttempted++;
-									lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.SCORE_NOT_MET);
-									break;
+					OperationResult<ColumnList<String>> lessonMetaData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), lessonGooruOid, resourceColumns);
+					lessonDataAsMap.put(ApiConstants.GOORUOID, lessonGooruOid);
+					lessonDataAsMap.put(ApiConstants.TYPE, ApiConstants.LESSON);
+					lessonDataAsMap.put(ApiConstants.SEQUENCE, lesson.getLongValue());
+					
+					if (!lessonMetaData.getResult().isEmpty() && lessonMetaData.getResult().size() > 0) {
+						ColumnList<String> lessonMetaDataColumns = lessonMetaData.getResult();
+						lessonDataAsMap.put(ApiConstants.TITLE, lessonMetaDataColumns.getColumnByName(ApiConstants.TITLE).getStringValue());
+					}
+					// fetch lesson item score status
+					OperationResult<ColumnList<String>> lessonMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), classLessonKey);
+					ColumnList<String> lessonMetricColumnList = null;
+					if (lessonMetricsData != null && !lessonMetricsData.getResult().isEmpty()) {
+						lessonMetricColumnList = lessonMetricsData.getResult();
+					}
+					OperationResult<ColumnList<String>> itemData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), lessonGooruOid);
+					ColumnList<String> items = itemData.getResult();
+					for (Column<String> item : items) {
+						String itemGooruOid = item.getName();
+						Long assessmentScore = null;
+
+						// fetch type
+						Map<String, Object> itemDataAsMap = new HashMap<String, Object>();
+						getResourceMeta(itemDataAsMap, isSecure, traceId, itemGooruOid, getBaseService().convertStringToCollection(ApiConstants.RESOURCE_TYPE));
+
+						String itemType = null;
+						if (itemDataAsMap.get(ApiConstants.TYPE) != null && StringUtils.isNotBlank(itemDataAsMap.get(ApiConstants.TYPE).toString())) {
+							itemType = itemDataAsMap.get(ApiConstants.TYPE).toString();
+						}
+						if (itemType != null) {
+							if (itemType.matches(ApiConstants.ASSESSMENT_TYPES)) {
+								assessmentCount++;
+								if (lessonMetricColumnList != null && lessonMetricColumnList.size() > 0) {
+									assessmentScore = lessonMetricColumnList.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._SCORE_IN_PERCENTAGE), null);
+									if (assessmentScore != null && assessmentScore >= classMinScore) {
+										scoreMet++;
+										assessmentAttempted++;
+									} else if (assessmentScore != null && assessmentScore < classMinScore) {
+										scoreNotMet++;
+										assessmentAttempted++;
+										lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.SCORE_NOT_MET);
+										break;
+									}
 								}
+								if (assessmentScore == null) {
+									assessmentNotAttempted++;
+								}
+							} else if (itemType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
+								collectionNotAttempted++;
 							}
-							if (assessmentScore == null) {
-								assessmentNotAttempted++;
-							}
-						} else if (itemType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
-							collectionNotAttempted++;
 						}
 					}
+					if (assessmentAttempted == 0 || (collectionNotAttempted == items.size())) {
+						lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.NOT_ATTEMPTED);
+					} else if (scoreMet > 0 && scoreNotMet == 0 && assessmentNotAttempted == 0 && (scoreMet == assessmentCount)) {
+						lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.SCORE_MET);
+					} else if (assessmentAttempted > 0 && (scoreMet < assessmentCount)) {
+						lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.SCORE_NOT_MET);
+					} else if (collectionNotAttempted > 0) {
+						lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.NOT_ATTEMPTED);
+					}
+					lessonDataMapAsList.add(lessonDataAsMap);
 				}
-				if (assessmentAttempted == 0 || (collectionNotAttempted == items.size())) {
-					lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.NOT_ATTEMPTED);
-				} else if (scoreMet > 0 && scoreNotMet == 0 && assessmentNotAttempted == 0 && (scoreMet == assessmentCount)) {
-					lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.SCORE_MET);
-				} else if (assessmentAttempted > 0 && (scoreMet < assessmentCount)) {
-					lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.SCORE_NOT_MET);
-				} else if(collectionNotAttempted > 0) {
-					lessonDataAsMap.put(ApiConstants.SCORE_STATUS, ApiConstants.NOT_ATTEMPTED);
-				}
-				lessonDataMapAsList.add(lessonDataAsMap);
+				unitDataAsMap.put(ApiConstants.ITEM, lessonDataMapAsList);
+				unitDataMapAsList.add(unitDataAsMap);
 			}
-			unitDataAsMap.put(ApiConstants.ITEM, lessonDataMapAsList);
-			unitDataMapAsList.add(unitDataAsMap);
 		}
 		responseParamDTO.setContent(unitDataMapAsList);
 		return responseParamDTO;		
@@ -434,7 +430,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		List<Map<String, Object>> lessonDataMapAsList = new ArrayList<Map<String, Object>>();
 		OperationResult<ColumnList<String>> classData = getCassandraService().read(traceId, ColumnFamily.CLASS.getColumnFamily(), classId);
 		Long classMinScore = 0L;
-		if (!classData.getResult().isEmpty() && classData.getResult().size() > 0) {
+		if (classData != null && !classData.getResult().isEmpty() && classData.getResult().size() > 0) {
 			classMinScore = classData.getResult().getLongValue(ApiConstants.MINIMUM_SCORE, 0L);
 		}
 		Collection<String> resourceColumns = new ArrayList<String>();
@@ -446,11 +442,12 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		resourceColumns.add(ApiConstants.URL);
 		
 		OperationResult<ColumnList<String>> lessonData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), unitId);
+		if(lessonData != null) {
 		ColumnList<String> lessons = lessonData.getResult();
 		for (Column<String> lesson : lessons) {
 			long scoreMet = 0; long scoreNotMet = 0; long assessmentAttempted = 0; long assessmentNotAttempted = 0; 
-			long collectionNotViewed = 0; long collectionViewed = 0; long collectionNotAttempted = 0; 
-			long assessmentCount = 0; long collectionCount = 0; 
+			long collectionNotViewed = 0; long collectionViewed = 0;
+			long assessmentCount = 0;  
 			List<Map<String, Object>> itemDataMapAsList = new ArrayList<Map<String, Object>>();
 			Map<String, Object> lessonDataAsMap = new HashMap<String, Object>();
 			String lessonGooruOid = lesson.getName();
@@ -459,31 +456,26 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				classLessonKey = getBaseService().appendTilda(classLessonKey, userUid);
 			}
 			lessonDataAsMap.put(ApiConstants.GOORUOID, lessonGooruOid);
-			try {
-				lessonDataAsMap.put(ApiConstants.SEQUENCE, lesson.getLongValue());
-			} catch (Exception e) {
-				lessonDataAsMap.put(ApiConstants.SEQUENCE, lesson.getIntegerValue());
-			}
+			lessonDataAsMap.put(ApiConstants.SEQUENCE, lesson.getLongValue());
+			
 			OperationResult<ColumnList<String>> lessonMetaData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), lessonGooruOid, resourceColumns);
-			if (!lessonMetaData.getResult().isEmpty() && lessonMetaData.getResult().size() > 0) {
+			if (lessonMetaData != null && !lessonMetaData.getResult().isEmpty() && lessonMetaData.getResult().size() > 0) {
 				ColumnList<String> lessonMetaDataColumns = lessonMetaData.getResult();
 				lessonDataAsMap.put(ApiConstants.TITLE, lessonMetaDataColumns.getColumnByName(ApiConstants.TITLE).getStringValue());
 			}
-			OperationResult<ColumnList<String>> itemData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), lessonGooruOid);
-			ColumnList<String> items = itemData.getResult();
+			//Fetch lesson metrics
 			ColumnList<String> lessonMetricColumnList = null;
 			OperationResult<ColumnList<String>> lessonMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), classLessonKey);
 			if (lessonMetricsData != null && !lessonMetricsData.getResult().isEmpty()) {
 				lessonMetricColumnList = lessonMetricsData.getResult();
 			}
+			//Fetch item data
+			OperationResult<ColumnList<String>> itemData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), lessonGooruOid);
+			ColumnList<String> items = itemData.getResult();
 			for (Column<String> item : items) {
 				String itemGooruOid = item.getName();
 				Map<String, Object> itemDataAsMap = new HashMap<String, Object>();
-				try {
-					itemDataAsMap.put(ApiConstants.SEQUENCE, item.getLongValue());
-				} catch (Exception e) {
-					itemDataAsMap.put(ApiConstants.SEQUENCE, item.getIntegerValue());
-				}
+				itemDataAsMap.put(ApiConstants.SEQUENCE, item.getLongValue());
 
 				getResourceMeta(itemDataAsMap, isSecure, traceId, itemGooruOid, resourceColumns);
 				String itemType = null;
@@ -519,7 +511,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 							itemScoreStatus = ApiConstants.NOT_ATTEMPTED;
 						}
 					} else if (itemType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
-						collectionCount++;
 						if(itemViews > 0) {
 							collectionViewed++;
 							itemScoreStatus = ApiConstants.VIEWED;
@@ -554,6 +545,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			lessonDataAsMap.put(ApiConstants.TYPE, ApiConstants.LESSON);
 			lessonDataMapAsList.add(lessonDataAsMap);
 		}
+		}
 		responseParamDTO.setContent(lessonDataMapAsList);
 		return responseParamDTO;
 	}
@@ -578,9 +570,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			resourceColumns.add(ApiConstants.GOORUOID);
 
 			OperationResult<ColumnList<String>> unitData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), courseId);
-			ColumnList<String> units = unitData.getResult();
-			if (!units.isEmpty() && units.size() > 0) {
-				for (Column<String> unit : units) {
+			if (unitData != null && !unitData.getResult().isEmpty() && unitData.getResult().size() > 0) {
+				for (Column<String> unit : unitData.getResult()) {
 					Map<String, Object> unitDataAsMap = new HashMap<String, Object>();
 					String unitGooruOid = unit.getName();
 					// Form unit class key
@@ -596,14 +587,10 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					}
 					unitDataAsMap.put(ApiConstants.GOORUOID, unitGooruOid);
 					unitDataAsMap.put(ApiConstants.TYPE, ApiConstants.UNIT);
-					try{
-						unitDataAsMap.put(ApiConstants.SEQUENCE, unit.getLongValue());
-					}catch (Exception e) {
-						unitDataAsMap.put(ApiConstants.SEQUENCE, unit.getIntegerValue());
-					}
-					long unitAssessmentCount = 0L;
-					long unitCollectionCount = 0L;
+					unitDataAsMap.put(ApiConstants.SEQUENCE, unit.getLongValue());
 
+					// Fetch unit's assessment and collections count 
+					long unitAssessmentCount = 0L; long unitCollectionCount = 0L;
 					OperationResult<ColumnList<String>> lessonData = getCassandraService().read(traceId, ColumnFamily.CONTENT_META.getColumnFamily(), unitGooruOid);
 					if(!lessonData.getResult().isEmpty()){
 						unitAssessmentCount = lessonData.getResult().getLongValue(ApiConstants.ASSESSMENT_COUNT, 0l);	
@@ -613,8 +600,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					OperationResult<ColumnList<String>> collectionMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
 							getBaseService().appendTilda(classUnitKey, ApiConstants.COLLECTION));
 					ColumnList<String> collectionMetricColumnList = null;
-					long collectionsViewedInUnit = 0L;
-					long unitCollectionsTotalStudyTime = 0L;
+					Long collectionsViewedInUnit = 0L;
+					Long unitCollectionsTotalStudyTime = 0L;
 					if (collectionMetricsData != null && !collectionMetricsData.getResult().isEmpty()) {
 						collectionMetricColumnList = collectionMetricsData.getResult();
 						if (collectionMetricColumnList != null && collectionMetricColumnList.size() > 0) {
@@ -627,7 +614,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					OperationResult<ColumnList<String>> assessmentMetricsData = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), getBaseService().appendTilda(classUnitKey, ApiConstants.ASSESSMENT));
 					ColumnList<String> assessmentMetricColumnList = null;
 					Long unitAvgScore = 0L;
-					long assessmentsAttemptedInUnit = 0L;
+					Long assessmentsAttemptedInUnit = 0L;
 					if (assessmentMetricsData != null && !assessmentMetricsData.getResult().isEmpty()) {
 						assessmentMetricColumnList = assessmentMetricsData.getResult();
 						if (assessmentMetricColumnList != null && assessmentMetricColumnList.size() > 0) {
@@ -714,7 +701,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		//Fetch minScore of class
 		OperationResult<ColumnList<String>> classData = getCassandraService().read(traceId, ColumnFamily.CLASS.getColumnFamily(), classId);
 		Long classMinScore = 0L;
-		if (!classData.getResult().isEmpty() && classData.getResult().size() > 0) {
+		if (classData != null && !classData.getResult().isEmpty() && classData.getResult().size() > 0) {
 			classMinScore = classData.getResult().getLongValue(ApiConstants.MINIMUM_SCORE, 0L);
 		}
 		
@@ -724,25 +711,20 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		resourceColumns.add(ApiConstants.THUMBNAIL);
 		
 		OperationResult<ColumnList<String>> lessonData = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), unitId);
-		ColumnList<String> lessons = lessonData.getResult();		
-		for (Column<String> lesson : lessons) {
+		if(lessonData != null && !lessonData.getResult().isEmpty() && lessonData.getResult().size() > 0) {
+		for (Column<String> lesson : lessonData.getResult()) {
 			Map<String, Object> lessonDataAsMap = new HashMap<String, Object>();
 			List<Map<String, Object>> itemDataMapAsList = new ArrayList<Map<String, Object>>();
 			long scoreMet = 0; long scoreNotMet = 0; long assessmentAttempted = 0; long assessmentNotAttempted = 0; 
-			long collectionNotViewed = 0; long collectionViewed = 0; 
-			long assessmentCount = 0; long collectionCount = 0; 
+			long collectionNotViewed = 0; long collectionViewed = 0; long assessmentCount = 0; 
 			String lessonGooruOid = lesson.getName();
-			try {
-				lessonDataAsMap.put(ApiConstants.SEQUENCE, lesson.getLongValue());
-			} catch (Exception e) {
-				lessonDataAsMap.put(ApiConstants.SEQUENCE, lesson.getIntegerValue());
-			}
 			String classLessonKey = getBaseService().appendTilda(classId, courseId, unitId, lessonGooruOid);
 			if (StringUtils.isNotBlank(userUid)) {
 				classLessonKey = getBaseService().appendTilda(classLessonKey, userUid);
 			}
 			OperationResult<ColumnList<String>> lessonMetaData = getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), lessonGooruOid, resourceColumns);
 			lessonDataAsMap.put(ApiConstants.GOORUOID, lessonGooruOid);
+			lessonDataAsMap.put(ApiConstants.SEQUENCE, lesson.getLongValue());
 			lessonDataAsMap.put(ApiConstants.TITLE, null);
 			if (!lessonMetaData.getResult().isEmpty() && lessonMetaData.getResult().size() > 0) {
 				ColumnList<String> lessonMetaDataColumns = lessonMetaData.getResult();
@@ -760,18 +742,23 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			for (Column<String> item : items) {
 				Map<String, Object> itemDataAsMap = new HashMap<String, Object>();
 				String itemGooruOid = item.getName();
+				itemDataAsMap.put(ApiConstants.GOORUOID, itemGooruOid);
 				itemDataAsMap.put(ApiConstants.SEQUENCE, item.getLongValue());
 
 				// fetch item usage data
-				itemDataAsMap.putAll(getClassMetricsAsMap(traceId, classLessonKey, itemGooruOid));
-
+				long itemViews = 0l;
+				Long assessmentScore = null;
+				if(lessonMetricColumnList != null && lessonMetricColumnList.size() > 0) {
+					itemViews = lessonMetricColumnList.getLongValue(getBaseService().appendTilda(itemGooruOid,ApiConstants.VIEWS), 0L);
+					assessmentScore = lessonMetricColumnList.getLongValue(getBaseService().appendTilda(itemGooruOid,ApiConstants._SCORE_IN_PERCENTAGE), null);
+					itemDataAsMap.put(ApiConstants.VIEWS, itemViews);
+					itemDataAsMap.put(ApiConstants.TIMESPENT, lessonMetricColumnList.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._TIME_SPENT), 0L));
+				}
+				
 				// fetch type
 				getResourceMeta(itemDataAsMap, isSecure, traceId, itemGooruOid, getBaseService().convertStringToCollection(ApiConstants.RESOURCE_TYPE));
 				itemDataMapAsList.add(itemDataAsMap);
-				long itemViews = 0l;
-				if(lessonMetricColumnList != null && lessonMetricColumnList.size() > 0) {
-					itemViews = lessonMetricColumnList.getLongValue(getBaseService().appendTilda(itemGooruOid,ApiConstants.VIEWS), 0L);
-				}
+				
 				String itemType = null;
 				if (itemDataAsMap.get(ApiConstants.TYPE) != null && StringUtils.isNotBlank(itemDataAsMap.get(ApiConstants.TYPE).toString())) {
 					itemType = itemDataAsMap.get(ApiConstants.TYPE).toString();
@@ -780,16 +767,12 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
                     if (itemType.matches(ApiConstants.ASSESSMENT_TYPES)) {
 						// fetch lesson's score status data
 						assessmentCount++;
-						Long assessmentScore = null;
-						if (lessonMetricColumnList != null && lessonMetricColumnList.size() > 0) {
-							assessmentScore = lessonMetricColumnList.getLongValue(getBaseService().appendTilda(itemGooruOid,ApiConstants._SCORE_IN_PERCENTAGE), null);
-							if (assessmentScore != null && assessmentScore >= classMinScore) {
-								scoreMet++;
-								assessmentAttempted++;
-							} else if (assessmentScore != null && assessmentScore < classMinScore) {
-								scoreNotMet++;
-								assessmentAttempted++;
-							}
+						if (assessmentScore != null && assessmentScore >= classMinScore) {
+							scoreMet++;
+							assessmentAttempted++;
+						} else if (assessmentScore != null && assessmentScore < classMinScore) {
+							scoreNotMet++;
+							assessmentAttempted++;
 						}
 						if (assessmentScore == null) {
 							assessmentNotAttempted++;
@@ -802,6 +785,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						}
 					}
 				}
+				itemDataAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, assessmentScore != null ? assessmentScore : 0L);
 			}
 			
 			lessonDataAsMap.putAll(getActivityMetricsAsMap(traceId, classLessonKey, lessonGooruOid));
@@ -827,6 +811,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				resultDataMapAsList.add(lessonDataAsMap);
 			}
 		}
+		}
 		responseParamDTO.setContent(resultDataMapAsList);
 		return responseParamDTO;
 	}
@@ -851,8 +836,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		Map<String, Object> itemDetailAsMap = new HashMap<String, Object>();
 		OperationResult<ColumnList<String>> itemsColumnList = null;
 		Long classMinScore = 0L; String sessionKey = null;
-			Long scoreInPercentage = 0L; Long score = 0L; String evidence = null; Long timespent = 0L; Long scorableCountOnEvent = 0L; Long totalReaction = 0L; Long reactedCount = 0L; Long avgReaction = 0L;
-	
+		Long scoreInPercentage = 0L; Long score = 0L; String evidence = null; Long timespent = 0L; Long scorableCountOnEvent = 0L; Long totalReaction = 0L; Long reactedCount = 0L; Long avgReaction = 0L;
+		
 		if ((sessionId != null && StringUtils.isNotBlank(sessionId.trim()))) {
 			sessionKey = sessionId;
 		} else if ((classId != null && StringUtils.isNotBlank(classId.trim())) && (courseId != null && StringUtils.isNotBlank(courseId.trim())) 
@@ -869,7 +854,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		// Fetch goal for the class
 		if (classId != null && StringUtils.isNotBlank(classId.trim())) {
 			OperationResult<ColumnList<String>> classData = getCassandraService().read(traceId, ColumnFamily.CLASS.getColumnFamily(), classId);
-			if (!classData.getResult().isEmpty() && classData.getResult().size() > 0) {
+			if (classData != null && !classData.getResult().isEmpty() && classData.getResult().size() > 0) {
 				classMinScore = classData.getResult().getLongValue(ApiConstants.MINIMUM_SCORE, 0L);
 			}
 		}
@@ -877,7 +862,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		//Fetch score and evidence of assessment
 		if (StringUtils.isNotBlank(sessionKey)) {
 			itemsColumnList = getCassandraService().read(traceId, ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), sessionKey);
-			if (!itemsColumnList.getResult().isEmpty() && itemsColumnList.getResult().size() > 0) {
+			if (itemsColumnList != null && !itemsColumnList.getResult().isEmpty() && itemsColumnList.getResult().size() > 0) {
 				ColumnList<String> lessonMetricColumns = itemsColumnList.getResult();
 				score = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants.SCORE), 0L);
 				scoreInPercentage = lessonMetricColumns.getLongValue(getBaseService().appendTilda(assessmentId, ApiConstants._SCORE_IN_PERCENTAGE), 0L);
@@ -923,6 +908,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		itemDetailAsMap.put(ApiConstants.ITEM_COUNT, itemCount);
 		itemDetailAsMap.put(ApiConstants.SCORABLE_COUNT_ON_EVENT, scorableCountOnEvent);
 		itemDetailAsMap.put(ApiConstants.SESSIONID, sessionKey);
+		itemDetailAsMap.put(ApiConstants.AVG_REACTION, avgReaction);
 		//Fetch username and profile url
 		String username = null;
 		OperationResult<ColumnList<String>> userColumnList = getCassandraService().read(traceId, ColumnFamily.USER.getColumnFamily(), userUid);
@@ -1085,29 +1071,30 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	}
 	
 	private List<Map<String, Object>> getClassMetricsForAllItemsAsMap(String traceId, String key, String contentGooruOids) {
-		List<Map<String, Object>> usageAsMapAsList = null;
+		List<Map<String, Object>> usageAsMapAsList = new ArrayList<Map<String, Object>>();;
 		OperationResult<ColumnList<String>> itemsColumnList = getCassandraService().read(traceId, ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), key);
-		usageAsMapAsList = new ArrayList<Map<String, Object>>();
-		for (String itemGooruOid : contentGooruOids.split(ApiConstants.COMMA)) {
-			Map<String, Object> usageAsMap = new HashMap<String, Object>();
-			usageAsMap.put(ApiConstants.GOORUOID, itemGooruOid);
-			Long views = 0L; Long timeSpent = 0L; Long score = 0L; String collectionType = null;Long lastAccessed = null;String evidence = null;
-			if (!itemsColumnList.getResult().isEmpty() && itemsColumnList.getResult().size() > 0) {
-				ColumnList<String> itemMetricColumns = itemsColumnList.getResult();
-				views = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants.VIEWS), 0L);
-				timeSpent = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._TIME_SPENT), 0L);
-				score = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._SCORE_IN_PERCENTAGE), 0L);
-				collectionType = itemMetricColumns.getStringValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._COLLECTION_TYPE), null);
-				lastAccessed = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._LAST_ACCESSED), null);
-				evidence = itemMetricColumns.getStringValue(getBaseService().appendTilda(itemGooruOid, ApiConstants.EVIDENCE), null);
+		if(StringUtils.isNotBlank(contentGooruOids)) {
+			for (String itemGooruOid : contentGooruOids.split(ApiConstants.COMMA)) {
+				Map<String, Object> usageAsMap = new HashMap<String, Object>();
+				usageAsMap.put(ApiConstants.GOORUOID, itemGooruOid);
+				Long views = 0L; Long timeSpent = 0L; Long score = 0L; String collectionType = null;Long lastAccessed = null;String evidence = null;
+				if (itemsColumnList != null && !itemsColumnList.getResult().isEmpty() && itemsColumnList.getResult().size() > 0) {
+					ColumnList<String> itemMetricColumns = itemsColumnList.getResult();
+					views = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants.VIEWS), 0L);
+					timeSpent = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._TIME_SPENT), 0L);
+					score = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._SCORE_IN_PERCENTAGE), 0L);
+					collectionType = itemMetricColumns.getStringValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._COLLECTION_TYPE), null);
+					lastAccessed = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._LAST_ACCESSED), null);
+					evidence = itemMetricColumns.getStringValue(getBaseService().appendTilda(itemGooruOid, ApiConstants.EVIDENCE), null);
+				}
+				usageAsMap.put(ApiConstants.VIEWS, views);
+				usageAsMap.put(ApiConstants.TIMESPENT, timeSpent);
+				usageAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, score);
+				usageAsMap.put(ApiConstants.TYPE, collectionType);
+				usageAsMap.put(ApiConstants.LAST_ACCESSED, lastAccessed);
+				usageAsMap.put(ApiConstants.EVIDENCE, evidence);
+				usageAsMapAsList.add(usageAsMap);
 			}
-			usageAsMap.put(ApiConstants.VIEWS, views);
-			usageAsMap.put(ApiConstants.TIMESPENT, timeSpent);
-			usageAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, score);
-			usageAsMap.put(ApiConstants.TYPE, collectionType);
-			usageAsMap.put(ApiConstants.LAST_ACCESSED, lastAccessed);
-			usageAsMap.put(ApiConstants.EVIDENCE, evidence);
-			usageAsMapAsList.add(usageAsMap);
 		}
 		return usageAsMapAsList;
 	}
@@ -1122,12 +1109,10 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			views = itemMetricColumns.getLongValue(ApiConstants.VIEWS, 0L);
 			timeSpent = itemMetricColumns.getLongValue(ApiConstants._TIME_SPENT, 0L);
 			score = itemMetricColumns.getLongValue(ApiConstants._SCORE_IN_PERCENTAGE, 0L);
-			collectionType = itemMetricColumns.getStringValue(ApiConstants._COLLECTION_TYPE, null);
 		}
 		usageAsMap.put(ApiConstants.VIEWS, views);
 		usageAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, score);
 		usageAsMap.put(ApiConstants.TIMESPENT, timeSpent);
-		usageAsMap.put(ApiConstants.TYPE, collectionType);
 		return usageAsMap;
 	}
 	
@@ -1423,7 +1408,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		
 		StringBuffer resourceIds = getBaseService().exportData(resourcesMetaData, ApiConstants.GOORUOID);
 		StringBuffer studentIds = getBaseService().exportData(studentsMetaData, ApiConstants.USER_UID);
-		Set<String> columnSuffix =  DataUtils.getStudentsCollectionUsageColumnSuffix();
+		Set<String> columnSuffix = DataUtils.getStudentsCollectionUsageColumnSuffix();
 		//Fetch session data
 		Collection<String> rowKeys = getBaseService().appendAdditionalField(ApiConstants.TILDA, getBaseService().appendTilda(SessionAttributes.RS.getSession(),classId,courseId,unitId,lessonId,collectionId), studentIds.toString());
 		List<String> sessionIds = getSessions(traceId,rowKeys);
@@ -1529,8 +1514,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			usageMap.put(ApiConstants.COLLECTION_TYPE, metricRow.getColumns().getStringValue(column, null));
 		}else if(metricName.equals(ApiConstants.VIEWS)){
 			usageMap.put(ApiConstants.VIEWS, metricRow.getColumns().getLongValue(column.trim(), 0L));
-		}else if(metricName.equals(ApiConstants.SCORE)){
-			usageMap.put(ApiConstants.SCORE, metricRow.getColumns().getLongValue(column.trim(), 0L));
 		}else if(metricName.equals(ApiConstants._SCORE_IN_PERCENTAGE)){
 			usageMap.put(ApiConstants.SCORE_IN_PERCENTAGE, metricRow.getColumns().getLongValue(column.trim(), 0L));
 		}else if(metricName.equals(ApiConstants._TIME_SPENT)){
@@ -1548,7 +1531,9 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		}else if(metricName.equals(ApiConstants._AVG_REACTION)){
 			usageMap.put(ApiConstants.AVG_REACTION, metricRow.getColumns().getLongValue(column.trim(), 0L));
 		}else if(metricName.equals(ApiConstants._QUESTION_STATUS)){
-			usageMap.put(ApiConstants.STATUS, metricRow.getColumns().getStringValue(column.trim(), null));
+			String responseStatus = metricRow.getColumns().getStringValue(column.trim(), null);
+			usageMap.put(ApiConstants.STATUS, responseStatus);
+			usageMap.put(ApiConstants.SCORE, (responseStatus != null && responseStatus.equalsIgnoreCase(ApiConstants.CORRECT)) ? 1L : 0L);
 		}else if(metricName.matches(ApiConstants.OPTIONS)){
 			Map<String,Long> optionMap = new HashMap<String,Long>();
 			optionMap.put(ApiConstants.options.A.name(), metricRow.getColumns().getLongValue(getBaseService().appendTilda(id,ApiConstants.options.A.name()), 0L));
