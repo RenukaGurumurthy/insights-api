@@ -18,6 +18,8 @@ public interface CassandraService {
 	OperationResult<Rows<String, String>> read(String traceId, String columnFamilyName, String columnName, String columnValue, Collection<String> columnList);
 
 	OperationResult<Rows<String, String>> read(String traceId, String columnFamilyName, String columnName, String columnValue);
+	
+	OperationResult<Rows<String, String>> read(String traceId, String columnFamilyName, String columnName, int columnValue);
 
 	OperationResult<Rows<String, String>> readAll(String traceId, String columnFamilyName, String columnName);
 
@@ -56,4 +58,6 @@ public interface CassandraService {
 	boolean putStringValue(String traceId, String columnFamily, String key, Map<String, String> columns);
 	
 	ColumnList<String> getDashBoardKeys(String traceId, String key);
+	
+	ColumnList<String> getConfigKeys(String key);
 }

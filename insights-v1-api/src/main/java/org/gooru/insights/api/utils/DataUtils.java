@@ -2,12 +2,14 @@ package org.gooru.insights.api.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -18,6 +20,8 @@ import org.gooru.insights.api.constants.ErrorMessages;
 import org.gooru.insights.api.models.InsightsConstant.ColumnFamily;
 import org.gooru.insights.api.services.BaseService;
 import org.gooru.insights.api.services.CassandraService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -55,6 +59,8 @@ public class DataUtils {
 	@Resource
 	private Properties filePath;
 
+	private static final Logger logger = LoggerFactory.getLogger(DataUtils.class);
+
 	@PostConstruct
 	private void init() {
 		includeTableDataType();
@@ -79,12 +85,14 @@ public class DataUtils {
 					.read(ApiConstants.BEAN_INIT,
 							ColumnFamily.TABLE_DATATYPES.getColumnFamily(),
 							columnFamiliesName);
-			for (Row<String, String> row : tableDataType.getResult()) {
-				Map<String, String> dataType = new HashMap<String, String>();
-				for (Column<String> column : row.getColumns()) {
-					dataType.put(column.getName(), column.getStringValue());
+			if (tableDataType != null && !tableDataType.getResult().isEmpty()) {
+				for (Row<String, String> row : tableDataType.getResult()) {
+					Map<String, String> dataType = new HashMap<String, String>();
+					for (Column<String> column : row.getColumns()) {
+						dataType.put(column.getName(), column.getStringValue());
+					}
+					columnFamilyDataTypes.put(row.getKey(), dataType);
 				}
-				columnFamilyDataTypes.put(row.getKey(), dataType);
 			}
 		}
 	}
@@ -162,7 +170,6 @@ public class DataUtils {
 		studentsCollectionUsageColumnSuffix = new HashSet<String>();
 		studentsCollectionUsageColumnSuffix.add(ApiConstants.VIEWS);
 		studentsCollectionUsageColumnSuffix.add(ApiConstants._TIME_SPENT);
-		studentsCollectionUsageColumnSuffix.add(ApiConstants.SCORE);
 		studentsCollectionUsageColumnSuffix.add(ApiConstants._QUESTION_STATUS);
 		studentsCollectionUsageColumnSuffix.add(ApiConstants._ANSWER_OBJECT);
 		studentsCollectionUsageColumnSuffix.add(ApiConstants.CHOICE);
@@ -365,6 +372,20 @@ public class DataUtils {
 			message = message.replace(ApiConstants.OPEN_BRACE+count+ApiConstants.CLOSE_BRACE, replacer[count]);
 		}
 		return message;
+	}
+	
+	public static String getTimeDifference(String traceId,Date lastModified) {
+		String lagTime = null;
+		try {
+			Date currentTime = new Date();
+			long lagInMilliSecs = (currentTime.getTime() - lastModified.getTime());
+			lagTime = String.format("%02d", TimeUnit.MILLISECONDS.toSeconds(lagInMilliSecs));
+		} catch (Exception e2) {
+			logger.error("Exception : "+e2);
+			throw new InternalError(e2.getMessage());
+		}
+		return lagTime;
+
 	}
 	
 	public BaseService getBaseService() {
