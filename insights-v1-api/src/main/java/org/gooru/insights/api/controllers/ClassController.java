@@ -39,16 +39,6 @@ public class ClassController extends BaseController{
 		return classService;
 	}
 	
-	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/unit",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	@ResponseBody
-	public ModelAndView getClassCourseUsage(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
-			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="getUsageData", required = false, defaultValue = "false") Boolean getUsageData,
-			@RequestParam(value="userUid", required = false) String userUid, HttpServletResponse response) throws Exception{
-		setAllowOrigin(response);
-		return getModel(getClassService().getCourseUsage(getTraceId(request), classGooruId, courseGooruId, userUid, getUsageData, request.isSecure()));
-	}
-	
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
@@ -58,18 +48,7 @@ public class ClassController extends BaseController{
 			@RequestParam(value="collectionType", required = false) String collectionType,
 			@RequestParam(value="getUsageData", required = false, defaultValue = "false") Boolean getUsageData, HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		return getModel(getClassService().getUnitUsage(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid,collectionType, getUsageData, request.isSecure()));
-	}
-	
-	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	@ResponseBody
-	public ModelAndView getClassLessonUsage(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
-			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId, 
-			@PathVariable(value="lessonGooruId") String lessonGooruId, @RequestParam(value="userUid", required = false) String userUid,
-			@RequestParam(value="getUsageData", required = false, defaultValue = "false") Boolean getUsageData, HttpServletResponse response) throws Exception{
-		setAllowOrigin(response);
-		return getModel(getClassService().getLessonUsage(getTraceId(request), classGooruId, courseGooruId, unitGooruId, lessonGooruId, userUid, getUsageData, request.isSecure()));
+		return getModel(getClassService().getAllStudentsUnitUsage(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid,collectionType, getUsageData, request.isSecure()));
 	}
 	
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/plan",method ={ RequestMethod.GET,RequestMethod.POST})
