@@ -17,7 +17,6 @@ import org.gooru.insights.api.constants.ErrorMessages;
 import org.gooru.insights.api.models.InsightsConstant.ColumnFamily;
 import org.gooru.insights.api.services.BaseService;
 import org.gooru.insights.api.services.CassandraService;
-import org.gooru.insights.api.services.JobServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,12 +69,14 @@ public class DataUtils {
 					.read(ApiConstants.BEAN_INIT,
 							ColumnFamily.TABLE_DATATYPES.getColumnFamily(),
 							columnFamiliesName);
-			for (Row<String, String> row : tableDataType.getResult()) {
-				Map<String, String> dataType = new HashMap<String, String>();
-				for (Column<String> column : row.getColumns()) {
-					dataType.put(column.getName(), column.getStringValue());
+			if (tableDataType != null && !tableDataType.getResult().isEmpty()) {
+				for (Row<String, String> row : tableDataType.getResult()) {
+					Map<String, String> dataType = new HashMap<String, String>();
+					for (Column<String> column : row.getColumns()) {
+						dataType.put(column.getName(), column.getStringValue());
+					}
+					columnFamilyDataTypes.put(row.getKey(), dataType);
 				}
-				columnFamilyDataTypes.put(row.getKey(), dataType);
 			}
 		}
 	}
@@ -128,7 +129,6 @@ public class DataUtils {
 		studentsCollectionUsageColumnSuffix = new HashSet<String>();
 		studentsCollectionUsageColumnSuffix.add(ApiConstants.VIEWS);
 		studentsCollectionUsageColumnSuffix.add(ApiConstants._TIME_SPENT);
-		studentsCollectionUsageColumnSuffix.add(ApiConstants.SCORE);
 		studentsCollectionUsageColumnSuffix.add(ApiConstants._QUESTION_STATUS);
 		studentsCollectionUsageColumnSuffix.add(ApiConstants._ANSWER_OBJECT);
 		studentsCollectionUsageColumnSuffix.add(ApiConstants.CHOICE);
