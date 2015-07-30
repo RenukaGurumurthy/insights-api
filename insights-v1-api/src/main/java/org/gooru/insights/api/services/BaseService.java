@@ -42,21 +42,21 @@ public interface BaseService {
 	
 	List<Map<String,Object>> getData(List<Map<String,Object>> requestData,String coreKey);
 	
-	List<Map<String, Object>> LeftJoin(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey, String childKey);
+	List<Map<String, Object>> leftJoin(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey, String childKey);
 
 	List<Map<String, Object>> rightJoin(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey, String childKey);
 
-	List<Map<String, Object>> InnerJoin(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey, String childKey);
+	List<Map<String, Object>> innerJoin(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey, String childKey);
 
-	List<Map<String, Object>> InnerJoin(List<Map<String, Object>> parent, List<Map<String, Object>> child, String commonKey);
+	List<Map<String, Object>> innerJoin(List<Map<String, Object>> parent, List<Map<String, Object>> child, String commonKey);
 
-	Collection<String> appendAdditionalField(String selectFields,String prefix,String suffix);
+	Collection<String> generateCommaSeparatedStringToKeys(String selectFields,String prefix,String suffix);
 	
 	Collection<String> convertStringToCollection(String data);
 
-	StringBuffer exportData(List<Map<String,Object>> requestData,String requestKey);
+	StringBuffer getCommaSeparatedIds(List<Map<String,Object>> requestData,String requestKey);
 	
-	Map<String,String> exportData(List<Map<String,Object>> requestData,Collection<String> requestKey);
+	Map<String,String> getCommaSeparatedIds(List<Map<String,Object>> requestData,Collection<String> requestKey);
 	
 	List<Map<String,Object>> JoinWithSingleKey(List<Map<String,Object>> multipleRecord,List<Map<String,Object>> singleRecord,String MultipleRecordKey);
 	
@@ -76,7 +76,7 @@ public interface BaseService {
 
 	List<Map<String, Object>> safeJoin(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey, String childKey);
 		
-	List<Map<String,Object>> injectRecord(List<Map<String,Object>> aggregateData,Map<String,Object> injuctableRecord);
+	List<Map<String,Object>> injectMapRecord(List<Map<String,Object>> aggregateData,Map<String,Object> injuctableRecord);
 	
 	List<Map<String, Object>> removeUnknownKeyList(List<Map<String, Object>> requestData,String key,String exceptionalkey,Object value,boolean status);
 
@@ -92,9 +92,9 @@ public interface BaseService {
 
 	Date convertTimeZone(Date inputDate, String fromZone, String toZone);
 	
-	 List<Map<String, Object>> InnerJoinContainsKey(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey,String childKey) ;
+	 List<Map<String, Object>> innerJoinWithContainsKey(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey,String childKey) ;
 	 
-	Collection<String> appendAdditionalField(String selectFields,String prefix,Collection<String> suffix);
+	Collection<String> generateCommaSeparatedStringToKeys(String selectFields,String prefix,Collection<String> suffix);
 	
 	List<Map<String, Object>> properNameEndsWith(List<Map<String, Object>> requestList, Map<String, String> columnNames);
 	
@@ -136,10 +136,8 @@ public interface BaseService {
 	
 	List<Map<String,Object>> convertMapToList(Map<String,?> requestMap,String key);
 	
-	List<Map<String,Object>> groupDataDependOnkey(List<Map<String,Object>> requestData,String fetchKey,String objectKey);
+	List<Map<String,Object>> groupRecordsBasedOnKey(List<Map<String,Object>> requestData,String fetchKey,String objectKey);
 	
-	List<Map<String, Object>> includeDefaultData(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey, String childKey);
-
 	String getHourlyBasedTimespent(double timeSpent);
 	
 	String appendForwardSlash(String... texts);

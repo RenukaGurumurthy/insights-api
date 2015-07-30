@@ -37,7 +37,7 @@ public interface ClassService {
 
 	List<String> getSessions(String traceId, Collection<String> rowKeys);
 
-	List<Map<String,Object>> getIdBasedColumnActivityMetrics(String traceId, Collection<String> rowKeys,String columnFamily, Collection<String> columns, String userIds,boolean isUserIdInKey,String collectionIds, boolean userProcess);
+	List<Map<String,Object>> getIdSeparatedMetrics(String traceId, Collection<String> rowKeys,String columnFamily, Collection<String> columns, String userIds,boolean isUserIdInKey,String collectionIds, boolean userProcess);
 
 	ResponseParamDTO<Map<String, Object>> findUsageAvailable(String traceId, String classGooruId ,String courseGooruId,String unitGooruId,String lessonGooruId,String contentGooruId) throws Exception;
 

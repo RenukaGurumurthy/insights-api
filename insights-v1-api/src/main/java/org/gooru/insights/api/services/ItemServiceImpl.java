@@ -109,7 +109,7 @@ public class ItemServiceImpl implements ItemService,InsightsConstant{
 				}
 				rawList.add(dataMap);
 			}
-			dataList = baseService.InnerJoin(rawList, dataList, "id");
+			dataList = baseService.innerJoin(rawList, dataList, "id");
 			dataList = baseService.properNameEndsWith(dataList, selectFields);
 			dataList = formatKeyValueJson(dataList, "key");
 			responseParamDTO.setContent(dataList);
