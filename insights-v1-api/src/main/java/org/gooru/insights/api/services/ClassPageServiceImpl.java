@@ -123,7 +123,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			whereCondition.put(ApiConstants.IS_GROUP_OWWNER, 0);
 			whereCondition.put(ApiConstants.DELETED, 0);
 			injuctableRecord.put(ApiConstants.USERCOUNT,getCassandraService().getRowCount(traceId, ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
-			rawData = getBaseService().injectRecord(rawData, injuctableRecord);
+			rawData = getBaseService().injectMapRecord(rawData, injuctableRecord);
 		}					
 
 		/**
@@ -132,8 +132,8 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		Map<String, Object> injuctableRecord = new HashMap<String, Object>();
 		injuctableRecord.put(ApiConstants.GOORUOID, collectionId);
 		intermediateData = getBaseService().getColumnValues(traceId,
-				getCassandraService().read(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session, getBaseService().appendAdditionalField(requestParamsDTO.getFields(), collectionId, new String())));
-		aggregateData = getBaseService().injectRecord(intermediateData, injuctableRecord);
+				getCassandraService().read(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session, getBaseService().generateCommaSeparatedStringToKeys(requestParamsDTO.getFields(), collectionId, new String())));
+		aggregateData = getBaseService().injectMapRecord(intermediateData, injuctableRecord);
 		injuctableRecord = new HashMap<String, Object>();
 		injuctableRecord.put(ApiConstants.DELETED, 0);
 		injuctableRecord.put(ApiConstants.COLLECTION_GOORU_OID, collectionId);
@@ -144,7 +144,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		 */
 		injuctableRecord = getItemCount(collectionList);
 		
-		aggregateData = getBaseService().injectRecord(aggregateData, injuctableRecord);
+		aggregateData = getBaseService().injectMapRecord(aggregateData, injuctableRecord);
 		responseParamDTO.setContent(getBaseService().properName(getBaseService().rightJoin(rawData, aggregateData, ApiConstants.GOORUOID, ApiConstants.GOORUOID), selectValues));
 		return responseParamDTO;
 	}
@@ -183,7 +183,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			/**
 			 * Extract resource ids and fetch rawData
 			 */
-			StringBuffer previousData = getBaseService().exportData(resourceItem, ApiConstants.RESOURCEGOORUOID);
+			StringBuffer previousData = getBaseService().getCommaSeparatedIds(resourceItem, ApiConstants.RESOURCEGOORUOID);
 			rawData = getBaseService()
 					.getRowsColumnValues(traceId, getCassandraService().readAll(traceId, ColumnFamily.RESOURCE.getColumnFamily(), null, previousData.toString(), new String(), getBaseService().convertStringToCollection(requestParamsDTO.getFields())));
 
@@ -213,7 +213,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			 */
 			aggregateData = getBaseService().getColumnValues(traceId,
 					getCassandraService().read(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session,
-							getBaseService().appendAdditionalField(previousData.toString(), null, requestParamsDTO.getFields())));
+							getBaseService().generateCommaSeparatedStringToKeys(previousData.toString(), null, requestParamsDTO.getFields())));
 			resultSet = getBaseService().JoinWithSingleKey(resourceItem, aggregateData, ApiConstants.GOORUOID);
 			/**
 			 * Get answer for the questions
@@ -224,7 +224,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			 * get teacher response
 			 */
 			StringBuffer teacherUId = new StringBuffer();
-			teacherUId = getBaseService().exportData(resultSet, ApiConstants.FEEDBACKPROVIDER);
+			teacherUId = getBaseService().getCommaSeparatedIds(resultSet, ApiConstants.FEEDBACKPROVIDER);
 			if (!teacherUId.toString().isEmpty()) {
 				String teacherUid = "";
 				String[] teacherid = teacherUId.toString().split(",");
@@ -238,7 +238,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 				selectValues.put(ApiConstants.FEEDBACKPROVIDER, ApiConstants.GOORUUID);
 				List<Map<String, Object>> teacherData = getBaseService().getColumnValues(traceId, getCassandraService().getClassPageUsage(traceId, "user", "", teacherUid, "", new ArrayList<String>()));
 				teacherData = getBaseService().properName(teacherData, selectValues);
-				resultSet = getBaseService().LeftJoin(resultSet, teacherData, ApiConstants.FEEDBACKPROVIDER, ApiConstants.FEEDBACKPROVIDER);
+				resultSet = getBaseService().leftJoin(resultSet, teacherData, ApiConstants.FEEDBACKPROVIDER, ApiConstants.FEEDBACKPROVIDER);
 			}
 
 			/**
@@ -311,7 +311,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			String rowKey = buildRowKey(traceId, requestParamsDTO);
 			aggregateData = getBaseService().getColumnValues(traceId,
 					getCassandraService().read(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), rowKey,
-							getBaseService().appendAdditionalField(requestParamsDTO.getFilters().getResourceGooruOId(), null, requestParamsDTO.getFields())));
+							getBaseService().generateCommaSeparatedStringToKeys(requestParamsDTO.getFilters().getResourceGooruOId(), null, requestParamsDTO.getFields())));
 			userData = getBaseService().getColumnValues(traceId,
 					getCassandraService().getClassPageUsage(traceId, ColumnFamily.USER.getColumnFamily(), ApiConstants.STRING_EMPTY, requestParamsDTO.getFilters().getUserUId(), ApiConstants.STRING_EMPTY,
 							new ArrayList<String>()));
@@ -328,12 +328,12 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			whereCondition.put(ApiConstants.IS_GROUP_OWWNER, 0);
 			whereCondition.put(ApiConstants.DELETED, 0);
 			classData = getBaseService().getRowsColumnValues(traceId, getCassandraService().readAll(traceId, ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
-			StringBuffer userUId = getBaseService().exportData(classData, ApiConstants.GOORU_UID);
+			StringBuffer userUId = getBaseService().getCommaSeparatedIds(classData, ApiConstants.GOORU_UID);
 			if (getBaseService().notNull(userUId.toString())) {
 				for (String gooruUId : userUId.toString().split(ApiConstants.COMMA)) {
 					requestParamsDTO.getFilters().setUserUId(gooruUId);
 					String rowKey = buildRowKey(traceId, requestParamsDTO);
-					Collection<String> columnName = getBaseService().appendAdditionalField(requestParamsDTO.getFilters().getResourceGooruOId(), null, requestParamsDTO.getFields());
+					Collection<String> columnName = getBaseService().generateCommaSeparatedStringToKeys(requestParamsDTO.getFilters().getResourceGooruOId(), null, requestParamsDTO.getFields());
 					columnName.add(ApiConstants.GOORU_UID);
 					aggregateData.add(getBaseService().getColumnValue(traceId,
 							getCassandraService().read(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), rowKey,
@@ -350,8 +350,8 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			selectValues.put("gooruUid", ApiConstants.GOORU_UID);
 			classData = getBaseService().properNameEndsWith(classData,selectValues);
 			aggregateData = getBaseService().properNameEndsWith(aggregateData,selectValues);
-			aggregateData = getBaseService().LeftJoin(classData, aggregateData, ApiConstants.GOORUUID, ApiConstants.GOORUUID);
-			aggregateData = getBaseService().LeftJoin(userData, aggregateData, ApiConstants.GOORUUID, ApiConstants.GOORUUID);
+			aggregateData = getBaseService().leftJoin(classData, aggregateData, ApiConstants.GOORUUID, ApiConstants.GOORUUID);
+			aggregateData = getBaseService().leftJoin(userData, aggregateData, ApiConstants.GOORUUID, ApiConstants.GOORUUID);
 		}
 		aggregateData = getBaseService().sortBy(aggregateData, ApiConstants.USER_NAME, ApiConstants.ASC);
 		responseParamDTO.setContent(aggregateData);
@@ -438,7 +438,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 				responseParamDTO.setContent(itemData);
 				return responseParamDTO;
 			}
-			previousData = getBaseService().exportData(itemData, ApiConstants.RESOURCEGOORUOID);
+			previousData = getBaseService().getCommaSeparatedIds(itemData, ApiConstants.RESOURCEGOORUOID);
 			rawData = getBaseService()
 					.getRowsColumnValues(traceId,getCassandraService().readAll(traceId, ColumnFamily.RESOURCE.getColumnFamily(), null, previousData.toString(), new String(), new ArrayList<String>()));
 
@@ -456,7 +456,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			 */
 			rawData = getBaseService().addCustomKeyInMapList(rawData, "gooruOId", null);
 
-			resourceData = getBaseService().LeftJoin(itemData, rawData, "resource_gooru_oid", ApiConstants.GOORUOID);
+			resourceData = getBaseService().leftJoin(itemData, rawData, "resource_gooru_oid", ApiConstants.GOORUOID);
 			resourceData = getBaseService().properName(resourceData, selectValues);
 
 			String session = requestParamsDTO.getFilters().getSession();
@@ -470,7 +470,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			List<Map<String, Object>> classData = new ArrayList<Map<String, Object>>();
 			classData = getBaseService().getRowsColumnValues(traceId,getCassandraService().readAll(traceId, ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
 
-			StringBuffer userUId = getBaseService().exportData(classData, ApiConstants.GOORU_UID);
+			StringBuffer userUId = getBaseService().getCommaSeparatedIds(classData, ApiConstants.GOORU_UID);
 			if (getBaseService().notNull(userUId.toString())) {
 				if (session.startsWith("FS")) {
 					for (String userId : userUId.toString().split(",")) {
@@ -490,11 +490,11 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 				 * Get user related info
 				 */
 				rawData = getBaseService().getRowsColumnValues(traceId,getCassandraService().readAll(traceId, "user", "", userUId.toString(), "", new ArrayList<String>()));
-				classData = getBaseService().LeftJoin(classData, rawData, "gooru_uid", "gooru_uid");
+				classData = getBaseService().leftJoin(classData, rawData, "gooru_uid", "gooru_uid");
 				selectValues.put("gooruUId", "gooru_uid");
 				classData = getBaseService().properName(classData, selectValues);
 				classData = getBaseService().combineTwoList(resourceData, classData, "resourceGooruOId", "gooruUId");
-				resultData = getBaseService().LeftJoin(aggregateData, rawData, "gooru_uid", "gooru_uid");
+				resultData = getBaseService().leftJoin(aggregateData, rawData, "gooru_uid", "gooru_uid");
 
 			}
 			/**
@@ -508,7 +508,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			surName.put("~C", "C");
 			surName.put("~D", "D");
 			surName.put("~E", "E");
-			resultData = getBaseService().InnerJoinContainsKey(resultData, itemData, "gooru_oid", "resource_gooru_oid");
+			resultData = getBaseService().innerJoinWithContainsKey(resultData, itemData, "gooru_oid", "resource_gooru_oid");
 			aggregateData = getBaseService().buildJSON(traceId, resultData, additionParameter, surName, singleSession);
 			selectValues.put("options", "providedAnswer");
 			surName = new HashMap<String, String>();
@@ -530,7 +530,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			aggregateData = getBaseService().sortBy(aggregateData, "userName", "ASC");
 			aggregateData = getBaseService().getUserData(aggregateData, "resourceGooruOId", null, "userName", null, null);
 			aggregateData = getBaseService().safeJoin(aggregateData, rawData, "resourceGooruOId", "resourceGooruOId");
-			aggregateData = getBaseService().LeftJoin(resourceData, aggregateData, "resourceGooruOId", "resourceGooruOId");
+			aggregateData = getBaseService().leftJoin(resourceData, aggregateData, "resourceGooruOId", "resourceGooruOId");
 
 			if (requestParamsDTO.getPaginate() != null) {
 				getBaseService().sortBy(aggregateData, requestParamsDTO.getPaginate().getSortBy(), requestParamsDTO.getPaginate().getSortOrder());
@@ -609,7 +609,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 
 		resourceData = getBaseService().getRowsColumnValues(traceId, getCassandraService().readAll(traceId, ColumnFamily.COLLECTION_ITEM.getColumnFamily(), whereCondition, new ArrayList<String>()));
 
-		StringBuffer itemData = getBaseService().exportData(resourceData, ApiConstants.COLLECTIONITEMID);
+		StringBuffer itemData = getBaseService().getCommaSeparatedIds(resourceData, ApiConstants.COLLECTIONITEMID);
 
 		if (resourceData.isEmpty()) {
 			responseParamDTO.setContent(resourceData);
@@ -620,7 +620,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		 * Get only collection from the classpage,in order to avoid pathway in
 		 * the list
 		 */
-		previousData = getBaseService().exportData(resourceData, ApiConstants.RESOURCEGOORUOID);
+		previousData = getBaseService().getCommaSeparatedIds(resourceData, ApiConstants.RESOURCEGOORUOID);
 		List<String> collection = new ArrayList<String>();
 		List<String> collectionColumn = new ArrayList<String>();
 		collectionColumn.add("collection_type");
@@ -665,7 +665,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		 */
 		rawData = getBaseService().addCustomKeyInMapList(rawData, "gooruOId", null);
 
-		resourceData = getBaseService().LeftJoin(resourceData, rawData, "resource_gooru_oid", "gooruOId");
+		resourceData = getBaseService().leftJoin(resourceData, rawData, "resource_gooru_oid", "gooruOId");
 		resourceData = getBaseService().properName(resourceData, selectValues);
 
 		/**
@@ -686,15 +686,15 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			}
 			classData = getBaseService().getRowsColumnValues(traceId,getCassandraService().readAll(traceId, ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
 
-			userUId = getBaseService().exportData(classData, ApiConstants.GOORU_UID);
+			userUId = getBaseService().getCommaSeparatedIds(classData, ApiConstants.GOORU_UID);
 		}
 		Collection<String> extractId = new ArrayList<String>();
 		if (getBaseService().notNull(userUId.toString())) {
-			extractId = getBaseService().appendAdditionalField(previousData.toString(), new String(), "~views,~avg_time_spent,~gooru_oid,~score,~time_spent,~grade_in_percentage");
+			extractId = getBaseService().generateCommaSeparatedStringToKeys(previousData.toString(), new String(), "~views,~avg_time_spent,~gooru_oid,~score,~time_spent,~grade_in_percentage");
 			extractId.add("gooru_uid");
 			aggregateData = getBaseService().getRowsColumnValues(traceId,
 					getCassandraService().readAll(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session + "~", previousData.toString(),
-							getBaseService().appendAdditionalField(userUId.toString(), "~", new String()), extractId));
+							getBaseService().generateCommaSeparatedStringToKeys(userUId.toString(), "~", new String()), extractId));
 			aggregateData = getBaseService().getSingleKey(aggregateData, "gooru_oid", "~gooru_oid");
 			if (aggregateData != null && !aggregateData.isEmpty()) {
 				isAggregateData = true;
@@ -707,17 +707,17 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			Map<String, Object> injuctableRecord = new HashMap<String, Object>();
 			injuctableRecord.put("profile_url", filePath.getProperty("insights.profile.url.path"));
 			rawData = getBaseService().formatRecord(rawData, injuctableRecord, "gooruUid", "id");
-			classData = getBaseService().LeftJoin(rawData, classData, "gooruUid", "gooru_uid");
+			classData = getBaseService().leftJoin(rawData, classData, "gooruUid", "gooru_uid");
 			classData = getBaseService().properName(classData, selectValues);
 			classData = getBaseService().combineTwoList(resourceData, classData, "resourceGooruOId", "gooruUId");
-			resultData = getBaseService().LeftJoin(rawData, aggregateData, "gooruUid", "gooru_uid");
+			resultData = getBaseService().leftJoin(rawData, aggregateData, "gooruUid", "gooru_uid");
 		}
 
 		/**
 		 * fetching Collection minimum score,studing and status info
 		 */
 		if (!classData.isEmpty()) {
-			userUId = getBaseService().exportData(classData, ApiConstants.GOORU_UID);
+			userUId = getBaseService().getCommaSeparatedIds(classData, ApiConstants.GOORU_UID);
 			List<Map<String, Object>> processData = getBaseService().getRowsColumnValues(traceId,
 					getCassandraService().readAll(traceId, ColumnFamily.USER_COLLECTION_ITEM_ASSOC.getColumnFamily(), userUId.toString(), "~", itemData.toString(), new ArrayList<String>()));
 
@@ -750,7 +750,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 
 		}
 		aggregateData = getBaseService().safeJoin(aggregateData, rawData, "resourceGooruOId", "resourceGooruOId");
-		aggregateData = getBaseService().LeftJoin(resourceData, aggregateData, "resourceGooruOId", "resourceGooruOId");
+		aggregateData = getBaseService().leftJoin(resourceData, aggregateData, "resourceGooruOId", "resourceGooruOId");
 
 		if (requestParamsDTO.getPaginate() != null) {
 			getBaseService().sortBy(aggregateData, requestParamsDTO.getPaginate().getSortBy(), requestParamsDTO.getPaginate().getSortOrder());
@@ -1499,7 +1499,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			return responseParamDTO;
 		}
 
-		String collectionId = getBaseService().exportData(collectionData, ApiConstants.RESOURCEGOORUOID).toString();
+		String collectionId = getBaseService().getCommaSeparatedIds(collectionData, ApiConstants.RESOURCEGOORUOID).toString();
 
 		for (String id : collectionId.split(",")) {
 		
@@ -1731,7 +1731,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 
 					selectValues.remove("options");
 					selectValues.put("options", "dataSet");
-					resultSet = getBaseService().properNameEndsWith(getBaseService().LeftJoin(resultSet, rawData, ApiConstants.GOORUOID, ApiConstants.QUESTION_GOORU_OID), selectValues);
+					resultSet = getBaseService().properNameEndsWith(getBaseService().leftJoin(resultSet, rawData, ApiConstants.GOORUOID, ApiConstants.QUESTION_GOORU_OID), selectValues);
 					return resultSet;
 	}
 }

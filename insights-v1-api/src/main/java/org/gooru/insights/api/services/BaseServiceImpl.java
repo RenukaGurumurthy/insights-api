@@ -53,9 +53,9 @@ public class BaseServiceImpl implements BaseService {
 	public List<Map<String, Object>> sortBy(List<Map<String, Object>> requestData, String sortBy, String sortOrder) {
 
 		if (notNull(sortBy)) {
-			for (final String name : sortBy.split(",")) {
+			for (final String name : sortBy.split(ApiConstants.COMMA)) {
 				boolean descending = false;
-				if (notNull(sortOrder) && sortOrder.equalsIgnoreCase("DESC")) {
+				if (notNull(sortOrder) && sortOrder.equalsIgnoreCase(ApiConstants.DESC)) {
 					descending = true;
 				}
 				if (descending) {
@@ -423,7 +423,7 @@ public class BaseServiceImpl implements BaseService {
 		return resultSet;
 	}
 
-	public List<Map<String, Object>> InnerJoin(List<Map<String, Object>> parent, List<Map<String, Object>> child, String commonKey) {
+	public List<Map<String, Object>> innerJoin(List<Map<String, Object>> parent, List<Map<String, Object>> child, String commonKey) {
 		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
 		if (!child.isEmpty() && !parent.isEmpty()) {
 			for (Map<String, Object> childEntry : child) {
@@ -445,7 +445,7 @@ public class BaseServiceImpl implements BaseService {
 		return resultList;
 	}
 
-	public List<Map<String, Object>> InnerJoinContainsKey(
+	public List<Map<String, Object>> innerJoinWithContainsKey(
 			List<Map<String, Object>> parent, List<Map<String, Object>> child,
 			String parentKey, String childKey) {
 		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
@@ -477,76 +477,67 @@ public class BaseServiceImpl implements BaseService {
 		return resultList;
 	}
 
-	public List<Map<String, Object>> InnerJoin(
-			List<Map<String, Object>> parent, List<Map<String, Object>> child,
-			String parentKey, String childKey) {
-		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
-		for (Map<String, Object> childEntry : child) {
-			Map<String, Object> appended = new HashMap<String, Object>();
-			for (Map<String, Object> parentEntry : parent) {
-				if (childEntry.containsKey(childKey)
-						&& parentEntry.containsKey(parentKey)) {
-					if (childEntry.get(childKey).equals(
-							parentEntry.get(parentKey))) {
-						appended.putAll(childEntry);
-						appended.putAll(parentEntry);
+	public List<Map<String, Object>> innerJoin(List<Map<String, Object>> leftSideRecords, List<Map<String, Object>> rightSideRecords,
+												String leftRecordKeyName, String rightRecordKeyName) {
+		List<Map<String, Object>> mergedRecords = new ArrayList<Map<String, Object>>();
+		for (Map<String, Object> rightSideRecord : rightSideRecords) {
+			Map<String, Object> mergedRecord = new HashMap<String, Object>();
+			for (Map<String, Object> leftSideRecord : leftSideRecords) {
+				if (rightSideRecord.get(rightRecordKeyName) != null && leftSideRecord.get(leftRecordKeyName) != null && rightSideRecord.get(rightRecordKeyName).equals(leftSideRecord.get(leftRecordKeyName))) {
+						mergedRecord.putAll(rightSideRecord);
+						mergedRecord.putAll(leftSideRecord);
 						break;
-					}
 				}
 			}
-			resultList.add(appended);
+			mergedRecords.add(mergedRecord);
 		}
-
-		return resultList;
+		return mergedRecords;
 	}
 
-	public List<Map<String, Object>> rightJoin(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey, String childKey) {
-		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
-		for (Map<String, Object> childEntry : child) {
-			boolean occured = false;
-			Map<String, Object> appended = new HashMap<String, Object>();
-			for (Map<String, Object> parentEntry : parent) {
-				if (childEntry.containsKey(childKey) && parentEntry.containsKey(parentKey)) {
-					if (childEntry.get(childKey).equals(parentEntry.get(parentKey))) {
-						occured = true;
-						appended.putAll(childEntry);
-						appended.putAll(parentEntry);
+	public List<Map<String, Object>> rightJoin(List<Map<String, Object>> leftSideRecords, List<Map<String, Object>> rightSideRecords, String leftRecordKeyName, String rightRecordKeyName) {
+		List<Map<String, Object>> mergedRecords = new ArrayList<Map<String, Object>>();
+		for (Map<String, Object> rightSideRecord : rightSideRecords) {
+			boolean merged = false;
+			Map<String, Object> mergedRecord = new HashMap<String, Object>();
+			for (Map<String, Object> leftSideRecord : leftSideRecords) {
+				if (rightSideRecord.get(rightRecordKeyName) != null && leftSideRecord.get(leftRecordKeyName) != null && rightSideRecord.get(rightRecordKeyName).equals(leftSideRecord.get(leftRecordKeyName))) {
+						merged = true;
+						mergedRecord.putAll(rightSideRecord);
+						mergedRecord.putAll(leftSideRecord);
 						break;
-					}
 				}
 			}
-			if (!occured) {
-				appended.putAll(childEntry);
+			if (!merged) {
+				mergedRecord.putAll(rightSideRecord);
 			}
-
-			resultList.add(appended);
+			mergedRecords.add(mergedRecord);
 		}
-		return resultList;
+		return mergedRecords;
 	}
 
-	public List<Map<String, Object>> LeftJoin(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey, String childKey) {
-		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
-		for (Map<String, Object> parentEntry : parent) {
-			boolean occured = false;
-			Map<String, Object> appended = new HashMap<String, Object>();
-			if(child != null && !child.isEmpty()) {
-				for (Map<String, Object> childEntry : child) {
-					if (childEntry.containsKey(childKey) && parentEntry.containsKey(parentKey)) {
-						if (childEntry.get(childKey).equals(parentEntry.get(parentKey))) {
-							occured = true;
-							appended.putAll(childEntry);
-							appended.putAll(parentEntry);
+	public List<Map<String, Object>> leftJoin(List<Map<String, Object>> leftSideRecords, List<Map<String, Object>> rightSideRecords, String leftRecordKeyName, String rightRecordKeyName) {
+		List<Map<String, Object>> mergedRecords = new ArrayList<Map<String, Object>>();
+		for (Map<String, Object> leftSideRecord : leftSideRecords) {
+			boolean merged = false;
+			Map<String, Object> mergedRecord = new HashMap<String, Object>();
+			if(rightSideRecords != null && !rightSideRecords.isEmpty()) {
+				for (Map<String, Object> rightSideRecord : rightSideRecords) {
+					if (rightSideRecord.containsKey(rightRecordKeyName) && leftSideRecord.containsKey(leftRecordKeyName)) {
+						if (rightSideRecord.get(rightRecordKeyName).equals(leftSideRecord.get(leftRecordKeyName))) {
+							merged = true;
+							mergedRecord.putAll(rightSideRecord);
+							mergedRecord.putAll(leftSideRecord);
 							break;
 						}
 					}
 				}
 			}
-			if (!occured) {
-				appended.putAll(parentEntry);
+			if (!merged) {
+				mergedRecord.putAll(leftSideRecord);
 			}
-			resultList.add(appended);
+			mergedRecords.add(mergedRecord);
 		}
-		return resultList;
+		return mergedRecords;
 	}
 
 	public List<Map<String, Object>> leftJoinwithTwoKey(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey, String childKey) {
@@ -573,62 +564,6 @@ public class BaseServiceImpl implements BaseService {
 		return resultList;
 	}
 
-	public List<Map<String, Object>> includeDefaultData(List<Map<String, Object>> parent, List<Map<String, Object>> child, String parentKey, String childKey){
-		
-		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
-		if(parent == null){
-			return child;
-		}else if(child == null){
-			return parent;
-		}
-		for (Map<String, Object> childEntry : child) {
-			Set<Object> childIds = new HashSet<Object>();
-			Set<Object> parentIds = new HashSet<Object>();
-			Map<String,Object> checkerMap = new HashMap<String,Object>();
-			if(childEntry.containsKey(childKey)){
-					for (Map<String, Object> parentEntry : parent) {
-						Map<String, Object> appended = new HashMap<String, Object>();
-						if(parentIds.contains(parentEntry.get(parentKey))){
-							continue;
-						}
-					if(parentEntry.get(childKey) != null && childEntry.get(childKey) != null){
-						if(parentEntry.get(childKey).toString().equalsIgnoreCase(childEntry.get(childKey).toString())){
-							appended.putAll(parentEntry);
-							appended.putAll(childEntry);
-							parentIds.add(parentEntry.get(parentKey));
-							resultList.add(appended);
-						}else{
-							List<Map<String,Object>> checkerList = new ArrayList<Map<String,Object>>();
-							Map<String,Object> tempMap = new HashMap<String,Object>();
-							tempMap.put(parentKey, parentEntry.get(parentKey));
-							tempMap.putAll(childEntry);
-							checkerList.add(tempMap);
-							checkerMap.put(parentEntry.get(parentKey).toString(), checkerList);
-						}
-					}else{
-						if(childIds.contains(childEntry.get(childKey)) && childIds.contains(parentEntry.get(parentKey))){
-							continue;
-						}
-						Map<String,Object> temp = new HashMap<String,Object>();
-						childIds.add(childEntry.get(childKey));
-						childIds.add(parentEntry.get(parentKey));
-						temp.putAll(childEntry);
-						temp.putAll(parentEntry);
-						resultList.add(temp);
-					}
-				}
-			}
-			if(!checkerMap.isEmpty()){
-				for(String key : checkerMap.keySet()){
-					if(!parentIds.contains(key)){
-						resultList.addAll((Collection<? extends Map<String, Object>>) checkerMap.get(key));
-					}
-				}
-			}
-		}
-		return resultList;
-	}
-
 	public List<Map<String, Object>> removeUnknownKeyList(List<Map<String, Object>> requestData, String key, String exceptionalkey, Object value, boolean status) {
 		List<Map<String, Object>> responseData = new ArrayList<Map<String, Object>>();
 		for (Map<String, Object> map : requestData) {
@@ -644,6 +579,9 @@ public class BaseServiceImpl implements BaseService {
 		return responseData;
 	}
 
+	/**
+	 * 
+	 */
 	public List<Map<String, Object>> combineTwoList(List<Map<String, Object>> parentList, List<Map<String, Object>> childList, String parentKey, String childKey) {
 
 		List<Map<String, Object>> responseList = new ArrayList<Map<String, Object>>();
@@ -767,10 +705,10 @@ public class BaseServiceImpl implements BaseService {
 	 * Append the resource gooru oid with the requested fields to get the data
 	 */
 
-	   public Collection<String> appendAdditionalField(String selectFields, String prefix, String suffix) {
+	   public Collection<String> generateCommaSeparatedStringToKeys(String fields, String prefix, String suffix) {
 	       Collection<String> resultFields = new ArrayList<String>();
-	       if (notNull(selectFields)) {
-	           for (String field : selectFields.split(ApiConstants.COMMA)) {
+	       if (notNull(fields)) {
+	           for (String field : fields.split(ApiConstants.COMMA)) {
 	               if (notNull(prefix) && notNull(suffix)) {
 	                   for (String first : prefix.split(ApiConstants.COMMA)) {
 	                       StringBuffer resultField = new StringBuffer();
@@ -802,12 +740,12 @@ public class BaseServiceImpl implements BaseService {
 	       return resultFields;
 	   }
 
-	public Collection<String> appendAdditionalField(String selectFields, String prefix, Collection<String> suffix) {
+	public Collection<String> generateCommaSeparatedStringToKeys(String selectFields, String prefix, Collection<String> suffix) {
 		Collection<String> resultFields = new ArrayList<String>();
 		if (notNull(selectFields)) {
-			for (String field : selectFields.split(",")) {
+			for (String field : selectFields.split(ApiConstants.COMMA)) {
 				if (notNull(prefix) && !suffix.isEmpty()) {
-					for (String first : prefix.split(",")) {
+					for (String first : prefix.split(ApiConstants.COMMA)) {
 						StringBuffer resultField = new StringBuffer();
 						resultField.append(first);
 						resultField.append(field);
@@ -816,7 +754,7 @@ public class BaseServiceImpl implements BaseService {
 						}
 					}
 				} else if (notNull(prefix) && suffix.isEmpty()) {
-					for (String first : prefix.split(",")) {
+					for (String first : prefix.split(ApiConstants.COMMA)) {
 						StringBuffer resultField = new StringBuffer();
 						resultField.append(first);
 						resultField.append(field);
@@ -837,19 +775,19 @@ public class BaseServiceImpl implements BaseService {
 		return resultFields;
 	}
 
-	public Collection<String> convertStringToCollection(String data) {
-		Collection<String> collection = new ArrayList<String>();
-		for (String value : data.split(",")) {
-			collection.add(value);
+	public Collection<String> convertStringToCollection(String field) {
+		Collection<String> includedData = new ArrayList<String>();
+		for (String value : field.split(ApiConstants.COMMA)) {
+			includedData.add(value);
 		}
-		return collection;
+		return includedData;
 	}
 
-	public List<Map<String, Object>> injectRecord(List<Map<String, Object>> aggregateData, Map<String, Object> injuctableRecord) {
+	public List<Map<String, Object>> injectMapRecord(List<Map<String, Object>> records, Map<String, Object> injuctableRecord) {
 		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
-		for (Map<String, Object> map : aggregateData) {
-			map.putAll(injuctableRecord);
-			resultList.add(map);
+		for (Map<String, Object> record : records) {
+			record.putAll(injuctableRecord);
+			resultList.add(record);
 		}
 		return resultList;
 	}
@@ -1039,7 +977,7 @@ public class BaseServiceImpl implements BaseService {
 	/**
 	 * 	Accumulate all the resource ids in single unit with List of Map and String as arguments 
 	 */
-	public StringBuffer exportData(List<Map<String, Object>> requestData, String requestKey) {
+	public StringBuffer getCommaSeparatedIds(List<Map<String, Object>> requestData, String requestKey) {
 			StringBuffer exportData = new StringBuffer();
 			if(requestData != null && !requestData.isEmpty()){
 				for (Map<String, Object> map : requestData) {
@@ -1057,7 +995,7 @@ public class BaseServiceImpl implements BaseService {
 	/**
 	 * 	Accumulate all the resource ids in single unit with List of Map and Collection as arguments 
 	 */
-	public Map<String, String> exportData(List<Map<String, Object>> requestData, Collection<String> requestKey) {
+	public Map<String, String> getCommaSeparatedIds(List<Map<String, Object>> requestData, Collection<String> requestKey) {
 		Map<String, String> exportData = new HashMap<String, String>();
 		String appendedField = ApiConstants.STRING_EMPTY;
 		for (Map<String, Object> map : requestData) {
@@ -1177,7 +1115,7 @@ public class BaseServiceImpl implements BaseService {
 		for (Map<String, Object> map : resultSet) {
 			boolean isChoice = false;
 			boolean hasQuestion = false;
-			JSONObject json = new JSONObject();
+			Map<String,Long> tempMap = new HashMap<String,Long>();
 			Map<String, Object> resultMap = new HashMap<String, Object>();
 			if (map.containsKey("question_type")) {
 				hasQuestion = true;
@@ -1191,14 +1129,10 @@ public class BaseServiceImpl implements BaseService {
 				for (Map.Entry<String, Object> entry : map.entrySet()) {
 					for (String column : additionParameter) {
 						if(entry.getKey().endsWith("~options")){
-							try {
 								if(!entry.getValue().toString().equalsIgnoreCase("skipped")){
-								json.append(entry.getValue().toString(), Long.valueOf(1));
+									tempMap.put(entry.getValue().toString(), Long.valueOf(1));
 								}
-							} catch (JSONException e) {
-								InsightsLogger.error(traceId,"buildJSON exception", e);
-							}
-							resultMap.put(column, json.toString());
+							resultMap.put(column, tempMap);
 						}
 					}
 				}
@@ -1206,16 +1140,10 @@ public class BaseServiceImpl implements BaseService {
 				for (Map.Entry<String, Object> entry : map.entrySet()) {
 					for (String column : additionParameter) {
 							String data[] = entry.getKey().split("~");
-
 								if (surName.containsKey("~" + data[data.length - 1])) {
-									try {
-										json.append(surName.get("~" + data[data.length - 1]), Long.parseLong(String.valueOf(entry.getValue())));
-
-									} catch (JSONException e) {
-										InsightsLogger.error(traceId,"buildJSON exception", e);
-									}
+										tempMap.put(surName.get("~" + data[data.length - 1]), Long.parseLong(String.valueOf(entry.getValue())));
 								}
-						resultMap.put(column, String.valueOf(json));
+						resultMap.put(column, tempMap);
 					}
 				}
 			}
@@ -1778,7 +1706,7 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 			return dataList;
 		}
 		
-		public List<Map<String,Object>> groupDataDependOnkey(List<Map<String,Object>> contentUsageList,String fetchKey,String objectKey){
+		public List<Map<String,Object>> groupRecordsBasedOnKey(List<Map<String,Object>> contentUsageList,String fetchKey,String objectKey){
 			
 			/**
 			 * The Usage data is grouped depends on fetch key

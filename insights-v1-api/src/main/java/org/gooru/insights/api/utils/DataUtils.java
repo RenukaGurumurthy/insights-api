@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.options;
@@ -27,6 +30,8 @@ import com.netflix.astyanax.model.Rows;
 @Component
 public class DataUtils {
 
+	private static String nfsLocation;
+	
 	private static Map<String,String> stringColumns;
 
 	private static Map<String,String> longColumns;
@@ -35,9 +40,11 @@ public class DataUtils {
 	
 	private static Collection<String> collectionSummaryResourceColumns;
 
-	private static Map<String,Map<String,String>> columnFamilyDataTypes;
-	
 	private static Map<String,String> resourceFields;
+	
+	private static Map<String,Map<String,String>> columnFamilyDataTypes;
+
+	private static Map<String,Map<String,List<String>>> mergeDualColumnValues;
 	
 	@Autowired
 	private BaseService baseService;
@@ -45,10 +52,19 @@ public class DataUtils {
 	@Autowired
 	private CassandraService cassandraService;
 	
+	@Resource
+	private Properties filePath;
+
 	@PostConstruct
 	private void init() {
 		includeTableDataType();
 		putResourceFields();
+		putMergeDualColumnValues();
+		putNFSLocation();
+	}
+	
+	private void putNFSLocation(){
+		nfsLocation = filePath.getProperty(ApiConstants.NFS_BUCKET);
 	}
 	
 	private void includeTableDataType(){
@@ -79,8 +95,33 @@ public class DataUtils {
 		resourceFields.put(ApiConstants.TITLE,ApiConstants.TITLE);
 		resourceFields.put(ApiConstants.RESOURCE_TYPE,ApiConstants.TYPE);
 		resourceFields.put(ApiConstants.THUMBNAIL,ApiConstants.THUMBNAIL);
+		resourceFields.put(ApiConstants.FOLDER,ApiConstants.FOLDER);
 		resourceFields.put(ApiConstants.GOORUOID,ApiConstants.GOORUOID);
 		resourceFields.put(ApiConstants._GOORUOID,ApiConstants.GOORUOID);
+	}
+	
+	private void putCourseUsage(){
+		
+	}
+	
+	private void putMergeDualColumnValues(){
+		
+		mergeDualColumnValues = new HashMap<String,Map<String,List<String>>>();
+		putResourceMergeConfig(mergeDualColumnValues);
+	}
+	
+	private void putResourceMergeConfig(Map<String,Map<String,List<String>>> mergeDualColumnValues){
+		
+		List<String> columnNames = new ArrayList<String>();
+		columnNames.add(ApiConstants.GOORUOID);
+		columnNames.add(ApiConstants._GOORUOID);
+		Map<String,List<String>> dependentColumn = new HashMap<String,List<String>>();
+		dependentColumn.put(getBaseService().appendComma(ApiConstants.GOORUOID,ApiConstants._GOORUOID), columnNames);
+		columnNames.clear();
+		columnNames.add(ApiConstants.QUESTION_DOT_QUESTION_TYPE);
+		columnNames.add(ApiConstants.QUESTION_DOT_TYPE);
+		dependentColumn.put(getBaseService().appendComma(ApiConstants.QUESTION_DOT_QUESTION_TYPE,ApiConstants.QUESTION_DOT_TYPE), columnNames);
+		mergeDualColumnValues.put(ColumnFamily.RESOURCE.getColumnFamily(), dependentColumn);
 	}
 	
 	public static Set<Object> convertArrayToSet(Object[] keyList){
@@ -226,61 +267,58 @@ public class DataUtils {
 		DataUtils.collectionSummaryResourceColumns = collectionSummaryResourceColumns;
 	}
 	
-	public static Map<String,Object> getColumnFamilyContent(String traceId, String columnFamily, Row<String, String> row, Map<String,String> aliesNames, Collection<String> columnNames, Collection<String> conditionalColumns){
+	public static Map<String,Object> getColumnFamilyContent(String traceId, String columnFamily, ColumnList<String> columnList, Map<String,String> aliesNames, Collection<String> columnNames, Map<String,List<String>> mergeResourceDualColumnValues){
 	
 		Map<String,String> dataTypes = getColumnFamilyDataTypes().get(columnFamily);
 		Map<String,Object> dataMap = new HashMap<String,Object>();
-		Collection<String> columnList = new ArrayList<String>(columnNames);
-		if(conditionalColumns != null){
-			for(String conditionalColumn : conditionalColumns){
-				String[] dependentColumn = conditionalColumn.split(ApiConstants.COMMA);
-				for(int i =0; i<dependentColumn.length; i++){
-					if(columnList.contains(dependentColumn[i])){
-						String apiField = aliesNames.get(dependentColumn[i]) != null ? aliesNames.get(dependentColumn[i]) : dependentColumn[i];
-						fetchData(traceId, columnFamily, dataTypes, dependentColumn[i], apiField, row, dataMap);
-						if(dataMap.get(apiField) != null){
-							for(String column : dependentColumn){
-								columnList.remove(column);
-							}
-							break;
-						}
-					}
-				}
-			}
+		Collection<String> RequestedColumns = new ArrayList<String>(columnNames);
+		if(RequestedColumns.contains(ApiConstants.THUMBNAIL)){
+			buildThumbnailURL(columnList, dataMap);
+			RequestedColumns.remove(ApiConstants.THUMBNAIL);
+			RequestedColumns.remove(ApiConstants.FOLDER);
 		}
-		for(String columnName : columnList){
+		if(mergeResourceDualColumnValues != null){
+			handleMergeColumnValues(traceId, columnFamily, columnList, RequestedColumns, dataMap, dataTypes, aliesNames, mergeResourceDualColumnValues);
+		}
+		for(String columnName : RequestedColumns){
 			String apiField = aliesNames.get(columnName) != null ? aliesNames.get(columnName) : columnName;
-			fetchData(traceId, columnFamily, dataTypes, columnName, apiField, row, dataMap);
+			fetchData(traceId, columnFamily, dataTypes, columnName, apiField, columnList, dataMap);
 		}
 		return dataMap;
 	}
 	
-	public static Map<String,Object> getColumnFamilyContent(String traceId, String columnFamily, ColumnList<String> columns, Map<String,String> aliesNames, Collection<String> columnNames, Collection<String> conditionalColumns){
+	private static void buildThumbnailURL(ColumnList<String> columns, Map<String,Object> resourceMetaData){
 		
-		Map<String,String> dataTypes = getColumnFamilyDataTypes().get(columnFamily);
-		Map<String,Object> dataMap = new HashMap<String,Object>();
-		Collection<String> columnList = new ArrayList<String>(columnNames);
-		if(conditionalColumns != null){
-			for(String conditionalColumn : conditionalColumns){
-				String[] dependentColumn = conditionalColumn.split(ApiConstants.PIPE);
-				for(int i =0; i<dependentColumn.length; i++){
-					if(columnList.contains(dependentColumn[i])){
-						String apiField = aliesNames.get(dependentColumn[i]) != null ? aliesNames.get(dependentColumn[i]) : dependentColumn[i];
-						fetchData(traceId, columnFamily, dataTypes, dependentColumn[i], apiField, columns, dataMap);
-						if(dataMap.get(apiField) != null){
-							columnList.remove(dependentColumn);
-							break;
-						}
+		String thumbnail = null;
+		thumbnail = columns.getStringValue(ApiConstants.THUMBNAIL, null);
+		if(thumbnail != null && !thumbnail.startsWith(ApiConstants.HTTP)) {
+			thumbnail = ServiceUtils.buildString(nfsLocation,columns.getStringValue(ApiConstants.FOLDER, ApiConstants.STRING_EMPTY),thumbnail);
+		}
+		resourceMetaData.put(ApiConstants.THUMBNAIL, thumbnail);
+	}
+	
+	private static void handleMergeColumnValues(String traceId, String columnFamily,
+			ColumnList<String> columnList, Collection<String> RequestedColumns,
+			Map<String, Object> dataMap, Map<String, String> dataTypes,
+			Map<String, String> aliesNames,
+			Map<String, List<String>> mergeResourceDualColumnValues) {
+
+		for (Map.Entry<String, List<String>> mergeColumns : mergeResourceDualColumnValues.entrySet()) {
+			if (RequestedColumns.containsAll(mergeColumns.getValue())) {
+				for (String column : mergeColumns.getValue()) {
+					String apiField = aliesNames.get(column) != null ? aliesNames
+							.get(column) : column;
+					fetchData(traceId, columnFamily, dataTypes, column,
+							apiField, columnList, dataMap);
+					if (dataMap.get(apiField) != null) {
+						RequestedColumns.removeAll(mergeColumns.getValue());
+						break;
 					}
 				}
 			}
 		}
-		for(String columnName : columnList){
-			String apiField = aliesNames.get(columnName) != null ? aliesNames.get(columnName) : columnName;
-			fetchData(traceId, columnFamily, dataTypes, columnName, apiField, columns, dataMap);
-		}
-		return dataMap;
 	}
+	
 	private static void fetchData(String traceId, String columnFamily, Map<String,String> dataTypes, String columnName, String apiField, ColumnList<String> columns, Map<String,Object> dataMap){
 		if(dataTypes.get(columnName) != null){
 			if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.STRING.dataType())){
@@ -296,6 +334,7 @@ public class DataUtils {
 				InsightsLogger.debug(traceId, buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
 			}
 		}else {
+			dataMap.put(apiField, columns.getStringValue(columnName, null));
 			InsightsLogger.debug(traceId, buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
 		}
 	}
@@ -349,5 +388,8 @@ public class DataUtils {
 	public static Map<String, String> getResourceFields() {
 		return resourceFields;
 	}
-	
+
+	public static Map<String, Map<String,List<String>>> getMergeDualColumnValues() {
+		return mergeDualColumnValues;
+	}
 }

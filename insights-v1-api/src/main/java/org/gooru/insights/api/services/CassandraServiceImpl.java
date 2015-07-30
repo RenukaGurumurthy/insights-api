@@ -59,12 +59,12 @@ public class CassandraServiceImpl implements CassandraService{
 
 	public OperationResult<Rows<String, String>> readAll(String traceId, String columnFamily,String prefix,String rowKey,String suffix,Collection<String> columnNames){
 		
-		return cassandraDAO.readAll(traceId, columnFamily, getBaseService().appendAdditionalField( rowKey,prefix, suffix),columnNames,0);
+		return cassandraDAO.readAll(traceId, columnFamily, getBaseService().generateCommaSeparatedStringToKeys( rowKey,prefix, suffix),columnNames,0);
 	}
 	
 	public OperationResult<Rows<String, String>> readAll(String traceId, String columnFamily,String prefix,String rowKey,Collection<String> suffix,Collection<String> columnNames){
 		
-		return cassandraDAO.readAll(traceId, columnFamily, getBaseService().appendAdditionalField( rowKey,prefix, suffix),columnNames,0);
+		return cassandraDAO.readAll(traceId, columnFamily, getBaseService().generateCommaSeparatedStringToKeys( rowKey,prefix, suffix),columnNames,0);
 	}
 	
 	public OperationResult<Rows<String, String>> getClassPageResouceUsage(String traceId, String columnFamily,String columnName,String value){
