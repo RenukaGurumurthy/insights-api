@@ -10,7 +10,6 @@ import java.util.Map;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.gooru.insights.api.models.EventObject;
-import org.gooru.insights.api.services.ExcelBuilderServiceImpl;
 import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
