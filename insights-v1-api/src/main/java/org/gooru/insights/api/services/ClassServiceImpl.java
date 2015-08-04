@@ -12,6 +12,7 @@ import java.util.Set;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpStatus;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.SessionAttributes;
 import org.gooru.insights.api.constants.ErrorCodes;
@@ -148,7 +149,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> unitDataMapAsList = new ArrayList<Map<String, Object>>();
 		Long classGoal = getClassGoal(traceId, classId);
-
 		List<Map<String, Object>> unitMetaDataAsList = getAssociatedItems(traceId, courseId, null, true, DataUtils.getResourceFields().keySet(), DataUtils.getResourceFields());
 		if (!unitMetaDataAsList.isEmpty()) {
 			for (Map<String, Object> unitMeta : unitMetaDataAsList) {
@@ -213,10 +213,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				unitDataMapAsList.add(unitDataAsMap);
 			}
 		} else {
-			Map<String, Object> messageAsMap = new HashMap<String, Object>();
-			messageAsMap.put(ApiConstants.STATUS_CODE, 400);
-			messageAsMap.put(ApiConstants.MESSAGE, ApiConstants.UNIT_NOT_FOUND);
-			responseParamDTO.setMessage(messageAsMap);
+			logger.info(ApiConstants.COURSE_PLAN_UNAVAILABLE,  courseId);
+			responseParamDTO.setStatusCode(HttpStatus.SC_NO_CONTENT);
 		}
 		responseParamDTO.setContent(unitDataMapAsList);
 		return responseParamDTO;
@@ -1088,23 +1086,25 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		OperationResult<ColumnList<String>> associatedItemList = getCassandraService().read(traceId, ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), rowKey);
 		List<Map<String, Object>> associatedItems = new ArrayList<Map<String, Object>>();
 		List<String> itemIds = new ArrayList<String>();
-		for (Column<String> column : associatedItemList.getResult()) {
-			Map<String, Object> itemDataMap = new HashMap<String, Object>();
-			itemDataMap.put(ApiConstants.SEQUENCE, column.getLongValue());
-			itemDataMap.put(ApiConstants.GOORUOID, column.getName());
-			itemIds.add(column.getName());
-			associatedItems.add(itemDataMap);
-		}
-		if (fetchMetaData) {
-			if (columnNames == null || columnNames.isEmpty()) {
-				columnNames = new ArrayList<String>();
-				columnNames.add(ApiConstants.TITLE);
-				columnNames.add(ApiConstants.GOORUOID);
-				columnNames.add(ApiConstants._GOORUOID);
-				columnNames.add(ApiConstants.RESOURCE_TYPE);
+		if (associatedItemList != null && !associatedItemList.getResult().isEmpty() && associatedItemList.getResult().size() > 0) {
+			for (Column<String> column : associatedItemList.getResult()) {
+				Map<String, Object> itemDataMap = new HashMap<String, Object>();
+				itemDataMap.put(ApiConstants.SEQUENCE, column.getLongValue());
+				itemDataMap.put(ApiConstants.GOORUOID, column.getName());
+				itemIds.add(column.getName());
+				associatedItems.add(itemDataMap);
 			}
-			List<Map<String, Object>> itemMetaData = getResourcesMetaData(traceId, itemIds, columnNames, type, aliasName);
-			associatedItems = getBaseService().innerJoin(itemMetaData, associatedItems, ApiConstants.GOORUOID);
+			if (fetchMetaData) {
+				if (columnNames == null || columnNames.isEmpty()) {
+					columnNames = new ArrayList<String>();
+					columnNames.add(ApiConstants.TITLE);
+					columnNames.add(ApiConstants.GOORUOID);
+					columnNames.add(ApiConstants._GOORUOID);
+					columnNames.add(ApiConstants.RESOURCE_TYPE);
+				}
+				List<Map<String, Object>> itemMetaData = getResourcesMetaData(traceId, itemIds, columnNames, type, aliasName);
+				associatedItems = getBaseService().innerJoin(itemMetaData, associatedItems, ApiConstants.GOORUOID);
+			}
 		}
 		return associatedItems;
 	}

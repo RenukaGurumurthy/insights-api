@@ -443,7 +443,7 @@ public class ApiConstants {
 	/**
 	 * Message constants
 	 */
-	public static final String UNIT_NOT_FOUND = "Units not found";
+	public static final String COURSE_PLAN_UNAVAILABLE = "Course Plan unavailable for CourseGooruOid : {} ";
 	public static final String MESSAGE = "message";
 
 }
