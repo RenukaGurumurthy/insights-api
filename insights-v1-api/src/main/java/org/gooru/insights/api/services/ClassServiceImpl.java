@@ -444,7 +444,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		List<Map<String, Object>> resultSet = new ArrayList<Map<String, Object>>();
 		if (sessions != null) {
 			ColumnList<String> sessionList = sessions.getResult();
-			ColumnList<String> sessionsInfo = getCassandraService().read(traceId, ColumnFamily.SESSION.getColumnFamily(), baseService.appendTilda(key, INFO)).getResult();
 			if (!sessionList.isEmpty()) {
 				ColumnList<String> sessionsInfo = getCassandraService().read(traceId, ColumnFamily.SESSION.getColumnFamily(), baseService.appendTilda(key, INFO)).getResult();
 				if (!fetchOpenSession) {
