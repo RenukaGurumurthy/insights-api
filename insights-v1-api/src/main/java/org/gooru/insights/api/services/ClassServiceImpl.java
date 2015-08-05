@@ -480,12 +480,15 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		if (sessions != null) {
 			ColumnList<String> sessionList = sessions.getResult();
 			if (!sessionList.isEmpty()) {
+				ColumnList<String> sessionsInfo = getCassandraService().read(traceId, ColumnFamily.SESSION.getColumnFamily(), baseService.appendTilda(key, INFO)).getResult();
 				if (!fetchOpenSession) {
 					for (Column<String> sessionColumn : sessionList) {
 						resultSet.add(generateSessionMap(sessionColumn.getName(), sessionColumn.getLongValue()));
+						if (sessionsInfo.getStringValue(baseService.appendTilda(sessionColumn.getName(), TYPE), null).equalsIgnoreCase(STOP)) {
+							resultSet.add(generateSessionMap(sessionColumn.getName(), sessionColumn.getLongValue()));
+						}
 					}
 				} else {
-					ColumnList<String> sessionsInfo = getCassandraService().read(traceId, ColumnFamily.SESSION.getColumnFamily(), baseService.appendTilda(key, INFO)).getResult();
 					for (Column<String> sessionColumn : sessionList) {
 						if (sessionsInfo.getStringValue(baseService.appendTilda(sessionColumn.getName(), TYPE), null).equalsIgnoreCase(START)) {
 							Map<String, Object> sessionInfoMap = generateSessionMap(sessionColumn.getName(), sessionColumn.getLongValue());
