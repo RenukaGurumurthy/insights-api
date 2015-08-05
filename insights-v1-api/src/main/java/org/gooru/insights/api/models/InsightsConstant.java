@@ -37,6 +37,8 @@ public interface InsightsConstant {
 	
 	String START = "start";
 	
+	String STOP = "stop";
+	
 	String INFO = "info";
 	
 	String NEW_QUERY = "new query:";
