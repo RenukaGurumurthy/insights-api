@@ -1506,11 +1506,11 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 							if (column.contains(item)) {
 								String[] columnMetaInfo = column.split(ApiConstants.TILDA);
 								String metricName = (columnMetaInfo.length > 1) ? columnMetaInfo[columnMetaInfo.length - 1] : columnMetaInfo[0];
-								if (DataUtils.getStringColumns().containsKey(metricName)) {
+								if (DataUtils.getStringColumns().containsKey(metricName) && !metricName.matches(ApiConstants.OPTIONS)) {
 									usageMap.put(DataUtils.getStringColumns().get(metricName), metricRow.getColumns().getStringValue(column.trim(), null));
-								} else if (metricName.matches(ApiConstants.OPTIONS_MATCH) && metricRow.getColumns().getColumnNames().contains(column.trim())) {
-									optionsAsMap.put(metricName, metricRow.getColumns().getLongValue(column.trim(), 0L));
-								} else if (DataUtils.getLongColumns().containsKey(metricName) && !metricName.matches(ApiConstants.OPTIONS_MATCH)) {
+								} else if (metricName.matches(ApiConstants.OPTIONS) && StringUtils.isNotBlank(metricRow.getColumns().getStringValue(column.trim(), null)) && !metricRow.getColumns().getStringValue(column.trim(), null).equalsIgnoreCase(ApiConstants.SKIPPED)) {
+									optionsAsMap.put(metricRow.getColumns().getStringValue(column.trim(), null), 0);
+								} else if (DataUtils.getLongColumns().containsKey(metricName)) {
 									usageMap.put(DataUtils.getLongColumns().get(metricName), metricRow.getColumns().getLongValue(column.trim(), 0L));
 								}
 							}	                                                
