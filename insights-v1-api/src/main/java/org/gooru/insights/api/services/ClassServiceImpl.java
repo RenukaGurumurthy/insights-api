@@ -820,7 +820,11 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			if (thumbnail.startsWith(ApiConstants._HTTP)) {
 				thumb = thumbnail;
 			} else {
-				thumb = getBaseService().appendForwardSlash(nfsPath, folder, thumbnail);
+				if (thumbnail.contains(folder)) {
+					thumb = getBaseService().appendForwardSlash(nfsPath, thumbnail);
+				} else {
+					thumb = getBaseService().appendForwardSlash(nfsPath, folder, thumbnail);
+				}
 			}
 			if (isSecure) {
 				thumb = thumb.replaceFirst(ApiConstants._HTTP, ApiConstants._HTTPS);
