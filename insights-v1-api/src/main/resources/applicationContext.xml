@@ -101,8 +101,8 @@
 
 	<bean id="redisConnectionFactory"
 		class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
-		<property name="port" value="${redis.server.port}" />
 		<property name="hostName" value="${redis.server.host}" />
+		 <property name="port" value="${redis.server.port}" />
 	</bean>
 	
 	<!-- Mailer configuration -->
@@ -152,4 +152,7 @@
 		</property>
 		<property name="ignoreUnresolvablePlaceholders" value="true" />
 	</bean>
+	
+	<bean id="requestTracer" class="org.gooru.insights.api.utils.RequestUtils" scope="request"/>
+	
 </beans>

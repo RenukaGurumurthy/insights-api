@@ -44,7 +44,7 @@ public class JobController extends BaseController {
 			throw new BadRequestException(ErrorMessages.E112);
 		}
 	
-		responseParamDTO = getJobService().getJobStatus(getTraceId(request),responseParamDTO, jobStatus);
+		responseParamDTO = getJobService().getJobStatus(responseParamDTO, jobStatus);
 
 		if (responseParamDTO != null && responseParamDTO.getMessage() != null && !responseParamDTO.getMessage().isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -66,7 +66,7 @@ public class JobController extends BaseController {
 		}	
 		JobStatus jobStatus = new JobStatus();
 		jobStatus.setQueue(jobName);
-		responseParamDTO = getJobService().getJobMonitorStatus(getTraceId(request),responseParamDTO,jobStatus);
+		responseParamDTO = getJobService().getJobMonitorStatus(responseParamDTO,jobStatus);
 		
 		if (format.equalsIgnoreCase(InsightsOperationConstants.SIMPLE_TEXT)) {
 			return getSimpleModel(String.valueOf(responseParamDTO.getContent().get(0).get("lagInSeconds")));

@@ -25,7 +25,6 @@ import org.gooru.insights.api.constants.ErrorMessages;
 import org.gooru.insights.api.models.RequestParamsDTO;
 import org.gooru.insights.api.spring.exception.BadRequestException;
 import org.gooru.insights.api.spring.exception.InsightsServerException;
-import org.gooru.insights.api.utils.DataUtils;
 import org.gooru.insights.api.utils.InsightsLogger;
 import org.gooru.insights.api.utils.JsonDeserializer;
 import org.json.JSONArray;
@@ -116,7 +115,7 @@ public class BaseServiceImpl implements BaseService {
 	}
 	
 
-	public static String getValue(String traceId, String key, JSONObject json) throws Exception {
+	public static String getValue(String key, JSONObject json) throws Exception {
 		try {
 			if (json.isNull(key)) {
 				return null;
@@ -196,7 +195,7 @@ public class BaseServiceImpl implements BaseService {
 	 * get input as OperationResult ColumnList
 	 * @return List of Map fields with corresponding data types values 
 	 */
-	public List<Map<String, Object>> getColumnValues(String traceId, OperationResult<ColumnList<String>> columnList) {
+	public List<Map<String, Object>> getColumnValues(OperationResult<ColumnList<String>> columnList) {
 		List<Map<String, Object>> resultSet = new ArrayList<Map<String, Object>>();
 		if (columnList != null && notNull(columnList.toString())) {
 			/** Collection get */
@@ -221,7 +220,7 @@ public class BaseServiceImpl implements BaseService {
 					dataSet.put(column.getName(), column.getStringValue());
 				}
 				}catch(Exception e){
-					InsightsLogger.error(traceId, e);
+					InsightsLogger.error(e);
 				}
 			}
 			resultSet.add(dataSet);
@@ -234,7 +233,7 @@ public class BaseServiceImpl implements BaseService {
 	 * get input as OperationResult ColumnList
 	 * @return Map fields with corresponding data types values 
 	 */
-	public Map<String, Object> getColumnValue(String traceId, OperationResult<ColumnList<String>> columnList) {
+	public Map<String, Object> getColumnValue(OperationResult<ColumnList<String>> columnList) {
 		Map<String, Object> dataSet = new HashMap<String, Object>();
 		if (columnList != null && notNull(columnList.toString())) {
 			for (Column<String> column : columnList.getResult()) {
@@ -257,21 +256,21 @@ public class BaseServiceImpl implements BaseService {
 					dataSet.put(column.getName(), column.getStringValue());
 				}
 				}catch(Exception e){
-					InsightsLogger.error(traceId, e);
+					InsightsLogger.error(e);
 				}
 			}
 		}
 		return dataSet;
 	}
 
-	public Map<String, Object> getLongValue(String traceId, OperationResult<ColumnList<String>> columnList) {
+	public Map<String, Object> getLongValue(OperationResult<ColumnList<String>> columnList) {
 		Map<String, Object> dataSet = new HashMap<String, Object>();
 		if (columnList != null && notNull(columnList.toString())) {
 			for (Column<String> column : columnList.getResult()) {
 				try{
 				dataSet.put(column.getName(), (notNull(String.valueOf(column.getLongValue()))) ? column.getLongValue() : 0);
 			}catch(Exception e){
-			InsightsLogger.error(traceId, e);	
+			InsightsLogger.error(e);	
 			}
 			}
 		}
@@ -288,7 +287,7 @@ public class BaseServiceImpl implements BaseService {
 		return dataSet;
 	}
 	
-	public Map<String, Object> getRowLongValue(String traceId, OperationResult<Rows<String, String>> rowList) {
+	public Map<String, Object> getRowLongValue(OperationResult<Rows<String, String>> rowList) {
 		Map<String, Object> resultSetMap = new LinkedHashMap<String, Object>();
 		if (rowList != null && !rowList.getResult().isEmpty()) {
 			Rows<String, String> row = rowList.getResult();
@@ -298,7 +297,7 @@ public class BaseServiceImpl implements BaseService {
 						try{
 						resultSetMap.put(row.getRowByIndex(i).getKey(),column.getLongValue());
 						}catch(Exception e){
-							InsightsLogger.error(traceId, e);
+							InsightsLogger.error(e);
 						}
 					}
 				}
@@ -307,7 +306,7 @@ public class BaseServiceImpl implements BaseService {
 		return resultSetMap;
 	}
 	
-	public Map<String, Object> getRowLongValues(String traceId, OperationResult<Rows<String, String>> rowList) {
+	public Map<String, Object> getRowLongValues(OperationResult<Rows<String, String>> rowList) {
 		Map<String, Object> resultSetMap = new LinkedHashMap<String, Object>();
 		if (rowList != null && !rowList.getResult().isEmpty()) {
 			Rows<String, String> row = rowList.getResult();
@@ -318,7 +317,7 @@ public class BaseServiceImpl implements BaseService {
 						try{
 						columnSet.put(column.getName(), column.getLongValue());
 						}catch(Exception e){
-							InsightsLogger.error(traceId, e);
+							InsightsLogger.error(e);
 						}
 					}
 					resultSetMap.put(row.getRowByIndex(i).getKey(),columnSet);
@@ -327,7 +326,7 @@ public class BaseServiceImpl implements BaseService {
 		}
 		return resultSetMap;
 	}
-	public Map<String, Object> getColumnValues(String traceId, OperationResult<ColumnList<String>> columnList, Map<String, Object> key) {
+	public Map<String, Object> getColumnValues(OperationResult<ColumnList<String>> columnList, Map<String, Object> key) {
 		Map<String, Object> dataSet = new HashMap<String, Object>();
 		if (notNull(columnList.toString())) {
 			for (Column<String> column : columnList.getResult()) {
@@ -348,7 +347,7 @@ public class BaseServiceImpl implements BaseService {
 					dataSet.put(column.getName(), column.getStringValue());
 				}
 				}catch(Exception e){
-					InsightsLogger.error(traceId, e);
+					InsightsLogger.error(e);
 				}
 			}
 
@@ -364,7 +363,7 @@ public class BaseServiceImpl implements BaseService {
 	 * get input as OperationResult Rows
 	 * @return List of Map fields with corresponding data types values 
 	 */
-		public List<Map<String, Object>> getRowsColumnValues(String traceId, OperationResult<Rows<String, String>> rowList) {
+		public List<Map<String, Object>> getRowsColumnValues(OperationResult<Rows<String, String>> rowList) {
 			List<Map<String, Object>> resultSet = new ArrayList<Map<String, Object>>();
 		if (rowList != null && !rowList.getResult().isEmpty()) {
 			Rows<String, String> row = rowList.getResult();
@@ -411,7 +410,7 @@ public class BaseServiceImpl implements BaseService {
                              dataSet.put(column.getName(), column.getStringValue());
 						}
 					}catch(Exception e){
-						InsightsLogger.error(traceId, e);
+						InsightsLogger.error(e);
 					}
 					}
 					if(!dataSet.isEmpty()){
@@ -1109,7 +1108,7 @@ public class BaseServiceImpl implements BaseService {
 		return resultList;
 	}
 
-	public List<Map<String, Object>> buildJSON(String traceId, List<Map<String, Object>> resultSet,Collection<String> additionParameter, Map<String, String> surName,
+	public List<Map<String, Object>> buildJSON(List<Map<String, Object>> resultSet,Collection<String> additionParameter, Map<String, String> surName,
 			boolean checkSession) {
 		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
 		for (Map<String, Object> map : resultSet) {
@@ -1167,7 +1166,7 @@ public class BaseServiceImpl implements BaseService {
 		return "F";
 	}
 
-	public List<Map<String, Object>> changeDataType(String traceId, Map<String, String> changableDataType, List<Map<String, Object>> requestList) {
+	public List<Map<String, Object>> changeDataType(Map<String, String> changableDataType, List<Map<String, Object>> requestList) {
 		List<Map<String, Object>> changedList = new ArrayList<Map<String, Object>>();
 
 		for (Map<String, Object> map : requestList) {
@@ -1197,7 +1196,7 @@ public class BaseServiceImpl implements BaseService {
 									try{
 										responseMap.put(checkableDataType.getKey(), Long.valueOf((map.get(checkableDataType.getKey()).toString())));
 									} catch(Exception e) {
-										InsightsLogger.error(traceId,"changeDataType exception", e);
+										InsightsLogger.error("changeDataType exception", e);
 									}							
 									}
 						} else if ("INTEGER".equalsIgnoreCase(String.valueOf(checkableDataType.getValue()))) {
@@ -1210,7 +1209,7 @@ public class BaseServiceImpl implements BaseService {
 							responseMap.put(checkableDataType.getKey(), map.get(checkableDataType.getKey()));
 						}
 					} catch (Exception e) {
-						InsightsLogger.error(traceId,"changeDataType exception", e);
+						InsightsLogger.error("changeDataType exception", e);
 						responseMap.put(checkableDataType.getKey(), map.get(checkableDataType.getKey()));
 					}
 				}
@@ -1296,7 +1295,7 @@ public class BaseServiceImpl implements BaseService {
 			return returnDate;
 	}
 
-public JSONObject mergeJSONObject(String traceId, String raw,String custom,String arrayObjectIdentityfier){
+public JSONObject mergeJSONObject(String raw,String custom,String arrayObjectIdentityfier){
 	try {
 	JSONObject  rawMap = new JSONObject(raw);
 	JSONObject  customMap = new JSONObject(custom);
@@ -1345,23 +1344,23 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 		}
 		
 		}catch(Exception e){
-			InsightsLogger.error(traceId,"mergeJSONObject exception", e);
+			InsightsLogger.error("mergeJSONObject exception", e);
 			return null;
 		}
 	}
 	return rawMap;
 	} catch (Exception e) { 
-		InsightsLogger.error(traceId,"mergeJSONObject exception", e);
+		InsightsLogger.error("mergeJSONObject exception", e);
 		return null;
 	}
 }
-    public Map<String,String> getDisplayKey(String traceId, String dashboardKeys){
+    public Map<String,String> getDisplayKey(String dashboardKeys){
         Map<String,String> returnDate = new LinkedHashMap<String, String>();
         SimpleDateFormat dateFormatter = null;
         if(dashboardKeys != null){
                 for(String key : dashboardKeys.split(",")){
                         String rowKeys = "";
-                        ColumnList<String> defination = cassandraService.getDashBoardKeys(traceId, key);
+                        ColumnList<String> defination = cassandraService.getDashBoardKeys(key);
                         	String[] parts = key.split("~");
 	            	        for(int i = 0 ; i < parts.length ; i++){
 	            	        	if(parts[i].startsWith("D:")){
@@ -1382,7 +1381,7 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
         return returnDate;
     }
     
-    public Map<String,String> generateDiffYMWDValues(String traceId, String dashboardKeys) throws ParseException{
+    public Map<String,String> generateDiffYMWDValues(String dashboardKeys) throws ParseException{
 		Map<String,String> returnDate = new LinkedHashMap<String, String>();
 		if(dashboardKeys != null){
 			for(String key : dashboardKeys.split(",")){
@@ -1485,7 +1484,7 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 		return getData;
 	}
 	
-	   public String listMapToJsonString(String traceId,List<Map<String, Object>> list){       
+	   public String listMapToJsonString(List<Map<String, Object>> list){       
 	        JSONObject jsonObj=new JSONObject();
 	        for (Map<String, Object> map : list) {
 	            JSONObject json_obj=new JSONObject();
@@ -1495,13 +1494,13 @@ public JSONObject mergeJSONObject(String traceId, String raw,String custom,Strin
 	                try {
 	                    json_obj.put(key,value);
 	                } catch (JSONException e) {
-	                	InsightsLogger.error(traceId,"JSONException in listMapToJsonString", e);
+	                	InsightsLogger.error("JSONException in listMapToJsonString", e);
 	                }                           
 	            }
 	            try {
 					jsonObj.append("metrics", json_obj);
 				} catch (JSONException e) {
-					InsightsLogger.error(traceId,"JSONException in listMapToJsonString", e);
+					InsightsLogger.error("JSONException in listMapToJsonString", e);
 				}
 	        }
 	        return jsonObj.toString();

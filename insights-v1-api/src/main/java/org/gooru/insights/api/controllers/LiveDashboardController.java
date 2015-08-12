@@ -25,7 +25,7 @@ public class LiveDashboardController extends BaseController {
 			@RequestParam(value = "data", required = true) String data, HttpServletResponse response) throws Exception {
 		
 		response = setAllowOrigin(response);
-		return getModel(getLiveDashboardService().addSettings(getTraceId(request), cfName, keyName, data));
+		return getModel(getLiveDashboardService().addSettings(cfName, keyName, data));
 	}
         
 	@RequestMapping(value = "/add/counter/settings", method = { RequestMethod.POST })
@@ -33,7 +33,7 @@ public class LiveDashboardController extends BaseController {
 			@RequestParam(value = "keyName", required = true) String keyName, @RequestParam(value = "data", required = true) String data, HttpServletResponse response) throws Exception {
 		
 		response = setAllowOrigin(response);
-		return getModel(getLiveDashboardService().addCounterSettings(getTraceId(request), cfName, keyName, data));
+		return getModel(getLiveDashboardService().addCounterSettings(cfName, keyName, data));
 	}
     
 	@RequestMapping(value = "/view/settings", method = { RequestMethod.GET })
@@ -41,7 +41,7 @@ public class LiveDashboardController extends BaseController {
 			HttpServletResponse response) throws Exception {
 
 		response = setAllowOrigin(response);
-		return getModel(getLiveDashboardService().viewSettings(getTraceId(request), cfName, keyName));
+		return getModel(getLiveDashboardService().viewSettings(cfName, keyName));
 	}
     
     private LiveDashboardService getLiveDashboardService() {

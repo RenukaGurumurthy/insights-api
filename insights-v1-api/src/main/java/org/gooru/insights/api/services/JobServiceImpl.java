@@ -54,7 +54,7 @@ public class JobServiceImpl implements JobService {
 	}
 	
 	@SuppressWarnings("unused")
-	public ResponseParamDTO<Map<String, Object>> getJobStatus(String traceId,ResponseParamDTO<Map<String,Object>> responseParamDTO,JobStatus jobStatus) {
+	public ResponseParamDTO<Map<String, Object>> getJobStatus(ResponseParamDTO<Map<String,Object>> responseParamDTO,JobStatus jobStatus) {
 		List<Map<String,Object>> jobList = new ArrayList<Map<String,Object>>();
 		Map<String,Object> errorMap = new HashMap<String,Object>();
 		if(jobStatus != null) {
@@ -62,7 +62,7 @@ public class JobServiceImpl implements JobService {
 				for (String key : monitoringKeys.keySet()) {
 					Map<String,Object> mapData = new HashMap<String,Object>();
 					mapData.put("queue", key);
-					mapData.put("lagInSeconds", getSingleJobStatus(traceId,key));
+					mapData.put("lagInSeconds", getSingleJobStatus(key));
 					jobList.add(mapData);
 				}
 			} else if(!jobStatus.getQueue().equalsIgnoreCase(InsightsOperationConstants._ALL)){
@@ -70,7 +70,7 @@ public class JobServiceImpl implements JobService {
 					if(monitoringKeys.containsKey(queueName)) {
 						Map<String,Object> mapData = new HashMap<String,Object>();
 						mapData.put("queue", queueName);
-						mapData.put("lagInSeconds", getSingleJobStatus(traceId,queueName));
+						mapData.put("lagInSeconds", getSingleJobStatus(queueName));
 						jobList.add(mapData);
 					} else if(!monitoringKeys.containsKey(queueName)) {
 						errorMap.put(queueName, ErrorMessages.E113);
@@ -89,12 +89,12 @@ public class JobServiceImpl implements JobService {
 		return responseParamDTO;
 	}
 	
-	private String getSingleJobStatus(String traceId,String queue) {
+	private String getSingleJobStatus(String queue) {
 		String lagTime = null;
 		try {
-			ColumnList<String> settingsMap = cassandraService.read(traceId, ColumnFamily.CONFIG_SETTING.getColumnFamily(), monitoringKeys.get(queue)).getResult();
+			ColumnList<String> settingsMap = cassandraService.read(ColumnFamily.CONFIG_SETTING.getColumnFamily(), monitoringKeys.get(queue)).getResult();
 			Date lastRunTime = minFormatter.parse(settingsMap.getColumnByName(InsightsOperationConstants.CONSTANT_VALUE).getStringValue());
-			lagTime = DataUtils.getTimeDifference(traceId, lastRunTime);
+			lagTime = DataUtils.getTimeDifference(lastRunTime);
 		} catch (Exception e2) {
 			logger.error("Exception : "+e2);
 			throw new InternalError(e2.getMessage());
@@ -103,11 +103,11 @@ public class JobServiceImpl implements JobService {
 	}
 
 	@Override
-	public ResponseParamDTO<Map<String, Object>> getJobMonitorStatus(String traceId,ResponseParamDTO<Map<String, Object>> responseParamDTO,JobStatus jobStatus) {
+	public ResponseParamDTO<Map<String, Object>> getJobMonitorStatus(ResponseParamDTO<Map<String, Object>> responseParamDTO,JobStatus jobStatus) {
 		List<Map<String,Object>> jobList = new ArrayList<Map<String,Object>>();
 		Map<String,Object> errorMap = new HashMap<String,Object>();
 		if(jobStatus != null) {
-			Rows<String, String> runningJobs = getCassandraService().read(traceId, ColumnFamily.JOB_TRACKER.getColumnFamily(), "running_status", 1).getResult();
+			Rows<String, String> runningJobs = getCassandraService().read(ColumnFamily.JOB_TRACKER.getColumnFamily(), "running_status", 1).getResult();
 			Map<String,String> jobDetails = new HashMap<String,String>();
 			for(int i=0;i<runningJobs.size();i++) {
 				jobDetails.put(runningJobs.getRowByIndex(i).getKey(), runningJobs.getRowByIndex(i).getColumns().getColumnByName("modified_on").getStringValue());
@@ -118,7 +118,7 @@ public class JobServiceImpl implements JobService {
 				for(Map.Entry<String,String> data : jobDetails.entrySet()) {
 					Map<String,Object> mapData = new HashMap<String,Object>();
 					mapData.put("jobName", data.getKey());
-					mapData.put("lagInSeconds", getMonitorJobStatus(traceId,data.getValue()));
+					mapData.put("lagInSeconds", getMonitorJobStatus(data.getValue()));
 					jobList.add(mapData);
 				}
 			} else if(!jobStatus.getQueue().equalsIgnoreCase(InsightsOperationConstants._ALL)) {
@@ -126,7 +126,7 @@ public class JobServiceImpl implements JobService {
 					if(jobDetails.containsKey(queueName)) {
 						Map<String,Object> mapData = new HashMap<String,Object>();						
 						mapData.put("jobName", queueName);
-						mapData.put("lagInSeconds", getMonitorJobStatus(traceId,jobDetails.get(queueName)));
+						mapData.put("lagInSeconds", getMonitorJobStatus(jobDetails.get(queueName)));
 						jobList.add(mapData);
 					} else if(!jobDetails.containsKey(queueName)) {
 						errorMap.put(queueName, ErrorMessages.E113);
@@ -145,11 +145,11 @@ public class JobServiceImpl implements JobService {
 		return responseParamDTO;
 	}	
 	
-	public String getMonitorJobStatus(String traceId,String lastModified) {
+	public String getMonitorJobStatus(String lastModified) {
 		String lagTime = null;
 		try {
 			Date lastRunTime = dateToMinFormatter.parse(lastModified);
-			lagTime = DataUtils.getTimeDifference(traceId,lastRunTime);
+			lagTime = DataUtils.getTimeDifference(lastRunTime);
 		} catch (Exception e2) {
 			logger.error("Exception : "+e2);
 			throw new InternalError(e2.getMessage());

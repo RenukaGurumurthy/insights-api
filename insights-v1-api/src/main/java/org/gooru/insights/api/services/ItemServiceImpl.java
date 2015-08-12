@@ -38,7 +38,7 @@ public class ItemServiceImpl implements ItemService,InsightsConstant{
 	@Autowired
 	private SelectParamsService selectParamsService;
 	
-	public ResponseParamDTO<Map<String, Object>> getItemDetail(String traceId, String fields, String itemIds, String startDate, String endDate, String format, String dateLevel, String granularity) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getItemDetail(String fields, String itemIds, String startDate, String endDate, String format, String dateLevel, String granularity) throws Exception {
 
 		try {
 			fields += ",key";
@@ -63,7 +63,7 @@ public class ItemServiceImpl implements ItemService,InsightsConstant{
 					}
 				}
 			}
-			OperationResult<Rows<String, String>> liveDashboardResult = cassandraService.readAll(traceId, ColumnFamily.LIVE_DASHBOARD.getColumnFamily(), keys,
+			OperationResult<Rows<String, String>> liveDashboardResult = cassandraService.readAll(ColumnFamily.LIVE_DASHBOARD.getColumnFamily(), keys,
 					new ArrayList<String>());
 			List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
 			for (Row<String, String> row : liveDashboardResult.getResult()) {
@@ -86,7 +86,7 @@ public class ItemServiceImpl implements ItemService,InsightsConstant{
 				}
 				dataList.add(dataMap);
 			}
-			OperationResult<Rows<String, String>> rawDataResult = cassandraService.readAll(traceId, ColumnFamily.RESOURCE.getColumnFamily(), itemKeys, new ArrayList<String>());
+			OperationResult<Rows<String, String>> rawDataResult = cassandraService.readAll(ColumnFamily.RESOURCE.getColumnFamily(), itemKeys, new ArrayList<String>());
 			List<Map<String, Object>> rawList = new ArrayList<Map<String, Object>>();
 			for (Row<String, String> row : rawDataResult.getResult()) {
 				Map<String, Object> dataMap = new HashMap<String, Object>();
@@ -199,12 +199,12 @@ public class ItemServiceImpl implements ItemService,InsightsConstant{
 		return resultList;
 	}
 
-	public ResponseParamDTO<Map<String, Object>> getMetadataDetails(String traceId) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getMetadataDetails() throws Exception {
 
 		try{
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		long totalCount = getCassandraService().read(traceId, ColumnFamily.CUSTOM_FIELDS.getColumnFamily(), "dataCount").getResult().getColumnByIndex(0).getLongValue();
-		ColumnList<String> metadataCount = getCassandraService().read(traceId, ColumnFamily.CUSTOM_FIELDS.getColumnFamily(), "metadata").getResult();
+		long totalCount = getCassandraService().read(ColumnFamily.CUSTOM_FIELDS.getColumnFamily(), "dataCount").getResult().getColumnByIndex(0).getLongValue();
+		ColumnList<String> metadataCount = getCassandraService().read(ColumnFamily.CUSTOM_FIELDS.getColumnFamily(), "metadata").getResult();
 		List<Map<String, Object>> metadataList = new ArrayList<Map<String, Object>>();
 		long calculatedPercentage = 0L;
 		for (int i = 0; i < metadataCount.size(); i++) {

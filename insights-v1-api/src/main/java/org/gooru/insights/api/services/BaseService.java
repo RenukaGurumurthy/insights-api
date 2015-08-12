@@ -22,23 +22,23 @@ public interface BaseService {
 	
 	JSONObject validateJSON(String data) throws Exception;
 	
-	List<Map<String,Object>> changeDataType(String traceId, Map<String,String> changableDataType,List<Map<String,Object>> requestList);
+	List<Map<String,Object>> changeDataType(Map<String,String> changableDataType,List<Map<String,Object>> requestList);
 	
 	RequestParamsDTO buildRequestParameters(String data) throws Exception;
 	
-	List<Map<String,Object>> getColumnValues(String traceId, OperationResult<ColumnList<String>> columnList);
+	List<Map<String,Object>> getColumnValues(OperationResult<ColumnList<String>> columnList);
 	
-	Map<String,Object> getColumnValue(String traceId, OperationResult<ColumnList<String>> columnList);
+	Map<String,Object> getColumnValue(OperationResult<ColumnList<String>> columnList);
 	
-	Map<String,Object> getLongValue(String traceId, OperationResult<ColumnList<String>> columnList);
+	Map<String,Object> getLongValue(OperationResult<ColumnList<String>> columnList);
 	
-	Map<String, Object> getRowLongValue(String traceId, OperationResult<Rows<String, String>> rowList);
+	Map<String, Object> getRowLongValue(OperationResult<Rows<String, String>> rowList);
 	
-	Map<String, Object> getRowLongValues(String traceId, OperationResult<Rows<String, String>> rowList);
+	Map<String, Object> getRowLongValues(OperationResult<Rows<String, String>> rowList);
 	
 	Map<String,String> getStringValue(OperationResult<ColumnList<String>> columnList);
 	
-	List<Map<String,Object>> getRowsColumnValues(String traceId, OperationResult<Rows<String, String>> rowList);
+	List<Map<String,Object>> getRowsColumnValues(OperationResult<Rows<String, String>> rowList);
 	
 	List<Map<String,Object>> getData(List<Map<String,Object>> requestData,String coreKey);
 	
@@ -62,11 +62,11 @@ public interface BaseService {
 	
 	List<Map<String,Object>> properName(List<Map<String,Object>> requestList,Map<String,String> columnNames);
 	
-	List<Map<String,Object>> buildJSON(String traceId, List<Map<String,Object>> resultSet,Collection<String> additionParameter,Map<String,String> surName,boolean checkSession);
+	List<Map<String,Object>> buildJSON(List<Map<String,Object>> resultSet,Collection<String> additionParameter,Map<String,String> surName,boolean checkSession);
 
 	List<Map<String,Object>> RandomJoin(List<Map<String,Object>> record1,List<Map<String,Object>> record2);
 
-	Map<String,Object> getColumnValues(String traceId, OperationResult<ColumnList<String>> columnList,Map<String,Object> key);
+	Map<String,Object> getColumnValues(OperationResult<ColumnList<String>> columnList,Map<String,Object> key);
 
 	List<Map<String,Object>> getUserData(List<Map<String,Object>> requestData,String coreKey,Map<String,String> selectValue,String sortBy,String sortOrder,Integer limit);
 
@@ -102,19 +102,19 @@ public interface BaseService {
 	
 	String convertListToString(Collection<String> keyList);
 	
-	Map<String,String> getDisplayKey(String traceId, String dashboardKeys);	
+	Map<String,String> getDisplayKey(String dashboardKeys);	
 	
 	String generateTimeConversion(long mseconds);
 
-	Map<String,String> generateDiffYMWDValues(String traceId, String dashboardKeys) throws ParseException;
+	Map<String,String> generateDiffYMWDValues(String dashboardKeys) throws ParseException;
 	
-	String listMapToJsonString(String traceId,List<Map<String, Object>> list);
+	String listMapToJsonString(List<Map<String, Object>> list);
 	
 	boolean notNull(Map<?,?> request);
 
 	Map<String,Object> generateCurrentData(String defaultKeys,List<String> currentData) throws ParseException;
 	
-	JSONObject mergeJSONObject(String traceId, String raw,String custom,String arrayObjectIdentityfier);
+	JSONObject mergeJSONObject(String raw,String custom,String arrayObjectIdentityfier);
 	
 	List<Map<String,Object>> formatRecord(List<Map<String,Object>> rawData,Map<String,Object> injuctableRecord,String formatKey,String id);
 	

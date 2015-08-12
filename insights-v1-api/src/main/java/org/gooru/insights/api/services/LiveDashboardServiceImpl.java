@@ -27,7 +27,7 @@ public class LiveDashboardServiceImpl implements LiveDashboardService {
 	@Autowired
 	private CassandraService cassandraService;
 	
-	public ResponseParamDTO<Map<String, Object>> addSettings(String traceId, String cfName, String keyName, String data) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> addSettings(String cfName, String keyName, String data) throws Exception {
 		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		JSONObject jsonData = getBaseService().validateJSON(data);
@@ -35,14 +35,14 @@ public class LiveDashboardServiceImpl implements LiveDashboardService {
 		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
 		Map<String, Object> m = new JsonDeserializer().deserializeTypeRef(jsonData.toString(), new TypeReference<Map<String, Object>>() {
 		});
-		getCassandraService().addRowKeyValues(traceId, cfName, keyName, m);
+		getCassandraService().addRowKeyValues(cfName, keyName, m);
 		resultMap.put("status", "Successfully added!!");
 		resultList.add(resultMap);
 		responseParamDTO.setContent(resultList);
 		return responseParamDTO;
 	}
 	
-	public ResponseParamDTO<Map<String, Object>> addCounterSettings(String traceId, String cfName, String keyName, String data) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> addCounterSettings(String cfName, String keyName, String data) throws Exception {
 
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -54,19 +54,19 @@ public class LiveDashboardServiceImpl implements LiveDashboardService {
 
 		Map<String, Object> m = new JsonDeserializer().deserializeTypeRef(dataObj.toString(), new TypeReference<Map<String, Object>>() {
 		});
-		getCassandraService().addCounterRowKeyValues(traceId, cfName, keyName, m);
+		getCassandraService().addCounterRowKeyValues(cfName, keyName, m);
 		resultMap.put("status", "Successfully added.");
 		resultList.add(resultMap);
 		responseParamDTO.setContent(resultList);
 		return responseParamDTO;
 	}
 	
-	public ResponseParamDTO<Map<String, Object>> viewSettings(String traceId, String cfName, String keyName) {
+	public ResponseParamDTO<Map<String, Object>> viewSettings(String cfName, String keyName) {
 		
 		try {
 			ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 			List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
-			OperationResult<ColumnList<String>> settingsMap = getCassandraService().read(traceId, cfName, keyName);
+			OperationResult<ColumnList<String>> settingsMap = getCassandraService().read(cfName, keyName);
 			for (Column<String> detail : settingsMap.getResult()) {
 				Map<String, Object> resultMap = new HashMap<String, Object>();
 				resultMap.put(detail.getName(), detail.getStringValue());

@@ -20,77 +20,77 @@ public class CassandraServiceImpl implements CassandraService{
 	@Autowired
 	private CassandraDAO cassandraDAO;
 
-	public OperationResult<ColumnList<String>> read(String traceId, String columnFamilyName, String key) {
-		return cassandraDAO.read(traceId, columnFamilyName, key);
+	public OperationResult<ColumnList<String>> read(String columnFamilyName, String key) {
+		return cassandraDAO.read(columnFamilyName, key);
 	}
 
-	public OperationResult<Rows<String, String>> read(String traceId, String columnFamilyName, Collection<String> key) {
-		return cassandraDAO.read(traceId, columnFamilyName, key);
+	public OperationResult<Rows<String, String>> read(String columnFamilyName, Collection<String> key) {
+		return cassandraDAO.read(columnFamilyName, key);
 	}
 	
-	public OperationResult<ColumnList<String>> read(String traceId, String columnFamilyName, String key, Collection<String> columnList) {
-		return cassandraDAO.read(traceId,columnFamilyName, key, columnList);
+	public OperationResult<ColumnList<String>> read(String columnFamilyName, String key, Collection<String> columnList) {
+		return cassandraDAO.read(columnFamilyName, key, columnList);
 	}
 
-	public OperationResult<Rows<String, String>> readAll(String traceId, String columnFamilyName, String columnName) {
-		return cassandraDAO.readAll(traceId, columnFamilyName, columnName,0);
+	public OperationResult<Rows<String, String>> readAll(String columnFamilyName, String columnName) {
+		return cassandraDAO.readAll(columnFamilyName, columnName,0);
 	}
 	
-	public OperationResult<Rows<String, String>> read(String traceId, String columnFamilyName, String columnName, String columnValue,Collection<String> columnList) {
-		return cassandraDAO.read(traceId, columnFamilyName, columnName, columnValue,columnList);
+	public OperationResult<Rows<String, String>> read(String columnFamilyName, String columnName, String columnValue,Collection<String> columnList) {
+		return cassandraDAO.read(columnFamilyName, columnName, columnValue,columnList);
 	}
 	
-	public OperationResult<Rows<String, String>> read(String traceId, String columnFamilyName, String columnName, String columnValue) {
-		return cassandraDAO.read(traceId, columnFamilyName, columnName, columnValue,0);
+	public OperationResult<Rows<String, String>> read(String columnFamilyName, String columnName, String columnValue) {
+		return cassandraDAO.read(columnFamilyName, columnName, columnValue,0);
 	}
 
-	public OperationResult<Rows<String, String>> read(String traceId, String columnFamilyName, String columnName, int columnValue) {
-		return cassandraDAO.read(traceId, columnFamilyName, columnName, columnValue,0);
+	public OperationResult<Rows<String, String>> read(String columnFamilyName, String columnName, int columnValue) {
+		return cassandraDAO.read(columnFamilyName, columnName, columnValue,0);
 	}
 	
-	public int getRowCount(String traceId, String columnFamilyName, Map<String,Object> whereCondition,Collection<String> columnList){
-		return cassandraDAO.getRowCount(traceId, columnFamilyName,whereCondition, columnList,0);
+	public int getRowCount(String columnFamilyName, Map<String,Object> whereCondition,Collection<String> columnList){
+		return cassandraDAO.getRowCount(columnFamilyName,whereCondition, columnList,0);
 	}
 	
-	public int getColumnCount(String traceId, String columnFamilyName, String key){
-		return cassandraDAO.getColumnCount(traceId, columnFamilyName, key);
+	public int getColumnCount(String columnFamilyName, String key){
+		return cassandraDAO.getColumnCount(columnFamilyName, key);
 	}
 	
-	public OperationResult<ColumnList<String>> getClassPageUsage(String traceId, String columnFamily,String prefix,String rowKey,String suffix,Collection<String> columnNames){
+	public OperationResult<ColumnList<String>> getClassPageUsage(String columnFamily,String prefix,String rowKey,String suffix,Collection<String> columnNames){
 	
-		return cassandraDAO.read(traceId, columnFamily, buildKey(prefix, rowKey, suffix),columnNames);
+		return cassandraDAO.read(columnFamily, buildKey(prefix, rowKey, suffix),columnNames);
 	}
 
-	public OperationResult<Rows<String, String>> readAll(String traceId, String columnFamily,String prefix,String rowKey,String suffix,Collection<String> columnNames){
+	public OperationResult<Rows<String, String>> readAll(String columnFamily,String prefix,String rowKey,String suffix,Collection<String> columnNames){
 		
-		return cassandraDAO.readAll(traceId, columnFamily, getBaseService().generateCommaSeparatedStringToKeys( rowKey,prefix, suffix),columnNames,0);
+		return cassandraDAO.readAll(columnFamily, getBaseService().generateCommaSeparatedStringToKeys( rowKey,prefix, suffix),columnNames,0);
 	}
 	
-	public OperationResult<Rows<String, String>> readAll(String traceId, String columnFamily,String prefix,String rowKey,Collection<String> suffix,Collection<String> columnNames){
+	public OperationResult<Rows<String, String>> readAll(String columnFamily,String prefix,String rowKey,Collection<String> suffix,Collection<String> columnNames){
 		
-		return cassandraDAO.readAll(traceId, columnFamily, getBaseService().generateCommaSeparatedStringToKeys( rowKey,prefix, suffix),columnNames,0);
+		return cassandraDAO.readAll(columnFamily, getBaseService().generateCommaSeparatedStringToKeys( rowKey,prefix, suffix),columnNames,0);
 	}
 	
-	public OperationResult<Rows<String, String>> getClassPageResouceUsage(String traceId, String columnFamily,String columnName,String value){
+	public OperationResult<Rows<String, String>> getClassPageResouceUsage(String columnFamily,String columnName,String value){
 		
-		return cassandraDAO.read(traceId, columnFamily, columnName,value,0);
+		return cassandraDAO.read(columnFamily, columnName,value,0);
 	}
 	
-	public OperationResult<Rows<String, String>> readAll(String traceId, String columnFamily,Map<String,Object> whereColumn,Collection<String> columns){
+	public OperationResult<Rows<String, String>> readAll(String columnFamily,Map<String,Object> whereColumn,Collection<String> columns){
 		
-		return cassandraDAO.readAll(traceId, columnFamily, whereColumn,columns,0);
-
-	}
-	
-	public OperationResult<Rows<String, String>> readAll(String traceId, String columnFamily,Collection<String> rowKey,Collection<String> columnNames){
-		
-		return cassandraDAO.readAll(traceId, columnFamily, rowKey,columnNames,0);
+		return cassandraDAO.readAll(columnFamily, whereColumn,columns,0);
 
 	}
 	
-	public boolean putStringValue(String traceId, String columnFamily,String key,Map<String,String> columns){
+	public OperationResult<Rows<String, String>> readAll(String columnFamily,Collection<String> rowKey,Collection<String> columnNames){
 		
-		return cassandraDAO.putStringValue(traceId, columnFamily,key, columns);
+		return cassandraDAO.readAll(columnFamily, rowKey,columnNames,0);
+
+	}
+	
+	public boolean putStringValue(String columnFamily,String key,Map<String,String> columns){
+		
+		return cassandraDAO.putStringValue(columnFamily,key, columns);
 
 	}
 
@@ -120,41 +120,41 @@ public class CassandraServiceImpl implements CassandraService{
 	}
 
 	@Override
-	public OperationResult<Rows<String, String>> readAll(String traceId, String columnFamily, String whereColumn, String columnValue, Collection<String> columns) {
-		return cassandraDAO.readAll(traceId, columnFamily, whereColumn,columnValue,columns,0);
+	public OperationResult<Rows<String, String>> readAll(String columnFamily, String whereColumn, String columnValue, Collection<String> columns) {
+		return cassandraDAO.readAll(columnFamily, whereColumn,columnValue,columns,0);
 
 	}
 
-	public void addRowKeyValues(String traceId, String cfName,String keyName,Map<String,Object> data){
-		cassandraDAO.addRowKeyValues(traceId, cfName,keyName,data);
+	public void addRowKeyValues(String cfName,String keyName,Map<String,Object> data){
+		cassandraDAO.addRowKeyValues(cfName,keyName,data);
 	}
 	
-	public void addCounterRowKeyValues(String traceId, String cfName,String keyName,Map<String,Object> data) {
-		cassandraDAO.incrementCounterValues(traceId, cfName,keyName,data);
+	public void addCounterRowKeyValues(String cfName,String keyName,Map<String,Object> data) {
+		cassandraDAO.incrementCounterValues(cfName,keyName,data);
 	}
 	
-	public void saveProfileSettings(String traceId, String cfName,String keyName,String columnName,String data) {
-		cassandraDAO.saveProfileSettings(traceId, cfName,keyName,columnName,data);
+	public void saveProfileSettings(String cfName,String keyName,String columnName,String data) {
+		cassandraDAO.saveProfileSettings(cfName,keyName,columnName,data);
 	}
 	
-	public void updateDefaultProfileSettings(String traceId, String cfName, String keyName,String column, String value) {
-		cassandraDAO.saveDefaultProfileSettings(traceId, cfName,keyName,column,value);
+	public void updateDefaultProfileSettings(String cfName, String keyName,String column, String value) {
+		cassandraDAO.saveDefaultProfileSettings(cfName,keyName,column,value);
 	}
 	
-	public void deleteRowKey(String traceId, String cfName,String keyName) {
-		cassandraDAO.deleteRowKey(traceId, cfName,keyName);
+	public void deleteRowKey(String cfName,String keyName) {
+		cassandraDAO.deleteRowKey(cfName,keyName);
 	}
 	
-	public void deleteColumnInRow(String traceId, String cfName,String keyName,String columnName) {
-		cassandraDAO.deleteColumnInRow(traceId, cfName, keyName,columnName);
+	public void deleteColumnInRow(String cfName,String keyName,String columnName) {
+		cassandraDAO.deleteColumnInRow(cfName, keyName,columnName);
 	}
 	
-	public Map<String,String> getMonitorEventProperty(String traceId) {
-		return cassandraDAO.getMonitorEventProperty(traceId);
+	public Map<String,String> getMonitorEventProperty() {
+		return cassandraDAO.getMonitorEventProperty();
 	}
 
-	public ColumnList<String> getDashBoardKeys(String traceId, String key) {
-		return cassandraDAO.getDashBoardKeys(traceId, key);
+	public ColumnList<String> getDashBoardKeys(String key) {
+		return cassandraDAO.getDashBoardKeys(key);
 	}
 	 
 	private BaseService getBaseService() {

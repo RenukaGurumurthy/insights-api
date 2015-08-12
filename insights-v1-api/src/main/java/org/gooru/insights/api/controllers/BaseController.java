@@ -5,9 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,12 +17,9 @@ import org.gooru.insights.api.constants.ApiConstants.apiHeaders;
 import org.gooru.insights.api.constants.ApiConstants.fileAttributes;
 import org.gooru.insights.api.constants.ApiConstants.modelAttributes;
 import org.gooru.insights.api.constants.ErrorMessages;
-import org.gooru.insights.api.models.RequestParamsDTO;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.spring.exception.BadRequestException;
 import org.gooru.insights.api.utils.InsightsLogger;
-import org.gooru.insights.api.utils.JsonDeserializer;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -110,45 +105,11 @@ public class BaseController {
 		response.getOutputStream().close();
 	}
 
-	public RequestParamsDTO deSerialize(String data) {
-		return data != null ? new JsonDeserializer().deserialize(data, RequestParamsDTO.class) : null;
-	}
-
-	public String getTraceId(HttpServletRequest request) throws JSONException {
-		Map<String, Object> requestParam = request.getParameterMap();
-		JSONObject jsonObject = new JSONObject();
-		for (Map.Entry<String, Object> entry : requestParam.entrySet()) {
-			jsonObject.put(entry.getKey(), entry.getValue());
-		}
-		jsonObject.put("url", request.getRequestURL().toString());
-		UUID uuid = UUID.randomUUID();
-		InsightsLogger.debug(uuid.toString(), jsonObject.toString());
-		request.setAttribute("traceId", uuid.toString());
-		return uuid.toString();
-	}
-
-	public String getRequestData(HttpServletRequest request,String requestBody){
-		requestBody = request.getParameter(ApiConstants.DATA) != null ? request.getParameter(ApiConstants.DATA) : requestBody;
-			if(StringUtils.isBlank(requestBody)){
-				throw new BadRequestException(ErrorMessages.E104.replace(ApiConstants.REPLACER, ApiConstants.DATA));
-			}
-			return requestBody;
-	}
-	
 	public HttpServletResponse setAllowOrigin(HttpServletResponse response) {
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Headers", "Cache-Control, Pragma, Origin, Authorization, Content-Type, X-Requested-With");
 		response.setHeader("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
 		return response;
-	}
-	
-	public static String getSessionToken(HttpServletRequest request) {
-
-		if (request.getHeader(ApiConstants.GOORU_SESSION_TOKEN) != null) {
-			return request.getHeader(ApiConstants.GOORU_SESSION_TOKEN);
-		} else {
-			return request.getParameter(ApiConstants.SESSION_TOKEN);
-		}
 	}
 	
 	public String checkRequestContentType(HttpServletRequest request) {

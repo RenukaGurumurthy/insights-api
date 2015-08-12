@@ -48,7 +48,7 @@ public class ClassController extends BaseController{
 			@RequestParam(value="collectionType", required = false) String collectionType,
 			@RequestParam(value="getUsageData", required = false, defaultValue = "false") Boolean getUsageData, HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		return getModel(getClassService().getAllStudentsUnitUsage(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid,collectionType, getUsageData, request.isSecure()));
+		return getModel(getClassService().getAllStudentsUnitUsage(classGooruId, courseGooruId, unitGooruId, userUid,collectionType, getUsageData, request.isSecure()));
 	}
 	
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/plan",method ={ RequestMethod.GET,RequestMethod.POST})
@@ -57,7 +57,7 @@ public class ClassController extends BaseController{
 	public ModelAndView getCoursePlan(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="userUid", required = true) String userUid, HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		return getModel(getClassService().getCoursePlan(getTraceId(request), classGooruId, courseGooruId, userUid, request.isSecure()));
+		return getModel(getClassService().getCoursePlan(classGooruId, courseGooruId, userUid, request.isSecure()));
 	}
 	
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/plan",method ={ RequestMethod.GET,RequestMethod.POST})
@@ -67,7 +67,7 @@ public class ClassController extends BaseController{
 			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId,
 			@RequestParam(value="userUid", required = true) String userUid, HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		return getModel(getClassService().getUnitPlan(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid, request.isSecure()));
+		return getModel(getClassService().getUnitPlan(classGooruId, courseGooruId, unitGooruId, userUid, request.isSecure()));
 	}
 	
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/progress",method ={ RequestMethod.GET,RequestMethod.POST})
@@ -76,7 +76,7 @@ public class ClassController extends BaseController{
 	public ModelAndView getCourseProgress(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="userUid", required = false) String userUid, HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		return getModel(getClassService().getCourseProgress(getTraceId(request), classGooruId, courseGooruId,userUid, request.isSecure()));
+		return getModel(getClassService().getCourseProgress(classGooruId, courseGooruId,userUid, request.isSecure()));
 	}
 	
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/progress",method ={ RequestMethod.GET,RequestMethod.POST})
@@ -86,7 +86,7 @@ public class ClassController extends BaseController{
 			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId,
 			@RequestParam(value="userUid", required = true) String userUid, HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getUnitProgress(getTraceId(request), classGooruId, courseGooruId, unitGooruId, userUid, request.isSecure()));
+		return getModel(getClassService().getUnitProgress(classGooruId, courseGooruId, unitGooruId, userUid, request.isSecure()));
 	}
 	
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/usage",method ={ RequestMethod.GET,RequestMethod.POST})
@@ -97,7 +97,7 @@ public class ClassController extends BaseController{
 			@PathVariable(value="lessonGooruId") String lessonGooruId, @RequestParam(value="contentGooruIds", required = true) String contentGooruIds,
 			@RequestParam(value="userUid", required = true) String userUid, HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getLessonAssessmentsUsage(getTraceId(request), classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruIds, userUid, request.isSecure()));
+		return getModel(getClassService().getLessonAssessmentsUsage(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruIds, userUid, request.isSecure()));
 	}
 	
 	@RequestMapping(value="/{collectionType}/{contentGooruId}/sessions",method ={ RequestMethod.GET,RequestMethod.POST})
@@ -110,7 +110,7 @@ public class ClassController extends BaseController{
 			@RequestParam(value="userUid", required = true) String userUid,
 			HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		return getModel(getClassService().getUserSessions(getTraceId(request), classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, collectionType, userUid, fetchOpenSession, request.isSecure()));
+		return getModel(getClassService().getUserSessions(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, collectionType, userUid, fetchOpenSession, request.isSecure()));
 	}
 	
 	@RequestMapping(value="/{collectionType}/{contentGooruId}/user/{userUid}",method ={ RequestMethod.GET,RequestMethod.POST})
@@ -123,7 +123,7 @@ public class ClassController extends BaseController{
 			@RequestParam(value="lessonGooruId", required = false) String lessonGooruId, @PathVariable(value="contentGooruId") String contentGooruId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getStudentAssessmentData(getTraceId(request), classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, sessionId, userUid, collectionType, request.isSecure()));
+		return getModel(getClassService().getStudentAssessmentData(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, sessionId, userUid, collectionType, request.isSecure()));
 	}
 	
 	@RequestMapping(value="{collectionType}/{contentGooruId}/session/{sessionId}/status",method ={ RequestMethod.GET,RequestMethod.POST})
@@ -132,7 +132,7 @@ public class ClassController extends BaseController{
 	public ModelAndView getSessionStatus(HttpServletRequest request, @PathVariable(value="sessionId") String sessionId,@PathVariable(value="contentGooruId") String contentGooruId, @PathVariable(value="collectionType") String collectionType, 
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getSessionStatus(getTraceId(request), sessionId, contentGooruId,collectionType, request.isSecure()));
+		return getModel(getClassService().getSessionStatus(sessionId, contentGooruId,collectionType, request.isSecure()));
 	}
 
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/{collectionType}/{collectionId}/users",method ={ RequestMethod.GET,RequestMethod.POST})
@@ -144,7 +144,7 @@ public class ClassController extends BaseController{
 			@PathVariable(value="collectionType") String collectionType,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getStudentsCollectionData(getTraceId(request), classGooruId, courseGooruId, unitGooruId, lessonGooruId, collectionId, request.isSecure()));
+		return getModel(getClassService().getStudentsCollectionData(classGooruId, courseGooruId, unitGooruId, lessonGooruId, collectionId, request.isSecure()));
 	}
 	
 	@RequestMapping(value="{collectionType}/{contentGooruId}/user/{userUid}/resources",method ={ RequestMethod.GET,RequestMethod.POST})
@@ -156,7 +156,7 @@ public class ClassController extends BaseController{
 			@PathVariable(value="userUid") String userUid, @RequestParam(value="sessionId", required = true) String sessionId, 
 			@PathVariable(value="collectionType") String collectionType, HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getStudentAssessmentSummary(getTraceId(request), classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, userUid, sessionId, request.isSecure()));
+		return getModel(getClassService().getStudentAssessmentSummary(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, userUid, sessionId, request.isSecure()));
 	}
 	
 	@RequestMapping(value="/class/find/usage",method ={ RequestMethod.GET,RequestMethod.POST})
@@ -167,7 +167,7 @@ public class ClassController extends BaseController{
 			@RequestParam(value="lessonGooruId", required = false) String lessonGooruId, @RequestParam(value="contentGooruId", required = false) String contentGooruId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().findUsageAvailable(getTraceId(request), classGooruId, courseGooruId,unitGooruId,lessonGooruId,contentGooruId));
+		return getModel(getClassService().findUsageAvailable(classGooruId, courseGooruId,unitGooruId,lessonGooruId,contentGooruId));
 	}
 
 	@RequestMapping(value="/class/{classId}/course/{courseId}/unit/{unitId}/lesson/{lessonId}/{collectionType}/{collectionId}/users/report", method = {RequestMethod.GET})
@@ -176,7 +176,7 @@ public class ClassController extends BaseController{
 			@PathVariable(value ="unitId") String unitId,@PathVariable(value ="lessonId") String lessonId,
 			@PathVariable(value ="collectionType") String collectionType,@PathVariable(value ="collectionId") String collectionId,HttpServletResponse response) throws JSONException, ParseException, IOException{
 		
-		File file = getClassExporterProcessor().exportClassUserUsageReport(getTraceId(request),classId, courseId, unitId, lessonId, collectionType, collectionId);
+		File file = getClassExporterProcessor().exportClassUserUsageReport(classId, courseId, unitId, lessonId, collectionType, collectionId);
 		generateCSVOutput(response,file);
 	}
 
@@ -185,7 +185,7 @@ public class ClassController extends BaseController{
 			@PathVariable(value ="collectionId") String collectionId,
 			@RequestParam(value="sessionId") String sessionId,HttpServletResponse response) throws JSONException, ParseException, IOException{
 		
-		File file = getClassExporterProcessor().exportClassSummaryReport(getTraceId(request),collectionId,sessionId);
+		File file = getClassExporterProcessor().exportClassSummaryReport(collectionId,sessionId);
 		generateCSVOutput(response,file);
 	}
 	

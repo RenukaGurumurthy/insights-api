@@ -45,7 +45,7 @@ public class ExcelBuilderServiceImpl implements ExcelBuilderService {
 	@Resource(name = "filePath")
 	private Properties filePath;
 	
-	public String exportXlsReport(String traceId, List<Map<String, Object>> listOfMap, String fileName, boolean isNewFile) throws ParseException, IOException {
+	public String exportXlsReport(List<Map<String, Object>> listOfMap, String fileName, boolean isNewFile) throws ParseException, IOException {
 
 		HSSFWorkbook workbook = null;
 		HSSFSheet sheet = null;
@@ -121,7 +121,7 @@ public class ExcelBuilderServiceImpl implements ExcelBuilderService {
 								imageMap.put(cell.getColumnIndex(), row.getRowNum());
 								picture.resize(1.0);
 							} catch (Exception e) {
-								InsightsLogger.error(traceId, e);
+								InsightsLogger.error(e);
 							}
 						}
 						anchor2 = new HSSFClientAnchor();
@@ -181,9 +181,9 @@ public class ExcelBuilderServiceImpl implements ExcelBuilderService {
 			out.close();
 
 		} catch (FileNotFoundException e) {
-			InsightsLogger.error(traceId, e);
+			InsightsLogger.error(e);
 		} catch (IOException e) {
-			InsightsLogger.error(traceId, e);
+			InsightsLogger.error(e);
 		}
 		return setFilePath(fileName);
 	}

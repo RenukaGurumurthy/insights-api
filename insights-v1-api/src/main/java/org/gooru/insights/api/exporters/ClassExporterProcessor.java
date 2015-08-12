@@ -55,10 +55,10 @@ public class ClassExporterProcessor {
 		reactionMapper.put(10, ApiConstants.reactions.TEN.reaction());
 	}
 	
-	public File exportClassUserUsageReport(String traceId, String classId, String courseId, String unitId, String lessonId, String collectionType, String collectionId) throws ParseException, IOException{
+	public File exportClassUserUsageReport(String classId, String courseId, String unitId, String lessonId, String collectionType, String collectionId) throws ParseException, IOException{
 		
-		List<Map<String,Object>> resources = getClassService().getContentItems(traceId,collectionId,null,true,null,DataUtils.getResourceFields());
-		List<Map<String,Object>> students = getClassService().getStudents(traceId, classId);
+		List<Map<String,Object>> resources = getClassService().getContentItems(collectionId,null,true,null,DataUtils.getResourceFields());
+		List<Map<String,Object>> students = getClassService().getStudents(classId);
 		resources = getBaseService().sortBy(resources, ApiConstants.SEQUENCE, ApiConstants.ASC);
 		students = getBaseService().sortBy(students, ApiConstants.USER_NAME, ApiConstants.ASC);
 		List<Map<String,Object>> questionUsage = new ArrayList<Map<String,Object>>();
@@ -90,12 +90,12 @@ public class ClassExporterProcessor {
 				}
 				Collection<String> rowKeys = new ArrayList<String>();
 				rowKeys.add(getBaseService().appendTilda(SessionAttributes.RS.getSession(),classId,courseId,unitId,lessonId,collectionId, student.get(ApiConstants.USER_UID).toString()));
-				List<String> sessionIds = getClassService().getSessions(traceId,rowKeys);
+				List<String> sessionIds = getClassService().getSessions(rowKeys);
 				String sessionId = ApiConstants.DATA;
 				if(sessionIds.size() > 0){
 					sessionId = sessionIds.get(0);
 				}
-				ColumnList<String> resourceActivity = getCassandraService().read(traceId, ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), sessionId).getResult();
+				ColumnList<String> resourceActivity = getCassandraService().read(ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), sessionId).getResult();
 				if(asessmentData){
 					keyPrefix = getBaseService().buildString(ApiConstants.QUESTION,asessmentCount,ApiConstants.HYPHEN);
 					if(resourceActivity == null || resourceActivity.isEmpty() ) {
@@ -104,7 +104,7 @@ public class ClassExporterProcessor {
 						usageData.put(getBaseService().buildString(keyPrefix,ExportFileConstants.ATTEMPTS),ApiConstants.HYPHEN);
 		
 					}else{
-						fetchQuestionMetrics(traceId,keyPrefix,resourceActivity,resource,usageData);
+						fetchQuestionMetrics(keyPrefix,resourceActivity,resource,usageData);
 						}
 					asessmentCount++;
 				}else{
@@ -119,7 +119,7 @@ public class ClassExporterProcessor {
 					Long storedViews = resourceActivity.getLongValue(getBaseService().buildString(resource.get(ApiConstants.GOORUOID),ApiConstants.TILDA,ApiConstants.VIEWS), 0L);
 					String views =  (storedViews > 0) ? ApiConstants.STRING_EMPTY+storedViews : ApiConstants.HYPHEN;
 					usageData.put(getBaseService().buildString(keyPrefix,ExportFileConstants.VIEWS),views);
-					fetchResourceMetrics(traceId,keyPrefix,resourceActivity,resource,usageData);
+					fetchResourceMetrics(keyPrefix,resourceActivity,resource,usageData);
 				}
 				if(asessmentData){
 					studentQuestionUsage.putAll(usageData);
@@ -136,18 +136,18 @@ public class ClassExporterProcessor {
 				
 	}
 
-	public File exportClassSummaryReport(String traceId, String collectionId,String sessionId) throws ParseException, IOException{
+	public File exportClassSummaryReport(String collectionId,String sessionId) throws ParseException, IOException{
 		
 		boolean includCollectionData = false;
 		String fileName = ExportFileConstants.SUMMARY_FILE_NAME+System.currentTimeMillis()+ApiConstants.CSV_EXT;
-		List<Map<String,Object>> resources = getClassService().getContentItems(traceId,collectionId,null,true,null,DataUtils.getResourceFields());
+		List<Map<String,Object>> resources = getClassService().getContentItems(collectionId,null,true,null,DataUtils.getResourceFields());
 		resources = getBaseService().sortBy(resources, ApiConstants.SEQUENCE, ApiConstants.ASC);
 		Map<String,Object> collectionData = new LinkedHashMap<String,Object>();
 		Map<String,Object> questionData = new LinkedHashMap<String,Object>();
 		Map<String,Object> resourceData = new LinkedHashMap<String,Object>();
 		
 		Map<String,Object> collectionMetaInfo = new LinkedHashMap<String,Object>();
-		getClassService().getResourceMetaData(collectionMetaInfo, traceId, null, collectionId,DataUtils.getResourceFields());
+		getClassService().getResourceMetaData(collectionMetaInfo, null, collectionId,DataUtils.getResourceFields());
 		String collectionKeyPrefix = getBaseService().buildString(collectionMetaInfo.get(ApiConstants.TITLE),ApiConstants.HYPHEN);
 		collectionData.put(ExportFileConstants.COLLECTION_DATA, ApiConstants.STRING_EMPTY);
 		questionData.put(ExportFileConstants.QUESTION_DATA, ApiConstants.STRING_EMPTY);
@@ -162,7 +162,7 @@ public class ClassExporterProcessor {
 					asessmentData = true;
 				}
 			}
-			ColumnList<String> resourceActivity = getCassandraService().read(traceId, ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), sessionId).getResult();
+			ColumnList<String> resourceActivity = getCassandraService().read(ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), sessionId).getResult();
 			if(!includCollectionData){
 				if(resourceActivity == null || resourceActivity.isEmpty() ) {
 					collectionData.put(getBaseService().buildString(collectionKeyPrefix,ExportFileConstants.SCORE_IN_PERCENTAGE),ApiConstants.HYPHEN);
@@ -184,7 +184,7 @@ public class ClassExporterProcessor {
 				}
 				includCollectionData = true;
 			}
-			fetchResourceMetrics(traceId,keyPrefix,resourceActivity,resource,resourceUsage);			
+			fetchResourceMetrics(keyPrefix,resourceActivity,resource,resourceUsage);			
 			if(asessmentData){
 				if(resourceActivity == null || resourceActivity.isEmpty() ) {
 					resourceUsage.put(getBaseService().buildString(keyPrefix,ExportFileConstants.ANSWER),ApiConstants.HYPHEN);
@@ -198,7 +198,7 @@ public class ClassExporterProcessor {
 						try {
 							answer = URLDecoder.decode(oeText, ApiConstants.UTF8);
 						} catch (Exception e) {
-							InsightsLogger.error(traceId, e);
+							InsightsLogger.error(e);
 						}
 					}
 					resourceUsage.put(getBaseService().buildString(keyPrefix,ExportFileConstants.ANSWER),answer);
@@ -215,7 +215,7 @@ public class ClassExporterProcessor {
 		return getCsvFileGenerator().generateCSVReport(false,fileName, resourceData);
 	}
 	
-	private void fetchQuestionMetrics(String traceId,String keyPrefix,ColumnList<String> resourceActivity,Map<String,Object> resource,Map<String,Object> usageData){
+	private void fetchQuestionMetrics(String keyPrefix,ColumnList<String> resourceActivity,Map<String,Object> resource,Map<String,Object> usageData){
 		String answer = resourceActivity.getStringValue(getBaseService().buildString(resource.get(ApiConstants.GOORUOID),ApiConstants.TILDA,ExportFileConstants.OPTIONS), ApiConstants.HYPHEN);
 		String oeText = resourceActivity.getStringValue(getBaseService().buildString(resource.get(ApiConstants.GOORUOID),ApiConstants.TILDA,ExportFileConstants.CHOICE), ApiConstants.HYPHEN);
 		String scoreStatus = ApiConstants.HYPHEN;
@@ -230,7 +230,7 @@ public class ClassExporterProcessor {
 			try {
 				answer = URLDecoder.decode(oeText, ApiConstants.UTF8);
 			} catch (Exception e) {
-				InsightsLogger.error(traceId, e);
+				InsightsLogger.error(e);
 			}
 		}
 		Long storedAttempts = resourceActivity.getLongValue(getBaseService().buildString(resource.get(ApiConstants.GOORUOID),ApiConstants.TILDA,ApiConstants.ATTEMPTS), 0L);
@@ -240,7 +240,7 @@ public class ClassExporterProcessor {
 		usageData.put(getBaseService().buildString(keyPrefix,ExportFileConstants.ATTEMPTS),attempts);
 	}
 	
-	private void fetchResourceMetrics(String traceId,String keyPrefix,ColumnList<String> resourceActivity,Map<String,Object> resource,Map<String,Object> usageData){
+	private void fetchResourceMetrics(String keyPrefix,ColumnList<String> resourceActivity,Map<String,Object> resource,Map<String,Object> usageData){
 		if(resourceActivity == null || resourceActivity.isEmpty()){
 			usageData.put(getBaseService().buildString(keyPrefix,ExportFileConstants.TIME_SPENT),ApiConstants.HYPHEN);
 			usageData.put(getBaseService().buildString(keyPrefix,ExportFileConstants.REACTION),ApiConstants.HYPHEN);
