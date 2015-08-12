@@ -9,6 +9,6 @@ public interface ExcelBuilderService {
 
 	String generateExcelReport(String startDate,String endDate,Integer partnerIpdId,List<Map<String,String>> resultSet,String FileName)throws ParseException, IOException;
 
-	String exportXlsReport(String traceId, List<Map<String,Object>> listOfMap,String fileName,boolean isNewFile)throws ParseException, IOException;
+	String exportXlsReport(List<Map<String,Object>> listOfMap,String fileName,boolean isNewFile)throws ParseException, IOException;
 	
 }

@@ -153,7 +153,7 @@ public class CSVBuilderServiceImpl implements CSVBuilderService {
 			long diffHours = (diff / (60 * 60 * 1000) % 24);
 			//long diffDays = (diff / (60 * 60 * 1000));
 				if(diffHours > 24){
-					InsightsLogger.info("schedular", file.getName() + " is deleted");
+					InsightsLogger.info(file.getName() + " is deleted");
 					file.delete();
 				}	
 			}

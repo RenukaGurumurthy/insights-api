@@ -82,8 +82,7 @@ public class DataUtils {
 				columnFamiliesName.add(columnFamily.getColumnFamily());
 			}
 			OperationResult<Rows<String, String>> tableDataType = getCassandraService()
-					.read(ApiConstants.BEAN_INIT,
-							ColumnFamily.TABLE_DATATYPES.getColumnFamily(),
+					.read(ColumnFamily.TABLE_DATATYPES.getColumnFamily(),
 							columnFamiliesName);
 			if (tableDataType != null && !tableDataType.getResult().isEmpty()) {
 				for (Row<String, String> row : tableDataType.getResult()) {
@@ -259,7 +258,7 @@ public class DataUtils {
 		DataUtils.collectionSummaryResourceColumns = collectionSummaryResourceColumns;
 	}
 	
-	public static Map<String,Object> getColumnFamilyContent(String traceId, String columnFamily, ColumnList<String> columnList, Map<String,String> aliesNames, Collection<String> columnNames, Map<String,List<String>> mergeResourceDualColumnValues){
+	public static Map<String,Object> getColumnFamilyContent(String columnFamily, ColumnList<String> columnList, Map<String,String> aliesNames, Collection<String> columnNames, Map<String,List<String>> mergeResourceDualColumnValues){
 	
 		Map<String,String> dataTypes = getColumnFamilyDataTypes().get(columnFamily);
 		Map<String,Object> dataMap = new HashMap<String,Object>();
@@ -270,11 +269,11 @@ public class DataUtils {
 			RequestedColumns.remove(ApiConstants.FOLDER);
 		}
 		if(mergeResourceDualColumnValues != null){
-			handleMergeColumnValues(traceId, columnFamily, columnList, RequestedColumns, dataMap, dataTypes, aliesNames, mergeResourceDualColumnValues);
+			handleMergeColumnValues(columnFamily, columnList, RequestedColumns, dataMap, dataTypes, aliesNames, mergeResourceDualColumnValues);
 		}
 		for(String columnName : RequestedColumns){
 			String apiField = aliesNames.get(columnName) != null ? aliesNames.get(columnName) : columnName;
-			fetchData(traceId, columnFamily, dataTypes, columnName, apiField, columnList, dataMap);
+			fetchData(columnFamily, dataTypes, columnName, apiField, columnList, dataMap);
 		}
 		return dataMap;
 	}
@@ -289,7 +288,7 @@ public class DataUtils {
 		resourceMetaData.put(ApiConstants.THUMBNAIL, thumbnail);
 	}
 	
-	private static void handleMergeColumnValues(String traceId, String columnFamily,
+	private static void handleMergeColumnValues(String columnFamily,
 			ColumnList<String> columnList, Collection<String> RequestedColumns,
 			Map<String, Object> dataMap, Map<String, String> dataTypes,
 			Map<String, String> aliesNames,
@@ -300,7 +299,7 @@ public class DataUtils {
 				for (String column : mergeColumns.getValue()) {
 					String apiField = aliesNames.get(column) != null ? aliesNames
 							.get(column) : column;
-					fetchData(traceId, columnFamily, dataTypes, column,
+					fetchData(columnFamily, dataTypes, column,
 							apiField, columnList, dataMap);
 					if (dataMap.get(apiField) != null) {
 						RequestedColumns.removeAll(mergeColumns.getValue());
@@ -311,7 +310,7 @@ public class DataUtils {
 		}
 	}
 	
-	private static void fetchData(String traceId, String columnFamily, Map<String,String> dataTypes, String columnName, String apiField, ColumnList<String> columns, Map<String,Object> dataMap){
+	private static void fetchData(String columnFamily, Map<String,String> dataTypes, String columnName, String apiField, ColumnList<String> columns, Map<String,Object> dataMap){
 		if(dataTypes.get(columnName) != null){
 			if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.STRING.dataType())){
 				dataMap.put(apiField, columns.getStringValue(columnName, null));
@@ -323,15 +322,15 @@ public class DataUtils {
 				dataMap.put(apiField, columns.getDateValue(columnName, null));
 			}else{
 				dataMap.put(apiField, columns.getStringValue(columnName, null));
-				InsightsLogger.debug(traceId, buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
+				InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
 			}
 		}else {
 			dataMap.put(apiField, columns.getStringValue(columnName, null));
-			InsightsLogger.debug(traceId, buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
+			InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
 		}
 	}
 
-	private static void fetchData(String traceId, String columnFamily, Map<String,String> dataTypes, String columnName, String apiField, Row<String, String> row, Map<String,Object> dataMap){
+	private static void fetchData(String columnFamily, Map<String,String> dataTypes, String columnName, String apiField, Row<String, String> row, Map<String,Object> dataMap){
 		if(dataTypes.get(columnName) != null){
 			if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.STRING.dataType())){
 				dataMap.put(apiField, row.getColumns().getStringValue(columnName, null));
@@ -343,11 +342,11 @@ public class DataUtils {
 				dataMap.put(apiField, row.getColumns().getDateValue(columnName, null));
 			}else{
 				dataMap.put(apiField, row.getColumns().getStringValue(columnName, null));
-				InsightsLogger.debug(traceId, buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
+				InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
 			}
 		}else {
 			dataMap.put(apiField, row.getColumns().getStringValue(columnName, null));
-			InsightsLogger.debug(traceId, buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
+			InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
 		}
 	}
 	
@@ -359,7 +358,7 @@ public class DataUtils {
 		return message;
 	}
 	
-	public static String getTimeDifference(String traceId,Date lastModified) {
+	public static String getTimeDifference(Date lastModified) {
 		String lagTime = null;
 		try {
 			Date currentTime = new Date();

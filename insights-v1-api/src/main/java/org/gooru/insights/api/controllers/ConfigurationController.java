@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.gooru.insights.api.constants.InsightsOperationConstants;
 import org.gooru.insights.api.security.AuthorizeOperations;
 import org.gooru.insights.api.services.ConfigurationService;
+import org.gooru.insights.api.utils.RequestUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class ConfigurationController extends BaseController {
 	public ModelAndView addFormula(HttpServletRequest request,
 			@RequestParam(value = "eventName", required = true) String eventName,
 			@RequestParam(value = "formula", required = true) JSONObject formulaJSON,@RequestParam(value = "aggregateType", required = false) String aggregateType, HttpServletResponse response) throws Exception {
-		return getModel(configurationService.addFormula(getTraceId(request),getSessionToken(request),eventName,aggregateType, formulaJSON));
+		return getModel(configurationService.addFormula(RequestUtils.getSessionToken(request),eventName,aggregateType, formulaJSON));
 	}
 
 	@RequestMapping(value = "/formula", method = RequestMethod.GET)
@@ -37,32 +38,32 @@ public class ConfigurationController extends BaseController {
 	@ResponseBody
 	public ModelAndView listFormula(HttpServletRequest request,
 			@RequestParam(value = "eventName", required = true) String eventName, HttpServletResponse response) throws JSONException {
-		return getModel(configurationService.listFormula(getTraceId(request),getSessionToken(request),eventName));
+		return getModel(configurationService.listFormula(RequestUtils.getSessionToken(request),eventName));
 	}
 	
 	@RequestMapping(value="/add/settings",method={RequestMethod.POST})
     public ModelAndView addSettings(HttpServletRequest request,@RequestParam(value="cfName",required = false) String cfName,@RequestParam(value="keyName",required = true) String keyName,@RequestParam(value="data",required = true) String data,HttpServletResponse response) throws Exception {
 		
-            return getModel(configurationService.addSettings(getTraceId(request),cfName, keyName, data));
+            return getModel(configurationService.addSettings(cfName, keyName, data));
     }
         
     @RequestMapping(value="/add/counter/settings",method={RequestMethod.POST})
     public ModelAndView addCounterSettings(HttpServletRequest request,@RequestParam(value="cfName",required=false) String cfName,@RequestParam(value="keyName",required=true) String keyName,@RequestParam(value="data",required=true) String data,HttpServletResponse response) throws Exception {
 
-        return getModel(configurationService.addCounterSettings(getTraceId(request),cfName,keyName,data));
+        return getModel(configurationService.addCounterSettings(cfName,keyName,data));
     }
     
     @RequestMapping(value="/view/settings",method={RequestMethod.GET})
     public ModelAndView viewSettings(HttpServletRequest request,@RequestParam(value="cfName",required = false) String cfName,@RequestParam(value="keyName",required = true) String keyName,HttpServletResponse response) throws Exception {
     		
-    	 return getModel(configurationService.viewSettings(getTraceId(request),cfName, keyName));
+    	 return getModel(configurationService.viewSettings(cfName, keyName));
     }
     
     @RequestMapping(value="migrate/row",method={RequestMethod.POST})
 	public ModelAndView migrateData(HttpServletRequest request,@RequestParam(value="sourceCF",required=true) String sourceCF,
 			@RequestParam(value="targetCF",required=true) String targetCF,@RequestParam(value="sourceKey",required=true) String sourceKey,@RequestParam(value="targetKey",required=false) String targetKey,HttpServletResponse response) throws Exception {
     	
-    	return getModel(configurationService.migrateCFData(getTraceId(request),sourceCF,targetCF,sourceKey,targetKey));
+    	return getModel(configurationService.migrateCFData(sourceCF,targetCF,sourceKey,targetKey));
 	}
 	
 }

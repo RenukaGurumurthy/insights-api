@@ -62,7 +62,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 
 	private static final String REPLACE = "";
 
-	public ResponseParamDTO<Map<String,Object>> getClasspageCollectionUsage(String traceId, String collectionId, String data,boolean isSecure) throws Exception {
+	public ResponseParamDTO<Map<String,Object>> getClasspageCollectionUsage(String collectionId, String data,boolean isSecure) throws Exception {
 
 		ResponseParamDTO<Map<String,Object>> responseParamDTO = new ResponseParamDTO<Map<String,Object>>();
 		
@@ -78,7 +78,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		/**
 		 * Getting session
 		 */
-		String session = buildRowKey(traceId, requestParamsDTO);
+		String session = buildRowKey(requestParamsDTO);
 		List<Map<String, Object>> rawData = new ArrayList<Map<String, Object>>();
 		List<Map<String, Object>> aggregateData = new ArrayList<Map<String, Object>>();
 		List<Map<String, Object>> intermediateData = new ArrayList<Map<String, Object>>();
@@ -86,8 +86,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		/**
 		 * Get Collection Data
 		 */
-		rawData = getBaseService().getColumnValues(traceId,
-				getCassandraService().getClassPageUsage(traceId, ColumnFamily.RESOURCE.getColumnFamily(), null, collectionId, new String(),
+		rawData = getBaseService().getColumnValues(getCassandraService().getClassPageUsage(ColumnFamily.RESOURCE.getColumnFamily(), null, collectionId, new String(),
 						new ArrayList<String>()));
 		
 		/**
@@ -122,7 +121,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			whereCondition.put(ApiConstants.CLASSPAGE_GOORU_OID, requestParamsDTO.getFilters().getClassId());
 			whereCondition.put(ApiConstants.IS_GROUP_OWWNER, 0);
 			whereCondition.put(ApiConstants.DELETED, 0);
-			injuctableRecord.put(ApiConstants.USERCOUNT,getCassandraService().getRowCount(traceId, ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
+			injuctableRecord.put(ApiConstants.USERCOUNT,getCassandraService().getRowCount(ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
 			rawData = getBaseService().injectMapRecord(rawData, injuctableRecord);
 		}					
 
@@ -131,13 +130,12 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		 */
 		Map<String, Object> injuctableRecord = new HashMap<String, Object>();
 		injuctableRecord.put(ApiConstants.GOORUOID, collectionId);
-		intermediateData = getBaseService().getColumnValues(traceId,
-				getCassandraService().read(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session, getBaseService().generateCommaSeparatedStringToKeys(requestParamsDTO.getFields(), collectionId, new String())));
+		intermediateData = getBaseService().getColumnValues(getCassandraService().read(ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session, getBaseService().generateCommaSeparatedStringToKeys(requestParamsDTO.getFields(), collectionId, new String())));
 		aggregateData = getBaseService().injectMapRecord(intermediateData, injuctableRecord);
 		injuctableRecord = new HashMap<String, Object>();
 		injuctableRecord.put(ApiConstants.DELETED, 0);
 		injuctableRecord.put(ApiConstants.COLLECTION_GOORU_OID, collectionId);
-		OperationResult<Rows<String, String>> collectionList = cassandraService.readAll(traceId, ColumnFamily.COLLECTION_ITEM.getColumnFamily(), injuctableRecord, new ArrayList<String>());
+		OperationResult<Rows<String, String>> collectionList = cassandraService.readAll(ColumnFamily.COLLECTION_ITEM.getColumnFamily(), injuctableRecord, new ArrayList<String>());
 		
 		/**
 		 * Inject itemCount,ResourceCount,nonResourceCount and questionCount
@@ -149,7 +147,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		return responseParamDTO;
 	}
 
-	public ResponseParamDTO<Map<String, Object>> getClasspageResourceUsage(String traceId, String collectionId, String data,boolean isSecure) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getClasspageResourceUsage(String collectionId, String data,boolean isSecure) throws Exception {
 
 		/**
 		 * Logical Authorizing API
@@ -161,7 +159,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		boolean singleSession = false;
 		requestParamsDTO.getFilters().setCollectionGooruOId(collectionId);
 		requestParamsDTO.setFields(getSelectParamsService().getClasspageResourceUsage(requestParamsDTO.getFields(), selectValues));
-		String session = buildRowKey(traceId, requestParamsDTO);
+		String session = buildRowKey(requestParamsDTO);
 		 if (!requestParamsDTO.getFilters().getSession().startsWith("AS")) {
              singleSession = true;
          }
@@ -170,7 +168,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			List<Map<String, Object>> rawData = new ArrayList<Map<String, Object>>();
 			List<Map<String, Object>> resourceItem = new ArrayList<Map<String, Object>>();
 			List<Map<String, Object>> aggregateData = new ArrayList<Map<String, Object>>();
-			resourceItem = getBaseService().getRowsColumnValues(traceId, getCassandraService().getClassPageResouceUsage(traceId, ColumnFamily.COLLECTION_ITEM.getColumnFamily(), "collection_gooru_oid", collectionId));
+			resourceItem = getBaseService().getRowsColumnValues(getCassandraService().getClassPageResouceUsage(ColumnFamily.COLLECTION_ITEM.getColumnFamily(), "collection_gooru_oid", collectionId));
 
 			/**
 			 * Return if resource
@@ -185,7 +183,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			 */
 			StringBuffer previousData = getBaseService().getCommaSeparatedIds(resourceItem, ApiConstants.RESOURCEGOORUOID);
 			rawData = getBaseService()
-					.getRowsColumnValues(traceId, getCassandraService().readAll(traceId, ColumnFamily.RESOURCE.getColumnFamily(), null, previousData.toString(), new String(), getBaseService().convertStringToCollection(requestParamsDTO.getFields())));
+					.getRowsColumnValues(getCassandraService().readAll(ColumnFamily.RESOURCE.getColumnFamily(), null, previousData.toString(), new String(), getBaseService().convertStringToCollection(requestParamsDTO.getFields())));
 
 			/**
 			 * Thumbnail URL Logic 
@@ -211,14 +209,14 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			/**
 			 * fetch aggregate data
 			 */
-			aggregateData = getBaseService().getColumnValues(traceId,
-					getCassandraService().read(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session,
+			aggregateData = getBaseService().getColumnValues(
+					getCassandraService().read(ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session,
 							getBaseService().generateCommaSeparatedStringToKeys(previousData.toString(), null, requestParamsDTO.getFields())));
 			resultSet = getBaseService().JoinWithSingleKey(resourceItem, aggregateData, ApiConstants.GOORUOID);
 			/**
 			 * Get answer for the questions
 			 */
-			resultSet = getAnswer(traceId,resultSet, selectValues, collectionId, singleSession);
+			resultSet = getAnswer(resultSet, selectValues, collectionId, singleSession);
 
 			/**
 			 * get teacher response
@@ -236,7 +234,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 				}
 				selectValues.put(ApiConstants.FEEDBACK_TEACHER_NAME, ApiConstants.USERNAME);
 				selectValues.put(ApiConstants.FEEDBACKPROVIDER, ApiConstants.GOORUUID);
-				List<Map<String, Object>> teacherData = getBaseService().getColumnValues(traceId, getCassandraService().getClassPageUsage(traceId, "user", "", teacherUid, "", new ArrayList<String>()));
+				List<Map<String, Object>> teacherData = getBaseService().getColumnValues(getCassandraService().getClassPageUsage("user", "", teacherUid, "", new ArrayList<String>()));
 				teacherData = getBaseService().properName(teacherData, selectValues);
 				resultSet = getBaseService().leftJoin(resultSet, teacherData, ApiConstants.FEEDBACKPROVIDER, ApiConstants.FEEDBACKPROVIDER);
 			}
@@ -263,7 +261,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 	/**
 	 *  To get the list of users with in the classpage
 	 */
-	public ResponseParamDTO<Map<String, Object>> getClasspageUsers(String traceId, String classId, String data) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getClasspageUsers(String classId, String data) throws Exception {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		Map<String, String> selectValues = new HashMap<String, String>();
 		RequestParamsDTO requestParamsDTO = this.getBaseService().buildRequestParameters(data);
@@ -273,8 +271,8 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		whereCondition.put("is_group_owner", 0);
 		whereCondition.put("deleted", 0);
 		responseParamDTO.setContent(getBaseService().properName(
-				getBaseService().getRowsColumnValues(traceId,
-						getCassandraService().readAll(traceId, ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, getBaseService().convertStringToCollection(requestParamsDTO.getFields()))),
+				getBaseService().getRowsColumnValues(
+						getCassandraService().readAll(ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, getBaseService().convertStringToCollection(requestParamsDTO.getFields()))),
 				selectValues));
 		return responseParamDTO;
 	}
@@ -282,7 +280,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 	/**
 	 * List the OE resources
 	 */
-	public ResponseParamDTO<Map<String, Object>> getClasspageResourceOEtext(String traceId,String collectionId, String data) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getClasspageResourceOEtext(String collectionId, String data) throws Exception {
 
 		RequestParamsDTO requestParamsDTO = getBaseService().buildRequestParameters(data);
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
@@ -308,12 +306,12 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		 * For a given Single student
 		 */
 		if (userId) {
-			String rowKey = buildRowKey(traceId, requestParamsDTO);
-			aggregateData = getBaseService().getColumnValues(traceId,
-					getCassandraService().read(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), rowKey,
+			String rowKey = buildRowKey(requestParamsDTO);
+			aggregateData = getBaseService().getColumnValues(
+					getCassandraService().read(ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), rowKey,
 							getBaseService().generateCommaSeparatedStringToKeys(requestParamsDTO.getFilters().getResourceGooruOId(), null, requestParamsDTO.getFields())));
-			userData = getBaseService().getColumnValues(traceId,
-					getCassandraService().getClassPageUsage(traceId, ColumnFamily.USER.getColumnFamily(), ApiConstants.STRING_EMPTY, requestParamsDTO.getFilters().getUserUId(), ApiConstants.STRING_EMPTY,
+			userData = getBaseService().getColumnValues(
+					getCassandraService().getClassPageUsage(ColumnFamily.USER.getColumnFamily(), ApiConstants.STRING_EMPTY, requestParamsDTO.getFilters().getUserUId(), ApiConstants.STRING_EMPTY,
 							new ArrayList<String>()));
 			userData = getBaseService().properName(userData, selectValues);
 			selectValues.put("gooruUid", ApiConstants.GOORU_UID);
@@ -327,24 +325,24 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			whereCondition.put(ApiConstants.CLASSPAGE_GOORU_OID, requestParamsDTO.getFilters().getClassId());
 			whereCondition.put(ApiConstants.IS_GROUP_OWWNER, 0);
 			whereCondition.put(ApiConstants.DELETED, 0);
-			classData = getBaseService().getRowsColumnValues(traceId, getCassandraService().readAll(traceId, ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
+			classData = getBaseService().getRowsColumnValues(getCassandraService().readAll(ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
 			StringBuffer userUId = getBaseService().getCommaSeparatedIds(classData, ApiConstants.GOORU_UID);
 			if (getBaseService().notNull(userUId.toString())) {
 				for (String gooruUId : userUId.toString().split(ApiConstants.COMMA)) {
 					requestParamsDTO.getFilters().setUserUId(gooruUId);
-					String rowKey = buildRowKey(traceId, requestParamsDTO);
+					String rowKey = buildRowKey(requestParamsDTO);
 					Collection<String> columnName = getBaseService().generateCommaSeparatedStringToKeys(requestParamsDTO.getFilters().getResourceGooruOId(), null, requestParamsDTO.getFields());
 					columnName.add(ApiConstants.GOORU_UID);
-					aggregateData.add(getBaseService().getColumnValue(traceId,
-							getCassandraService().read(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), rowKey,
+					aggregateData.add(getBaseService().getColumnValue(
+							getCassandraService().read(ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), rowKey,
 									columnName)));
 				}
 			}
 			/**
 			 * Get student detail
 			 */
-			userData = getBaseService().getRowsColumnValues(traceId,
-					getCassandraService().readAll(traceId, ColumnFamily.USER.getColumnFamily(), getBaseService().convertStringToCollection(userUId.toString()),
+			userData = getBaseService().getRowsColumnValues(
+					getCassandraService().readAll(ColumnFamily.USER.getColumnFamily(), getBaseService().convertStringToCollection(userUId.toString()),
 							getBaseService().convertStringToCollection(requestParamsDTO.getFields())));
 			userData = getBaseService().properName(userData, selectValues);
 			selectValues.put("gooruUid", ApiConstants.GOORU_UID);
@@ -358,7 +356,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		return responseParamDTO;
 	}
 
-	public ResponseParamDTO<Map<String, Object>> getUserSessions(String traceId, String data, String collectionId) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getUserSessions(String data, String collectionId) throws Exception {
 		RequestParamsDTO requestParamsDTO = getBaseService().buildRequestParameters(data);
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		getBaseService().existsFilter(requestParamsDTO);
@@ -377,7 +375,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		/**
 		 * Fetch the list of session ids with timestamp
 		 */
-		OperationResult<ColumnList<String>> columnResult = getCassandraService().read(traceId, ColumnFamily.MICRO_AGGREGATION.getColumnFamily(), filterValues);
+		OperationResult<ColumnList<String>> columnResult = getCassandraService().read(ColumnFamily.MICRO_AGGREGATION.getColumnFamily(), filterValues);
 		if (!columnResult.getResult().isEmpty()) {
 			List<Map<String, Object>> sessionList = new ArrayList<Map<String, Object>>();
 			for (Column<String> column : columnResult.getResult()) {
@@ -387,7 +385,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 					Date date = secondsDateFormatter.parse(column.getStringValue());
 					sessionTimeStamp.put("timeStamp", Math.abs(date.getTime()));
 				} catch (ParseException e) {
-					InsightsLogger.error(traceId, e);
+					InsightsLogger.error(e);
 				}
 				sessionList.add(sessionTimeStamp);
 			}
@@ -404,7 +402,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		return responseParamDTO;
 	}
 
-	public ResponseParamDTO<Map<String, Object>> getClasspageUserUsage(String traceId, String collectionId, String data,boolean isSecure) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getClasspageUserUsage(String collectionId, String data,boolean isSecure) throws Exception {
 
 		/**
 		 * Logical Authorizing API
@@ -431,8 +429,8 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			/**
 			 * Get list of resources and it's meta-data
 			 */
-			itemData = getBaseService().getRowsColumnValues(traceId,
-					getCassandraService().getClassPageResouceUsage(traceId, ColumnFamily.COLLECTION_ITEM.getColumnFamily(), ApiConstants.COLLECTION_GOORU_OID, collectionId));
+			itemData = getBaseService().getRowsColumnValues(
+					getCassandraService().getClassPageResouceUsage(ColumnFamily.COLLECTION_ITEM.getColumnFamily(), ApiConstants.COLLECTION_GOORU_OID, collectionId));
 
 			if (itemData.isEmpty()) {
 				responseParamDTO.setContent(itemData);
@@ -440,7 +438,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			}
 			previousData = getBaseService().getCommaSeparatedIds(itemData, ApiConstants.RESOURCEGOORUOID);
 			rawData = getBaseService()
-					.getRowsColumnValues(traceId,getCassandraService().readAll(traceId, ColumnFamily.RESOURCE.getColumnFamily(), null, previousData.toString(), new String(), new ArrayList<String>()));
+					.getRowsColumnValues(getCassandraService().readAll(ColumnFamily.RESOURCE.getColumnFamily(), null, previousData.toString(), new String(), new ArrayList<String>()));
 
 			Map<String, Map<Integer, String>> combineMap = new HashMap<String, Map<Integer, String>>();
 			Map<Integer, String> filterMap = new HashMap<Integer, String>();
@@ -468,28 +466,28 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			whereCondition.put("is_group_owner", 0);
 			whereCondition.put("deleted", 0);
 			List<Map<String, Object>> classData = new ArrayList<Map<String, Object>>();
-			classData = getBaseService().getRowsColumnValues(traceId,getCassandraService().readAll(traceId, ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
+			classData = getBaseService().getRowsColumnValues(getCassandraService().readAll(ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
 
 			StringBuffer userUId = getBaseService().getCommaSeparatedIds(classData, ApiConstants.GOORU_UID);
 			if (getBaseService().notNull(userUId.toString())) {
 				if (session.startsWith("FS")) {
 					for (String userId : userUId.toString().split(",")) {
 						requestParamsDTO.getFilters().setUserUId(userId);
-						session = buildRowKey(traceId, requestParamsDTO);
+						session = buildRowKey(requestParamsDTO);
 						Map<String, Object> temp = new HashMap<String, Object>();
-						temp = getBaseService().getColumnValues(traceId, getCassandraService().read(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session, new ArrayList<String>()), temp);
+						temp = getBaseService().getColumnValues(getCassandraService().read(ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session, new ArrayList<String>()), temp);
 						aggregateData.add(temp);
 					}
 				} else {
-					aggregateData = getBaseService().getRowsColumnValues(traceId,
-							getCassandraService().readAll(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session, "~", userUId.toString(), new ArrayList<String>()));
+					aggregateData = getBaseService().getRowsColumnValues(
+							getCassandraService().readAll(ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session, "~", userUId.toString(), new ArrayList<String>()));
 				}
 				aggregateData = getBaseService().getSingleKey(aggregateData, "gooru_oid", "~gooru_oid");
 
 				/**
 				 * Get user related info
 				 */
-				rawData = getBaseService().getRowsColumnValues(traceId,getCassandraService().readAll(traceId, "user", "", userUId.toString(), "", new ArrayList<String>()));
+				rawData = getBaseService().getRowsColumnValues(getCassandraService().readAll("user", "", userUId.toString(), "", new ArrayList<String>()));
 				classData = getBaseService().leftJoin(classData, rawData, "gooru_uid", "gooru_uid");
 				selectValues.put("gooruUId", "gooru_uid");
 				classData = getBaseService().properName(classData, selectValues);
@@ -509,7 +507,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			surName.put("~D", "D");
 			surName.put("~E", "E");
 			resultData = getBaseService().innerJoinWithContainsKey(resultData, itemData, "gooru_oid", "resource_gooru_oid");
-			aggregateData = getBaseService().buildJSON(traceId, resultData, additionParameter, surName, singleSession);
+			aggregateData = getBaseService().buildJSON(resultData, additionParameter, surName, singleSession);
 			selectValues.put("options", "providedAnswer");
 			surName = new HashMap<String, String>();
 			surName.put("correct", "is_correct");
@@ -521,8 +519,8 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			surName.put("metaData", "metaData");
 			rawData = getBaseService().properName(
 					getBaseService().getData(
-							getBaseService().getRowsColumnValues(traceId,
-									getCassandraService().readAll(traceId, ColumnFamily.ASSESSMENT_ANSWER.getColumnFamily(), "collection_gooru_oid", collectionId, new ArrayList<String>())),
+							getBaseService().getRowsColumnValues(
+									getCassandraService().readAll(ColumnFamily.ASSESSMENT_ANSWER.getColumnFamily(), "collection_gooru_oid", collectionId, new ArrayList<String>())),
 							"question_gooru_oid"), surName);
 			selectValues.put("resourceGooruOId", "gooru_oid");
 			aggregateData = getBaseService().properName(aggregateData, selectValues);
@@ -539,15 +537,15 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			return responseParamDTO;
 
 		} catch (ParseException e) {
-			InsightsLogger.error(traceId, e);
+			InsightsLogger.error(e);
 		}
 		return new ResponseParamDTO<Map<String, Object>>();
 	}
 
-	public ResponseParamDTO<Map<String, Object>> getResourceInfo(String traceId, String resouceId, String data) {
+	public ResponseParamDTO<Map<String, Object>> getResourceInfo(String resouceId, String data) {
 		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		ColumnList<String> resourceInfo = getCassandraService().read(traceId, ColumnFamily.LIVE_DASHBOARD.getColumnFamily(), "all~" + resouceId).getResult();
+		ColumnList<String> resourceInfo = getCassandraService().read(ColumnFamily.LIVE_DASHBOARD.getColumnFamily(), "all~" + resouceId).getResult();
 		Map<String, Object> resourceInfoMap = new LinkedHashMap<String, Object>();
 		List<Map<String, Object>> resourceInfoList = new ArrayList<Map<String, Object>>();
 		for (int i = 0; i < resourceInfo.size(); i++) {
@@ -575,7 +573,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		return columnVal;
 	}
 
-	public ResponseParamDTO<Map<String, Object>> getClasspageGrade(String traceId, String classId, String data,boolean isSecure) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getClasspageGrade(String classId, String data,boolean isSecure) throws Exception {
 
 		/**
 		 * Logical Authorizing API
@@ -607,7 +605,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		}
 		whereCondition.put("deleted", 0);
 
-		resourceData = getBaseService().getRowsColumnValues(traceId, getCassandraService().readAll(traceId, ColumnFamily.COLLECTION_ITEM.getColumnFamily(), whereCondition, new ArrayList<String>()));
+		resourceData = getBaseService().getRowsColumnValues(getCassandraService().readAll(ColumnFamily.COLLECTION_ITEM.getColumnFamily(), whereCondition, new ArrayList<String>()));
 
 		StringBuffer itemData = getBaseService().getCommaSeparatedIds(resourceData, ApiConstants.COLLECTIONITEMID);
 
@@ -625,8 +623,8 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		List<String> collectionColumn = new ArrayList<String>();
 		collectionColumn.add("collection_type");
 		collectionColumn.add("gooru_oid");
-		List<Map<String, Object>> collectionData = getBaseService().getRowsColumnValues(traceId,
-				getCassandraService().readAll(traceId, ColumnFamily.COLLECTION.getColumnFamily(), null, previousData.toString(), new String(), collectionColumn));
+		List<Map<String, Object>> collectionData = getBaseService().getRowsColumnValues(
+				getCassandraService().readAll(ColumnFamily.COLLECTION.getColumnFamily(), null, previousData.toString(), new String(), collectionColumn));
 		for (Map<String, Object> map : collectionData) {
 			if (map.containsKey("collection_type") && map.containsKey("gooru_oid")
 					&& (map.get("collection_type").toString().equalsIgnoreCase("collection") || map.get("collection_type").toString().equalsIgnoreCase("assessment"))) {
@@ -650,8 +648,8 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		/**
 		 * Get resource data
 		 */
-		rawData = getBaseService().getRowsColumnValues(traceId,
-				getCassandraService().readAll(traceId, ColumnFamily.RESOURCE.getColumnFamily(), null, getBaseService().convertListToString(collection), new String(), new ArrayList<String>()));
+		rawData = getBaseService().getRowsColumnValues(
+				getCassandraService().readAll(ColumnFamily.RESOURCE.getColumnFamily(), null, getBaseService().convertListToString(collection), new String(), new ArrayList<String>()));
 		Map<String, Map<Integer, String>> combineMap = new HashMap<String, Map<Integer, String>>();
 		Map<Integer, String> filterMap = new HashMap<Integer, String>();
 		filterMap.put(0, filePath.getProperty(ApiConstants.NFS_BUCKET));
@@ -673,7 +671,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		 */
 		StringBuffer userUId = new StringBuffer();
 		List<Map<String, Object>> classData = new ArrayList<Map<String, Object>>();
-		String session = buildRowKey(traceId, requestParamsDTO);
+		String session = buildRowKey(requestParamsDTO);
 		if (getBaseService().notNull(requestParamsDTO.getFilters().getUserUId())) {
 			userUId = new StringBuffer(requestParamsDTO.getFilters().getUserUId());
 		} else {
@@ -684,7 +682,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			if (getBaseService().notNull(requestParamsDTO.getFilters().getUserUId())) {
 				whereCondition.put("gooru_uid", requestParamsDTO.getFilters().getUserUId());
 			}
-			classData = getBaseService().getRowsColumnValues(traceId,getCassandraService().readAll(traceId, ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
+			classData = getBaseService().getRowsColumnValues(getCassandraService().readAll(ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
 
 			userUId = getBaseService().getCommaSeparatedIds(classData, ApiConstants.GOORU_UID);
 		}
@@ -692,8 +690,8 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		if (getBaseService().notNull(userUId.toString())) {
 			extractId = getBaseService().generateCommaSeparatedStringToKeys(previousData.toString(), new String(), "~views,~avg_time_spent,~gooru_oid,~score,~time_spent,~grade_in_percentage");
 			extractId.add("gooru_uid");
-			aggregateData = getBaseService().getRowsColumnValues(traceId,
-					getCassandraService().readAll(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session + "~", previousData.toString(),
+			aggregateData = getBaseService().getRowsColumnValues(
+					getCassandraService().readAll(ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session + "~", previousData.toString(),
 							getBaseService().generateCommaSeparatedStringToKeys(userUId.toString(), "~", new String()), extractId));
 			aggregateData = getBaseService().getSingleKey(aggregateData, "gooru_oid", "~gooru_oid");
 			if (aggregateData != null && !aggregateData.isEmpty()) {
@@ -703,7 +701,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			/**
 			 * Get user details
 			 */
-			rawData = getBaseService().getRowsColumnValues(traceId, getCassandraService().readAll(traceId,"user", "", userUId.toString(), "", new ArrayList<String>()));
+			rawData = getBaseService().getRowsColumnValues(getCassandraService().readAll("user", "", userUId.toString(), "", new ArrayList<String>()));
 			Map<String, Object> injuctableRecord = new HashMap<String, Object>();
 			injuctableRecord.put("profile_url", filePath.getProperty("insights.profile.url.path"));
 			rawData = getBaseService().formatRecord(rawData, injuctableRecord, "gooruUid", "id");
@@ -718,8 +716,8 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		 */
 		if (!classData.isEmpty()) {
 			userUId = getBaseService().getCommaSeparatedIds(classData, ApiConstants.GOORU_UID);
-			List<Map<String, Object>> processData = getBaseService().getRowsColumnValues(traceId,
-					getCassandraService().readAll(traceId, ColumnFamily.USER_COLLECTION_ITEM_ASSOC.getColumnFamily(), userUId.toString(), "~", itemData.toString(), new ArrayList<String>()));
+			List<Map<String, Object>> processData = getBaseService().getRowsColumnValues(
+					getCassandraService().readAll(ColumnFamily.USER_COLLECTION_ITEM_ASSOC.getColumnFamily(), userUId.toString(), "~", itemData.toString(), new ArrayList<String>()));
 
 			Map<String, String> assocFields = new HashMap<String, String>();
 			assocFields.put("userTime", "time_studying");
@@ -763,7 +761,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		return responseParamDTO;
 	}
 
-	public ResponseParamDTO<Map<String, Object>> getExportGradeBook(String traceId, String classId, String data, String reportType, String timeZone) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getExportGradeBook(String classId, String data, String reportType, String timeZone) throws Exception {
 
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> classGrade = new ArrayList<Map<String, Object>>();
@@ -786,7 +784,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		Collection<String> resourceColumns = new ArrayList<String>();
 		resourceColumns.add("title");
 		resourceColumns.add("createdOn");
-		classData = getBaseService().getColumnValue(traceId, getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), classId, resourceColumns));
+		classData = getBaseService().getColumnValue(getCassandraService().read(ColumnFamily.RESOURCE.getColumnFamily(), classId, resourceColumns));
 
 		/**
 		 * fetch classpage data
@@ -795,7 +793,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		whereCondition.put("classpage_gooru_oid", classId);
 		whereCondition.put("is_group_owner", 0);
 		whereCondition.put("deleted", 0);
-		classRawdata = getBaseService().getRowsColumnValues(traceId, getCassandraService().readAll(traceId, ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
+		classRawdata = getBaseService().getRowsColumnValues(getCassandraService().readAll(ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
 
 		/**
 		 * fetch list of collections
@@ -804,9 +802,9 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			whereCondition = new HashMap<String, Object>();
 			whereCondition.put("collection_gooru_oid", classId);
 			whereCondition.put("resource_gooru_oid", requestParamsDTO.getFilters().getCollectionGooruOId());
-			collectionData = getBaseService().getRowsColumnValues(traceId, getCassandraService().readAll(traceId, ColumnFamily.COLLECTION_ITEM.getColumnFamily(), whereCondition, new ArrayList<String>()));
+			collectionData = getBaseService().getRowsColumnValues(getCassandraService().readAll(ColumnFamily.COLLECTION_ITEM.getColumnFamily(), whereCondition, new ArrayList<String>()));
 		} else {
-			collectionData = getBaseService().getRowsColumnValues(traceId, getCassandraService().getClassPageResouceUsage(traceId, ColumnFamily.COLLECTION_ITEM.getColumnFamily(), "collection_gooru_oid", classId));
+			collectionData = getBaseService().getRowsColumnValues(getCassandraService().getClassPageResouceUsage(ColumnFamily.COLLECTION_ITEM.getColumnFamily(), "collection_gooru_oid", classId));
 		}
 		if (collectionData.isEmpty()) {
 			responseParamDTO.setContent(collectionData);
@@ -824,7 +822,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			String date = formatter2.format(clientDate);
 			classMapInfo.put("Date Created", date);
 		} catch (Exception e) {
-			InsightsLogger.error(traceId, e);
+			InsightsLogger.error(e);
 		}
 		classInfo.add(classMapInfo);
 		classGrade.add(classMapInfo);
@@ -837,15 +835,15 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			collectionGrade.put("Student", userClass.get("username"));
 			for (Map<String, Object> singleCollection : collectionData) {
 				Map<String, Object> collectionRawData = new HashMap<String, Object>();
-				collectionRawData = getBaseService().getColumnValue(traceId,
-						getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), "GLP~" + singleCollection.get("resource_gooru_oid"), resourceColumns));
+				collectionRawData = getBaseService().getColumnValue(
+						getCassandraService().read(ColumnFamily.RESOURCE.getColumnFamily(), "GLP~" + singleCollection.get("resource_gooru_oid"), resourceColumns));
 
 				Map<String, Object> aggData = new HashMap<String, Object>();
 				requestParamsDTO.getFilters().setCollectionGooruOId(singleCollection.get("resource_gooru_oid").toString());
 				requestParamsDTO.getFilters().setUserUId(userClass.get("gooru_uid").toString());
-				session = buildRowKey(traceId, requestParamsDTO);
-					aggData = getBaseService().getColumnValue(traceId,
-							getCassandraService().read(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(),session));
+				session = buildRowKey(requestParamsDTO);
+					aggData = getBaseService().getColumnValue(
+							getCassandraService().read(ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(),session));
 
 				String title = collectionRawData.get("title") != null ? collectionRawData.get("title").toString().replaceAll(REGEXP, REPLACE) : "-";
 
@@ -871,12 +869,12 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			Map<String, Object> files = new HashMap<String, Object>();
 			String fileName = null;
 			try {
-				fileName = excelBuilderService.exportXlsReport(traceId, classInfo, "Student-Grade" + "." + reportType, true);
-				fileName = excelBuilderService.exportXlsReport(traceId, classGradeInfo, "Student-Grade" + "." + reportType, false);
+				fileName = excelBuilderService.exportXlsReport(classInfo, "Student-Grade" + "." + reportType, true);
+				fileName = excelBuilderService.exportXlsReport(classGradeInfo, "Student-Grade" + "." + reportType, false);
 			} catch (ParseException e) {
-				InsightsLogger.error(traceId, e);
+				InsightsLogger.error(e);
 			} catch (IOException e) {
-				InsightsLogger.error(traceId, e);
+				InsightsLogger.error(e);
 			}
 			files.put("file", fileName);
 			classGrade = new ArrayList<Map<String, Object>>();
@@ -889,7 +887,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		}
 	}
 
-	public ResponseParamDTO<Map<String, Object>> getClasspageCollectionOEResources(String traceId, String classId, String data, String reportType, String timeZone) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getClasspageCollectionOEResources(String classId, String data, String reportType, String timeZone) throws Exception {
 
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> classGrade = new ArrayList<Map<String, Object>>();
@@ -907,18 +905,18 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		 * fetch resource,classpage and collection item data
 		 */
 		Map<String, Object> classData = new HashMap<String, Object>();
-		classData = getBaseService().getColumnValue(traceId, getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), classId, resourceColumns));
+		classData = getBaseService().getColumnValue(getCassandraService().read(ColumnFamily.RESOURCE.getColumnFamily(), classId, resourceColumns));
 		Map<String, Object> whereCondition = new HashMap<String, Object>();
 		whereCondition.put("classpage_gooru_oid", classId);
 		whereCondition.put("is_group_owner", 0);
 		whereCondition.put("deleted", 0);
-		classRawdata = getBaseService().getRowsColumnValues(traceId, getCassandraService().readAll(traceId, ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
+		classRawdata = getBaseService().getRowsColumnValues(getCassandraService().readAll(ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
 
 		whereCondition = new HashMap<String, Object>();
 		whereCondition.put("collection_gooru_oid", classId);
 		whereCondition.put("deleted", 0);
-		List<Map<String, Object>> collectionData = getBaseService().getRowsColumnValues(traceId,
-				getCassandraService().readAll(traceId, ColumnFamily.COLLECTION_ITEM.getColumnFamily(), whereCondition, new ArrayList<String>()));
+		List<Map<String, Object>> collectionData = getBaseService().getRowsColumnValues(
+				getCassandraService().readAll(ColumnFamily.COLLECTION_ITEM.getColumnFamily(), whereCondition, new ArrayList<String>()));
 
 		if (collectionData.isEmpty()) {
 			responseParamDTO.setContent(collectionData);
@@ -935,7 +933,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			String date = formatter.format(clientDate);
 			classMapInfo.put("Date Created", date);
 		} catch (Exception e) {
-			InsightsLogger.error(traceId, e);
+			InsightsLogger.error(e);
 		}
 		classInfo.add(classMapInfo);
 		classGrade.add(classMapInfo);
@@ -950,14 +948,14 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			for (int i = 0; i < collectionData.size(); i++) {
 				Map<String, Object> singleCollection = collectionData.get(i);
 				Map<String, Object> collectionRawData = new HashMap<String, Object>();
-				collectionRawData = getBaseService().getColumnValue(traceId,
-						getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), "" + singleCollection.get("resource_gooru_oid"), resourceColumns));
+				collectionRawData = getBaseService().getColumnValue(
+						getCassandraService().read(ColumnFamily.RESOURCE.getColumnFamily(), "" + singleCollection.get("resource_gooru_oid"), resourceColumns));
 				List<Map<String, Object>> resourceData = new ArrayList<Map<String, Object>>();
 				Map<String, Object> Condition = new HashMap<String, Object>();
 				Condition.put("collection_gooru_oid", singleCollection.get("resource_gooru_oid"));
 				Condition.put("question_type", "OE");
 				Condition.put("deleted", 0);
-				resourceData = getBaseService().getRowsColumnValues(traceId, getCassandraService().readAll(traceId, ColumnFamily.COLLECTION_ITEM.getColumnFamily(), Condition, new ArrayList<String>()));
+				resourceData = getBaseService().getRowsColumnValues(getCassandraService().readAll(ColumnFamily.COLLECTION_ITEM.getColumnFamily(), Condition, new ArrayList<String>()));
 				Map<String, Object> aggData = new HashMap<String, Object>();
 				/**
 				 * Fetch session level aggregation data
@@ -966,8 +964,8 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 				requestParamsDTO.getFilters().setCollectionGooruOId(singleCollection.get("resource_gooru_oid").toString());
 				requestParamsDTO.getFilters().setUserUId(userClass.get("gooru_uid").toString());
 				requestParamsDTO.getFilters().setCollectionGooruOId(singleCollection.get("resource_gooru_oid").toString());
-				String session = buildRowKey(traceId, requestParamsDTO);
-				aggData = getBaseService().getColumnValue(traceId, getCassandraService().read(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session));
+				String session = buildRowKey(requestParamsDTO);
+				aggData = getBaseService().getColumnValue(getCassandraService().read(ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session));
 
 				if (!resourceData.isEmpty()) {
 					resourceData = getBaseService().sortBy(resourceData, "item_sequence", "ASC");
@@ -975,8 +973,8 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 				for (int j = 0; j < resourceData.size(); j++) {
 					Map<String, Object> singleResource = resourceData.get(j);
 					Map<String, Object> questionRawData = new HashMap<String, Object>();
-					questionRawData = getBaseService().getColumnValue(traceId,
-							getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), "" + singleResource.get("resource_gooru_oid"), resourceColumns));
+					questionRawData = getBaseService().getColumnValue(
+							getCassandraService().read(ColumnFamily.RESOURCE.getColumnFamily(), "" + singleResource.get("resource_gooru_oid"), resourceColumns));
 					StringBuffer mapKey = new StringBuffer();
 					mapKey.append("[");
 					mapKey.append(collectionRawData.get("title") != null ? String.valueOf(collectionRawData.get("title")).replaceAll(REGEXP, REPLACE) : "-");
@@ -1002,12 +1000,12 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			Map<String, Object> files = new HashMap<String, Object>();
 			String fileName = null;
 			try {
-				fileName = excelBuilderService.exportXlsReport(traceId, classInfo, "Student-Responses" + "." + reportType, true);
-				fileName = excelBuilderService.exportXlsReport(traceId, classOEResponseInfo, "Student-Responses" + "." + reportType, false);
+				fileName = excelBuilderService.exportXlsReport(classInfo, "Student-Responses" + "." + reportType, true);
+				fileName = excelBuilderService.exportXlsReport(classOEResponseInfo, "Student-Responses" + "." + reportType, false);
 			} catch (ParseException e) {
-				InsightsLogger.error(traceId, e);
+				InsightsLogger.error(e);
 			} catch (IOException e) {
-				InsightsLogger.error(traceId, e);
+				InsightsLogger.error(e);
 			}
 			files.put("file", fileName);
 			classGrade = new ArrayList<Map<String, Object>>();
@@ -1020,7 +1018,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		}
 	}
 
-	public ResponseParamDTO<Map<String, Object>> getExportSummary(String traceId, String classId, String data, String reportType, String timeZone) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getExportSummary(String classId, String data, String reportType, String timeZone) throws Exception {
 
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> classGrade = new ArrayList<Map<String, Object>>();
@@ -1051,7 +1049,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		reactionMap.put("5", "I can explain");
 		reactionMap.put("10", "-");
 		Map<String, Object> classData = new HashMap<String, Object>();
-		classData = getBaseService().getColumnValue(traceId, getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), classId, resourceColumns));
+		classData = getBaseService().getColumnValue(getCassandraService().read(ColumnFamily.RESOURCE.getColumnFamily(), classId, resourceColumns));
 		/**
 		 * Get class data
 		 */
@@ -1059,7 +1057,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		whereCondition.put("classpage_gooru_oid", classId);
 		whereCondition.put("is_group_owner", 0);
 		whereCondition.put("deleted", 0);
-		classRawdata = getBaseService().getRowsColumnValues(traceId, getCassandraService().readAll(traceId, ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
+		classRawdata = getBaseService().getRowsColumnValues(getCassandraService().readAll(ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
 
 		whereCondition = new HashMap<String, Object>();
 		whereCondition.put("collection_gooru_oid", classId);
@@ -1068,8 +1066,8 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			whereCondition.put("gooru_uid", requestParamsDTO.getFilters().getUserUId());
 		}
 
-		List<Map<String, Object>> collectionData = getBaseService().getRowsColumnValues(traceId,
-				getCassandraService().readAll(traceId, ColumnFamily.COLLECTION_ITEM.getColumnFamily(), whereCondition, new ArrayList<String>()));
+		List<Map<String, Object>> collectionData = getBaseService().getRowsColumnValues(
+				getCassandraService().readAll(ColumnFamily.COLLECTION_ITEM.getColumnFamily(), whereCondition, new ArrayList<String>()));
 
 		if (collectionData.isEmpty()) {
 			responseParamDTO.setContent(collectionData);
@@ -1086,7 +1084,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			String date = formatter.format(clientDate);
 			classMapInfo.put("Class Date Created", date);
 		} catch (Exception e) {
-			InsightsLogger.error(traceId, e);
+			InsightsLogger.error(e);
 		}
 		classInfo.add(classMapInfo);
 		classGrade.add(classMapInfo);
@@ -1095,7 +1093,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 
 		Map<String, Object> collectionMapInfo = new LinkedHashMap<String, Object>();
 		collectionRawData = getBaseService()
-				.getColumnValue(traceId, getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), requestParamsDTO.getFilters().getCollectionGooruOId(), resourceColumns));
+				.getColumnValue(getCassandraService().read(ColumnFamily.RESOURCE.getColumnFamily(), requestParamsDTO.getFilters().getCollectionGooruOId(), resourceColumns));
 		collectionMapInfo.put("Collection Title", collectionRawData.get("title") != null ? String.valueOf(collectionRawData.get("title")).replaceAll(REGEXP, REPLACE) : "-");
 
 		try {
@@ -1105,7 +1103,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			String date = formatter.format(clientDate);
 			collectionMapInfo.put("Collection Date Created", date);
 		} catch (Exception e) {
-			InsightsLogger.error(traceId, e);
+			InsightsLogger.error(e);
 		}
 		  collectionInfo.add(collectionMapInfo);
 
@@ -1132,11 +1130,11 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 				Map<String, Object> where = new HashMap<String, Object>();
 				where.put("collection_gooru_oid", requestParamsDTO.getFilters().getCollectionGooruOId());
 				where.put("deleted", 0);
-				resourceData = getBaseService().getRowsColumnValues(traceId, getCassandraService().readAll(traceId, ColumnFamily.COLLECTION_ITEM.getColumnFamily(), where, new ArrayList<String>()));
+				resourceData = getBaseService().getRowsColumnValues(getCassandraService().readAll(ColumnFamily.COLLECTION_ITEM.getColumnFamily(), where, new ArrayList<String>()));
 				requestParamsDTO.getFilters().setUserUId(userClass.get("gooru_uid").toString());
-				String session = buildRowKey(traceId, requestParamsDTO);
+				String session = buildRowKey(requestParamsDTO);
 				Map<String, Object> aggData = new HashMap<String, Object>();
-				aggData = getBaseService().getColumnValue(traceId, getCassandraService().read(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session));
+				aggData = getBaseService().getColumnValue(getCassandraService().read(ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session));
 
 				resourceData = getBaseService().sortBy(resourceData, "item_sequence", "ASC");
 				/**
@@ -1145,8 +1143,8 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 				for (Map<String, Object> singleResource : resourceData) {
 
 					Map<String, Object> questionRawData = new HashMap<String, Object>();
-					questionRawData = getBaseService().getColumnValue(traceId,
-							getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), singleResource.get("resource_gooru_oid").toString(), resourceColumns));
+					questionRawData = getBaseService().getColumnValue(
+							getCassandraService().read(ColumnFamily.RESOURCE.getColumnFamily(), singleResource.get("resource_gooru_oid").toString(), resourceColumns));
 
 					String resourceType = "Resource";
 					if (questionRawData.get("type_name") != null && String.valueOf(questionRawData.get("type_name")).equalsIgnoreCase("assessment-question")) {
@@ -1221,13 +1219,13 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			Map<String, Object> files = new HashMap<String, Object>();
 			String fileName = null;
 			try {
-				fileName = excelBuilderService.exportXlsReport(traceId, classInfo, "Student-Summary" + "." + reportType, true);
-				fileName = excelBuilderService.exportXlsReport(traceId, collectionInfo, "Student-Summary" + "." + reportType, false);
-				fileName = excelBuilderService.exportXlsReport(traceId, resourcesInfo, "Student-Summary" + "." + reportType, false);
+				fileName = excelBuilderService.exportXlsReport(classInfo, "Student-Summary" + "." + reportType, true);
+				fileName = excelBuilderService.exportXlsReport(collectionInfo, "Student-Summary" + "." + reportType, false);
+				fileName = excelBuilderService.exportXlsReport(resourcesInfo, "Student-Summary" + "." + reportType, false);
 			} catch (ParseException e) {
-				InsightsLogger.error(traceId, e);
+				InsightsLogger.error(e);
 			} catch (IOException e) {
-				InsightsLogger.error(traceId, e);
+				InsightsLogger.error(e);
 			}
 			files.put("file", fileName);
 			classGrade = new ArrayList<Map<String, Object>>();
@@ -1240,7 +1238,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		}
 	}
 
-	public ResponseParamDTO<Map<String, Object>> getExportProgress(String traceId, String classId, String data, String reportType, String timeZone) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getExportProgress(String classId, String data, String reportType, String timeZone) throws Exception {
 
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> classGrade = new ArrayList<Map<String, Object>>();
@@ -1263,19 +1261,19 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		resourceColumns.add("resourceType");
 
 		Map<String, Object> classData = new HashMap<String, Object>();
-		classData = getBaseService().getColumnValue(traceId, getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), classId, resourceColumns));
+		classData = getBaseService().getColumnValue(getCassandraService().read(ColumnFamily.RESOURCE.getColumnFamily(), classId, resourceColumns));
 		Map<String, Object> whereCondition = new HashMap<String, Object>();
 		
 		whereCondition.put("classpage_gooru_oid", classId);
 		whereCondition.put("deleted", 0);
 		whereCondition.put("is_group_owner", 0);
-		classRawdata = getBaseService().getRowsColumnValues(traceId, getCassandraService().readAll(traceId, ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
+		classRawdata = getBaseService().getRowsColumnValues(getCassandraService().readAll(ColumnFamily.CLASSPAGE.getColumnFamily(), whereCondition, new ArrayList<String>()));
 
 		whereCondition = new HashMap<String, Object>();
 		whereCondition.put("collection_gooru_oid", classId);
 		whereCondition.put("deleted", 0);
-		List<Map<String, Object>> collectionData = getBaseService().getRowsColumnValues(traceId,
-				getCassandraService().readAll(traceId, ColumnFamily.COLLECTION_ITEM.getColumnFamily(), whereCondition, new ArrayList<String>()));
+		List<Map<String, Object>> collectionData = getBaseService().getRowsColumnValues(
+				getCassandraService().readAll(ColumnFamily.COLLECTION_ITEM.getColumnFamily(), whereCondition, new ArrayList<String>()));
 
 		if (collectionData.isEmpty()) {
 			responseParamDTO.setContent(collectionData);
@@ -1293,7 +1291,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			String date = formatter.format(clientDate);
 			classMapInfo.put("Class Date Created", date);
 		} catch (Exception e) {
-			InsightsLogger.error(traceId, e);
+			InsightsLogger.error(e);
 		}
 		
 		classInfo.add(classMapInfo);
@@ -1301,7 +1299,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		
 		Map<String, Object> collectionRawData = new HashMap<String, Object>();
 		collectionRawData = getBaseService()
-				.getColumnValue(traceId, getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), requestParamsDTO.getFilters().getCollectionGooruOId(), resourceColumns));
+				.getColumnValue(getCassandraService().read(ColumnFamily.RESOURCE.getColumnFamily(), requestParamsDTO.getFilters().getCollectionGooruOId(), resourceColumns));
 		Map<String, Object> collectionMapInfo = new LinkedHashMap<String, Object>();
 		collectionMapInfo.put("Collection Title", collectionRawData.get("title") != null ? collectionRawData.get("title").toString().replaceAll(REGEXP, REPLACE) : "-");
 		
@@ -1312,7 +1310,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			String date = formatter.format(clientDate);
 			collectionMapInfo.put("Collection Date Created", date);
 		} catch (Exception e) {
-			InsightsLogger.error(traceId, e);
+			InsightsLogger.error(e);
 		}
 		
 		collectionInfo.add(collectionMapInfo);
@@ -1322,10 +1320,10 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		
 		String sessionName = requestParamsDTO.getFilters().getSession();
 		requestParamsDTO.getFilters().setSession("AS");
-		String session = buildRowKey(traceId, requestParamsDTO);
+		String session = buildRowKey(requestParamsDTO);
 		requestParamsDTO.getFilters().setSession(sessionName);
 		
-		aggDataWithOutUser = getBaseService().getColumnValue(traceId, getCassandraService().read(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session));
+		aggDataWithOutUser = getBaseService().getColumnValue(getCassandraService().read(ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session));
 		if (aggDataWithOutUser.get(requestParamsDTO.getFilters().getCollectionGooruOId() + "~question_count") != null
 				&& aggDataWithOutUser.get(requestParamsDTO.getFilters().getCollectionGooruOId() + "~views") != null) {
 		}
@@ -1366,16 +1364,16 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			Map<String, Object> condition = new HashMap<String, Object>();
 			condition.put("collection_gooru_oid", requestParamsDTO.getFilters().getCollectionGooruOId());
 			condition.put("deleted", 0);
-			resourceData = getBaseService().getRowsColumnValues(traceId, getCassandraService().readAll(traceId, ColumnFamily.COLLECTION_ITEM.getColumnFamily(), condition, new ArrayList<String>()));
+			resourceData = getBaseService().getRowsColumnValues(getCassandraService().readAll(ColumnFamily.COLLECTION_ITEM.getColumnFamily(), condition, new ArrayList<String>()));
 			Map<String, Object> aggData = new HashMap<String, Object>();
 			requestParamsDTO.getFilters().setUserUId(userClass.get("gooru_uid").toString());
-			session = buildRowKey(traceId, requestParamsDTO);
-			aggData = getBaseService().getColumnValue(traceId, getCassandraService().read(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session));
+			session = buildRowKey(requestParamsDTO);
+			aggData = getBaseService().getColumnValue(getCassandraService().read(ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session));
 			resourceData = getBaseService().sortBy(resourceData, "item_sequence", "ASC");
 			int i = 1, j = 1;
 			for (Map<String, Object> singleResource : resourceData) {
 				Map<String, Object> questionRawData = new HashMap<String, Object>();
-				questionRawData = getBaseService().getColumnValue(traceId, getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), "" + singleResource.get("resource_gooru_oid"), resourceColumns));
+				questionRawData = getBaseService().getColumnValue(getCassandraService().read(ColumnFamily.RESOURCE.getColumnFamily(), "" + singleResource.get("resource_gooru_oid"), resourceColumns));
 				if ((questionRawData.get("type_name") != null && questionRawData.get("type_name").toString().equalsIgnoreCase("assessment-question"))
 						|| (questionRawData.get("resourceType") != null && questionRawData.get("resourceType").toString().equalsIgnoreCase("assessment-question"))) {
 
@@ -1449,15 +1447,15 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			Map<String, Object> files = new HashMap<String, Object>();
 			String fileName = null;
 			try {
-				fileName = excelBuilderService.exportXlsReport(traceId, classInfo, "Student-Progress" + "." + reportType, true);
-				fileName = excelBuilderService.exportXlsReport(traceId, collectionInfo, "Student-Progress" + "." + reportType, false);
-				fileName = excelBuilderService.exportXlsReport(traceId, collectionOverView, "Student-Progress" + "." + reportType, false);
-				fileName = excelBuilderService.exportXlsReport(traceId, questionInfo, "Student-Progress" + "." + reportType, false);
-				fileName = excelBuilderService.exportXlsReport(traceId, resourceInfo, "Student-Progress" + "." + reportType, false);
+				fileName = excelBuilderService.exportXlsReport(classInfo, "Student-Progress" + "." + reportType, true);
+				fileName = excelBuilderService.exportXlsReport(collectionInfo, "Student-Progress" + "." + reportType, false);
+				fileName = excelBuilderService.exportXlsReport(collectionOverView, "Student-Progress" + "." + reportType, false);
+				fileName = excelBuilderService.exportXlsReport(questionInfo, "Student-Progress" + "." + reportType, false);
+				fileName = excelBuilderService.exportXlsReport(resourceInfo, "Student-Progress" + "." + reportType, false);
 			} catch (ParseException e) {
-				InsightsLogger.error(traceId, e);
+				InsightsLogger.error(e);
 			} catch (IOException e) {
-				InsightsLogger.error(traceId, e);
+				InsightsLogger.error(e);
 			}
 			files.put("file", fileName);
 			classGrade = new ArrayList<Map<String, Object>>();
@@ -1470,7 +1468,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		}
 	}
 
-	public ResponseParamDTO<Map<String, Object>> getClassProgress(String traceId, String classId, String data) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getClassProgress(String classId, String data) throws Exception {
 		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		Collection<String> staticColumns = new ArrayList<String>();
@@ -1490,9 +1488,9 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		}
 		
 		Map<String, Object> classRawData = new HashMap<String, Object>();
-		classRawData = getBaseService().getColumnValue(traceId, getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), classId, staticColumns));
-		List<Map<String, Object>> collectionData = getBaseService().getRowsColumnValues(traceId,
-				getCassandraService().getClassPageResouceUsage(traceId, ColumnFamily.COLLECTION_ITEM.getColumnFamily(), "collection_gooru_oid", classId));
+		classRawData = getBaseService().getColumnValue(getCassandraService().read(ColumnFamily.RESOURCE.getColumnFamily(), classId, staticColumns));
+		List<Map<String, Object>> collectionData = getBaseService().getRowsColumnValues(
+				getCassandraService().getClassPageResouceUsage(ColumnFamily.COLLECTION_ITEM.getColumnFamily(), "collection_gooru_oid", classId));
 
 		if (collectionData.isEmpty()) {
 			responseParamDTO.setContent(collectionData);
@@ -1506,12 +1504,12 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 			Map<String, Object> collection = new LinkedHashMap<String, Object>();
 			Map<String, Object> collectionRawData = new HashMap<String, Object>();
 			
-			collectionRawData = getBaseService().getColumnValue(traceId, getCassandraService().read(traceId, ColumnFamily.RESOURCE.getColumnFamily(), id, staticColumns));
+			collectionRawData = getBaseService().getColumnValue(getCassandraService().read(ColumnFamily.RESOURCE.getColumnFamily(), id, staticColumns));
 			Map<String, Object> aggData = new HashMap<String, Object>();
 			requestParamsDTO.getFilters().setCollectionGooruOId(id);
-			String session = buildRowKey(traceId, requestParamsDTO);
+			String session = buildRowKey(requestParamsDTO);
 			
-			aggData = getBaseService().getColumnValue(traceId, getCassandraService().read(traceId, ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session));
+			aggData = getBaseService().getColumnValue(getCassandraService().read(ColumnFamily.REAL_TIME_DASHBOARD.getColumnFamily(), session));
 			collection.put("ClassTitle", classRawData.get("title"));
 			collection.put("CollectionTitle", collectionRawData.get("title"));
 			collection.put("TimeSpent", aggData.get(id + "~time_spent"));
@@ -1529,7 +1527,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 	 * @return	returns key to fetch the data depending upon the user requested input
 	 * @throws Exception
 	 */
-	private String buildRowKey(String traceId, RequestParamsDTO requestParamsDTO) throws Exception{
+	private String buildRowKey(RequestParamsDTO requestParamsDTO) throws Exception{
 		
 		String id = null;
 		StringBuffer idBuilder = new StringBuffer();
@@ -1583,8 +1581,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 				throw new BadRequestException(ErrorMessages.E103+ApiConstants.USER_UID);
 			}
 			if(hasClassId && !hasSessionId){
-				OperationResult<ColumnList<String>> recentSessionIds = getCassandraService().getClassPageUsage(
-						traceId, ColumnFamily.MICRO_AGGREGATION.getColumnFamily(),ApiConstants.SessionAttributes.RS.getSession()+ApiConstants.TILDA, sessionId,new String(),
+				OperationResult<ColumnList<String>> recentSessionIds = getCassandraService().getClassPageUsage(ColumnFamily.MICRO_AGGREGATION.getColumnFamily(),ApiConstants.SessionAttributes.RS.getSession()+ApiConstants.TILDA, sessionId,new String(),
 						getBaseService().convertStringToCollection(requestParamsDTO.getFilters().getUserUId()));
 				ColumnList<String> columns = recentSessionIds.getResult();
 				if(!columns.isEmpty()){
@@ -1593,7 +1590,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 				}
 			}else if(!hasClassId && !hasSessionId){
 				OperationResult<ColumnList<String>> recentSessionIds = getCassandraService()
-						.getClassPageUsage(traceId, ColumnFamily.MICRO_AGGREGATION.getColumnFamily(), ApiConstants.SessionAttributes.RS.getSession()+ApiConstants.TILDA, requestParamsDTO.getFilters().getCollectionGooruOId(), null,
+						.getClassPageUsage(ColumnFamily.MICRO_AGGREGATION.getColumnFamily(), ApiConstants.SessionAttributes.RS.getSession()+ApiConstants.TILDA, requestParamsDTO.getFilters().getCollectionGooruOId(), null,
 								getBaseService().convertStringToCollection(requestParamsDTO.getFilters().getUserUId()));
 				ColumnList<String> columns = recentSessionIds.getResult();
 				if(!columns.isEmpty()){
@@ -1602,7 +1599,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 				}
 			}
 			if(!getBaseService().notNull(sessionId)){
-				InsightsLogger.error(traceId, ErrorMessages.E105);
+				InsightsLogger.error(ErrorMessages.E105);
 			}
 			return id;
 		}
@@ -1611,7 +1608,7 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 				throw new BadRequestException(ErrorMessages.E103+ApiConstants.CLASSID_USERUID);
 			}
 			String rowKey = id.replace(ApiConstants.SessionAttributes.FS.getSession()+ApiConstants.TILDA, ApiConstants.STRING_EMPTY);
-			OperationResult<ColumnList<String>> columnResult = getCassandraService().read(traceId, ColumnFamily.MICRO_AGGREGATION.getColumnFamily(), rowKey);
+			OperationResult<ColumnList<String>> columnResult = getCassandraService().read(ColumnFamily.MICRO_AGGREGATION.getColumnFamily(), rowKey);
 			 if (!columnResult.getResult().isEmpty()) {
 		           List<Map<String,Object>> dataList = new ArrayList<Map<String,Object>>();
 		           for (Column<String> column : columnResult.getResult()) {
@@ -1621,14 +1618,14 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		                   Date date = secondsDateFormatter.parse(column.getStringValue());
 		                   sessionTimeStamp.put("timeStamp", Math.abs(date.getTime()));
 		               } catch (ParseException e) {
-		            	   InsightsLogger.error(traceId, e);
+		            	   InsightsLogger.error(e);
 		               }
 		               dataList.add(sessionTimeStamp);
 		           }
 		           dataList = getBaseService().sortBy(dataList, "timeStamp", "DESC");
 		           return id.replace(ApiConstants.SessionAttributes.FS.getSession(), dataList.get(0).get("sessionId").toString());
 		       }else{
-		    	   InsightsLogger.error(traceId, ErrorMessages.E105);
+		    	   InsightsLogger.error(ErrorMessages.E104);
 			}
 		}
 		return id;
@@ -1695,25 +1692,24 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 	}
 
 	@Override
-	public ResponseParamDTO<Map<String, Object>> getExportReport(String traceId,
-			String format, String classId, String reportType,
+	public ResponseParamDTO<Map<String, Object>> getExportReport(String format, String classId, String reportType,
 			String data, String timeZone, HttpServletResponse response)
 			throws Exception {
 		ResponseParamDTO<Map<String, Object>> dataReport = new ResponseParamDTO<Map<String, Object>>();
 		if (reportType.equalsIgnoreCase("summary")) {
-			dataReport = getExportSummary(traceId, classId, data, format, timeZone);
+			dataReport = getExportSummary(classId, data, format, timeZone);
 		} else if (reportType.equalsIgnoreCase("progress")) {
-			dataReport = getExportProgress(traceId, classId, data, format, timeZone);
+			dataReport = getExportProgress(classId, data, format, timeZone);
 		} else if (reportType.equalsIgnoreCase("grade")) {
-			dataReport = getExportGradeBook(traceId, classId, data, format, timeZone);
+			dataReport = getExportGradeBook(classId, data, format, timeZone);
 		} else if (reportType.equalsIgnoreCase("oe")) {
-			dataReport = getClasspageCollectionOEResources(traceId, classId, data,
+			dataReport = getClasspageCollectionOEResources(classId, data,
 					format, timeZone);
 		}
 		return dataReport;
 	}
 	
-	private List<Map<String, Object>> getAnswer(String traceId, List<Map<String, Object>> resultSet, Map<String, String> selectValues, String collectionId, boolean singleSession) {
+	private List<Map<String, Object>> getAnswer(List<Map<String, Object>> resultSet, Map<String, String> selectValues, String collectionId, boolean singleSession) {
 		Map<String, String> surName = new HashMap<String, String>();
 		Collection<String> additionParameter = new ArrayList<String>();
 		additionParameter.add("dataSet");
@@ -1722,10 +1718,10 @@ public class ClassPageServiceImpl implements ClassPageService, InsightsConstant 
 		surName.put("~C", "C");
 		surName.put("~D", "D");
 		surName.put("~E", "E");
-		resultSet = getBaseService().buildJSON(traceId, resultSet, additionParameter, surName, singleSession);
+		resultSet = getBaseService().buildJSON(resultSet, additionParameter, surName, singleSession);
 		List<Map<String, Object>> rawData = getBaseService().getData(
-				getBaseService().getRowsColumnValues(traceId,
-						getCassandraService().readAll(traceId, ColumnFamily.ASSESSMENT_ANSWER.getColumnFamily(), ApiConstants.COLLECTIONGOORUOID, collectionId, new ArrayList<String>())),
+				getBaseService().getRowsColumnValues(
+						getCassandraService().readAll(ColumnFamily.ASSESSMENT_ANSWER.getColumnFamily(), ApiConstants.COLLECTIONGOORUOID, collectionId, new ArrayList<String>())),
 				ApiConstants.QUESTION_GOORU_OID);
 
 					selectValues.remove("options");

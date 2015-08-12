@@ -31,7 +31,7 @@ public class ExcelReportController extends BaseController implements InsightsCon
 			HttpServletResponse response) throws Exception {
 		
 		String format = checkRequestContentType(request);
-		return getModel(getExcelReport().getPerformDump(getTraceId(request),data, format, emailId));
+		return getModel(getExcelReport().getPerformDump(data, format, emailId));
 	}
 
 

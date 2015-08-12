@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
 	/*
 	 * Reads User Preference data given user_uid
 	 */
-	public ResponseParamDTO<Map<String, Object>> getPreferenceDataByType(String traceId, String data, String userUid) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getPreferenceDataByType(String data, String userUid) throws Exception {
 
 		getBaseService().validateJSON(data);
 		RequestParamsDTO requestParamsDTO = this.getBaseService().buildRequestParameters(data);
@@ -52,7 +52,7 @@ public class UserServiceImpl implements UserService {
 
 		if (getBaseService().notNull(userUid)) {
 
-			OperationResult<ColumnList<String>> query = getCassandraService().read(traceId, "user_preference", userUid);
+			OperationResult<ColumnList<String>> query = getCassandraService().read("user_preference", userUid);
 			for (Column<String> columns : query.getResult()) {
 				Map<String, Object> columnMap = new HashMap<String, Object>();
 				String columnName = columns.getName();
@@ -83,10 +83,10 @@ public class UserServiceImpl implements UserService {
 	/*
 	 * Returns All the rows of Top preference table
 	 */
-	public ResponseParamDTO<Map<String, Object>> getTopPreferenceList(String traceId) throws ParseException {
+	public ResponseParamDTO<Map<String, Object>> getTopPreferenceList() throws ParseException {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
-			OperationResult<Rows<String, String>> data = getCassandraService().readAll(traceId, "top_preference_vectors", "username");
+			OperationResult<Rows<String, String>> data = getCassandraService().readAll("top_preference_vectors", "username");
 
 			for (Row<String, String> rowData : data.getResult()) {
 				Map<String, Object> userMap = new HashMap<String, Object>();
@@ -103,7 +103,7 @@ public class UserServiceImpl implements UserService {
 	/*
 	 * Reads User Proficiency data given user_uid and columnName
 	 */
-	public ResponseParamDTO<Map<Object, Object>> getProficiencyData(String traceId, String data, String userUid) throws Exception {
+	public ResponseParamDTO<Map<Object, Object>> getProficiencyData(String data, String userUid) throws Exception {
 
 		getBaseService().validateJSON(data);
 		RequestParamsDTO requestParamsDTO = this.getBaseService().buildRequestParameters(data);
@@ -119,7 +119,7 @@ public class UserServiceImpl implements UserService {
 
 				if (requestParamsDTO.getFields().contains("subject")) {
 					List<Map<Object, Object>> subjectData = new ArrayList<Map<Object, Object>>();
-					OperationResult<Rows<String, String>> subjectRows = getCassandraService().read(traceId, "agg_event_resource_user_subject", "user_uid", userUid);
+					OperationResult<Rows<String, String>> subjectRows = getCassandraService().read("agg_event_resource_user_subject", "user_uid", userUid);
 					for (Row<String, String> subjectRow : subjectRows.getResult()) {
 						Integer key = null;
 						for (Column<String> column : subjectRow.getColumns()) {
@@ -136,7 +136,7 @@ public class UserServiceImpl implements UserService {
 				}
 				if (requestParamsDTO.getFields().contains("course")) {
 					List<Map<Object, Object>> courseData = new ArrayList<Map<Object, Object>>();
-					OperationResult<Rows<String, String>> courseRows = getCassandraService().read(traceId, "agg_event_resource_user_course", "user_uid", userUid);
+					OperationResult<Rows<String, String>> courseRows = getCassandraService().read("agg_event_resource_user_course", "user_uid", userUid);
 					for (Row<String, String> courseRow : courseRows.getResult()) {
 						Integer key = null;
 						for (Column<String> column : courseRow.getColumns()) {
@@ -153,7 +153,7 @@ public class UserServiceImpl implements UserService {
 				}
 				if (requestParamsDTO.getFields().contains("unit")) {
 					List<Map<Object, Object>> unitData = new ArrayList<Map<Object, Object>>();
-					OperationResult<Rows<String, String>> unitRows = getCassandraService().read(traceId, "agg_event_resource_user_unit", "user_uid", userUid);
+					OperationResult<Rows<String, String>> unitRows = getCassandraService().read("agg_event_resource_user_unit", "user_uid", userUid);
 					for (Row<String, String> unitRow : unitRows.getResult()) {
 						Integer key = null;
 						for (Column<String> column : unitRow.getColumns()) {
@@ -170,7 +170,7 @@ public class UserServiceImpl implements UserService {
 				}
 				if (requestParamsDTO.getFields().contains("topic")) {
 					List<Map<Object, Object>> topicData = new ArrayList<Map<Object, Object>>();
-					OperationResult<Rows<String, String>> topicRows = getCassandraService().read(traceId, "agg_event_resource_user_topic", "user_uid", userUid);
+					OperationResult<Rows<String, String>> topicRows = getCassandraService().read("agg_event_resource_user_topic", "user_uid", userUid);
 					for (Row<String, String> topicRow : topicRows.getResult()) {
 						Integer key = null;
 						for (Column<String> column : topicRow.getColumns()) {
@@ -187,7 +187,7 @@ public class UserServiceImpl implements UserService {
 				}
 				if (requestParamsDTO.getFields().contains("lesson")) {
 					List<Map<Object, Object>> lessonData = new ArrayList<Map<Object, Object>>();
-					OperationResult<Rows<String, String>> lessonRows = getCassandraService().read(traceId, "agg_event_resource_user_lesson", "user_uid", userUid);
+					OperationResult<Rows<String, String>> lessonRows = getCassandraService().read("agg_event_resource_user_lesson", "user_uid", userUid);
 					for (Row<String, String> lessonRow : lessonRows.getResult()) {
 						Integer key = null;
 						for (Column<String> column : lessonRow.getColumns()) {
@@ -217,11 +217,11 @@ public class UserServiceImpl implements UserService {
 	/*
 	 * Returns All the rows of Top Proficiency table
 	 */
-	public ResponseParamDTO<Map<String,Object>> getTopProficiencyList(String traceId) throws Exception {
+	public ResponseParamDTO<Map<String,Object>> getTopProficiencyList() throws Exception {
 		try{
 		ResponseParamDTO<Map<String,Object>> responseParamDTO = new ResponseParamDTO<Map<String,Object>>();
 			List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
-			OperationResult<Rows<String, String>> resultRows = getCassandraService().readAll(traceId, "top_proficiency_vectors", "username");
+			OperationResult<Rows<String, String>> resultRows = getCassandraService().readAll("top_proficiency_vectors", "username");
 			for (Row<String, String> rowData : resultRows.getResult()) {
 				Map<String, Object> userMap = new HashMap<String, Object>();
 				String key = rowData.getKey();
@@ -240,7 +240,7 @@ public class UserServiceImpl implements UserService {
 	/*
 	 * Get User data from dim_user columnfamily
 	 */
-	public ResponseParamDTO<Map<String, Object>> getUserData(String traceId, String data) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getUserData(String data) throws Exception {
 
 		Map<String, String> selectValues = new HashMap<String, String>();
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
@@ -253,7 +253,7 @@ public class UserServiceImpl implements UserService {
 		if (getBaseService().notNull(requestParamsDTO.getFilters().getUserUId())) {
 			List<Map<String, Object>> userList = new ArrayList<Map<String, Object>>();
 			Map<String, Object> userMap = new HashMap<String, Object>();
-			OperationResult<ColumnList<String>> resultRow = getCassandraService().read(traceId, "dim_user", requestParamsDTO.getFilters().getUserUId(),
+			OperationResult<ColumnList<String>> resultRow = getCassandraService().read("dim_user", requestParamsDTO.getFilters().getUserUId(),
 					getBaseService().convertStringToCollection(requestParamsDTO.getFields()));
 			for (Column<String> column : resultRow.getResult()) {
 				userMap.put(column.getName(), column.getStringValue());

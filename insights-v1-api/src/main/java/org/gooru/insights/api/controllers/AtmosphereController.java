@@ -71,7 +71,7 @@ public class AtmosphereController extends AtmosphereResolver {
 		 * List<Map<String, Object>> finalData = getLiveDashboardService().getLiveData(data);
 		
 		 */
-		String resultSet = baseService.listMapToJsonString("atmosphere",new ArrayList<Map<String,Object>>());
+		String resultSet = baseService.listMapToJsonString(new ArrayList<Map<String,Object>>());
 		atmosphereResource.getBroadcaster().broadcast(resultSet);
 
 	}
@@ -105,8 +105,7 @@ public class AtmosphereController extends AtmosphereResolver {
 		response = addCrossDomainSupport(response);
 		AtmosphereRequest atmosphereProgressRequest = atmosphereProgress.getRequest();
 		String data = atmosphereProgressRequest.getParameter("data");
-		UUID uuid = UUID.randomUUID();
-		ResponseParamDTO<Map<String, Object>> resultSet = getClassPageService().getClasspageUserUsage(uuid.toString(),collectionId, data,request.isSecure());
+		ResponseParamDTO<Map<String, Object>> resultSet = getClassPageService().getClasspageUserUsage(collectionId, data,request.isSecure());
 		atmosphereProgress.getBroadcaster().broadcast(resultSet);
 
 	}

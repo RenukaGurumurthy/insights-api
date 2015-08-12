@@ -25,7 +25,7 @@ public class UserRestController extends BaseController implements InsightsConsta
 	@ResponseBody
 	public ModelAndView getUserPreference(HttpServletRequest request, @PathVariable(value = "userUid") String userId, @RequestParam(value = DATA_OBJECT, required = false) String data,
 			HttpServletResponse response) throws Exception {
-		return getModel(userservice.getPreferenceDataByType(getTraceId(request), data, userId));
+		return getModel(userservice.getPreferenceDataByType(data, userId));
 
 	}
 	
@@ -33,7 +33,7 @@ public class UserRestController extends BaseController implements InsightsConsta
 	@ResponseBody
 	public ModelAndView getUserDetails(HttpServletRequest request,  
 			HttpServletResponse response) throws Exception {
-		return getModel(userservice.getTopPreferenceList(getTraceId(request)));
+		return getModel(userservice.getTopPreferenceList());
 		
 	}
 
@@ -42,7 +42,7 @@ public class UserRestController extends BaseController implements InsightsConsta
 	public ModelAndView getUserTaxonomyProficiency(HttpServletRequest request, @PathVariable(value = "userUid") String userId, @RequestParam(value = DATA_OBJECT, required = false) String data,
 			HttpServletResponse response) throws NumberFormatException, Exception {
 		setAllowOrigin(response);
-		return getModel(userservice.getProficiencyData(getTraceId(request), data, userId));
+		return getModel(userservice.getProficiencyData(data, userId));
 
 	}
 	
@@ -51,14 +51,14 @@ public class UserRestController extends BaseController implements InsightsConsta
 	public ModelAndView getUserProficiencyDetails(HttpServletRequest request,  
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(userservice.getTopProficiencyList(getTraceId(request)));
+		return getModel(userservice.getTopProficiencyList());
 		
 	}
 	
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
 	public ModelAndView getUserData(HttpServletRequest request, @RequestParam(value = DATA_OBJECT,required = true) String data, HttpServletResponse response) throws Exception {
-		return getModel(userservice.getUserData(getTraceId(request), data));
+		return getModel(userservice.getUserData(data));
 
 	}
 
