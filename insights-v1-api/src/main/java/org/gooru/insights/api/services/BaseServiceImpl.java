@@ -25,7 +25,6 @@ import org.gooru.insights.api.constants.ErrorMessages;
 import org.gooru.insights.api.models.RequestParamsDTO;
 import org.gooru.insights.api.spring.exception.BadRequestException;
 import org.gooru.insights.api.spring.exception.InsightsServerException;
-import org.gooru.insights.api.utils.DataUtils;
 import org.gooru.insights.api.utils.InsightsLogger;
 import org.gooru.insights.api.utils.JsonDeserializer;
 import org.json.JSONArray;

@@ -336,7 +336,7 @@ public class ApiConstants {
 	public static final String _UNIQUE_VIEWS = "unique_views";
 	public static final String _TOTAL_REACTION = "total_reaction";
 	public static final String _REACTED_COUNT = "reacted_count";	
-
+	
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
 		
@@ -440,4 +440,10 @@ public class ApiConstants {
 		}
 	}
 	
+	/**
+	 * Message constants
+	 */
+	public static final String COURSE_PLAN_UNAVAILABLE = "Course Plan unavailable for CourseGooruOid : {} ";
+	public static final String MESSAGE = "message";
+
 }

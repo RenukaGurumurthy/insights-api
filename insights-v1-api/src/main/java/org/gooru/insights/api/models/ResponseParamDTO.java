@@ -3,6 +3,8 @@ package org.gooru.insights.api.models;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.HttpStatus;
+
 public class ResponseParamDTO<M> {
 
 	private List<M> content;
@@ -11,6 +13,8 @@ public class ResponseParamDTO<M> {
 
 	private Map<String, Object> paginate;
 
+	private Integer statusCode;
+	
 	public List<M> getContent() {
 		return content;
 	}
@@ -33,5 +37,13 @@ public class ResponseParamDTO<M> {
 
 	public void setPaginate(Map<String, Object> paginate) {
 		this.paginate = paginate;
+	}
+
+	public Integer getStatusCode() {
+		return statusCode;
+	}
+
+	public void setStatusCode(Integer statusCode) {
+		this.statusCode = statusCode;
 	}
 }
