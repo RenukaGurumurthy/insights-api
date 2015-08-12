@@ -189,12 +189,7 @@ public class DataUtils {
 		longColumns.put("attempts", "attempts");
 		longColumns.put("correct", "totalCorrectCount");
 		longColumns.put("in_correct", "totalInCorrectCount");
-		longColumns.put("A", "options");
-		longColumns.put("B", "options");
-		longColumns.put("C", "options");
-		longColumns.put("D", "options");
-		longColumns.put("E", "options");
-		longColumns.put("F", "options");
+		
 	}
 	
 	static{
@@ -202,6 +197,7 @@ public class DataUtils {
 		stringColumns.put(ApiConstants.CHOICE, ApiConstants.TEXT);
 		stringColumns.put(ApiConstants._FEEDBACK_PROVIDER, ApiConstants.FEEDBACKPROVIDER);
 		stringColumns.put(ApiConstants._QUESTION_STATUS, ApiConstants.STATUS);
+		stringColumns.put(ApiConstants.OPTIONS, ApiConstants.OPTIONS);
 		stringColumns.put("answer_object", "answerObject");
 	}
 
@@ -226,12 +222,7 @@ public class DataUtils {
 		sessionActivityMetrics.put(ApiConstants.IN_CORRECT, ApiConstants.TOTAL_INCORRECT_COUNT);
 		sessionActivityMetrics.put(ApiConstants._ANSWER_OBJECT,ApiConstants.ANSWER_OBJECT);
 		sessionActivityMetrics.put(ApiConstants.OPTIONS, ApiConstants.OPTIONS);
-		sessionActivityMetrics.put(options.A.option(), ApiConstants.OPTIONS);
-		sessionActivityMetrics.put(options.B.option(), ApiConstants.OPTIONS);
-		sessionActivityMetrics.put(options.C.option(), ApiConstants.OPTIONS);
-		sessionActivityMetrics.put(options.D.option(), ApiConstants.OPTIONS);
-		sessionActivityMetrics.put(options.E.option(), ApiConstants.OPTIONS);
-		sessionActivityMetrics.put(options.F.option(), ApiConstants.OPTIONS);
+		
 	}
 	
 	public static String getSessionActivityMetricsMapValue(String key) {

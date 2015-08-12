@@ -3,12 +3,15 @@ package org.gooru.insights.api.controllers;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.InsightsOperationConstants;
 import org.gooru.insights.api.exporters.ClassExporterProcessor;
+import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.security.AuthorizeOperations;
 import org.gooru.insights.api.services.BaseService;
 import org.gooru.insights.api.services.ClassService;
@@ -57,7 +60,11 @@ public class ClassController extends BaseController{
 	public ModelAndView getCoursePlan(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="userUid", required = true) String userUid, HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		return getModel(getClassService().getCoursePlan(classGooruId, courseGooruId, userUid, request.isSecure()));
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = getClassService().getCoursePlan(classGooruId, courseGooruId, userUid, request.isSecure());
+		if(responseParamDTO.getStatusCode() != null) {
+			response.setStatus(responseParamDTO.getStatusCode());
+		}
+		return getModel(responseParamDTO);
 	}
 	
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/plan",method ={ RequestMethod.GET,RequestMethod.POST})

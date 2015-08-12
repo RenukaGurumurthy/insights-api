@@ -31,7 +31,7 @@ public interface ClassService {
 
 	ResponseParamDTO<Map<String,Object>> getStudentsCollectionData(String classId, String courseId, String unitId, String lessonId, String collectionId, boolean isSecure) throws Exception;
 
-	List<Map<String,Object>> getContentItems(String rowKey,String type,boolean fetchMetaData,Collection<String> columns,Map<String,String> aliesName);
+	List<Map<String,Object>> getAssociatedItems(String rowKey,String type,boolean fetchMetaData,Collection<String> columns,Map<String,String> aliesName);
 
 	List<Map<String,Object>> getStudents(String classId);
 
