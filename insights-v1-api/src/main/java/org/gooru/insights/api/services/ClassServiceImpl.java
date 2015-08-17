@@ -176,7 +176,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						if (lessonMetricColumnList != null && lessonMetricColumnList.size() > 0) {
 							assessmentScore = lessonMetricColumnList.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._SCORE_IN_PERCENTAGE), null);
 						
-							if (assessmentScore == null) {
+							if (assessmentScore == null && !(lessonScoreStatus != null && lessonScoreStatus.equals(ApiConstants.SCORE_MET))) {
 								lessonScoreStatus = ApiConstants.NOT_ATTEMPTED;
 							}else if((classGoal == 0  || assessmentScore >= classGoal) && !(lessonScoreStatus != null && lessonScoreStatus.equals(ApiConstants.NOT_ATTEMPTED))){
 								lessonScoreStatus = ApiConstants.SCORE_MET;
