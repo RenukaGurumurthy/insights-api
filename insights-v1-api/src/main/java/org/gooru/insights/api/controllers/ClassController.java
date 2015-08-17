@@ -60,8 +60,7 @@ public class ClassController extends BaseController{
 	public ModelAndView getCoursePlan(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="userUid", required = true) String userUid, HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = getClassService().getCoursePlan(classGooruId, courseGooruId, userUid, request.isSecure());
-		return getModel(responseParamDTO);
+		return getModel(getClassService().getCoursePlan(classGooruId, courseGooruId, userUid, request.isSecure()));
 	}
 	
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/plan",method ={ RequestMethod.GET,RequestMethod.POST})
