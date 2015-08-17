@@ -24,8 +24,7 @@ public class RequestUtils {
 	}
 
 	public static String getTraceId() {
-		setId(((RequestUtils)ContextLoader.getCurrentWebApplicationContext().getBean("requestTracer")).getId());
-		return id;
+		return ((RequestUtils)ContextLoader.getCurrentWebApplicationContext().getBean("requestTracer")).getId();
 	}
 
 	public static String getSessionToken(HttpServletRequest request) {
@@ -67,8 +66,5 @@ public class RequestUtils {
 		return id;
 	}
 
-	public static void setId(String id) {
-		RequestUtils.id = id;
-	}
 
 }

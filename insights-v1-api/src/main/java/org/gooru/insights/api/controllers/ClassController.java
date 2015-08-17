@@ -61,9 +61,6 @@ public class ClassController extends BaseController{
 			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="userUid", required = true) String userUid, HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = getClassService().getCoursePlan(classGooruId, courseGooruId, userUid, request.isSecure());
-		if(responseParamDTO.getStatusCode() != null) {
-			response.setStatus(responseParamDTO.getStatusCode());
-		}
 		return getModel(responseParamDTO);
 	}
 	
