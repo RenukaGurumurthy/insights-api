@@ -13,8 +13,6 @@ public class ResponseParamDTO<M> {
 
 	private Map<String, Object> paginate;
 
-	private Integer statusCode;
-	
 	public List<M> getContent() {
 		return content;
 	}
@@ -37,13 +35,5 @@ public class ResponseParamDTO<M> {
 
 	public void setPaginate(Map<String, Object> paginate) {
 		this.paginate = paginate;
-	}
-
-	public Integer getStatusCode() {
-		return statusCode;
-	}
-
-	public void setStatusCode(Integer statusCode) {
-		this.statusCode = statusCode;
 	}
 }
