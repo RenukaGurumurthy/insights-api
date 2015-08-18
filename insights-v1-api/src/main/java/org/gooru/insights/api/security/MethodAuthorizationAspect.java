@@ -135,7 +135,6 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			sessionToken = RequestUtils.getSessionToken(request);
 			RequestUtils.logRequest(request);
 		}
-		logger.info("Requested Session Token : {}",sessionToken);
 		if (sessionToken != null) {
 			String result;
 			try {
