@@ -50,6 +50,8 @@ import org.restlet.data.Form;
 import org.restlet.ext.json.JsonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ClientResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -77,12 +79,13 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	private ColumnList<String> entityOperationsRole;
 	
 	private static final String GOORU_PREFIX = "authenticate_";
-	
-	private static final String ASPECT = "aspect";
-	
+		
 	private static final String DO_API = "doAPI";
 	
 	private static final String PROCEED = "proceed";
+
+	private static final Logger logger = LoggerFactory.getLogger(MethodAuthorizationAspect.class);
+
 	
 	@PostConstruct
 	private void init(){
@@ -132,7 +135,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			sessionToken = RequestUtils.getSessionToken(request);
 			RequestUtils.logRequest(request);
 		}
-
+		logger.info("Requested Session Token : {}",sessionToken);
 		if (sessionToken != null) {
 			String result;
 			try {
@@ -292,14 +295,13 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			} else {
 				classId = RequestUtils.getClassIdFromRequestParam(request);
 			}
+			logger.info("userUidFromSession : {} - userIdFromRequest {} - classId : {}",userUidFromSession,userIdFromRequest,classId);
 			if (StringUtils.isBlank(userIdFromRequest) && "ANONYMOUS".equalsIgnoreCase(userUidFromSession)) {
 				InsightsLogger.info("ANONYMOUS user can't be a teacher class creator");
 				return false;
 			} else if (StringUtils.isNotBlank(userIdFromRequest) && userIdFromRequest.equalsIgnoreCase(userUidFromSession)) {
-				InsightsLogger.info("Session Token and user uid that is available in url is mismatching..");
 				return true;
 			} else if (StringUtils.isNotBlank(classId) && userUidFromSession.equalsIgnoreCase(getTeacherUid(classId))) {
-				InsightsLogger.info("User is not a valid Class creatior or teacher..");
 				return true;
 			}
 
