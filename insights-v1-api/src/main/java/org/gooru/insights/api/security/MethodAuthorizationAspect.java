@@ -295,10 +295,10 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			if (StringUtils.isBlank(userIdFromRequest) && "ANONYMOUS".equalsIgnoreCase(userUidFromSession)) {
 				InsightsLogger.info("ANONYMOUS user can't be a teacher class creator");
 				return false;
-			} else if (userIdFromRequest.equalsIgnoreCase(userUidFromSession)) {
+			} else if (StringUtils.isNotBlank(userIdFromRequest) && userIdFromRequest.equalsIgnoreCase(userUidFromSession)) {
 				InsightsLogger.info("Session Token and user uid that is available in url is mismatching..");
 				return true;
-			} else if (StringUtils.isNotBlank(classId) && userUidFromSession.equalsIgnoreCase(getTeacherUid(classId))) {
+			} else if (StringUtils.isBlank(userIdFromRequest) && StringUtils.isNotBlank(classId) && userUidFromSession.equalsIgnoreCase(getTeacherUid(classId))) {
 				InsightsLogger.info("User is not a valid Class creatior or teacher..");
 				return true;
 			}
