@@ -429,7 +429,7 @@ public class ApiConstants {
 	}
 	
 	public enum dataTypes{
-		STRING("String"),INT("Integer"),LONG("Long"),DATE("Date");
+		STRING("String"),TEXT("text"),INT("Integer"),LONG("Long"),DATE("Date");
 		private String dataType;
 		
 		private dataTypes(String dataType){
