@@ -248,17 +248,18 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				itemDataMapAsList.add(item);
 			}
 			lesson.put(ApiConstants.ITEM, itemDataMapAsList);
-			if(lessonScoreStatus != null){}
-			else if(assessmentCount == 0 && itemData.size() > 0){
-				//Only For collection
-				if(collectionViewStatus == null){
+			if (lessonScoreStatus != null || (notAttempted != 0 && notAttempted < assessmentCount)) {
+				lessonScoreStatus = ApiConstants.SCORE_NOT_MET;
+			} else if (assessmentCount == 0 && itemData.size() > 0) {
+				// Only For collection
+				if (collectionViewStatus == null) {
 					lessonScoreStatus = ApiConstants.VIEWED;
-				}else {
+				} else {
 					lessonScoreStatus = collectionViewStatus;
 				}
-			}else if(notAttempted == assessmentCount){
+			} else if (notAttempted == assessmentCount) {
 				lessonScoreStatus = ApiConstants.NOT_ATTEMPTED;
-			}else {
+			} else {
 				lessonScoreStatus = ApiConstants.SCORE_MET;
 			}
 			lesson.put(ApiConstants.SCORE_STATUS, lessonScoreStatus);

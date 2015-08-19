@@ -437,7 +437,9 @@ public class BaseServiceImpl implements BaseService {
 						}
 					}
 				}
+				if(!appended.isEmpty()){
 				resultList.add(appended);
+				}
 			}
 			return resultList;
 		}
@@ -488,7 +490,9 @@ public class BaseServiceImpl implements BaseService {
 						break;
 				}
 			}
+			if(!mergedRecord.isEmpty()){
 			mergedRecords.add(mergedRecord);
+			}
 		}
 		return mergedRecords;
 	}
