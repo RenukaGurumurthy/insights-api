@@ -532,13 +532,11 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	
 	public ResponseParamDTO<Map<String,Object>> getLessonAssessmentsUsage(String classId, String courseId, String unitId, String lessonId, String assessmentIds, String userUid, boolean isSecure) throws Exception {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		List<Map<String, Object>> resultDataMapAsList = new ArrayList<Map<String, Object>>();
 		String classLessonKey = getBaseService().appendTilda(classId, courseId, unitId, lessonId);
 		if (StringUtils.isNotBlank(userUid)) {
 			classLessonKey = getBaseService().appendTilda(classLessonKey, userUid);
 		}
-		resultDataMapAsList = getClassMetricsForAllItemsAsMap(classLessonKey, assessmentIds);
-		responseParamDTO.setContent(resultDataMapAsList);
+		responseParamDTO.setContent(getClassMetricsForAllItemsAsMap(classLessonKey, assessmentIds));
 		return responseParamDTO;
 	}
 	
@@ -735,14 +733,13 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		List<Map<String,Object>> resourceMetaList = new ArrayList<Map<String,Object>>();
 		Map<String,List<String>> mergeResourceDualColumnValues = DataUtils.getMergeDualColumnValues().get(ColumnFamily.RESOURCE.getColumnFamily());
 		for(Row<String,String> row : resourceRows.getResult()){
-			Map<String,Object> resourceMetaData = new HashMap<String,Object>();
 			if(type != null){
 				String resourceType = row.getColumns().getStringValue(ApiConstants.RESOURCE_TYPE, ApiConstants.STRING_EMPTY);
 				if(!resourceType.matches(type)){
 						continue;
 				}
 			}
-			resourceMetaData = DataUtils.getColumnFamilyContent(ColumnFamily.RESOURCE.getColumnFamily(), row.getColumns(), aliesNames, resourceColumns, mergeResourceDualColumnValues);
+			Map<String,Object> resourceMetaData = DataUtils.getColumnFamilyContent(ColumnFamily.RESOURCE.getColumnFamily(), row.getColumns(), aliesNames, null, resourceColumns, mergeResourceDualColumnValues);
 			resourceMetaList.add(resourceMetaData);
 		}
 		return resourceMetaList;
@@ -778,7 +775,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
                 }
         }
 		Map<String,List<String>> mergeResourceDualColumnValues = DataUtils.getMergeDualColumnValues().get(ColumnFamily.RESOURCE.getColumnFamily());
-		dataMap = DataUtils.getColumnFamilyContent(ColumnFamily.RESOURCE.getColumnFamily(), resourceColumn, aliesNames, resourceColumns, mergeResourceDualColumnValues);
+		dataMap = DataUtils.getColumnFamilyContent(ColumnFamily.RESOURCE.getColumnFamily(), resourceColumn, aliesNames, null,resourceColumns, mergeResourceDualColumnValues);
 	}
 	
 	private List<Map<String, Object>> getClassMetricsForAllItemsAsMap(String key, String contentGooruOids) {
@@ -788,23 +785,14 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			for (String itemGooruOid : contentGooruOids.split(ApiConstants.COMMA)) {
 				Map<String, Object> usageAsMap = new HashMap<String, Object>();
 				usageAsMap.put(ApiConstants.GOORUOID, itemGooruOid);
-				Long views = 0L; Long timeSpent = 0L; Long score = 0L; String collectionType = null;Long lastAccessed = null;String evidence = null;
-				if (itemsColumnList != null && !itemsColumnList.getResult().isEmpty() && itemsColumnList.getResult().size() > 0) {
-					ColumnList<String> itemMetricColumns = itemsColumnList.getResult();
-					views = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants.VIEWS), 0L);
-					timeSpent = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._TIME_SPENT), 0L);
-					score = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._SCORE_IN_PERCENTAGE), 0L);
-					collectionType = itemMetricColumns.getStringValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._COLLECTION_TYPE), null);
-					lastAccessed = itemMetricColumns.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._LAST_ACCESSED), null);
-					evidence = itemMetricColumns.getStringValue(getBaseService().appendTilda(itemGooruOid, ApiConstants.EVIDENCE), null);
+				if(itemsColumnList != null && itemsColumnList.getResult() != null) {
+					usageAsMap.putAll(DataUtils.getColumnFamilyContent(ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), itemsColumnList.getResult(), DataUtils.getLessonPlanClassActivityFields(),itemGooruOid, DataUtils.getLessonPlanClassActivityFields().keySet(), null));
+				}else {
+					DataUtils.fetchDefaultData(ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), DataUtils.getLessonPlanClassActivityFields(), usageAsMap);
 				}
-				usageAsMap.put(ApiConstants.VIEWS, views);
-				usageAsMap.put(ApiConstants.TIMESPENT, timeSpent);
-				usageAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, score);
-				usageAsMap.put(ApiConstants.TYPE, collectionType);
-				usageAsMap.put(ApiConstants.LAST_ACCESSED, lastAccessed);
-				usageAsMap.put(ApiConstants.EVIDENCE, evidence);
-				usageAsMapAsList.add(usageAsMap);
+				if (!usageAsMap.isEmpty()) {
+					usageAsMapAsList.add(usageAsMap);
+				}
 			}
 		}
 		return usageAsMapAsList;
@@ -1024,7 +1012,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				Map<String, Object> itemDataMap = new HashMap<String, Object>();
 				itemDataMap.put(ApiConstants.SEQUENCE, column.getLongValue());
 				itemDataMap.put(ApiConstants.GOORUOID, column.getName());
-				itemDataMap.put(ApiConstants._GOORUOID, column.getName());
 				itemIds.add(column.getName());
 				associatedItems.add(itemDataMap);
 			}

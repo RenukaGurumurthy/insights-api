@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +20,7 @@ import org.gooru.insights.api.constants.ApiConstants.options;
 import org.gooru.insights.api.constants.ErrorMessages;
 import org.gooru.insights.api.models.InsightsConstant.ColumnFamily;
 import org.gooru.insights.api.services.BaseService;
+import org.gooru.insights.api.services.BaseServiceImpl;
 import org.gooru.insights.api.services.CassandraService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +48,8 @@ public class DataUtils {
 
 	private static Map<String,String> resourceFields;
 	
+	private static Map<String,String> lessonPlanClassActivityFields;
+	
 	private static Map<String,Map<String,String>> columnFamilyDataTypes;
 
 	private static Map<String,Map<String,List<String>>> mergeDualColumnValues;
@@ -67,6 +71,7 @@ public class DataUtils {
 		putResourceFields();
 		putMergeDualColumnValues();
 		putNFSLocation();
+		putLessonPlanClassActivityFields();
 	}
 	
 	private void putNFSLocation(){
@@ -107,8 +112,14 @@ public class DataUtils {
 		resourceFields.put(ApiConstants._GOORUOID,ApiConstants.GOORUOID);
 	}
 	
-	private void putCourseUsage(){
-		
+	private void putLessonPlanClassActivityFields(){
+		lessonPlanClassActivityFields = new HashMap<String,String>();
+		lessonPlanClassActivityFields.put(ApiConstants.VIEWS, ApiConstants.VIEWS);
+		lessonPlanClassActivityFields.put(ApiConstants._TIME_SPENT, ApiConstants.TIMESPENT);
+		lessonPlanClassActivityFields.put(ApiConstants._SCORE_IN_PERCENTAGE, ApiConstants.SCORE_IN_PERCENTAGE);
+		lessonPlanClassActivityFields.put(ApiConstants._COLLECTION_TYPE, ApiConstants.TYPE);
+		lessonPlanClassActivityFields.put(ApiConstants._LAST_ACCESSED, ApiConstants.LAST_ACCESSED);
+		lessonPlanClassActivityFields.put(ApiConstants.EVIDENCE, ApiConstants.EVIDENCE);
 	}
 	
 	private void putMergeDualColumnValues(){
@@ -258,7 +269,7 @@ public class DataUtils {
 		DataUtils.collectionSummaryResourceColumns = collectionSummaryResourceColumns;
 	}
 	
-	public static Map<String,Object> getColumnFamilyContent(String columnFamily, ColumnList<String> columnList, Map<String,String> aliesNames, Collection<String> columnNames, Map<String,List<String>> mergeResourceDualColumnValues){
+	public static Map<String,Object> getColumnFamilyContent(String columnFamily, ColumnList<String> columnList, Map<String,String> aliesNames, String key, Collection<String> columnNames, Map<String,List<String>> mergeResourceDualColumnValues){
 	
 		Map<String,String> dataTypes = getColumnFamilyDataTypes().get(columnFamily);
 		Map<String,Object> dataMap = new HashMap<String,Object>();
@@ -273,7 +284,7 @@ public class DataUtils {
 		}
 		for(String columnName : RequestedColumns){
 			String apiField = aliesNames.get(columnName) != null ? aliesNames.get(columnName) : columnName;
-			fetchData(columnFamily, dataTypes, columnName, apiField, columnList, dataMap);
+			fetchData(columnFamily, dataTypes, key, columnName, apiField, columnList, dataMap);
 		}
 		return dataMap;
 	}
@@ -299,7 +310,7 @@ public class DataUtils {
 				for (String column : mergeColumns.getValue()) {
 					String apiField = aliesNames.get(column) != null ? aliesNames
 							.get(column) : column;
-					fetchData(columnFamily, dataTypes, column,
+					fetchData(columnFamily, dataTypes, null, column,
 							apiField, columnList, dataMap);
 					if (dataMap.get(apiField) != null) {
 						RequestedColumns.removeAll(mergeColumns.getValue());
@@ -310,43 +321,55 @@ public class DataUtils {
 		}
 	}
 	
-	private static void fetchData(String columnFamily, Map<String,String> dataTypes, String columnName, String apiField, ColumnList<String> columns, Map<String,Object> dataMap){
+	private static void fetchData(String columnFamily, Map<String,String> dataTypes,String columnPrefix, String columnName, String apiField, ColumnList<String> columns, Map<String,Object> dataMap){
+
+		String fetchColumnName = columnName;
+		if(columnPrefix != null){
+			fetchColumnName = columnPrefix+ApiConstants.TILDA+columnName;
+		}
 		if(dataTypes.get(columnName) != null){
-			if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.STRING.dataType())){
-				dataMap.put(apiField, columns.getStringValue(columnName, null));
+			if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.STRING.dataType()) || dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.TEXT.dataType())){
+				dataMap.put(apiField, columns.getStringValue(fetchColumnName, null));
 			}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.INT.dataType())){
-				dataMap.put(apiField, columns.getIntegerValue(columnName, 0));
+				dataMap.put(apiField, columns.getIntegerValue(fetchColumnName, 0));
 			}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.LONG.dataType())){
-				dataMap.put(apiField, columns.getLongValue(columnName, 0L));
+				dataMap.put(apiField, columns.getLongValue(fetchColumnName, 0L));
 			}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.DATE.dataType())){
-				dataMap.put(apiField, columns.getDateValue(columnName, null));
+				dataMap.put(apiField, columns.getDateValue(fetchColumnName, null));
 			}else{
-				dataMap.put(apiField, columns.getStringValue(columnName, null));
+				dataMap.put(apiField, columns.getStringValue(fetchColumnName, null));
 				InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
 			}
 		}else {
-			dataMap.put(apiField, columns.getStringValue(columnName, null));
+			dataMap.put(apiField, columns.getStringValue(fetchColumnName, null));
 			InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
 		}
 	}
 
-	private static void fetchData(String columnFamily, Map<String,String> dataTypes, String columnName, String apiField, Row<String, String> row, Map<String,Object> dataMap){
-		if(dataTypes.get(columnName) != null){
-			if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.STRING.dataType())){
-				dataMap.put(apiField, row.getColumns().getStringValue(columnName, null));
-			}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.INT.dataType())){
-				dataMap.put(apiField, row.getColumns().getIntegerValue(columnName, 0));
-			}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.LONG.dataType())){
-				dataMap.put(apiField, row.getColumns().getLongValue(columnName, 0L));
-			}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.DATE.dataType())){
-				dataMap.put(apiField, row.getColumns().getDateValue(columnName, null));
-			}else{
-				dataMap.put(apiField, row.getColumns().getStringValue(columnName, null));
-				InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
+	public static void fetchDefaultData(String columnFamily, Map<String,String> aliesNames, Map<String,Object> dataMap){
+		
+		Map<String,String> dataTypes = getColumnFamilyDataTypes().get(columnFamily);
+		
+		if(dataTypes != null) {
+		for(Entry<String, String> aliesName : aliesNames.entrySet()){
+			if(dataTypes.get(aliesName.getKey()) != null){
+				if(dataTypes.get(aliesName.getKey()).equalsIgnoreCase(ApiConstants.dataTypes.STRING.dataType()) || dataTypes.get(aliesName.getKey()).equalsIgnoreCase(ApiConstants.dataTypes.TEXT.dataType())){
+					dataMap.put(aliesName.getValue(), null);
+				}else if(dataTypes.get(aliesName.getKey()).equalsIgnoreCase(ApiConstants.dataTypes.INT.dataType())){
+					dataMap.put(aliesName.getValue(), 0);
+				}else if(dataTypes.get(aliesName.getKey()).equalsIgnoreCase(ApiConstants.dataTypes.LONG.dataType())){
+					dataMap.put(aliesName.getValue(), 0L);
+				}else if(dataTypes.get(aliesName.getKey()).equalsIgnoreCase(ApiConstants.dataTypes.DATE.dataType())){
+					dataMap.put(aliesName.getValue(), null);
+				}else{
+					dataMap.put(aliesName.getValue(), null);
+					InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,aliesName.getValue()));
+				}
+			}else {
+				dataMap.put(aliesName.getValue(), null);
+				InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,aliesName.getValue()));
 			}
-		}else {
-			dataMap.put(apiField, row.getColumns().getStringValue(columnName, null));
-			InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
+		}
 		}
 	}
 	
@@ -392,6 +415,10 @@ public class DataUtils {
 
 	public static Map<String, String> getResourceFields() {
 		return resourceFields;
+	}
+	
+	public static Map<String, String>  getLessonPlanClassActivityFields() {
+		return lessonPlanClassActivityFields;
 	}
 
 	public static Map<String, Map<String,List<String>>> getMergeDualColumnValues() {
