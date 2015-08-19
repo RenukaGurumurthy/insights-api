@@ -56,6 +56,7 @@ public class RequestUtils {
 					jsonObject.put(entry.getKey(), entry.getValue());
 			}
 			jsonObject.put("url", request.getRequestURL().toString());
+			jsonObject.put("sessionToken", getSessionToken(request));
 			InsightsLogger.debug(jsonObject.toString());
 		} catch (JSONException e) {
 			InsightsLogger.debug(jsonObject.toString(),e);

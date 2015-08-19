@@ -1024,6 +1024,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				Map<String, Object> itemDataMap = new HashMap<String, Object>();
 				itemDataMap.put(ApiConstants.SEQUENCE, column.getLongValue());
 				itemDataMap.put(ApiConstants.GOORUOID, column.getName());
+				itemDataMap.put(ApiConstants._GOORUOID, column.getName());
 				itemIds.add(column.getName());
 				associatedItems.add(itemDataMap);
 			}
