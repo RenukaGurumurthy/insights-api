@@ -1414,9 +1414,9 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		for (String columnName : columnNames.split(ApiConstants.COMMA)) {
 			if (hasData) {
 				dataMap.put(columnName,
-						lessonData.getResult().getLongValue(columnName, 0l));
+						lessonData.getResult().getLongValue(columnName, 0L));
 			} else {
-				dataMap.put(columnName, 0l);
+				dataMap.put(columnName, 0L);
 			}
 		}
 	}
