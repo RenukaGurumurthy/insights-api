@@ -274,76 +274,37 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	public ResponseParamDTO<Map<String,Object>> getCourseProgress(String classId, String courseId, String userUid, boolean isSecure) throws Exception {
 		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = null;
+		
 		if (StringUtils.isNotBlank(userUid)) {
 			responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-			List<Map<String, Object>> unitDataMapAsList = new ArrayList<Map<String, Object>>();
-			Collection<String> resourceColumns = new ArrayList<String>();
-			resourceColumns.add(ApiConstants.TITLE);
-			resourceColumns.add(ApiConstants.GOORUOID);
-
-			OperationResult<ColumnList<String>> unitData = getCassandraService().read(ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), courseId);
-			if (unitData != null && !unitData.getResult().isEmpty() && unitData.getResult().size() > 0) {
-				for (Column<String> unit : unitData.getResult()) {
-					Map<String, Object> unitDataAsMap = new HashMap<String, Object>();
-					String unitGooruOid = unit.getName();
-					// Form unit class key
-					String classUnitKey = getBaseService().appendTilda(classId, courseId, unitGooruOid);
-					if (StringUtils.isNotBlank(userUid)) {
-						classUnitKey = getBaseService().appendTilda(classUnitKey, userUid);
-					}
-					// Fetch unit metadata
-					OperationResult<ColumnList<String>> unitMetaData = getCassandraService().read(ColumnFamily.RESOURCE.getColumnFamily(), unitGooruOid, resourceColumns);
-					if (!unitMetaData.getResult().isEmpty() && unitMetaData.getResult().size() > 0) {
-						ColumnList<String> unitMetaDataColumns = unitMetaData.getResult();
-						unitDataAsMap.put(ApiConstants.TITLE, unitMetaDataColumns.getColumnByName(ApiConstants.TITLE).getStringValue());
-					}
-					unitDataAsMap.put(ApiConstants.GOORUOID, unitGooruOid);
-					unitDataAsMap.put(ApiConstants.TYPE, ApiConstants.UNIT);
-					unitDataAsMap.put(ApiConstants.SEQUENCE, unit.getLongValue());
-
-					// Fetch unit's assessment and collections count 
-					long unitAssessmentCount = 0L; long unitCollectionCount = 0L;
-					OperationResult<ColumnList<String>> lessonData = getCassandraService().read(ColumnFamily.CONTENT_META.getColumnFamily(), unitGooruOid);
-					if(!lessonData.getResult().isEmpty()){
-						unitAssessmentCount = lessonData.getResult().getLongValue(ApiConstants.ASSESSMENT_COUNT, 0l);	
-						unitCollectionCount = lessonData.getResult().getLongValue(ApiConstants.COLLECTION_COUNT, 0l);	
-					}
-					// Fetch unit's total study time & unique views of collections 
-					OperationResult<ColumnList<String>> collectionMetricsData = getCassandraService().read(ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
-							getBaseService().appendTilda(classUnitKey, ApiConstants.COLLECTION));
-					ColumnList<String> collectionMetricColumnList = null;
-					Long collectionsViewedInUnit = 0L;
-					Long unitCollectionsTotalStudyTime = 0L;
-					if (collectionMetricsData != null && !collectionMetricsData.getResult().isEmpty()) {
-						collectionMetricColumnList = collectionMetricsData.getResult();
-						if (collectionMetricColumnList != null && collectionMetricColumnList.size() > 0) {
-							collectionsViewedInUnit = collectionMetricColumnList.getLongValue(ApiConstants._UNIQUE_VIEWS, 0L);
-							unitCollectionsTotalStudyTime = collectionMetricColumnList.getLongValue(ApiConstants._TIME_SPENT, 0L);
-						}
-					}
-					
-					// Fetch unit's avgScore & unique attempt count of assessments 
-					OperationResult<ColumnList<String>> assessmentMetricsData = getCassandraService().read(ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), getBaseService().appendTilda(classUnitKey, ApiConstants.ASSESSMENT));
-					ColumnList<String> assessmentMetricColumnList = null;
-					Long unitAvgScore = 0L;
-					Long assessmentsAttemptedInUnit = 0L;
-					if (assessmentMetricsData != null && !assessmentMetricsData.getResult().isEmpty()) {
-						assessmentMetricColumnList = assessmentMetricsData.getResult();
-						if (assessmentMetricColumnList != null && assessmentMetricColumnList.size() > 0) {
-							assessmentsAttemptedInUnit = assessmentMetricColumnList.getLongValue(ApiConstants._UNIQUE_VIEWS, 0L);
-							unitAvgScore = assessmentMetricColumnList.getLongValue(ApiConstants._SCORE_IN_PERCENTAGE, 0L);
-						}
-					}
-					unitDataAsMap.put(ApiConstants.COLLECTIONS_VIEWED, collectionsViewedInUnit);
-					unitDataAsMap.put(ApiConstants.TOTAL_STUDY_TIME, unitCollectionsTotalStudyTime);
-					unitDataAsMap.put(ApiConstants.ASSESSMENTS_ATTEMPTED, assessmentsAttemptedInUnit);
-					unitDataAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, unitAvgScore);
-					unitDataAsMap.put(ApiConstants.ASSESSMENT_COUNT, unitAssessmentCount);
-					unitDataAsMap.put(ApiConstants.COLLECTION_COUNT, unitCollectionCount);
-					unitDataMapAsList.add(unitDataAsMap);
+			List<Map<String,Object>> unitItemsMetaData = getAssociatedItems(courseId, null, true, null, DataUtils.getResourceFields());
+			for(Map<String,Object> unitItem : unitItemsMetaData) {
+				String unitGooruOid = unitItem.get(ApiConstants.GOORUOID).toString();
+				String classUnitKey = getBaseService().appendTilda(classId, courseId, unitGooruOid,userUid);
+				// Fetch unit metadata
+				getContentMeta(unitGooruOid, getBaseService().appendComma(ApiConstants.ASSESSMENT_COUNT,ApiConstants.COLLECTION_COUNT), unitItem);
+				long collectionsViewedInUnit = 0, unitCollectionsTotalStudyTime = 0,unitAvgScore = 0,assessmentsAttemptedInUnit = 0;
+				// Fetch unit's total study time & unique views of collections 
+				OperationResult<ColumnList<String>> collectionMetricsData = getCassandraService().read(ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
+						getBaseService().appendTilda(classUnitKey, ApiConstants.COLLECTION));
+				if (collectionMetricsData != null && collectionMetricsData.getResult() != null) {
+					ColumnList<String> collectionMetrics = collectionMetricsData.getResult();
+						collectionsViewedInUnit = collectionMetrics.getLongValue(ApiConstants._UNIQUE_VIEWS, 0L);
+						unitCollectionsTotalStudyTime = collectionMetrics.getLongValue(ApiConstants._TIME_SPENT, 0L);
 				}
-				responseParamDTO.setContent(unitDataMapAsList);
+				// Fetch unit's avgScore & unique attempt count of assessments 
+				OperationResult<ColumnList<String>> assessmentMetricsData = getCassandraService().read(ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), getBaseService().appendTilda(classUnitKey, ApiConstants.ASSESSMENT));
+				if (assessmentMetricsData != null && assessmentMetricsData.getResult() != null) {
+					ColumnList<String> assessmentMetricColumnList = assessmentMetricsData.getResult();
+					assessmentsAttemptedInUnit = assessmentMetricColumnList.getLongValue(ApiConstants._UNIQUE_VIEWS, 0L);
+					unitAvgScore = assessmentMetricColumnList.getLongValue(ApiConstants._SCORE_IN_PERCENTAGE, 0L);
+				}
+				unitItem.put(ApiConstants.COLLECTIONS_VIEWED, collectionsViewedInUnit);
+				unitItem.put(ApiConstants.TOTAL_STUDY_TIME, unitCollectionsTotalStudyTime);
+				unitItem.put(ApiConstants.ASSESSMENTS_ATTEMPTED, assessmentsAttemptedInUnit);
+				unitItem.put(ApiConstants.SCORE_IN_PERCENTAGE, unitAvgScore);
 			}
+			responseParamDTO.setContent(unitItemsMetaData);
 		}else{
 			responseParamDTO = getAllStudentProgressByUnit(classId, courseId, isSecure);	
 		}
@@ -1445,5 +1406,19 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			classGoal = classMetaData.getResult().getLongValue(ApiConstants.MINIMUM_SCORE, 0L);
 		}
 		return classGoal;
+	}
+	
+	private void getContentMeta(String key, String columnNames, Map<String,Object> dataMap) {
+		
+		OperationResult<ColumnList<String>> lessonData = getCassandraService().read(ColumnFamily.CONTENT_META.getColumnFamily(), key);
+		boolean hasData = (lessonData != null && lessonData.getResult() != null) ? true : false;
+		for (String columnName : columnNames.split(ApiConstants.COMMA)) {
+			if (hasData) {
+				dataMap.put(columnName,
+						lessonData.getResult().getLongValue(columnName, 0L));
+			} else {
+				dataMap.put(columnName, 0L);
+			}
+		}
 	}
 }
