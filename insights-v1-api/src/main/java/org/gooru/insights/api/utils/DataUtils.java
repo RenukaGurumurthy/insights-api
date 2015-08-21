@@ -46,6 +46,8 @@ public class DataUtils {
 	
 	private static Collection<String> collectionSummaryResourceColumns;
 
+	private static Map<String,String> unitProgressActivityFields;
+
 	private static Map<String,String> resourceFields;
 	
 	private static Map<String,String> lessonPlanClassActivityFields;
@@ -54,6 +56,7 @@ public class DataUtils {
 
 	private static Map<String,Map<String,List<String>>> mergeDualColumnValues;
 	
+ 	
 	@Autowired
 	private BaseService baseService;
 	
@@ -72,6 +75,7 @@ public class DataUtils {
 		putMergeDualColumnValues();
 		putNFSLocation();
 		putLessonPlanClassActivityFields();
+		putUnitProgressActivityFields();
 	}
 	
 	private void putNFSLocation(){
@@ -126,6 +130,14 @@ public class DataUtils {
 		
 		mergeDualColumnValues = new HashMap<String,Map<String,List<String>>>();
 		putResourceMergeConfig(mergeDualColumnValues);
+	}
+	
+	private void putUnitProgressActivityFields() {
+		
+		unitProgressActivityFields = new HashMap<String,String>();
+		unitProgressActivityFields.put(ApiConstants.VIEWS, ApiConstants.VIEWS);
+		unitProgressActivityFields.put(ApiConstants._TIME_SPENT, ApiConstants.TIMESPENT);
+		unitProgressActivityFields.put(ApiConstants._SCORE_IN_PERCENTAGE, ApiConstants.SCORE_IN_PERCENTAGE);
 	}
 	
 	private void putResourceMergeConfig(Map<String,Map<String,List<String>>> mergeDualColumnValues){
@@ -419,6 +431,10 @@ public class DataUtils {
 	
 	public static Map<String, String>  getLessonPlanClassActivityFields() {
 		return lessonPlanClassActivityFields;
+	}
+	
+	public static Map<String, String>  getUnitProgressActivityFields() {
+		return unitProgressActivityFields;
 	}
 
 	public static Map<String, Map<String,List<String>>> getMergeDualColumnValues() {
