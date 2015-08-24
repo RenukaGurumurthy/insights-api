@@ -37,8 +37,6 @@ public interface ClassService {
 
 	List<String> getSessions(Collection<String> rowKeys);
 
-	List<Map<String,Object>> getIdSeparatedMetrics(Collection<String> rowKeys,String columnFamily, Collection<String> columns, String userIds,boolean isUserIdInKey,String collectionIds, boolean userProcess);
-
 	ResponseParamDTO<Map<String, Object>> findUsageAvailable(String classGooruId ,String courseGooruId,String unitGooruId,String lessonGooruId,String contentGooruId) throws Exception;
 
 	List<Map<String,Object>> getResourcesMetaData(Collection<String> keys,Collection<String> resourceColumns,String type,Map<String,String> aliesNames);

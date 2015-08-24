@@ -56,6 +56,7 @@ public class DataUtils {
 
 	private static Map<String,Map<String,List<String>>> mergeDualColumnValues;
 	
+ 	private static Map<String,String> allStudentUnitProgress;
  	
 	@Autowired
 	private BaseService baseService;
@@ -76,6 +77,7 @@ public class DataUtils {
 		putNFSLocation();
 		putLessonPlanClassActivityFields();
 		putUnitProgressActivityFields();
+		putallStudentUnitProgress();
 	}
 	
 	private void putNFSLocation(){
@@ -114,6 +116,12 @@ public class DataUtils {
 		resourceFields.put(ApiConstants.FOLDER,ApiConstants.FOLDER);
 		resourceFields.put(ApiConstants.GOORUOID,ApiConstants.GOORUOID);
 		resourceFields.put(ApiConstants._GOORUOID,ApiConstants.GOORUOID);
+	}
+	
+	private void putallStudentUnitProgress() {
+		allStudentUnitProgress = new HashMap<String,String>();
+		allStudentUnitProgress.put(ApiConstants._SCORE_IN_PERCENTAGE, ApiConstants.SCORE_IN_PERCENTAGE);
+		allStudentUnitProgress.put(ApiConstants._ASSESSMENT_UNIQUE_VIEWS, ApiConstants.VIEWS);
 	}
 	
 	private void putLessonPlanClassActivityFields(){
@@ -439,5 +447,9 @@ public class DataUtils {
 
 	public static Map<String, Map<String,List<String>>> getMergeDualColumnValues() {
 		return mergeDualColumnValues;
+	}
+	
+	public static Map<String,String> getAllStudentUnitProgress() {
+		return allStudentUnitProgress;
 	}
 }

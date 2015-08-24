@@ -733,7 +733,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return usageAsMap;
 	}
 	
-	public List<Map<String,Object>> getDirectActivityMetrics(Collection<String> rowKeys,String columnFamily, Collection<String> requestedColumns, String studentIds,boolean isUserIdInKey,String contentIds, boolean userProcess) {
+	private List<Map<String,Object>> getDirectActivityMetrics(Collection<String> rowKeys,String columnFamily, String studentIds,boolean isUserIdInKey,String contentIds, boolean userProcess, Map<String,String> aliesNames) {
 		Collection<String> fetchedContentIds = new ArrayList<String>();
 		List<Map<String,Object>> contentUsageData = new ArrayList<Map<String,Object>>();
 		Map<String,Set<String>> studentContentMapper = new HashMap<String,Set<String>>();
@@ -741,8 +741,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		/**
 		 * Get Activity data
 		 */
-		OperationResult<Rows<String, String>> activityData = getCassandraService().readAll(columnFamily, rowKeys, requestedColumns);
-		if (!activityData.getResult().isEmpty()) {
+		OperationResult<Rows<String, String>> activityData = getCassandraService().readAll(columnFamily, rowKeys, aliesNames.keySet());
+		if (activityData != null && activityData.getResult() != null) {
 			
 			Rows<String, String> itemMetricRows = activityData.getResult();
 			//Iterate for Every Row
@@ -758,15 +758,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					}
 				}
 				usageMap.put(ApiConstants.GOORUOID, contentId);
-				//Iterate for Fetched column
-				for(String column : requestedColumns){
-					//Get the metric data
-					if(column.equalsIgnoreCase(ApiConstants._SCORE_IN_PERCENTAGE)){
-						usageMap.put(ApiConstants.SCORE_IN_PERCENTAGE, metricRow.getColumns().getLongValue(ApiConstants._SCORE_IN_PERCENTAGE, 0L));
-					} else if(column.equalsIgnoreCase(ApiConstants._ASSESSMENT_UNIQUE_VIEWS)){
-						usageMap.put(ApiConstants.VIEWS, metricRow.getColumns().getLongValue(ApiConstants._ASSESSMENT_UNIQUE_VIEWS, 0L));
-					}
-				}
+				//Get the metric data
+				usageMap.putAll(DataUtils.getColumnFamilyContent(columnFamily, metricRow.getColumns(), aliesNames, null, aliesNames.keySet(), null));
 				//Get the userId for the content usage,If we need user level tril down
 				if(userProcess){
 					userId = includeUserId(userProcess,isUserIdInKey,studentIds,userId,contentId,metricRow,usageMap,studentContentMapper);
@@ -782,16 +775,17 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		 * Set default value at user-content level
 		 */
 		if(userProcess){
-			insertDefaultUserContents(contentIds, studentContentMapper, studentIds, requestedColumns,contentUsageData);
+			insertDefaultUserContents(columnFamily, contentIds, studentContentMapper, studentIds, aliesNames,contentUsageData);
 		}else {
 			/**
 			 * Set default value only at collection level
 			 */
 			for(String id : contentIds.split(ApiConstants.COMMA)){
 				if(!fetchedContentIds.contains(id)){
-					Map<String,Object> tempMap = insertDefaultMetrics(requestedColumns);
-					tempMap.put(ApiConstants.GOORUOID, id);
-					contentUsageData.add(tempMap);
+					Map<String,Object> dataMap = new HashMap<String, Object>();
+					DataUtils.fetchDefaultData(columnFamily, aliesNames, dataMap);
+					dataMap.put(ApiConstants.GOORUOID, id);
+					contentUsageData.add(dataMap);
 				}
 			}
 		}
@@ -801,13 +795,81 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	/**
 	 * @param rowKeys is the list of CF rowKeys
 	 * @param columnFamily is the name of the columnFamily
-	 * @param requestedColumns is the CF column Names
+	 * @param aliesName is the CF column Names
 	 * @param studentIds List of students ids this may be null if we don't want user level break down
 	 * @param isUserIdInKey check is the user id available in rowkey
 	 * @param contentIds is the list of itemIds
 	 * @param userProcess check are we need to process at user level
 	 */
-	public List<Map<String,Object>> getIdSeparatedMetrics(Collection<String> rowKeys,String columnFamily, Collection<String> requestedColumns, String studentIds,boolean isUserIdInKey,String contentIds, boolean userProcess) {
+	private List<Map<String,Object>> getIdSeparatedMetrics(Collection<String> rowKeys,String columnFamily, Map<String, String> aliesNames, String studentIds,boolean isUserIdInKey,String contentIds, boolean userProcess) {
+
+		Collection<String> fetchedContentIds = new ArrayList<String>();
+		List<Map<String,Object>> contentUsageData = new ArrayList<Map<String,Object>>();
+		Map<String,Set<String>> studentContentMapper = new HashMap<String,Set<String>>();
+
+		/**
+		 * Get Activity data
+		 */
+		Set<String> columnNames = aliesNames.keySet();
+		OperationResult<Rows<String, String>> activityData = getCassandraService().readAll(columnFamily, rowKeys, aliesNames.keySet());
+		if (!activityData.getResult().isEmpty()) {
+			
+			Rows<String, String> itemMetricRows = activityData.getResult();
+			//Iterate for Every Row
+			for(Row<String, String> metricRow : itemMetricRows){
+				String userId = null;
+				Map<String,Map<String, Object>> idBasedContentUsage = new HashMap<String,Map<String, Object>>();
+				//Iterate for Fetched column
+				for(String column : columnNames){
+					Map<String,Object> usageMap = new HashMap<String,Object>();
+					String[] columnMetaInfo = column.split(ApiConstants.TILDA);
+					String metricName = (columnMetaInfo.length > 1) ? columnMetaInfo[columnMetaInfo.length-1] : columnMetaInfo[0];
+					//No Need to process for MA question A,B,C,D option
+					if((columnMetaInfo.length > 1 ? columnMetaInfo[1].matches(ApiConstants.OPTIONS_MATCH) : columnMetaInfo[0].matches(ApiConstants.OPTIONS_MATCH))){
+						continue;
+					}
+					//Get the metric data
+					usageMap = fetchMetricData(columnMetaInfo[0],metricRow,metricName,column);
+					//Get the userId for the content usage,If we need user level tril down
+					if(userProcess){
+						userId = includeUserId(userProcess,isUserIdInKey,studentIds,userId,columnMetaInfo[0],metricRow,usageMap,studentContentMapper);
+					}
+					//Since content are stored in column,we need to do a content based separation
+					if(idBasedContentUsage.containsKey(columnMetaInfo[0])){
+						usageMap.putAll(idBasedContentUsage.get(columnMetaInfo[0]));
+					}
+					idBasedContentUsage.put(columnMetaInfo[0], usageMap);
+					//Storing the Fetched content id to support including default value at content level 
+					if(!fetchedContentIds.contains(columnMetaInfo[0]) && columnMetaInfo[0].length() > 35){
+						fetchedContentIds.add(columnMetaInfo[0]);
+					}
+				}
+				contentUsageData.addAll(getBaseService().convertMapToList(idBasedContentUsage, ApiConstants.GOORUOID));
+			}
+		}
+		
+		/**
+		 * Set default value at user-content level
+		 */
+		if(userProcess){
+			insertDefaultUserContents(columnFamily, contentIds, studentContentMapper, studentIds, aliesNames,contentUsageData);
+		}else {
+			/**
+			 * Set default value only at collection level
+			 */
+			for(String id : contentIds.split(ApiConstants.COMMA)){
+				if(!fetchedContentIds.contains(id)){
+					Map<String,Object> tempMap = new HashMap<String, Object>();
+					DataUtils.fetchDefaultData(columnFamily, aliesNames, tempMap);
+					tempMap.put(ApiConstants.GOORUOID, id);
+					contentUsageData.add(tempMap);
+				}
+			}
+		}
+		return contentUsageData;
+	}
+	
+	private List<Map<String,Object>> getIdSeparatedMetrics(Collection<String> rowKeys,String columnFamily, Collection<String> requestedColumns, String studentIds,boolean isUserIdInKey,String contentIds, boolean userProcess) {
 
 		Collection<String> fetchedContentIds = new ArrayList<String>();
 		List<Map<String,Object>> contentUsageData = new ArrayList<Map<String,Object>>();
@@ -857,7 +919,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		 * Set default value at user-content level
 		 */
 		if(userProcess){
-			insertDefaultUserContents(contentIds, studentContentMapper, studentIds, requestedColumns,contentUsageData);
+			insertDefaultUserContents(columnFamily, contentIds, studentContentMapper, studentIds, requestedColumns,contentUsageData);
 		}else {
 			/**
 			 * Set default value only at collection level
@@ -871,9 +933,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			}
 		}
 		return contentUsageData;
-	}
-	
-	
+	}	
 	
 	private void getTypeBasedItemGooruOids(String lessonId, StringBuffer itemGooruOids, StringBuffer collectionGooruOids, StringBuffer assessmentGooruOids, StringBuffer assessmentUrlGooruOids) {
 		OperationResult<ColumnList<String>> contentItemRows = getCassandraService().read(ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), lessonId);
@@ -913,11 +973,13 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		
 		OperationResult<ColumnList<String>> studentData = getCassandraService().read(ColumnFamily.USER_GROUP_ASSOCIATION.getColumnFamily(), classId);
 		List<Map<String,Object>> studentsList = new ArrayList<Map<String,Object>>();
-		for(Column<String> column : studentData.getResult()){
-			Map<String,Object> student = new HashMap<String,Object>();
-			student.put(ApiConstants.USER_UID, column.getName());
-			student.put(ApiConstants.USER_NAME, column.getStringValue());
-			studentsList.add(student);
+		if(studentData != null) {
+			for(Column<String> column : studentData.getResult()){
+				Map<String,Object> student = new HashMap<String,Object>();
+				student.put(ApiConstants.USER_UID, column.getName());
+				student.put(ApiConstants.USER_NAME, column.getStringValue());
+				studentsList.add(student);
+			}
 		}
 		return studentsList;
 	} 
@@ -958,18 +1020,15 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		List<Map<String,Object>> unitsMetaData = getAssociatedItems(courseId,null,true, null, DataUtils.getResourceFields());
 		List<Map<String,Object>> students = getStudents(classId);
 		if(!unitsMetaData.isEmpty() && !students.isEmpty()){
-		String classCourseId = getBaseService().appendTilda(classId,courseId);
-		StringBuffer unitIds = getBaseService().getCommaSeparatedIds(unitsMetaData, ApiConstants.GOORUOID);
-		StringBuffer studentIds = getBaseService().getCommaSeparatedIds(students, ApiConstants.USER_UID);
-		Collection<String> UnitStudentKeys = getBaseService().generateCommaSeparatedStringToKeys(ApiConstants.TILDA, unitIds.toString(),studentIds.toString());
+		String classCourseId = ServiceUtils.appendTilda(classId,courseId);
+		StringBuffer unitIds = ServiceUtils.getCommaSeparatedIds(unitsMetaData, ApiConstants.GOORUOID);
+		StringBuffer studentIds = ServiceUtils.getCommaSeparatedIds(students, ApiConstants.USER_UID);
+		Collection<String> UnitStudentKeys = ServiceUtils.generateCommaSeparatedStringToKeys(ApiConstants.TILDA, unitIds.toString(),studentIds.toString());
 		Collection<String> keys = new ArrayList<String>();
 		for(String unitStudentKey : UnitStudentKeys){
-			keys.add(getBaseService().appendTilda(classCourseId,unitStudentKey));
+			keys.add(ServiceUtils.appendTilda(classCourseId,unitStudentKey));
 		}
-		UnitStudentKeys.clear();
-		UnitStudentKeys.add(ApiConstants._SCORE_IN_PERCENTAGE);
-		UnitStudentKeys.add(ApiConstants._ASSESSMENT_UNIQUE_VIEWS);
-		contentUsage = getDirectActivityMetrics(keys,ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), UnitStudentKeys, studentIds.toString(),true,unitIds.toString(),true);
+		contentUsage = getDirectActivityMetrics(keys,ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), studentIds.toString(),true,unitIds.toString(),true, DataUtils.getAllStudentUnitProgress());
 		contentUsage = getBaseService().leftJoin(contentUsage,unitsMetaData,ApiConstants.GOORUOID,ApiConstants.GOORUOID);
 		//group at content level
 		contentUsage = getBaseService().groupRecordsBasedOnKey(contentUsage,ApiConstants.USER_UID,ApiConstants.USAGE_DATA);
@@ -1184,10 +1243,24 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
  		return usageMap;
 	}
 	
-	private void insertDefaultUserContents(String collectionIds, Map<String,Set<String>> userSet, String userIds,Collection<String> columns, List<Map<String,Object>> collectionUsageData){
+	private void insertDefaultUserContents(String columnFamily, String collectionIds, Map<String,Set<String>> userSet, String userIds,Map<String,String> aliesNames, List<Map<String,Object>> collectionUsageData){
 	
 		for(String collectionId : collectionIds.split(ApiConstants.COMMA)){
-			
+			Map<String,Object> tempMap = new HashMap<String, Object>();
+			DataUtils.fetchDefaultData(columnFamily, aliesNames, tempMap);
+			tempMap.put(ApiConstants.GOORUOID, collectionId);
+			if(userSet.containsKey((collectionId))){
+				insertDataToDefaultUsers(userSet,collectionId,userIds,tempMap,collectionUsageData);
+			}else{
+				userSet.put(collectionId, new HashSet<String>());
+				insertDataToDefaultUsers(userSet,collectionId,userIds,tempMap,collectionUsageData);
+			}
+		}
+	}
+	
+	private void insertDefaultUserContents(String columnFamily, String collectionIds, Map<String,Set<String>> userSet, String userIds,Collection<String> columns, List<Map<String,Object>> collectionUsageData){
+		
+		for(String collectionId : collectionIds.split(ApiConstants.COMMA)){
 			Map<String,Object> tempMap = insertDefaultMetrics(columns);
 			tempMap.put(ApiConstants.GOORUOID, collectionId);
 			if(userSet.containsKey((collectionId))){
