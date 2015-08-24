@@ -56,6 +56,7 @@ public class DataUtils {
 
 	private static Map<String,Map<String,List<String>>> mergeDualColumnValues;
 	
+ 	private static Map<String,String> allStudentUnitProgress;
  	
 	@Autowired
 	private BaseService baseService;
@@ -76,6 +77,7 @@ public class DataUtils {
 		putNFSLocation();
 		putLessonPlanClassActivityFields();
 		putUnitProgressActivityFields();
+		putallStudentUnitProgress();
 	}
 	
 	private void putNFSLocation(){
@@ -114,6 +116,12 @@ public class DataUtils {
 		resourceFields.put(ApiConstants.FOLDER,ApiConstants.FOLDER);
 		resourceFields.put(ApiConstants.GOORUOID,ApiConstants.GOORUOID);
 		resourceFields.put(ApiConstants._GOORUOID,ApiConstants.GOORUOID);
+	}
+	
+	private void putallStudentUnitProgress() {
+		allStudentUnitProgress = new HashMap<String,String>();
+		allStudentUnitProgress.put(ApiConstants._SCORE_IN_PERCENTAGE, ApiConstants.SCORE_IN_PERCENTAGE);
+		allStudentUnitProgress.put(ApiConstants._ASSESSMENT_UNIQUE_VIEWS, ApiConstants.VIEWS);
 	}
 	
 	private void putLessonPlanClassActivityFields(){
@@ -281,13 +289,13 @@ public class DataUtils {
 		DataUtils.collectionSummaryResourceColumns = collectionSummaryResourceColumns;
 	}
 	
-	public static Map<String,Object> getColumnFamilyContent(String columnFamily, ColumnList<String> columnList, Map<String,String> aliesNames, String key, Collection<String> columnNames, Map<String,List<String>> mergeResourceDualColumnValues){
+	public static Map<String,Object> getColumnFamilyContent(String columnFamily, ColumnList<String> columnList, Map<String,String> aliesNames, String key, Collection<String> columnNames, Map<String,List<String>> mergeResourceDualColumnValues, boolean isSecure){
 	
 		Map<String,String> dataTypes = getColumnFamilyDataTypes().get(columnFamily);
 		Map<String,Object> dataMap = new HashMap<String,Object>();
 		Collection<String> RequestedColumns = new ArrayList<String>(columnNames);
 		if(RequestedColumns.contains(ApiConstants.THUMBNAIL)){
-			buildThumbnailURL(columnList, dataMap);
+			buildThumbnailURL(columnList,isSecure, dataMap);
 			RequestedColumns.remove(ApiConstants.THUMBNAIL);
 			RequestedColumns.remove(ApiConstants.FOLDER);
 		}
@@ -301,12 +309,14 @@ public class DataUtils {
 		return dataMap;
 	}
 	
-	private static void buildThumbnailURL(ColumnList<String> columns, Map<String,Object> resourceMetaData){
+	private static void buildThumbnailURL(ColumnList<String> columns, boolean isSecure, Map<String,Object> resourceMetaData){
 		
 		String thumbnail = null;
 		thumbnail = columns.getStringValue(ApiConstants.THUMBNAIL, null);
 		if(thumbnail != null && !thumbnail.startsWith(ApiConstants.HTTP)) {
-			thumbnail = ServiceUtils.buildString(nfsLocation,columns.getStringValue(ApiConstants.FOLDER, ApiConstants.STRING_EMPTY),thumbnail);
+			String path = columns.getStringValue(ApiConstants.FOLDER, ApiConstants.STRING_EMPTY);
+			path = ServiceUtils.appendForwardSlash(nfsLocation, thumbnail.contains(path) ? null : path, thumbnail);
+			thumbnail = ServiceUtils.buildString(isSecure ? ApiConstants._HTTPS : ApiConstants._HTTP,path);
 		}
 		resourceMetaData.put(ApiConstants.THUMBNAIL, thumbnail);
 	}
@@ -439,5 +449,9 @@ public class DataUtils {
 
 	public static Map<String, Map<String,List<String>>> getMergeDualColumnValues() {
 		return mergeDualColumnValues;
+	}
+	
+	public static Map<String,String> getAllStudentUnitProgress() {
+		return allStudentUnitProgress;
 	}
 }

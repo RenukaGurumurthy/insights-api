@@ -75,6 +75,24 @@ public class ServiceUtils {
 		return resultList;
 	}
 
+	/**
+	 * 	Accumulate all the resource ids in single unit with List of Map and String as arguments 
+	 */
+	public static StringBuffer getCommaSeparatedIds(List<Map<String, Object>> dataList, String key) {
+			StringBuffer exportData = new StringBuffer();
+			if(dataList != null){
+				for (Map<String, Object> map : dataList) {
+						if (map.get(key) != null) {
+							if(exportData.length() > 0) {
+								exportData.append(ApiConstants.COMMA);
+							} 
+							exportData.append(map.get(key));
+						}
+				}
+			}
+			return exportData;
+	}
+	
 	public static boolean notNull(String parameter) {
 
 		if (StringUtils.trimToNull(parameter) != null) {
@@ -122,5 +140,44 @@ public class ServiceUtils {
 			dataObject.add(objects[objectCount].toString());
 		}
 		return dataObject;
+	}
+	
+	public static String appendComma(String... texts) {
+		StringBuffer sb = new StringBuffer();
+		for (String text : texts) {
+			if (StringUtils.isNotBlank(text)) {
+				if (sb.length() > 0) {
+					sb.append(ApiConstants.COMMA);
+				}
+				sb.append(text);
+			}
+		}
+		return sb.toString();
+	}
+		
+	public static String appendTilda(String... texts) {
+		StringBuffer sb = new StringBuffer();
+		for (String text : texts) {
+			if (StringUtils.isNotBlank(text)) {
+				if (sb.length() > 0) {
+					sb.append(ApiConstants.TILDA);
+				}
+				sb.append(text);
+			}
+		}
+		return sb.toString();
+	}
+	
+	public static String appendForwardSlash(String... texts) {
+		StringBuffer sb = new StringBuffer();
+		for (String text : texts) {
+			if (StringUtils.isNotBlank(text)) {
+				if (sb.length() > 0) {
+					sb.append(ApiConstants.FORWARD_SLASH);
+				}
+				sb.append(text);
+			}
+		}
+		return sb.toString();
 	}
 }
