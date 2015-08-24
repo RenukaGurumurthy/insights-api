@@ -12,7 +12,6 @@ import java.util.Set;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpStatus;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.SessionAttributes;
 import org.gooru.insights.api.constants.ErrorCodes;
@@ -998,7 +997,9 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				associatedItems.add(itemDataMap);
 			}
 			if (fetchMetaData) {
-				if (columnNames == null || columnNames.isEmpty()) {
+				if(aliasName != null && aliasName.size() > 0){
+					columnNames = aliasName.keySet();
+				}else if (columnNames == null || columnNames.isEmpty()) {
 					columnNames = new ArrayList<String>();
 					columnNames.add(ApiConstants.TITLE);
 					columnNames.add(ApiConstants.GOORUOID);
