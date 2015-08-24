@@ -289,13 +289,13 @@ public class DataUtils {
 		DataUtils.collectionSummaryResourceColumns = collectionSummaryResourceColumns;
 	}
 	
-	public static Map<String,Object> getColumnFamilyContent(String columnFamily, ColumnList<String> columnList, Map<String,String> aliesNames, String key, Collection<String> columnNames, Map<String,List<String>> mergeResourceDualColumnValues){
+	public static Map<String,Object> getColumnFamilyContent(String columnFamily, ColumnList<String> columnList, Map<String,String> aliesNames, String key, Collection<String> columnNames, Map<String,List<String>> mergeResourceDualColumnValues, boolean isSecure){
 	
 		Map<String,String> dataTypes = getColumnFamilyDataTypes().get(columnFamily);
 		Map<String,Object> dataMap = new HashMap<String,Object>();
 		Collection<String> RequestedColumns = new ArrayList<String>(columnNames);
 		if(RequestedColumns.contains(ApiConstants.THUMBNAIL)){
-			buildThumbnailURL(columnList, dataMap);
+			buildThumbnailURL(columnList,isSecure, dataMap);
 			RequestedColumns.remove(ApiConstants.THUMBNAIL);
 			RequestedColumns.remove(ApiConstants.FOLDER);
 		}
@@ -309,12 +309,14 @@ public class DataUtils {
 		return dataMap;
 	}
 	
-	private static void buildThumbnailURL(ColumnList<String> columns, Map<String,Object> resourceMetaData){
+	private static void buildThumbnailURL(ColumnList<String> columns, boolean isSecure, Map<String,Object> resourceMetaData){
 		
 		String thumbnail = null;
 		thumbnail = columns.getStringValue(ApiConstants.THUMBNAIL, null);
 		if(thumbnail != null && !thumbnail.startsWith(ApiConstants.HTTP)) {
-			thumbnail = ServiceUtils.buildString(nfsLocation,columns.getStringValue(ApiConstants.FOLDER, ApiConstants.STRING_EMPTY),thumbnail);
+			String path = columns.getStringValue(ApiConstants.FOLDER, ApiConstants.STRING_EMPTY);
+			path = ServiceUtils.appendForwardSlash(nfsLocation, thumbnail.contains(path) ? null : path, thumbnail);
+			thumbnail = ServiceUtils.buildString(isSecure ? ApiConstants._HTTPS : ApiConstants._HTTP,path);
 		}
 		resourceMetaData.put(ApiConstants.THUMBNAIL, thumbnail);
 	}
