@@ -60,25 +60,9 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String,Object>> studentsMetaData = null;
 		List<Map<String,Object>> resultData = new ArrayList<Map<String, Object>>();
-		List<Map<String, Object>> lessonsRawData = new ArrayList<Map<String, Object>>();
 
-		//fetch list of lessons
-		OperationResult<ColumnList<String>> lessonData = getCassandraService().read(ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), unitId);
-		ColumnList<String> lessons = lessonData.getResult();
-		
-		//fetch metadata of lesson
-		Collection<String> resourceColumns = new ArrayList<String>();
-		resourceColumns.add(ApiConstants.TITLE);
-		resourceColumns.add(ApiConstants.RESOURCE_TYPE);
-		resourceColumns.add(ApiConstants.THUMBNAIL);
-		resourceColumns.add(ApiConstants.GOORUOID);
-		resourceColumns.add(ApiConstants._GOORUOID);
-		String lessonGooruOIds = getBaseService().convertListToString(lessons.getColumnNames());
-
+		List<Map<String, Object>> lessonsRawData = getAssociatedItems(unitId, null, true, isSecure, null, DataUtils.getResourceFields());
 			
-		if(StringUtils.isNotBlank(lessonGooruOIds)){
-			lessonsRawData = getResourceData(isSecure, lessonGooruOIds, resourceColumns, ApiConstants.LESSON);
-		}
 		responseParamDTO.setContent(lessonsRawData);
 		
 		//fetch usage data of lesson
@@ -94,39 +78,30 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				}
 				for(Map<String, Object> lessonrawData : lessonsRawData) {
 	
-					String lessonGooruOid = lessonrawData.get(ApiConstants.GOORUOID).toString();
-					OperationResult<ColumnList<String>> assessmentData = getCassandraService().read( ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), lessonGooruOid);
-					ColumnList<String> assessments = assessmentData.getResult();
-					if (lessons != null) {
-						lessonrawData.put(ApiConstants.SEQUENCE, lessons.getColumnByName(lessonGooruOid) != null ? lessons.getLongValue(lessonGooruOid, 0L) : 0L);
-					}
-					lessonrawData.put(ApiConstants.ASSESSMENT_COUNT, assessments.size());
-					lessonrawData.put(ApiConstants.GOORUOID, lessonGooruOid);
-	
 					//fetch lesson usage data
-					String classLessonKey = getBaseService().appendTilda(classId, courseId, unitId, lessonGooruOid);
-					
-					String contentType = null;
+					String lessonGooruOid = lessonrawData.get(ApiConstants.GOORUOID).toString();
 					if(collectionType !=null){
 						if(collectionType.equalsIgnoreCase(ApiConstants.ASSESSMENT)){
-							contentType = ApiConstants.ASSESSMENT_TYPES;
+							collectionType = ApiConstants.ASSESSMENT_TYPES;
 						}else if(collectionType.matches(ApiConstants.COLLECTION_MATCH)) {
-							contentType = ApiConstants.COLLECTION_MATCH;
+							collectionType = ApiConstants.COLLECTION_MATCH;
 						}
 					}
-					List<Map<String,Object>> contentsMetaData = getAssociatedItems(lessonGooruOid,contentType,true,isSecure,null,DataUtils.getResourceFields());
+					List<Map<String,Object>> contentsMetaData = getAssociatedItems(lessonGooruOid,collectionType,true,isSecure,null,DataUtils.getResourceFields());
+					lessonrawData.put(ApiConstants.ASSESSMENT_COUNT, contentsMetaData.size());
 					if(!contentsMetaData.isEmpty()){
 						Set<String> columnSuffix = new HashSet<String>();
 						columnSuffix.add(ApiConstants._TIME_SPENT);
 						columnSuffix.add(ApiConstants._SCORE_IN_PERCENTAGE);
 						columnSuffix.add(ApiConstants.VIEWS);
-						StringBuffer collectionIds = getBaseService().getCommaSeparatedIds(contentsMetaData, ApiConstants.GOORUOID);
+						StringBuffer collectionIds = ServiceUtils.getCommaSeparatedIds(contentsMetaData, ApiConstants.GOORUOID);
+						String classLessonKey = getBaseService().appendTilda(classId, courseId, unitId, lessonGooruOid);
 						Collection<String> rowKeys = ServiceUtils.generateCommaSeparatedStringToKeys(ApiConstants.TILDA,classLessonKey, studentId);
 						Collection<String> columns = ServiceUtils.generateCommaSeparatedStringToKeys(ApiConstants.TILDA,collectionIds.toString(), columnSuffix);
 						/**
 						 * Get collection activity
 						 */
-						List<Map<String,Object>> contentUsage = getIdSeparatedMetrics(rowKeys,ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), columns, studentId,true,collectionIds.toString(),true);
+						List<Map<String,Object>> contentUsage = getIdSeparatedMetrics(rowKeys,ColumnFamily.CLASS_ACTIVITY.getColumnFamily(), columns, DataUtils.getUnitProgressActivityFields(), studentId,true,collectionIds.toString(),true);
 						contentUsage = getBaseService().leftJoin(contentUsage,contentsMetaData,ApiConstants.GOORUOID,ApiConstants.GOORUOID);
 						//group at content level
 						contentUsage = getBaseService().groupRecordsBasedOnKey(contentUsage,ApiConstants.USER_UID,ApiConstants.USAGE_DATA);
@@ -800,7 +775,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	 * @param contentIds is the list of itemIds
 	 * @param userProcess check are we need to process at user level
 	 */
-	private List<Map<String,Object>> getIdSeparatedMetrics(Collection<String> rowKeys,String columnFamily, Map<String, String> aliesNames, String studentIds,boolean isUserIdInKey,String contentIds, boolean userProcess) {
+	private List<Map<String,Object>> getIdSeparatedMetrics(Collection<String> rowKeys,String columnFamily,Collection<String> columnNames, Map<String, String> aliesNames, String studentIds,boolean isUserIdInKey,String contentIds, boolean userProcess) {
 
 		Collection<String> fetchedContentIds = new ArrayList<String>();
 		List<Map<String,Object>> contentUsageData = new ArrayList<Map<String,Object>>();
@@ -809,15 +784,15 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		/**
 		 * Get Activity data
 		 */
-		Set<String> columnNames = aliesNames.keySet();
-		OperationResult<Rows<String, String>> activityData = getCassandraService().readAll(columnFamily, rowKeys, aliesNames.keySet());
-		if (!activityData.getResult().isEmpty()) {
+		OperationResult<Rows<String, String>> activityData = getCassandraService().readAll(columnFamily, rowKeys, columnNames);
+		if (activityData != null && activityData.getResult() != null) {
 			
 			Rows<String, String> itemMetricRows = activityData.getResult();
 			//Iterate for Every Row
 			for(Row<String, String> metricRow : itemMetricRows){
 				String userId = null;
 				Map<String,Map<String, Object>> idBasedContentUsage = new HashMap<String,Map<String, Object>>();
+				ColumnList<String> columnList = metricRow.getColumns();
 				//Iterate for Fetched column
 				for(String column : columnNames){
 					Map<String,Object> usageMap = new HashMap<String,Object>();
@@ -828,7 +803,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 						continue;
 					}
 					//Get the metric data
-					usageMap = fetchMetricData(columnMetaInfo[0],metricRow,metricName,column);
+					DataUtils.fetchData(columnFamily, DataUtils.getColumnFamilyDataTypes().get(columnFamily), columnMetaInfo[0], metricName, aliesNames.get(metricName), columnList, usageMap);
 					//Get the userId for the content usage,If we need user level tril down
 					if(userProcess){
 						userId = includeUserId(userProcess,isUserIdInKey,studentIds,userId,columnMetaInfo[0],metricRow,usageMap,studentContentMapper);
@@ -878,7 +853,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		 * Get Activity data
 		 */
 		OperationResult<Rows<String, String>> activityData = getCassandraService().readAll(columnFamily, rowKeys, requestedColumns);
-		if (!activityData.getResult().isEmpty()) {
+		if (activityData != null && activityData.getResult() != null) {
 			
 			Rows<String, String> itemMetricRows = activityData.getResult();
 			//Iterate for Every Row
@@ -993,7 +968,6 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				Map<String, Object> itemDataMap = new HashMap<String, Object>();
 				itemDataMap.put(ApiConstants.SEQUENCE, column.getLongValue());
 				itemDataMap.put(ApiConstants.GOORUOID, column.getName());
-				itemDataMap.put(ApiConstants._GOORUOID, column.getName());
 				itemIds.add(column.getName());
 				associatedItems.add(itemDataMap);
 			}

@@ -20,7 +20,6 @@ import org.gooru.insights.api.constants.ApiConstants.options;
 import org.gooru.insights.api.constants.ErrorMessages;
 import org.gooru.insights.api.models.InsightsConstant.ColumnFamily;
 import org.gooru.insights.api.services.BaseService;
-import org.gooru.insights.api.services.BaseServiceImpl;
 import org.gooru.insights.api.services.CassandraService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -343,7 +342,7 @@ public class DataUtils {
 		}
 	}
 	
-	private static void fetchData(String columnFamily, Map<String,String> dataTypes,String columnPrefix, String columnName, String apiField, ColumnList<String> columns, Map<String,Object> dataMap){
+	public static void fetchData(String columnFamily, Map<String,String> dataTypes,String columnPrefix, String columnName, String apiField, ColumnList<String> columns, Map<String,Object> dataMap){
 
 		String fetchColumnName = columnName;
 		if(columnPrefix != null){
