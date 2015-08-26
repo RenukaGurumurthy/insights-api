@@ -135,7 +135,7 @@ public class ClassController extends BaseController{
 	public ModelAndView getSessionStatus(HttpServletRequest request, @PathVariable(value="sessionId") String sessionId,@PathVariable(value="contentGooruId") String contentGooruId, @PathVariable(value="collectionType") String collectionType, 
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getSessionStatus(sessionId, contentGooruId,collectionType, request.isSecure()));
+		return getModel(getClassService().getSessionStatus(sessionId, contentGooruId));
 	}
 
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/{collectionType}/{collectionId}/users",method ={ RequestMethod.GET,RequestMethod.POST})

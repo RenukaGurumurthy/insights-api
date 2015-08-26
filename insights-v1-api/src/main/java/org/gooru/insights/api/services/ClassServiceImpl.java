@@ -1012,15 +1012,14 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return responseParamDTO;
 	}
 
-	@Override
-	public ResponseParamDTO<Map<String, Object>> getSessionStatus(String sessionId, String contentGooruId, String collectionType, boolean isSecure) throws Exception {
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		Map<String, Object> sessionDataMap = new HashMap<String, Object>();
+	public ResponseParamDTO<Map<String, Object>> getSessionStatus(String sessionId, String contentGooruId) {
 
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		OperationResult<ColumnList<String>> sessionDetails = getCassandraService().read(ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), sessionId);
-		if (sessionDetails != null && !sessionDetails.getResult().isEmpty()) {
+		if (sessionDetails != null && sessionDetails.getResult() != null) {
 			ColumnList<String> sessionList = sessionDetails.getResult();
-			String status = sessionList.getStringValue(baseService.appendTilda(contentGooruId,STATUS), null);
+			Map<String, Object> sessionDataMap = new HashMap<String, Object>();
+			String status = sessionList.getStringValue(ServiceUtils.appendTilda(contentGooruId,STATUS), null);
 			sessionDataMap.put(ApiConstants.SESSIONID, sessionId);
 			if (status != null) {
 				status = status.equalsIgnoreCase(ApiConstants.STOP) ? ApiConstants.COMPLETED : ApiConstants.INPROGRESS;
