@@ -90,14 +90,10 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					List<Map<String,Object>> contentsMetaData = getAssociatedItems(lessonGooruOid,collectionType,true,isSecure,null,DataUtils.getResourceFields());
 					lessonrawData.put(ApiConstants.ASSESSMENT_COUNT, contentsMetaData.size());
 					if(!contentsMetaData.isEmpty()){
-						Set<String> columnSuffix = new HashSet<String>();
-						columnSuffix.add(ApiConstants._TIME_SPENT);
-						columnSuffix.add(ApiConstants._SCORE_IN_PERCENTAGE);
-						columnSuffix.add(ApiConstants.VIEWS);
 						StringBuffer collectionIds = ServiceUtils.getCommaSeparatedIds(contentsMetaData, ApiConstants.GOORUOID);
 						String classLessonKey = getBaseService().appendTilda(classId, courseId, unitId, lessonGooruOid);
 						Collection<String> rowKeys = ServiceUtils.generateCommaSeparatedStringToKeys(ApiConstants.TILDA,classLessonKey, studentId);
-						Collection<String> columns = ServiceUtils.generateCommaSeparatedStringToKeys(ApiConstants.TILDA,collectionIds.toString(), columnSuffix);
+						Collection<String> columns = ServiceUtils.generateCommaSeparatedStringToKeys(ApiConstants.TILDA,collectionIds.toString(), DataUtils.getUnitProgressActivityFields().keySet());
 						/**
 						 * Get collection activity
 						 */
@@ -1070,16 +1066,15 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		List<Map<String,Object>> resourcesMetaData = getAssociatedItems(collectionId,null,true,isSecure,resourceFields.keySet(),resourceFields);
 		List<Map<String,Object>> studentsMetaData = getStudents(classId);
 		
-		StringBuffer resourceIds = getBaseService().getCommaSeparatedIds(resourcesMetaData, ApiConstants.GOORUOID);
-		StringBuffer studentIds = getBaseService().getCommaSeparatedIds(studentsMetaData, ApiConstants.USER_UID);
-		Set<String> columnSuffix =  DataUtils.getStudentsCollectionUsageColumnSuffix();
+		StringBuffer resourceIds = ServiceUtils.getCommaSeparatedIds(resourcesMetaData, ApiConstants.GOORUOID);
+		StringBuffer studentIds = ServiceUtils.getCommaSeparatedIds(studentsMetaData, ApiConstants.USER_UID);
 		//Fetch session data
 		Collection<String> rowKeys = getBaseService().generateCommaSeparatedStringToKeys(ApiConstants.TILDA, getBaseService().appendTilda(SessionAttributes.RS.getSession(),classId,courseId,unitId,lessonId,collectionId), studentIds.toString());
 		List<String> sessionIds = getSessions(rowKeys);
-		//Fetch collection actiivity data
-		Collection<String> columns = getBaseService().generateCommaSeparatedStringToKeys(ApiConstants.TILDA, resourceIds.toString(), columnSuffix);
+		//Fetch collection activity data
+		Collection<String> columns = getBaseService().generateCommaSeparatedStringToKeys(ApiConstants.TILDA, resourceIds.toString(), DataUtils.getStudentsCollectionUsage().keySet());
 		columns.add(ApiConstants.GOORU_UID);
-		List<Map<String,Object>> assessmentUsage = getIdSeparatedMetrics(sessionIds,ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), columns, studentIds.toString(),false,resourceIds.toString(),true);
+		List<Map<String,Object>> assessmentUsage = getIdSeparatedMetrics(sessionIds,ColumnFamily.SESSION_ACTIVITY.getColumnFamily(),columns, DataUtils.getStudentsCollectionUsage(), studentIds.toString(),false,resourceIds.toString(),true);
 		assessmentUsage = getBaseService().leftJoin(assessmentUsage, studentsMetaData, ApiConstants.USER_UID, ApiConstants.USER_UID);
 		//Group data at user level
 		assessmentUsage = getBaseService().groupRecordsBasedOnKey(assessmentUsage,ApiConstants.GOORUOID,ApiConstants.USAGE_DATA);

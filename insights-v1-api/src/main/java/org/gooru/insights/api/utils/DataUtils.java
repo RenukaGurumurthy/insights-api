@@ -43,6 +43,8 @@ public class DataUtils {
 	
 	private static Set<String> studentsCollectionUsageColumnSuffix;
 	
+	private static Map<String, String> studentsCollectionUsage;
+	
 	private static Collection<String> collectionSummaryResourceColumns;
 
 	private static Map<String,String> unitProgressActivityFields;
@@ -77,6 +79,7 @@ public class DataUtils {
 		putLessonPlanClassActivityFields();
 		putUnitProgressActivityFields();
 		putallStudentUnitProgress();
+		putStudentsCollectionUsage();
 	}
 	
 	private void putNFSLocation(){
@@ -187,6 +190,26 @@ public class DataUtils {
 		collectionSummaryResourceColumns.add(ApiConstants.HAS_FRAME_BREAKER);
 		collectionSummaryResourceColumns.add(ApiConstants.QUESTION_DOT_TYPE);
 		collectionSummaryResourceColumns.add(ApiConstants.QUESTION_DOT_QUESTION_TYPE);
+	}
+	
+	private static void putStudentsCollectionUsage() {
+		
+		studentsCollectionUsage = new HashMap<String, String>();
+		studentsCollectionUsage.put(ApiConstants.VIEWS, ApiConstants.VIEWS);
+		studentsCollectionUsage.put(ApiConstants._TIME_SPENT, ApiConstants.TIMESPENT);
+		studentsCollectionUsage.put(ApiConstants._ANSWER_OBJECT, ApiConstants.ANSWER_OBJECT);
+		studentsCollectionUsage.put(ApiConstants.CHOICE, ApiConstants.TEXT);
+		studentsCollectionUsage.put(ApiConstants.ATTEMPTS, ApiConstants.ATTEMPTS);
+		studentsCollectionUsage.put(ApiConstants._AVG_TIME_SPENT, ApiConstants.AVG_TIME_SPENT);
+		studentsCollectionUsage.put(ApiConstants._TIME_SPENT, ApiConstants.TIMESPENT);
+		studentsCollectionUsage.put(ApiConstants.options.A.name(), ApiConstants.OPTIONS);
+		studentsCollectionUsage.put(ApiConstants.options.B.name(), ApiConstants.OPTIONS);
+		studentsCollectionUsage.put(ApiConstants.options.C.name(), ApiConstants.OPTIONS);
+		studentsCollectionUsage.put(ApiConstants.options.D.name(), ApiConstants.OPTIONS);
+		studentsCollectionUsage.put(ApiConstants.options.E.name(), ApiConstants.OPTIONS);
+		studentsCollectionUsage.put(ApiConstants.options.F.name(), ApiConstants.OPTIONS);
+		studentsCollectionUsage.put(ApiConstants._QUESTION_STATUS, ApiConstants.STATUS);
+		studentsCollectionUsage.put(ApiConstants.OPTIONS, ApiConstants.OPTIONS);
 	}
 	
 	private static void putStudentCollectionColumnSuffix(){
@@ -348,50 +371,98 @@ public class DataUtils {
 		if(columnPrefix != null){
 			fetchColumnName = columnPrefix+ApiConstants.TILDA+columnName;
 		}
-		if(dataTypes.get(columnName) != null){
-			if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.STRING.dataType()) || dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.TEXT.dataType())){
-				dataMap.put(apiField, columns.getStringValue(fetchColumnName, null));
-			}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.INT.dataType())){
-				dataMap.put(apiField, columns.getIntegerValue(fetchColumnName, 0));
-			}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.LONG.dataType())){
-				dataMap.put(apiField, columns.getLongValue(fetchColumnName, 0L));
-			}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.DATE.dataType())){
-				dataMap.put(apiField, columns.getDateValue(fetchColumnName, null));
-			}else{
+		if(!customFetchData(columnPrefix, columnName, dataMap, columns)) {
+			if(dataTypes.get(columnName) != null){
+				if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.STRING.dataType()) || dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.TEXT.dataType())){
+					dataMap.put(apiField, columns.getStringValue(fetchColumnName, null));
+				}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.INT.dataType())){
+					dataMap.put(apiField, columns.getIntegerValue(fetchColumnName, 0));
+				}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.LONG.dataType())){
+					dataMap.put(apiField, columns.getLongValue(fetchColumnName, 0L));
+				}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.DATE.dataType())){
+					dataMap.put(apiField, columns.getDateValue(fetchColumnName, null));
+				}else{
+					dataMap.put(apiField, columns.getStringValue(fetchColumnName, null));
+					InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
+				}
+			}else {
 				dataMap.put(apiField, columns.getStringValue(fetchColumnName, null));
 				InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
 			}
-		}else {
-			dataMap.put(apiField, columns.getStringValue(fetchColumnName, null));
-			InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,columnName));
 		}
 	}
-
+	
+	private static boolean customFetchData(String columnPrefix, String columnName, Map<String,Object> dataMap, ColumnList<String> columns) {
+	
+		boolean processed = true;
+			if(columnName.equals(ApiConstants.OPTIONS)) {
+				Map<String,Long> optionsMap = new HashMap<String,Long>();
+				optionsMap.put(ApiConstants.options.A.name(), columns.getLongValue(ServiceUtils.appendTilda(columnPrefix,ApiConstants.options.A.name()), 0L));
+				optionsMap.put(ApiConstants.options.B.name(), columns.getLongValue(ServiceUtils.appendTilda(columnPrefix,ApiConstants.options.B.name()), 0L));
+				optionsMap.put(ApiConstants.options.C.name(), columns.getLongValue(ServiceUtils.appendTilda(columnPrefix,ApiConstants.options.C.name()), 0L));
+				optionsMap.put(ApiConstants.options.D.name(), columns.getLongValue(ServiceUtils.appendTilda(columnPrefix,ApiConstants.options.D.name()), 0L));
+				optionsMap.put(ApiConstants.options.E.name(), columns.getLongValue(ServiceUtils.appendTilda(columnPrefix,ApiConstants.options.E.name()), 0L));
+				optionsMap.put(ApiConstants.options.F.name(), columns.getLongValue(ServiceUtils.appendTilda(columnPrefix,ApiConstants.options.F.name()), 0L));
+				dataMap.put(ApiConstants.OPTIONS, optionsMap);
+			} else if(columnName.equals(ApiConstants._QUESTION_STATUS)) {
+				String responseStatus = columns.getStringValue(columnName, null);
+				dataMap.put(ApiConstants.STATUS, responseStatus);
+				dataMap.put(ApiConstants.SCORE, (responseStatus != null && responseStatus.equalsIgnoreCase(ApiConstants.CORRECT)) ? 1L : 0L);
+			} else {
+				processed = false;
+			}
+		return processed;
+	}
+	
+	private static boolean customFetchDefaultData(String columnName, Map<String,Object> dataMap) {
+		
+		boolean processed = true;
+			if(columnName.equals(ApiConstants.OPTIONS)) {
+				Map<String,Long> optionsMap = new HashMap<String,Long>();
+				optionsMap.put(ApiConstants.options.A.name(), 0L);
+				optionsMap.put(ApiConstants.options.B.name(), 0L);
+				optionsMap.put(ApiConstants.options.C.name(), 0L);
+				optionsMap.put(ApiConstants.options.D.name(), 0L);
+				optionsMap.put(ApiConstants.options.E.name(), 0L);
+				optionsMap.put(ApiConstants.options.F.name(), 0L);
+				dataMap.put(ApiConstants.OPTIONS, optionsMap);
+			} else if(columnName.equals(ApiConstants._QUESTION_STATUS)) {
+				dataMap.put(ApiConstants.STATUS, null);
+				dataMap.put(ApiConstants.SCORE,  0L);
+			} else {
+				processed = false;
+			}
+		return processed;
+	}
+	
 	public static void fetchDefaultData(String columnFamily, Map<String,String> aliesNames, Map<String,Object> dataMap){
 		
 		Map<String,String> dataTypes = getColumnFamilyDataTypes().get(columnFamily);
 		
-		if(dataTypes != null) {
-		for(Entry<String, String> aliesName : aliesNames.entrySet()){
-			if(dataTypes.get(aliesName.getKey()) != null){
-				if(dataTypes.get(aliesName.getKey()).equalsIgnoreCase(ApiConstants.dataTypes.STRING.dataType()) || dataTypes.get(aliesName.getKey()).equalsIgnoreCase(ApiConstants.dataTypes.TEXT.dataType())){
-					dataMap.put(aliesName.getValue(), null);
-				}else if(dataTypes.get(aliesName.getKey()).equalsIgnoreCase(ApiConstants.dataTypes.INT.dataType())){
-					dataMap.put(aliesName.getValue(), 0);
-				}else if(dataTypes.get(aliesName.getKey()).equalsIgnoreCase(ApiConstants.dataTypes.LONG.dataType())){
-					dataMap.put(aliesName.getValue(), 0L);
-				}else if(dataTypes.get(aliesName.getKey()).equalsIgnoreCase(ApiConstants.dataTypes.DATE.dataType())){
-					dataMap.put(aliesName.getValue(), null);
-				}else{
-					dataMap.put(aliesName.getValue(), null);
-					InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,aliesName.getValue()));
+			if(dataTypes != null) {
+				for(Entry<String, String> aliesName : aliesNames.entrySet()){
+					if(dataTypes.get(aliesName.getKey()) != null){
+						if(customFetchDefaultData(aliesName.getKey(), dataMap)) {
+							continue;
+						}
+						if(dataTypes.get(aliesName.getKey()).equalsIgnoreCase(ApiConstants.dataTypes.STRING.dataType()) || dataTypes.get(aliesName.getKey()).equalsIgnoreCase(ApiConstants.dataTypes.TEXT.dataType())){
+							dataMap.put(aliesName.getValue(), null);
+						}else if(dataTypes.get(aliesName.getKey()).equalsIgnoreCase(ApiConstants.dataTypes.INT.dataType())){
+							dataMap.put(aliesName.getValue(), 0);
+						}else if(dataTypes.get(aliesName.getKey()).equalsIgnoreCase(ApiConstants.dataTypes.LONG.dataType())){
+							dataMap.put(aliesName.getValue(), 0L);
+						}else if(dataTypes.get(aliesName.getKey()).equalsIgnoreCase(ApiConstants.dataTypes.DATE.dataType())){
+							dataMap.put(aliesName.getValue(), null);
+						}else{
+							dataMap.put(aliesName.getValue(), null);
+							InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,aliesName.getValue()));
+						}
+					}else {
+						dataMap.put(aliesName.getValue(), null);
+						InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,aliesName.getValue()));
+					}
 				}
-			}else {
-				dataMap.put(aliesName.getValue(), null);
-				InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,columnFamily,aliesName.getValue()));
 			}
-		}
-		}
 	}
 	
 	public static String buildMessage(String message, String... replacer){
@@ -452,5 +523,9 @@ public class DataUtils {
 	
 	public static Map<String,String> getAllStudentUnitProgress() {
 		return allStudentUnitProgress;
+	}
+	
+	public static Map<String, String> getStudentsCollectionUsage() {
+		return studentsCollectionUsage;
 	}
 }
