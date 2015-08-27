@@ -2,6 +2,8 @@ package org.gooru.insights.api.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -180,4 +182,56 @@ public class ServiceUtils {
 		}
 		return sb.toString();
 	}
+	
+	public static List<Map<String, Object>> sortBy(List<Map<String, Object>> requestData, String sortBy, String sortOrder) {
+
+		if (notNull(sortBy)) {
+			for (final String name : sortBy.split(ApiConstants.COMMA)) {
+				boolean descending = false;
+				if (notNull(sortOrder) && sortOrder.equalsIgnoreCase(ApiConstants.DESC)) {
+					descending = true;
+				}
+				if (descending) {
+					Collections.sort(requestData, new Comparator<Map<String, Object>>() {
+						public int compare(final Map<String, Object> m1, final Map<String, Object> m2) {
+							if (m2.containsKey(name)) {
+								if (m1.containsKey(name)) {
+									return compareTo(m2, m1, name);
+								} else {
+									return 1;
+								}
+							} else {
+								return -1;
+							}
+						}
+					});
+
+				} else {
+					Collections.sort(requestData, new Comparator<Map<String, Object>>() {
+						public int compare(final Map<String, Object> m1, final Map<String, Object> m2) {
+							if (m1.containsKey(name) && m2.containsKey(name)) {
+								return compareTo(m1, m2, name);
+							}
+							return 1;
+						}
+					});
+				}
+			}
+		}
+		return requestData;
+	}
+
+	private static int compareTo(Map<String, Object> m1, Map<String, Object> m2, String name) {
+		if (m1.get(name) instanceof String) {
+			return ((String) m1.get(name).toString().toLowerCase()).compareTo((String) m2.get(name).toString().toLowerCase());
+		} else if (m1.get(name) instanceof Long) {
+			return ((Long) m1.get(name)).compareTo((Long) m2.get(name));
+		} else if (m1.get(name) instanceof Integer) {
+			return ((Integer) m1.get(name)).compareTo((Integer) m2.get(name));
+		} else if (m1.get(name) instanceof Double) {
+			return ((Double) m1.get(name)).compareTo((Double) m2.get(name));
+		}
+		return 0;
+	}	
+
 }
