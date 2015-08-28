@@ -145,15 +145,14 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 					if (itemMetaData.get(ApiConstants.TYPE) != null && itemMetaData.get(ApiConstants.TYPE).toString().matches(ApiConstants.ASSESSMENT_TYPES)) {
 						if (lessonMetricColumnList != null && lessonMetricColumnList.size() > 0) {
 							assessmentScore = lessonMetricColumnList.getLongValue(getBaseService().appendTilda(itemGooruOid, ApiConstants._SCORE_IN_PERCENTAGE), null);
-						
-							if (assessmentScore == null && !(lessonScoreStatus != null && lessonScoreStatus.equals(ApiConstants.SCORE_MET))) {
-								lessonScoreStatus = ApiConstants.NOT_ATTEMPTED;
-							}else if((classGoal == 0  || assessmentScore >= classGoal) && !(lessonScoreStatus != null && lessonScoreStatus.equals(ApiConstants.NOT_ATTEMPTED))){
-								lessonScoreStatus = ApiConstants.SCORE_MET;
-							}else {
-								lessonScoreStatus = ApiConstants.SCORE_NOT_MET;
-								break;
-							}
+						if (assessmentScore == null && !(lessonScoreStatus != null && lessonScoreStatus.equals(ApiConstants.SCORE_MET))) {
+							lessonScoreStatus = ApiConstants.NOT_ATTEMPTED;
+						}else if(assessmentScore != null && (classGoal == 0  || assessmentScore >= classGoal) && !(lessonScoreStatus != null && lessonScoreStatus.equals(ApiConstants.NOT_ATTEMPTED))){
+							lessonScoreStatus = ApiConstants.SCORE_MET;
+						}else {
+							lessonScoreStatus = ApiConstants.SCORE_NOT_MET;
+							break;
+						}
 						}
 					}
 				}
@@ -580,20 +579,25 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		// form thumbnail
 		if (columnsToFetch.contains(ApiConstants.THUMBNAIL)) {
 			String thumbnail = resourceColumn.getStringValue(ApiConstants.THUMBNAIL, null);
+			String formedThumbnail = null;
 			if (StringUtils.isNotBlank(thumbnail)) {
 				String nfsPath = filePath.getProperty(ApiConstants.NFS_BUCKET);
-				String folder = resourceColumn.getStringValue(ApiConstants.FOLDER, null);
-				String formedThumbnail = null;
+				String folder = resourceColumn.getStringValue(ApiConstants.FOLDER, ApiConstants.STRING_EMPTY);
+				String protocol = isSecure ? ApiConstants._HTTPS : ApiConstants._HTTP;
 				if (thumbnail.startsWith(ApiConstants._HTTP)) {
 					formedThumbnail = thumbnail;
+					if(isSecure) {
+						formedThumbnail = formedThumbnail.replaceFirst(ApiConstants._HTTP, ApiConstants._HTTPS);
+					}
 				} else {
-					formedThumbnail = getBaseService().appendForwardSlash(nfsPath, folder, thumbnail);
+					if (thumbnail.contains(folder)) {
+						formedThumbnail = getBaseService().appendForwardSlash(protocol,nfsPath, thumbnail);
+					} else {
+						formedThumbnail = getBaseService().appendForwardSlash(protocol,nfsPath, folder, thumbnail);
+					}
 				}
-				if (isSecure) {
-					formedThumbnail = formedThumbnail.replaceFirst(ApiConstants._HTTP, ApiConstants._HTTPS);
-				}
-				dataMap.put(ApiConstants.THUMBNAIL, formedThumbnail);
 			}
+			dataMap.put(ApiConstants.THUMBNAIL, formedThumbnail);
 		}
 
 		for (Column<String> column : resourceColumn) {
@@ -606,7 +610,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			}
 		}
 	}
-	
+
 	public List<Map<String,Object>> getResourcesMetaData(Collection<String> keys,Collection<String> resourceColumns,String type,Map<String,String> aliesNames, boolean isSecure) {
 
 		OperationResult<Rows<String, String>> resourceRows = getCassandraService().readAll(ColumnFamily.RESOURCE.getColumnFamily(), keys, resourceColumns);
