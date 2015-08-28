@@ -405,7 +405,7 @@ public class DataUtils {
 				optionsMap.put(ApiConstants.options.F.name(), columns.getLongValue(ServiceUtils.appendTilda(columnPrefix,ApiConstants.options.F.name()), 0L));
 				dataMap.put(ApiConstants.OPTIONS, optionsMap);
 			} else if(columnName.equals(ApiConstants._QUESTION_STATUS)) {
-				String responseStatus = columns.getStringValue(columnName, null);
+				String responseStatus = columns.getStringValue(ServiceUtils.appendTilda(columnPrefix,columnName), null);
 				dataMap.put(ApiConstants.STATUS, responseStatus);
 				dataMap.put(ApiConstants.SCORE, (responseStatus != null && responseStatus.equalsIgnoreCase(ApiConstants.CORRECT)) ? 1L : 0L);
 			} else {
