@@ -176,6 +176,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			long notAttempted = 0,assessmentCount = 0;
 			List<Map<String, Object>> itemDataMapAsList = new ArrayList<Map<String, Object>>();
 			String lessonGooruOid = lesson.get(ApiConstants.GOORUOID).toString();
+			Map<String,String> assessmentAliesName = DataUtils.getResourceFields();
+			assessmentAliesName.put(ApiConstants.URL, ApiConstants.URL);
 			List<Map<String,Object>> itemData = getAssociatedItems(lessonGooruOid, null, true, isSecure, null, DataUtils.getResourceFields());
 			String classLessonKey = getBaseService().appendTilda(classId, courseId, unitId, lessonGooruOid);
 			if (StringUtils.isNotBlank(userUid)) {
