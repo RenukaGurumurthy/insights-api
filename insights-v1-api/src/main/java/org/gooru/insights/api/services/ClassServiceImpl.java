@@ -1041,24 +1041,21 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	}
 	
 	@Override
-	public ResponseParamDTO<Map<String, Object>> findUsageAvailable(String classGooruId ,String courseGooruId,String unitGooruId,String lessonGooruId,String contentGooruId) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> findUsageAvailable(String classGooruId, String courseGooruId, String unitGooruId, String lessonGooruId, String contentGooruId) throws Exception {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		String key = null;
-		if (StringUtils.isNotBlank(classGooruId)) {
-			key = baseService.appendTilda(courseGooruId,unitGooruId,lessonGooruId,contentGooruId);
-		} else {
-			key = classGooruId;
-		}
-		OperationResult<ColumnList<String>> sessions = getCassandraService().read(ColumnFamily.SESSION.getColumnFamily(), key);
-		Map<String, Object> sessionDataMap = new HashMap<String, Object>();
-		sessionDataMap.put(STATUS, false);
-		if (sessions != null) {
-			ColumnList<String> sessionList = sessions.getResult();
-			if (!sessionList.isEmpty()) {
-				sessionDataMap.put(STATUS, true);
+		String key = baseService.appendTilda(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId);
+		if (StringUtils.isNotBlank(key)) {
+			OperationResult<ColumnList<String>> sessions = getCassandraService().read(ColumnFamily.SESSION.getColumnFamily(), key);
+			Map<String, Object> sessionDataMap = new HashMap<String, Object>();
+			sessionDataMap.put(STATUS, false);
+			if (sessions != null) {
+				ColumnList<String> sessionList = sessions.getResult();
+				if (!sessionList.isEmpty()) {
+					sessionDataMap.put(STATUS, true);
+				}
 			}
+			responseParamDTO.setMessage(sessionDataMap);
 		}
-		responseParamDTO.setMessage(sessionDataMap);
 		return responseParamDTO;
 	}
 		
