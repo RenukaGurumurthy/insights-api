@@ -169,7 +169,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 					return validStatus;
 				}
 			} catch (Exception e) {
-				InsightsLogger.error("Exception from redis:" + e.getMessage());
+				InsightsLogger.error("Exception from redis:"+GOORU_PREFIX+sessionToken, e);
 				validStatus.put(DO_API, true);
 				return validStatus;
 			}
