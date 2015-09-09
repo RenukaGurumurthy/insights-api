@@ -43,7 +43,7 @@ public class ClassController extends BaseController{
 	}
 	
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_VIEW)
+	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_VIEW)
 	@ResponseBody
 	public ModelAndView getClassUnitUsage(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId, 
@@ -55,7 +55,7 @@ public class ClassController extends BaseController{
 	}
 	
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/plan",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_VIEW)
+	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_VIEW)
 	@ResponseBody
 	public ModelAndView getCoursePlan(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="userUid", required = true) String userUid, HttpServletResponse response) throws Exception{
@@ -64,7 +64,7 @@ public class ClassController extends BaseController{
 	}
 	
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/plan",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_VIEW)
+	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_VIEW)
 	@ResponseBody
 	public ModelAndView getUnitPlan(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId,
@@ -74,7 +74,7 @@ public class ClassController extends BaseController{
 	}
 	
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/progress",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_VIEW)
+	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_VIEW)
 	@ResponseBody
 	public ModelAndView getCourseProgress(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @RequestParam(value="userUid", required = false) String userUid, HttpServletResponse response) throws Exception{
@@ -83,7 +83,7 @@ public class ClassController extends BaseController{
 	}
 	
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/progress",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_VIEW)
+	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_VIEW)
 	@ResponseBody
 	public ModelAndView getUnitProgress(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId,
@@ -93,7 +93,7 @@ public class ClassController extends BaseController{
 	}
 	
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/usage",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_VIEW)
+	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_VIEW)
 	@ResponseBody
 	public ModelAndView getLessonAssessmentsUsage(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId,
@@ -104,7 +104,7 @@ public class ClassController extends BaseController{
 	}
 	
 	@RequestMapping(value="/{collectionType}/{contentGooruId}/sessions",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public ModelAndView getUserSessions(HttpServletRequest request, @RequestParam(value="classGooruId", required = false) String classGooruId,
 			@RequestParam(value="courseGooruId", required = false) String courseGooruId, @RequestParam(value="unitGooruId", required = false) String unitGooruId, 
@@ -117,7 +117,7 @@ public class ClassController extends BaseController{
 	}
 	
 	@RequestMapping(value="/{collectionType}/{contentGooruId}/user/{userUid}",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public ModelAndView getStudentAssessmentData(HttpServletRequest request, 
 			@PathVariable(value="collectionType") String collectionType, @PathVariable(value="userUid") String userUid, 
@@ -130,7 +130,7 @@ public class ClassController extends BaseController{
 	}
 	
 	@RequestMapping(value="{collectionType}/{contentGooruId}/session/{sessionId}/status",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public ModelAndView getSessionStatus(HttpServletRequest request, @PathVariable(value="sessionId") String sessionId,@PathVariable(value="contentGooruId") String contentGooruId, @PathVariable(value="collectionType") String collectionType, 
 			HttpServletResponse response) throws Exception {
@@ -139,7 +139,7 @@ public class ClassController extends BaseController{
 	}
 
 	@RequestMapping(value="/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/{collectionType}/{collectionId}/users",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_VIEW)
+	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_VIEW)
 	@ResponseBody
 	public ModelAndView getStudentsCollectionUsage(HttpServletRequest request, @PathVariable(value="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId, @PathVariable(value="unitGooruId") String unitGooruId, 
@@ -151,7 +151,7 @@ public class ClassController extends BaseController{
 	}
 	
 	@RequestMapping(value="{collectionType}/{contentGooruId}/user/{userUid}/resources",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public ModelAndView getStudentAssessmentSummary(HttpServletRequest request, @RequestParam(value="classGooruId", required = false) String classGooruId,
 			@RequestParam(value="courseGooruId", required = false) String courseGooruId, @RequestParam(value="unitGooruId", required = false) String unitGooruId, 
@@ -163,7 +163,7 @@ public class ClassController extends BaseController{
 	}
 	
 	@RequestMapping(value="/class/find/usage",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public ModelAndView findIfUsage(HttpServletRequest request, @RequestParam(value="classGooruId", required = false) String classGooruId,
 			@RequestParam(value="courseGooruId", required = false) String courseGooruId, @RequestParam(value="unitGooruId", required = false) String unitGooruId, 
