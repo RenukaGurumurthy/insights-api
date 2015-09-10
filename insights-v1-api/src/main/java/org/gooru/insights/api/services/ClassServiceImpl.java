@@ -295,7 +295,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			ValidationUtils.rejectInvalidRequest(ErrorCodes.E106);
 		}
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		List<Map<String, Object>> resultSet = getSessionInfo(key, fetchOpenSession);
+		List<Map<String, Object>> resultSet = getSessionInfo(key, collectionType,fetchOpenSession);
 		resultSet = ServiceUtils.sortBy(resultSet, EVENT_TIME, ApiConstants.ASC);
 		responseParamDTO.setContent(addSequence(resultSet));
 		return responseParamDTO;
@@ -321,23 +321,22 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return session;
 	}
 	
-	private List<Map<String, Object>> getSessionInfo(String key, boolean openSession) {
+	private List<Map<String, Object>> getSessionInfo(String key, String collectionType, boolean openSession) {
 		OperationResult<ColumnList<String>> sessions = getCassandraService().read(ColumnFamily.SESSION.getColumnFamily(), key);
 		OperationResult<ColumnList<String>>  sessionsOperationalInfo = getCassandraService().read(ColumnFamily.SESSION.getColumnFamily(), ServiceUtils.appendTilda(key, INFO));
 		List<Map<String,Object>> sessionList = new ArrayList<Map<String,Object>>();
 		if( sessions != null && sessions.getResult() != null && sessionsOperationalInfo != null && sessionsOperationalInfo.getResult() != null) {
-			String type = openSession ? START : STOP;
+			String type = STOP;
+			if(collectionType.equalsIgnoreCase(ASSESSMENT)){
+				type = openSession ? START : STOP;
+			}
 			ColumnList<String> sessionResult = sessions.getResult();
 			ColumnList<String> sessionInfo = sessionsOperationalInfo.getResult();
 			for (Column<String> sessionColumn : sessionResult) {
-				Map<String, Object> session = new HashMap<String, Object>();
-					if (sessionInfo.getStringValue(baseService.appendTilda(sessionColumn.getName(), TYPE), ApiConstants.STRING_EMPTY).equalsIgnoreCase(type)) {
-						session.put(SESSION_ID, sessionColumn.getName());
-						session.put(EVENT_TIME, sessionColumn.getLongValue());
-						if(openSession) {
-							session.put(LAST_ACCESSED_RESOURCE, sessionInfo.getStringValue(ServiceUtils.appendTilda(sessionColumn.getName(), _LAST_ACCESSED_RESOURCE), null));
-						}
-						sessionList.add(session);
+					if (collectionType.equalsIgnoreCase(ASSESSMENT) && sessionInfo.getStringValue(baseService.appendTilda(sessionColumn.getName(), TYPE), ApiConstants.STRING_EMPTY).equalsIgnoreCase(type)) {
+						sessionList.add(generateSessionObject(sessionColumn, sessionInfo, openSession));
+					}else if(collectionType.equalsIgnoreCase(COLLECTION)){
+						sessionList.add(generateSessionObject(sessionColumn, sessionInfo, openSession));						
 					}
 			}
 		}
@@ -1433,5 +1432,15 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				dataMap.put(columnName, 0L);
 			}
 		}
+	}
+	
+	private Map<String,Object> generateSessionObject(Column<String> sessionColumn ,ColumnList<String> sessionInfo, boolean openSession){
+		Map<String, Object> session = new HashMap<String, Object>();
+		session.put(SESSION_ID, sessionColumn.getName());
+		session.put(EVENT_TIME, sessionColumn.getLongValue());
+		if(openSession) {
+			session.put(LAST_ACCESSED_RESOURCE, sessionInfo.getStringValue(ServiceUtils.appendTilda(sessionColumn.getName(), _LAST_ACCESSED_RESOURCE), null));
+		}
+		return session;
 	}
 }
