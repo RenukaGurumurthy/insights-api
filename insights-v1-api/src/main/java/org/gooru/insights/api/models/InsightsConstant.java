@@ -45,6 +45,10 @@ public interface InsightsConstant {
 	
 	String WILD_CARD = "*";
 	
+	String COLLECTION = "collection";
+	
+	String ASSESSMENT = "assessment";
+	
 	
 	/**
 	 * Serializer Excludes
