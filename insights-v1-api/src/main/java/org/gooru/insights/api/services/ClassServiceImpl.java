@@ -1046,11 +1046,11 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		if (StringUtils.isNotBlank(key)) {
 			OperationResult<ColumnList<String>> sessions = getCassandraService().read(ColumnFamily.SESSION.getColumnFamily(), key);
 			Map<String, Object> sessionDataMap = new HashMap<String, Object>();
-			sessionDataMap.put(STATUS, false);
+			sessionDataMap.put(USAGE_SIGNALS_AVAILABLE, false);
 			if (sessions != null) {
 				ColumnList<String> sessionList = sessions.getResult();
 				if (!sessionList.isEmpty()) {
-					sessionDataMap.put(STATUS, true);
+					sessionDataMap.put(USAGE_SIGNALS_AVAILABLE, true);
 				}
 			}
 			responseParamDTO.setMessage(sessionDataMap);
