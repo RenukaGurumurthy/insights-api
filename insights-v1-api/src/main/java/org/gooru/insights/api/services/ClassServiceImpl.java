@@ -1466,15 +1466,12 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	
 	private void isValidClass(String classId) {
 		if(StringUtils.isNotBlank(classId)) {
-			System.out.println("classId:"+classId);
 			OperationResult<ColumnList<String>> classQuery = getCassandraService().read(ColumnFamily.CLASS.getColumnFamily(), classId);	
 			ColumnList<String> classDetail = null;
 			if(classQuery != null && (classDetail = classQuery.getResult()) != null) {
-				System.out.println("class has data");
 				int status = classDetail.getIntegerValue(ApiConstants.DELETED, 0);
-				System.out.println("class status:"+status);
 				if(status == 1) {
-					throw new NotFoundException("class Not Found!");
+					throw new NotFoundException("Class Not Found!");
 				}
 			}
 		}
