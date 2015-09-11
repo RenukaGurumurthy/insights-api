@@ -60,6 +60,8 @@ public interface InsightsConstant {
 	String STATUS = "status";
 
 	String CREATED = "created";
+	
+	String USAGE_SIGNALS_AVAILABLE = "userSignalsAvailable";
 
 	public enum ColumnFamily {
 		RESOURCE("resource"), DIM_RESOURCE("dim_resource"), REAL_TIME_DASHBOARD(
