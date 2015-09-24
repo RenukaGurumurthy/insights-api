@@ -982,11 +982,14 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		if (associatedItemList != null && associatedItemList.getResult() != null && associatedItemList.getResult().size() > 0) {
 
 			for (Column<String> column : associatedItemList.getResult()) {
-				Map<String, Object> itemDataMap = new HashMap<String, Object>();
-				itemDataMap.put(ApiConstants.SEQUENCE, column.getLongValue());
-				itemDataMap.put(ApiConstants.GOORUOID, column.getName());
-				itemIds.add(column.getName());
-				associatedItems.add(itemDataMap);
+				if (isVisibleCollection(column.getName())) {
+					Map<String, Object> itemDataMap = new HashMap<String, Object>();
+					itemDataMap.put(ApiConstants.SEQUENCE, column.getLongValue());
+					itemDataMap.put(ApiConstants.GOORUOID, column.getName());
+					itemIds.add(column.getName());
+					associatedItems.add(itemDataMap);
+				}
+				
 			}
 			if (fetchMetaData) {
 				if(aliasName != null && aliasName.size() > 0){
@@ -1475,5 +1478,18 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				}
 			}
 		}
+	}
+
+	private boolean isVisibleCollection(String collectionGooruId) {
+		boolean isVisible = false;
+		if (StringUtils.isNotBlank(collectionGooruId)) {
+			OperationResult<ColumnList<String>> classQuery = getCassandraService().read(ColumnFamily.CLASS_COLLECTION_SETTINGS.getColumnFamily(), collectionGooruId);
+			ColumnList<String> visibility = null;
+			if (classQuery != null && (visibility = classQuery.getResult()) != null) {
+				int status = visibility.getIntegerValue(ApiConstants.VISIBILITY, 0);
+				isVisible = status == 1 ? true : false;
+			}
+		}
+		return isVisible;
 	}
 }
