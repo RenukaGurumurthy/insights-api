@@ -1485,7 +1485,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		if (StringUtils.isNotBlank(classId)) {
 			boolean isVisible = false;
 			if (StringUtils.isNotBlank(collectionGooruId)) {
-				OperationResult<ColumnList<String>> classQuery = getCassandraService().read(ColumnFamily.CLASS_COLLECTION_SETTINGS.getColumnFamily(), collectionGooruId);
+				OperationResult<ColumnList<String>> classQuery = getCassandraService().read(ColumnFamily.CLASS_COLLECTION_SETTINGS.getColumnFamily(),ServiceUtils.appendTilda(classId,collectionGooruId));
 				ColumnList<String> visibility = null;
 				if (classQuery != null && (visibility = classQuery.getResult()) != null) {
 					int status = visibility.getIntegerValue(ApiConstants.VISIBILITY, 0);
