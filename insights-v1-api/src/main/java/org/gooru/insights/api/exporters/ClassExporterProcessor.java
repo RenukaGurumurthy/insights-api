@@ -57,7 +57,7 @@ public class ClassExporterProcessor {
 	
 	public File exportClassUserUsageReport(String classId, String courseId, String unitId, String lessonId, String collectionType, String collectionId) throws ParseException, IOException{
 		
-		List<Map<String,Object>> resources = getClassService().getAssociatedItems(collectionId,null,true,false,null,DataUtils.getResourceFields());
+		List<Map<String,Object>> resources = getClassService().getAssociatedItems(classId,collectionId,null,true,false,null,DataUtils.getResourceFields());
 		List<Map<String,Object>> students = getClassService().getStudents(classId);
 		resources = getBaseService().sortBy(resources, ApiConstants.SEQUENCE, ApiConstants.ASC);
 		students = getBaseService().sortBy(students, ApiConstants.USER_NAME, ApiConstants.ASC);
@@ -140,7 +140,7 @@ public class ClassExporterProcessor {
 		
 		boolean includCollectionData = false;
 		String fileName = ExportFileConstants.SUMMARY_FILE_NAME+System.currentTimeMillis()+ApiConstants.CSV_EXT;
-		List<Map<String,Object>> resources = getClassService().getAssociatedItems(collectionId,null,true,false,null,DataUtils.getResourceFields());
+		List<Map<String,Object>> resources = getClassService().getAssociatedItems(null,collectionId,null,true,false,null,DataUtils.getResourceFields());
 		resources = getBaseService().sortBy(resources, ApiConstants.SEQUENCE, ApiConstants.ASC);
 		Map<String,Object> collectionData = new LinkedHashMap<String,Object>();
 		Map<String,Object> questionData = new LinkedHashMap<String,Object>();

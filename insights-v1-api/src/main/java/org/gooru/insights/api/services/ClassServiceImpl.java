@@ -63,7 +63,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		List<Map<String,Object>> resultData = new ArrayList<Map<String, Object>>();
 		//validate ClassId
 		//isValidClass(classId);
-		List<Map<String, Object>> lessonsRawData = getAssociatedItems(unitId, null, true, isSecure, null, DataUtils.getResourceFields());
+		List<Map<String, Object>> lessonsRawData = getAssociatedItems(classId,unitId, null, true, isSecure, null, DataUtils.getResourceFields());
 			
 		responseParamDTO.setContent(lessonsRawData);
 		
@@ -89,7 +89,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 							collectionType = ApiConstants.COLLECTION_MATCH;
 						}
 					}
-					List<Map<String,Object>> contentsMetaData = getAssociatedItems(lessonGooruOid,collectionType,true,isSecure,null,DataUtils.getResourceFields());
+					List<Map<String,Object>> contentsMetaData = getAssociatedItems(classId,lessonGooruOid,collectionType,true,isSecure,null,DataUtils.getResourceFields());
 					lessonrawData.put(ApiConstants.ASSESSMENT_COUNT, contentsMetaData.size());
 					if(!contentsMetaData.isEmpty()){
 						StringBuffer collectionIds = ServiceUtils.getCommaSeparatedIds(contentsMetaData, ApiConstants.GOORUOID);
@@ -124,11 +124,11 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		//validate ClassId
 		//isValidClass(classId);
 		Long classGoal = getClassGoal(classId);
-		List<Map<String, Object>> unitMetaDataAsList = getAssociatedItems(courseId, null, true, isSecure, DataUtils.getResourceFields().keySet(), DataUtils.getResourceFields());
+		List<Map<String, Object>> unitMetaDataAsList = getAssociatedItems(classId,courseId, null, true, isSecure, DataUtils.getResourceFields().keySet(), DataUtils.getResourceFields());
 		for (Map<String, Object> unitMeta : unitMetaDataAsList) {
 			List<Map<String, Object>> lessonDataMapAsList = new ArrayList<Map<String, Object>>();
 			String unitGooruOid = unitMeta.get(ApiConstants.GOORUOID).toString();
-			List<Map<String, Object>> lessonMetaDataAsList = getAssociatedItems(unitGooruOid, null, true, isSecure, DataUtils.getResourceFields().keySet(), DataUtils.getResourceFields());
+			List<Map<String, Object>> lessonMetaDataAsList = getAssociatedItems(classId,unitGooruOid, null, true, isSecure, DataUtils.getResourceFields().keySet(), DataUtils.getResourceFields());
 			for (Map<String, Object> lessonMetaData : lessonMetaDataAsList) {
 				String lessonScoreStatus = null;
 				String lessonGooruOid = lessonMetaData.get(ApiConstants.GOORUOID).toString();
@@ -142,7 +142,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				if (lessonMetricsData != null && !lessonMetricsData.getResult().isEmpty()) {
 					lessonMetricColumnList = lessonMetricsData.getResult();
 				}
-				List<Map<String, Object>> itemMetaDataAsList = getAssociatedItems(lessonGooruOid, null, true, isSecure, DataUtils.getResourceFields().keySet(), DataUtils.getResourceFields());
+				List<Map<String, Object>> itemMetaDataAsList = getAssociatedItems(classId,lessonGooruOid, null, true, isSecure, DataUtils.getResourceFields().keySet(), DataUtils.getResourceFields());
 				for (Map<String, Object> itemMetaData : itemMetaDataAsList) {
 					Long assessmentScore = null;
 					String itemGooruOid = itemMetaData.get(ApiConstants.GOORUOID).toString();
@@ -176,7 +176,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		//validate ClassId
 		//isValidClass(classId);
 		Long classMinScore = getClassGoal(classId);
-		List<Map<String,Object>> lessonData = getAssociatedItems(unitId, null, true, isSecure, null, DataUtils.getResourceFields());
+		List<Map<String,Object>> lessonData = getAssociatedItems(classId,unitId, null, true, isSecure, null, DataUtils.getResourceFields());
 		for (Map<String,Object> lesson : lessonData) {
 			
 			long notAttempted = 0,assessmentCount = 0;
@@ -184,7 +184,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			String lessonGooruOid = lesson.get(ApiConstants.GOORUOID).toString();
 			Map<String,String> assessmentAliesName = DataUtils.getResourceFields();
 			assessmentAliesName.put(ApiConstants.URL, ApiConstants.URL);
-			List<Map<String,Object>> itemData = getAssociatedItems(lessonGooruOid, null, true, isSecure, null, DataUtils.getResourceFields());
+			List<Map<String,Object>> itemData = getAssociatedItems(classId,lessonGooruOid, null, true, isSecure, null, DataUtils.getResourceFields());
 			String classLessonKey = getBaseService().appendTilda(classId, courseId, unitId, lessonGooruOid);
 			if (StringUtils.isNotBlank(userUid)) {
 				classLessonKey = getBaseService().appendTilda(classLessonKey, userUid);
@@ -255,7 +255,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		//isValidClass(classId);
 		if (StringUtils.isNotBlank(userUid)) {
 			responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-			List<Map<String,Object>> unitItemsMetaData = getAssociatedItems(courseId, null, true, isSecure, null, DataUtils.getResourceFields());
+			List<Map<String,Object>> unitItemsMetaData = getAssociatedItems(classId,courseId, null, true, isSecure, null, DataUtils.getResourceFields());
 			for(Map<String,Object> unitItem : unitItemsMetaData) {
 				String unitGooruOid = unitItem.get(ApiConstants.GOORUOID).toString();
 				String classUnitKey = getBaseService().appendTilda(classId, courseId, unitGooruOid,userUid);
@@ -359,7 +359,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		//Fetch minScore of class
 		Long classMinScore = getClassGoal(classId);
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		List<Map<String,Object>> lessonsMetaData = getAssociatedItems(unitId, null, true, isSecure, null, DataUtils.getResourceFields());
+		List<Map<String,Object>> lessonsMetaData = getAssociatedItems(classId,unitId, null, true, isSecure, null, DataUtils.getResourceFields());
 		for (Map<String,Object> lessonDataAsMap : lessonsMetaData) {
 			
 			long assessmentCount = 0, notAttempted = 0;
@@ -369,7 +369,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			if (StringUtils.isNotBlank(userUid)) {
 				classLessonKey = getBaseService().appendTilda(classLessonKey, userUid);
 			}
-			List<Map<String,Object>> itemData = getAssociatedItems(lessonGooruOid, null, true, isSecure, null, DataUtils.getResourceFields());
+			List<Map<String,Object>> itemData = getAssociatedItems(classId,lessonGooruOid, null, true, isSecure, null, DataUtils.getResourceFields());
 
 			OperationResult<ColumnList<String>> lessonMetricsData = getClassMetricsForItem(classLessonKey,lessonDataAsMap, null, DataUtils.getUnitProgressActivityFields(), isSecure);
 			ColumnList<String> lessonMetricColumnList = (lessonMetricsData != null && lessonMetricsData.getResult() != null) ? lessonMetricsData.getResult() : null;
@@ -975,14 +975,14 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		return studentsList;
 	} 
 	
-	public List<Map<String, Object>> getAssociatedItems(String rowKey, String type, boolean fetchMetaData, boolean isSecure, Collection<String> columnNames, Map<String, String> aliasName) {
+	public List<Map<String, Object>> getAssociatedItems(String classId, String rowKey, String type, boolean fetchMetaData, boolean isSecure, Collection<String> columnNames, Map<String, String> aliasName) {
 		OperationResult<ColumnList<String>> associatedItemList = getCassandraService().read(ColumnFamily.COLLECTION_ITEM_ASSOC.getColumnFamily(), rowKey);
 		List<Map<String, Object>> associatedItems = new ArrayList<Map<String, Object>>();
 		List<String> itemIds = new ArrayList<String>();
 		if (associatedItemList != null && associatedItemList.getResult() != null && associatedItemList.getResult().size() > 0) {
 
 			for (Column<String> column : associatedItemList.getResult()) {
-				if (isVisibleCollection(column.getName())) {
+				if (classId != null && isVisibleCollection(classId,column.getName())) {
 					Map<String, Object> itemDataMap = new HashMap<String, Object>();
 					itemDataMap.put(ApiConstants.SEQUENCE, column.getLongValue());
 					itemDataMap.put(ApiConstants.GOORUOID, column.getName());
@@ -1014,7 +1014,8 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		//validate ClassId
 		//isValidClass(classId);
-		List<Map<String,Object>> unitsMetaData = getAssociatedItems(courseId,null,true, isSecure, null, DataUtils.getResourceFields());
+		List<Map<String,Object>> unitsMetaData = getAssociatedItems(classId,courseId,null,true, isSecure, null, DataUtils.getResourceFields());
+
 		List<Map<String,Object>> students = getStudents(classId);
 		if(!unitsMetaData.isEmpty() && !students.isEmpty()){
 		String classCourseId = ServiceUtils.appendTilda(classId,courseId);
@@ -1088,7 +1089,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		Map<String, String> resourceFields = DataUtils.getResourceFields();
 		resourceFields.put(ApiConstants.QUESTION_DOT_TYPE, ApiConstants.QUESTION_TYPE);
 		resourceFields.put(ApiConstants.QUESTION_DOT_QUESTION_TYPE, ApiConstants.QUESTION_TYPE);
-		List<Map<String,Object>> resourcesMetaData = getAssociatedItems(collectionId,null,true,isSecure,resourceFields.keySet(),resourceFields);
+		List<Map<String,Object>> resourcesMetaData = getAssociatedItems(classId,collectionId,null,true,isSecure,resourceFields.keySet(),resourceFields);
 		List<Map<String,Object>> studentsMetaData = getStudents(classId);
 		
 		StringBuffer resourceIds = ServiceUtils.getCommaSeparatedIds(resourcesMetaData, ApiConstants.GOORUOID);
@@ -1351,7 +1352,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	private List<Map<String, Object>> getCollectionSummaryData(String collectionGooruId, String sessionId, List<Map<String, Object>> itemDataMapAsList, boolean isSecure) {
 
 		//Fetch collection items
-		List<Map<String, Object>> itemColumnResult = getAssociatedItems(collectionGooruId, null, false, isSecure, null,null);
+		List<Map<String, Object>> itemColumnResult = getAssociatedItems(null,collectionGooruId, null, false, isSecure, null,null);
 		StringBuffer resourceGooruOids = getBaseService().getCommaSeparatedIds(itemColumnResult, ApiConstants.GOORUOID);
 
 		//Resource metadata
@@ -1480,7 +1481,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		}
 	}
 
-	private boolean isVisibleCollection(String collectionGooruId) {
+	private boolean isVisibleCollection(String classIf,String collectionGooruId) {
 		boolean isVisible = false;
 		if (StringUtils.isNotBlank(collectionGooruId)) {
 			OperationResult<ColumnList<String>> classQuery = getCassandraService().read(ColumnFamily.CLASS_COLLECTION_SETTINGS.getColumnFamily(), collectionGooruId);
