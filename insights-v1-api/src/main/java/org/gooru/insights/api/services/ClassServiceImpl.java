@@ -62,7 +62,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		List<Map<String,Object>> studentsMetaData = null;
 		List<Map<String,Object>> resultData = new ArrayList<Map<String, Object>>();
 		//validate ClassId
-		//isValidClass(classId);
+		isValidClass(classId);
 		List<Map<String, Object>> lessonsRawData = getAssociatedItems(unitId, null, true, isSecure, null, DataUtils.getResourceFields());
 			
 		responseParamDTO.setContent(lessonsRawData);
@@ -122,7 +122,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> unitDataMapAsList = new ArrayList<Map<String, Object>>();
 		//validate ClassId
-		//isValidClass(classId);
+		isValidClass(classId);
 		Long classGoal = getClassGoal(classId);
 		List<Map<String, Object>> unitMetaDataAsList = getAssociatedItems(courseId, null, true, isSecure, DataUtils.getResourceFields().keySet(), DataUtils.getResourceFields());
 		for (Map<String, Object> unitMeta : unitMetaDataAsList) {
@@ -174,7 +174,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 
 		List<Map<String, Object>> lessonDataMapAsList = new ArrayList<Map<String, Object>>();
 		//validate ClassId
-		//isValidClass(classId);
+		isValidClass(classId);
 		Long classMinScore = getClassGoal(classId);
 		List<Map<String,Object>> lessonData = getAssociatedItems(unitId, null, true, isSecure, null, DataUtils.getResourceFields());
 		for (Map<String,Object> lesson : lessonData) {
@@ -252,7 +252,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = null;
 		//validate ClassId
-		//isValidClass(classId);
+		isValidClass(classId);
 		if (StringUtils.isNotBlank(userUid)) {
 			responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 			List<Map<String,Object>> unitItemsMetaData = getAssociatedItems(courseId, null, true, isSecure, null, DataUtils.getResourceFields());
@@ -294,7 +294,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			String userUid, boolean fetchOpenSession, boolean isSecure) throws Exception {
 		String key = null;
 		//validate ClassId
-		//isValidClass(classId);
+		isValidClass(classId);
 		if (StringUtils.isNotBlank(collectionId) && StringUtils.isNotBlank(userUid) && StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) && StringUtils.isNotBlank(unitId)
 				&& StringUtils.isNotBlank(lessonId)) {
 			key = baseService.appendTilda(classId, courseId, unitId, lessonId, collectionId, userUid);
@@ -355,7 +355,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	public ResponseParamDTO<Map<String,Object>> getUnitProgress(String classId, String courseId, String unitId, String userUid, boolean isSecure) throws Exception {
 		
 		//validate ClassId
-		//isValidClass(classId);
+		isValidClass(classId);
 		//Fetch minScore of class
 		Long classMinScore = getClassGoal(classId);
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
@@ -424,7 +424,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	public ResponseParamDTO<Map<String,Object>> getLessonAssessmentsUsage(String classId, String courseId, String unitId, String lessonId, String assessmentIds, String userUid, boolean isSecure) throws Exception {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		//validate ClassId
-		//isValidClass(classId);
+		isValidClass(classId);
 		String classLessonKey = getBaseService().appendTilda(classId, courseId, unitId, lessonId);
 		if (StringUtils.isNotBlank(userUid)) {
 			classLessonKey = getBaseService().appendTilda(classLessonKey, userUid);
@@ -443,7 +443,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		Long classMinScore = 0L; String sessionKey = null;
 		Long scoreInPercentage = 0L; Long score = 0L; String evidence = null; Long timespent = 0L; Long scorableCountOnEvent = 0L; Long totalReaction = 0L; Long reactedCount = 0L; Long avgReaction = 0L;
 		//validate ClassId
-		//isValidClass(classId);
+		isValidClass(classId);
 		if ((sessionId != null && StringUtils.isNotBlank(sessionId.trim()))) {
 			sessionKey = sessionId;
 		} else if ((classId != null && StringUtils.isNotBlank(classId.trim())) && (courseId != null && StringUtils.isNotBlank(courseId.trim())) 
@@ -1010,7 +1010,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		List<Map<String, Object>> contentUsage = new ArrayList<Map<String, Object>>();
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		//validate ClassId
-		//isValidClass(classId);
+		isValidClass(classId);
 		List<Map<String,Object>> unitsMetaData = getAssociatedItems(courseId,null,true, isSecure, null, DataUtils.getResourceFields());
 		List<Map<String,Object>> students = getStudents(classId);
 		if(!unitsMetaData.isEmpty() && !students.isEmpty()){
@@ -1058,7 +1058,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 	public ResponseParamDTO<Map<String, Object>> findUsageAvailable(String classGooruId, String courseGooruId, String unitGooruId, String lessonGooruId, String contentGooruId) throws Exception {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		//validate ClassId
-		//isValidClass(classGooruId);
+		isValidClass(classGooruId);
 		String key = baseService.appendTilda(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId);
 		if (StringUtils.isNotBlank(key)) {
 			OperationResult<ColumnList<String>> sessions = getCassandraService().read(ColumnFamily.SESSION.getColumnFamily(), key);
@@ -1080,7 +1080,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		
 		ResponseParamDTO<Map<String,Object>> responseParamDTO = new ResponseParamDTO<Map<String,Object>>();
 		//validate ClassId
-		//isValidClass(classId);
+		isValidClass(classId);
 		//Get list of resources and students
 		Map<String, String> resourceFields = DataUtils.getResourceFields();
 		resourceFields.put(ApiConstants.QUESTION_DOT_TYPE, ApiConstants.QUESTION_TYPE);
@@ -1317,7 +1317,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		List<Map<String, Object>> itemDataMapAsList = new ArrayList<Map<String, Object>>();
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		//validate ClassId
-		//isValidClass(classId);
+		isValidClass(classId);
 		//Fetch sessionId from recent session if sessionId is not requested in call
 		String recentSessionKey = null;
 		if ((sessionId != null && StringUtils.isNotBlank(sessionId.trim()))) {
