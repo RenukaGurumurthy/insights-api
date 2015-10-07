@@ -1089,7 +1089,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 		Map<String, String> resourceFields = DataUtils.getResourceFields();
 		resourceFields.put(ApiConstants.QUESTION_DOT_TYPE, ApiConstants.QUESTION_TYPE);
 		resourceFields.put(ApiConstants.QUESTION_DOT_QUESTION_TYPE, ApiConstants.QUESTION_TYPE);
-		List<Map<String,Object>> resourcesMetaData = getAssociatedItems(classId,collectionId,null,true,isSecure,resourceFields.keySet(),resourceFields);
+		List<Map<String,Object>> resourcesMetaData = getAssociatedItems(null,collectionId,null,true,isSecure,resourceFields.keySet(),resourceFields);
 		List<Map<String,Object>> studentsMetaData = getStudents(classId);
 		
 		StringBuffer resourceIds = ServiceUtils.getCommaSeparatedIds(resourcesMetaData, ApiConstants.GOORUOID);
@@ -1497,4 +1497,25 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 			return true;
 		}
 	}
+
+	private List<Map<String, Object>> isVisibleCollection(Collection<String> itemIds, String collectionGooruId, ColumnList<String> items) {
+		List<Map<String, Object>> associatedItems = new ArrayList<Map<String, Object>>();
+		Collection<String> columns = new ArrayList<String>();
+		columns.add(ApiConstants.VISIBILITY);
+		if (StringUtils.isNotBlank(collectionGooruId)) {
+			OperationResult<Rows<String, String>> classQuery = getCassandraService().readAll(ColumnFamily.CLASS_COLLECTION_SETTINGS.getColumnFamily(), itemIds, columns);
+			for (Row<String, String> row : classQuery.getResult()) {
+				int status = row.getColumns().getIntegerValue(ApiConstants.VISIBILITY, null);
+				if (status == 1) {
+					Map<String, Object> itemDataMap = new HashMap<String, Object>();
+					String collectionId = row.getKey().split(SEPARATOR)[1];
+					itemDataMap.put(ApiConstants.SEQUENCE, items.getLongValue(collectionId, 0L));
+					itemDataMap.put(ApiConstants.GOORUOID, collectionId);
+					associatedItems.add(itemDataMap);
+				}
+			}
+		}
+		return associatedItems;
+	}
+
 }
