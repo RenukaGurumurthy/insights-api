@@ -260,7 +260,7 @@ public class ClassServiceImpl implements ClassService, InsightsConstant {
 				String unitGooruOid = unitItem.get(ApiConstants.GOORUOID).toString();
 				String classUnitKey = getBaseService().appendTilda(classId, courseId, unitGooruOid,userUid);
 				// Fetch unit metadata
-				getContentMeta(unitGooruOid, getBaseService().appendComma(ApiConstants.ASSESSMENT_COUNT,ApiConstants.COLLECTION_COUNT), unitItem);
+				getContentMeta(baseService.appendTilda(classId,unitGooruOid), getBaseService().appendComma(ApiConstants.ASSESSMENT_COUNT,ApiConstants.COLLECTION_COUNT), unitItem);
 				long collectionsViewedInUnit = 0, unitCollectionsTotalStudyTime = 0,unitAvgScore = 0,assessmentsAttemptedInUnit = 0;
 				// Fetch unit's total study time & unique views of collections 
 				OperationResult<ColumnList<String>> collectionMetricsData = getCassandraService().read(ColumnFamily.CLASS_ACTIVITY.getColumnFamily(),
