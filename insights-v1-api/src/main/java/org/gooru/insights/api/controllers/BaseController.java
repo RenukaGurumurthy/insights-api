@@ -161,12 +161,4 @@ public class BaseController {
 		} 
 		return fileExtension;
 	}
-
-        public static String getUserIdFromRequestParam(HttpServletRequest request) {
-                return request.getParameter(ApiConstants.USERUID);
-        }
-        public static String getClassIdFromRequestParam(HttpServletRequest request) {
-                return request.getParameter(ApiConstants.CLASS_GOORU_ID);
-        }
-
 }
