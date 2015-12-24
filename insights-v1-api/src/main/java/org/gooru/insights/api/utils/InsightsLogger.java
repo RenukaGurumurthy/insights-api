@@ -13,31 +13,35 @@ public class InsightsLogger {
 
 	private static final String COMMA = ",";
 	
-	public static void error(String traceId,Exception exception){
-		logger.error(TRACE_ID+traceId,exception);
+	public static void error(Exception exception){
+		logger.error(ServiceUtils.buildString(TRACE_ID+RequestUtils.getTraceId()),exception);
 	}
 	
-	public static void error(String traceId,String msg,Exception exception){
-		logger.error(TRACE_ID+traceId+COMMA+MESSAGE+msg,exception);
+	public static void error(String msg,Exception exception){
+		logger.error(getTraceMessage(msg),exception);
 	}
 	
-	public static void error(String traceId,String msg){
-		logger.error(TRACE_ID+traceId+COMMA+MESSAGE+msg);
+	public static void error(String msg){
+		logger.error(getTraceMessage(msg));
 	}
 	
-	public static void debug(String traceId,Exception exception){
-		logger.debug(TRACE_ID+traceId,exception);
+	public static void debug(Exception exception){
+		logger.debug(ServiceUtils.buildString(TRACE_ID+RequestUtils.getTraceId()),exception);
 	}
 	
-	public static void debug(String traceId,String msg){
-		logger.debug(TRACE_ID+traceId+COMMA+MESSAGE+msg);
+	public static void debug(String msg){
+		logger.debug(getTraceMessage(msg));
 	}
 	
-	public static void debug(String traceId,String msg,Exception exception){
-		logger.debug(TRACE_ID+traceId+COMMA+MESSAGE+msg,exception);
+	public static void debug(String msg,Exception exception){
+		logger.debug(getTraceMessage(msg),exception);
 	}
 	
-	public static void info(String traceId,String msg){
-		logger.debug(TRACE_ID+traceId+COMMA+MESSAGE+msg);
+	public static void info(String msg){
+		logger.debug(getTraceMessage(msg));
+	}
+	
+	private static String getTraceMessage(String message){
+		return ServiceUtils.buildString(TRACE_ID,RequestUtils.getTraceId(),COMMA,MESSAGE,message);
 	}
 }

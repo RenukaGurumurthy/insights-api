@@ -27,7 +27,7 @@ public class ItemController extends BaseController{
 	@ResponseBody
 	public ModelAndView getItemDetail(HttpServletRequest request,@RequestParam(value="fields",required=true) String fields,@PathVariable(value="itemId") String itemIds,@RequestParam(value="startDate",required = false)String startDate,
 			@RequestParam(value="endDate",required = false)String endDate,@RequestParam(value="format",required = false)String format,@RequestParam(value="dateLevel",required = false)String dateLevel,@RequestParam(value="granularity",required = false,defaultValue ="all")String granularity,HttpServletResponse response) throws Exception{
-		return getModel(getItemService().getItemDetail(getTraceId(request),fields, itemIds, startDate, endDate, format, dateLevel,granularity));
+		return getModel(getItemService().getItemDetail(fields, itemIds, startDate, endDate, format, dateLevel,granularity));
 	}
 	
 	@RequestMapping(value="/detail",method ={ RequestMethod.GET})
@@ -35,14 +35,14 @@ public class ItemController extends BaseController{
 	@ResponseBody
 	public ModelAndView getItemDetails(HttpServletRequest request,@RequestParam(value="fields",required=true) String fields,@RequestParam(value="itemId",required=false) String itemIds,@RequestParam(value="startDate",required = false)String startDate,
 			@RequestParam(value="endDate",required = false)String endDate,@RequestParam(value="format",required = false)String format,@RequestParam(value="dateLevel",required = false)String dateLevel,@RequestParam(value="granularity",required = false,defaultValue ="all")String granularity,HttpServletResponse response) throws Exception{
-		return getModel(getItemService().getItemDetail(getTraceId(request),fields, itemIds, startDate, endDate, format,dateLevel,granularity));
+		return getModel(getItemService().getItemDetail(fields, itemIds, startDate, endDate, format,dateLevel,granularity));
 	}
 
 	@RequestMapping(value="/metadata", method = RequestMethod.GET)
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public ModelAndView getMetadataList(HttpServletRequest request,HttpServletResponse response) throws Exception {
-		return getModel(getItemService().getMetadataDetails(getTraceId(request)));
+		return getModel(getItemService().getMetadataDetails());
 	}
 	
 	private ItemService getItemService() {

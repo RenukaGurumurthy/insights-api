@@ -31,7 +31,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 	@Autowired
 	private BaseService baseService;
 
-	public ResponseParamDTO<Map<String,Object>> addFormula(String traceId, String sessionToken, String eventName, String aggregateType, JSONObject formulasJson) {
+	public ResponseParamDTO<Map<String,Object>> addFormula(String sessionToken, String eventName, String aggregateType, JSONObject formulasJson) {
 
 		ResponseParamDTO<Map<String,Object>> responseParamDTO = new ResponseParamDTO<Map<String,Object>>();
 		List<Map<String, Object>> resultList = new ArrayList<Map<String,Object>>();
@@ -61,7 +61,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 						throw new BadRequestException("Missed mandatory values and its should not be NULL");
 					}
 				}
-				Map<String, String> formulaDetails = baseService.getStringValue(cassandraService.read(traceId, "formula_detail", eventName));
+				Map<String, String> formulaDetails = baseService.getStringValue(cassandraService.read("formula_detail", eventName));
 				try {
 					JSONObject json;
 					JSONArray fetchedJsonArray = new JSONArray();
@@ -91,7 +91,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 					formulaDetails = new HashMap<String, String>();
 					formulaDetails.put(formulaDetail.FORMULA.getName(), json.toString());
 					formulaDetails.put(formulaDetail.AGGREGATETYPE.getName(), aggregateType != null ? aggregateType : formulaDetail.DEFAULT_AGGREGATETYPE.getName());
-					getCassandraService().putStringValue(traceId, ColumnFamily.FORMULA_DETAIL.getColumnFamily(), eventName, formulaDetails);
+					getCassandraService().putStringValue(ColumnFamily.FORMULA_DETAIL.getColumnFamily(), eventName, formulaDetails);
 				} catch (JSONException e) {
 					throw new InsightsServerException("OOP's something went wrong !!! Try after some time" + e);
 				}
@@ -110,12 +110,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 		}
 	}
 
-	public ResponseParamDTO<Map<String,String>> listFormula(String traceId, String sessionToken,String eventName) {
+	public ResponseParamDTO<Map<String,String>> listFormula(String sessionToken,String eventName) {
 		ResponseParamDTO<Map<String,String>> responseParamDTO = new ResponseParamDTO<Map<String,String>>();
 		List<Map<String,String>> resultList = new ArrayList<Map<String,String>>();
 			List<String> columnList = new ArrayList<String>();
 			columnList.add(formulaDetail.FORMULA.getName());
-			Map<String, String> resultMap = getBaseService().getStringValue(getCassandraService().read(traceId,ColumnFamily.FORMULA_DETAIL.getColumnFamily(), eventName, columnList));
+			Map<String, String> resultMap = getBaseService().getStringValue(getCassandraService().read(ColumnFamily.FORMULA_DETAIL.getColumnFamily(), eventName, columnList));
 			for (Map.Entry<String, String> entry : resultMap.entrySet()) {
 				if (formulaDetail.FORMULA.getName().equalsIgnoreCase(entry.getKey())) {
 					resultMap = new HashMap<String, String>();
@@ -128,7 +128,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 			return responseParamDTO;
 	}
 	
-	public ResponseParamDTO<Map<String, Object>> addSettings(String traceId, String cfName, String keyName, String data) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> addSettings(String cfName, String keyName, String data) throws Exception {
 
 		JSONObject dataObj = getBaseService().validateJSON(data);
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
@@ -138,7 +138,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 		if (cfName == null) {
 			cfName = ColumnFamily.CONFIG_SETTING.getColumnFamily();
 		}
-		getCassandraService().addRowKeyValues(traceId, cfName, keyName, dataMap);
+		getCassandraService().addRowKeyValues(cfName, keyName, dataMap);
 		dataMap = new HashMap<String, Object>();
 		dataMap.put("status", "Successfully added!!");
 		resultList.add(dataMap);
@@ -146,7 +146,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 		return responseParamDTO;
 	}
 	
-	public ResponseParamDTO<Map<String, Object>> addCounterSettings(String traceId, String cfName,String keyName,String data) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> addCounterSettings(String cfName,String keyName,String data) throws Exception {
 		
 		JSONObject dataObj = getBaseService().validateJSON(data);
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
@@ -155,7 +155,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 		if(cfName == null){
 			cfName = ColumnFamily.CONFIG_SETTING.getColumnFamily();
 		}
-		getCassandraService().addCounterRowKeyValues(traceId, cfName,keyName,dataMap);
+		getCassandraService().addCounterRowKeyValues(cfName,keyName,dataMap);
 		dataMap = new HashMap<String, Object>();
 		dataMap.put("status", "Successfully added!!");
 		resultList.add(dataMap);
@@ -163,7 +163,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 		return responseParamDTO;
 	}
 
-	public ResponseParamDTO<Map<String, Object>> viewSettings(String traceId, String cfName, String keyName) {
+	public ResponseParamDTO<Map<String, Object>> viewSettings(String cfName, String keyName) {
 		
 		
 		if (cfName == null) {
@@ -171,7 +171,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 		}
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
-		OperationResult<ColumnList<String>> settingsMap = getCassandraService().read(traceId, cfName, keyName);
+		OperationResult<ColumnList<String>> settingsMap = getCassandraService().read(cfName, keyName);
 		for (Column<String> detail : settingsMap.getResult()) {
 			Map<String, Object> resultMap = new HashMap<String, Object>();
 			resultMap.put(detail.getName(), detail.getStringValue());
@@ -181,7 +181,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 		return responseParamDTO;
 	}
 	
-	public ResponseParamDTO<Map<String, String>> migrateCFData(String traceId, String sourceCF, String targetCF, String sourceKey, String targetKey) {
+	public ResponseParamDTO<Map<String, String>> migrateCFData(String sourceCF, String targetCF, String sourceKey, String targetKey) {
 
 		ResponseParamDTO<Map<String, String>> responseParamDTO = new ResponseParamDTO<Map<String, String>>();
 		if (!getBaseService().notNull(targetKey)) {
@@ -190,12 +190,12 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 		List<Map<String, String>> resultList = new ArrayList<Map<String, String>>();
 		if (getBaseService().notNull(sourceCF) && getBaseService().notNull(targetCF) && getBaseService().notNull(sourceKey)) {
 			Map<String, String> resultMap = new HashMap<String, String>();
-			OperationResult<ColumnList<String>> sourceData = getCassandraService().read(traceId, sourceCF, sourceKey);
+			OperationResult<ColumnList<String>> sourceData = getCassandraService().read(sourceCF, sourceKey);
 			if (sourceData.getResult().size() > 0) {
 				for (int i = 0; i < sourceData.getResult().size(); i++) {
 					String columnName = sourceData.getResult().getColumnByIndex(i).getName();
 					String columnValues = sourceData.getResult().getColumnByIndex(i).getStringValue();
-					getCassandraService().saveProfileSettings(traceId, targetCF, targetKey, columnName, columnValues);
+					getCassandraService().saveProfileSettings(targetCF, targetKey, columnName, columnValues);
 				}
 			} else {
 				throw new BadRequestException("Makesure sourceCF and sourcekey already exist");

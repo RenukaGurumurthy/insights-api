@@ -64,11 +64,11 @@ public class ExcelReportServiceImpl implements ExcelReportService,InsightsConsta
 	
 	private void cacheExportEvent(){
 		if(exportEvents == null){
-			exportEvents = cassandraService.getDashBoardKeys("schedular","export-events");
+			exportEvents = cassandraService.getDashBoardKeys("export-events");
 		}
 	}
 	
-	private Map<String, String> getActivity(String traceId,String data,String reportType) throws Exception {
+	private Map<String, String> getActivity(String data,String reportType) throws Exception {
 		
 		Map<String,String> result = new LinkedHashMap<String, String>();
 		RequestParamsDTO requestParamsDTO = getBaseService().buildRequestParameters(data);
@@ -136,7 +136,7 @@ public class ExcelReportServiceImpl implements ExcelReportService,InsightsConsta
 			    	try {
 						cal.setTime(minFormatter.parse(String.valueOf(startDate)));
 					} catch (ParseException e) {
-						InsightsLogger.error(traceId, e);
+						InsightsLogger.error(e);
 					}
 			    	cal.add(Calendar.MINUTE, 1);
 			    	Date incrementedTime =cal.getTime(); 
@@ -151,7 +151,7 @@ public class ExcelReportServiceImpl implements ExcelReportService,InsightsConsta
 			    	try {
 						cal.setTime(dateFormatter.parse(String.valueOf(startDate)));
 					} catch (ParseException e) {
-						InsightsLogger.error(traceId, e);
+						InsightsLogger.error(e);
 					}
 			    	cal.add(Calendar.DATE, 1);
 			    	Date incrementedTime =cal.getTime(); 
@@ -161,14 +161,14 @@ public class ExcelReportServiceImpl implements ExcelReportService,InsightsConsta
 			}else{
 				throw new IllegalArgumentException("Invalid date format");
 			}			
-			String fileName = getDataFromCassandra(traceId, timLinekeys, eventNames, eventParams, requestParamsDTO, displayName, activityLogs);	 
+			String fileName = getDataFromCassandra(timLinekeys, eventNames, eventParams, requestParamsDTO, displayName, activityLogs);	 
 			result.put("Download Link", "http:"+fileName);
 			result.put("Message", "This download link will expire in 24 hours");		
 		return result;
 	}
 
 	@Async
-	private Map<String, String> getAsyncActivity(String traceId, RequestParamsDTO requestParamsDTO, String reportType, String emailId) throws Exception {
+	private Map<String, String> getAsyncActivity(RequestParamsDTO requestParamsDTO, String reportType, String emailId) throws Exception {
 
 		Map<String, String> result = new LinkedHashMap<String, String>();
 		List<Map<String, Object>> activityLogs = new ArrayList<Map<String, Object>>();
@@ -222,7 +222,7 @@ public class ExcelReportServiceImpl implements ExcelReportService,InsightsConsta
 				try {
 					cal.setTime(minFormatter.parse(String.valueOf(startDate)));
 				} catch (ParseException e) {
-					InsightsLogger.error(traceId, e);
+					InsightsLogger.error(e);
 				}
 				cal.add(Calendar.MINUTE, 1);
 				Date incrementedTime = cal.getTime();
@@ -237,7 +237,7 @@ public class ExcelReportServiceImpl implements ExcelReportService,InsightsConsta
 				try {
 					cal.setTime(dateFormatter.parse(String.valueOf(startDate)));
 				} catch (ParseException e) {
-					InsightsLogger.error(traceId, e);
+					InsightsLogger.error(e);
 				}
 				cal.add(Calendar.DATE, 1);
 				Date incrementedTime = cal.getTime();
@@ -248,26 +248,26 @@ public class ExcelReportServiceImpl implements ExcelReportService,InsightsConsta
 			throw new IllegalArgumentException("Invalid date format");
 		}
 		result.put("Message", "File download link will be sent to your email account");
-		String fileName = getDataFromCassandra(traceId, timLinekeys, eventNames, eventParams, requestParamsDTO, displayName, activityLogs);
+		String fileName = getDataFromCassandra(timLinekeys, eventNames, eventParams, requestParamsDTO, displayName, activityLogs);
 		getMailerService().sendMail(emailId, "HarvardX Data Dump - " + utcDateFormatter.format(new Date()), "Please download the attachement ", fileName);
 
 		return result;
 	}
 	
-	private int checkDateLimit(String traceId, String startTime,String endTime){
+	private int checkDateLimit(String startTime,String endTime){
 		
 		if(startTime.length() == 12 && endTime.length() == 12){
 			Date endDate = null;
 			try {
 				endDate = minFormatter.parse(endTime);
 			} catch (ParseException e) {
-				InsightsLogger.error(traceId, e);
+				InsightsLogger.error(e);
 			}
 			Date startDate = null;
 			try {
 				startDate = minFormatter.parse(startTime);
 			} catch (ParseException e) {
-				InsightsLogger.error(traceId, e);
+				InsightsLogger.error(e);
 			}
 			int diffInDays = (int)( (endDate.getTime() - startDate.getTime() ) / (60 * 60 * 24 * 1000)) ;
 			
@@ -279,13 +279,13 @@ public class ExcelReportServiceImpl implements ExcelReportService,InsightsConsta
 			try {
 				endDate = dateFormatter.parse(endTime);
 			} catch (ParseException e) {
-				InsightsLogger.error(traceId, e);
+				InsightsLogger.error(e);
 			}
 			Date startDate = null;
 			try {
 				startDate = dateFormatter.parse(startTime);
 			} catch (ParseException e) {
-				InsightsLogger.error(traceId, e);
+				InsightsLogger.error(e);
 			}
 			int diffInDays = (int)( (endDate.getTime() - startDate.getTime() ) / (60 * 60 * 24 * 1000));
 			
@@ -295,7 +295,7 @@ public class ExcelReportServiceImpl implements ExcelReportService,InsightsConsta
 		}
 	}	
 		
-	private String  getDataFromCassandra(String traceId, List<String> timLinekeys,String eventNames,String eventParams ,RequestParamsDTO requestParamsDTO,Map<String,Object> displayName,List<Map<String, Object>> activityLogs){
+	private String  getDataFromCassandra(List<String> timLinekeys,String eventNames,String eventParams ,RequestParamsDTO requestParamsDTO,Map<String,Object> displayName,List<Map<String, Object>> activityLogs){
 		int keysLimit = 100;
 		String fileUrl = null;
 		List<String> eventDetailkeys = new ArrayList<String>();	
@@ -308,11 +308,11 @@ public class ExcelReportServiceImpl implements ExcelReportService,InsightsConsta
 			}else{
 				subTimeLineKeys = timLinekeys.subList(a, timLinekeys.size());
 			}
-			OperationResult<Rows<String, String>> locationDetails = cassandraService.read(traceId, ColumnFamily.EVENT_TIMELINE.getColumnFamily(), subTimeLineKeys);
+			OperationResult<Rows<String, String>> locationDetails = cassandraService.read(ColumnFamily.EVENT_TIMELINE.getColumnFamily(), subTimeLineKeys);
 			 for (Row<String, String> row : locationDetails.getResult()) {
 				 	ColumnList<String> eventUUID = row.getColumns();
 				    if(eventUUID == null && eventUUID.isEmpty() ) {
-				    	InsightsLogger.info(traceId, "No events in given timeline");
+				    	InsightsLogger.info("No events in given timeline");
 				    }
 			    	for(int i = 0 ; i < eventUUID.size() ; i++) {
 			    		String eventDetailUUID = eventUUID.getColumnByIndex(i).getStringValue();
@@ -328,7 +328,7 @@ public class ExcelReportServiceImpl implements ExcelReportService,InsightsConsta
 				}else{
 					subEventDetailkeys = eventDetailkeys.subList(b, eventDetailkeys.size());
 				}
-				OperationResult<Rows<String, String>> results = cassandraService.readAll(traceId, ColumnFamily.EVENT_DETAIL.getColumnFamily(), subEventDetailkeys, columns);
+				OperationResult<Rows<String, String>> results = cassandraService.readAll(ColumnFamily.EVENT_DETAIL.getColumnFamily(), subEventDetailkeys, columns);
 				 	for (Row<String, String> row : results.getResult()) {
 				 		JsonObject eventObj = new JsonParser().parse(row.getColumns().getStringValue("fields", null)).getAsJsonObject();
 				 		EventObject eventObject = gson.fromJson(eventObj, EventObject.class);
@@ -368,19 +368,19 @@ public class ExcelReportServiceImpl implements ExcelReportService,InsightsConsta
 								activityLogs.add(allowedEvents);
 							}
 						} catch (JSONException e) {
-							InsightsLogger.error(traceId, e);
+							InsightsLogger.error(e);
 					}
 				 	}
 				}
 		 	try {
 		 		 fileUrl = getCSVBuilderService().generateCSVMapReport(activityLogs,UUID.randomUUID()+"~"+minFormatter.format(new Date())+".csv");
 			} catch (Exception e) {
-				InsightsLogger.error(traceId, e);
+				InsightsLogger.error(e);
 			}
 			return  fileUrl;
 	}
 	
-	public Map<String, String> getPerformDump(String traceId, String data,String format,String emailId) throws Exception{
+	public Map<String, String> getPerformDump(String data,String format,String emailId) throws Exception{
 
 		Map<String, String> finalData = new LinkedHashMap<String, String>();
 		RequestParamsDTO requestParamsDTO = getBaseService().buildRequestParameters(data);
@@ -393,14 +393,14 @@ public class ExcelReportServiceImpl implements ExcelReportService,InsightsConsta
     			throw new IllegalArgumentException("End Date Can't be NULL");
     		}
     		
-		if(isAsyncProcess(traceId, requestParamsDTO.getFilters().getStartDate(), requestParamsDTO.getFilters().getEndDate())){
+		if(isAsyncProcess(requestParamsDTO.getFilters().getStartDate(), requestParamsDTO.getFilters().getEndDate())){
 			if(!getBaseService().notNull(emailId)){
 				finalData.put("Message", "Please provide atleast one email!!");
 				return finalData;
     		}
-			finalData  = getAsyncActivity(traceId, requestParamsDTO,format,emailId);
+			finalData  = getAsyncActivity(requestParamsDTO,format,emailId);
 		}else{
-			finalData  = getActivity(traceId, data,format);
+			finalData  = getActivity(data,format);
 		}
 		return finalData;
 	}
@@ -409,8 +409,8 @@ public class ExcelReportServiceImpl implements ExcelReportService,InsightsConsta
 		getCSVBuilderService().removeExpiredFiles();
 	}
 	
-	private boolean isAsyncProcess(String traceId, String startTime,String endTime){
-		int requestedLimit = checkDateLimit(traceId, startTime, endTime);
+	private boolean isAsyncProcess(String startTime,String endTime){
+		int requestedLimit = checkDateLimit(startTime, endTime);
 		int exportLimit = exportEvents.getColumnByName("exportLimit").getIntegerValue();
 		if(requestedLimit < exportLimit){
 			return false;

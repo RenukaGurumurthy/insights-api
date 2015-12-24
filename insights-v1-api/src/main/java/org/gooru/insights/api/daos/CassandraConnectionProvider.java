@@ -47,7 +47,8 @@ public class CassandraConnectionProvider {
 	private static void initInsights() {
 		try {
 			logger.info("Loading cassandra connection properties");
-			ConnectionPoolConfigurationImpl poolConfig = new ConnectionPoolConfigurationImpl("MyConnectionPool").setPort(9160).setMaxConnsPerHost(30).setSeeds(hosts);
+			ConnectionPoolConfigurationImpl poolConfig = new ConnectionPoolConfigurationImpl("MyConnectionPool").setPort(9160).setSeeds(hosts).setSocketTimeout(30000).setMaxTimeoutWhenExhausted(2000)
+					.setMaxConnsPerHost(30).setInitConnsPerHost(1);
 			if (!hosts.startsWith("127.0")) {
 				poolConfig.setLocalDatacenter(logDataCentre);
 			}

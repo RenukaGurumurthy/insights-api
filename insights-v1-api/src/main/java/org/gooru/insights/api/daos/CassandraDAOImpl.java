@@ -45,14 +45,14 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 	 * @param columnFamilyName
 	 * @param key
 	 */
-	public OperationResult<ColumnList<String>> read(String traceId, String columnFamilyName, String key) {
+	public OperationResult<ColumnList<String>> read(String columnFamilyName, String key) {
 
 		OperationResult<ColumnList<String>> query = null;
 		try {
 			query = getLogKeyspace().prepareQuery(this.accessColumnFamily(columnFamilyName)).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5)).getKey(key).execute();
 
 		} catch (Exception e) {
-			InsightsLogger.error(traceId,e);
+			InsightsLogger.error(e);
 		}
 
 		return query;
@@ -64,19 +64,19 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 	 * @param columnFamilyName
 	 * @param key
 	 */
-	public OperationResult<Rows<String, String>> read(String traceId, String columnFamilyName, Collection<String> keys) {
+	public OperationResult<Rows<String, String>> read(String columnFamilyName, Collection<String> keys) {
 
 		OperationResult<Rows<String, String>> query = null;
 		try {
 			query = getLogKeyspace().prepareQuery(this.accessColumnFamily(columnFamilyName)).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5)).getKeySlice(keys).execute();
 
 		} catch (Exception e) {
-			InsightsLogger.error(traceId,e);
+			InsightsLogger.error(e);
 		}
 		return query;
 	}
 	
-	public HashMap<String,String> getMonitorEventProperty(String traceId) {
+	public HashMap<String,String> getMonitorEventProperty() {
 		
 		Rows<String, String> operators = null;
 		HashMap<String,String> operatorsObject = new HashMap<String,String>();
@@ -96,7 +96,7 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 			             }})
 			        .execute().getResult();
 		} catch (Exception e) {
-			InsightsLogger.error(traceId,e);
+			InsightsLogger.error(e);
 		}
 		for (Row<String, String> row : operators) {
 				operatorsObject.put(row.getKey(), row.getColumns().getStringValue("property", null));
@@ -105,21 +105,21 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 		
 	}
 	
-	public ColumnList<String> getDashBoardKeys(String traceId, String key) {
+	public ColumnList<String> getDashBoardKeys(String key) {
 
 		ColumnList<String> jobConstants = null;
 		try {
 			jobConstants = getLogKeyspace().prepareQuery(this.accessColumnFamily("job_config_settings")).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5))
 			.getKey(key).execute().getResult();
 		} catch (Exception e) {
-			InsightsLogger.error(traceId,e);
+			InsightsLogger.error(e);
 		}
 		
 		return jobConstants;
 		
 	}
 	
-	public List<Map<String, Object>> getRangeRowCount(String traceId, String columnFamilyName, String startTime, String endTime, String eventName) {
+	public List<Map<String, Object>> getRangeRowCount(String columnFamilyName, String startTime, String endTime, String eventName) {
 
 		int query = 0;
 		try {
@@ -127,7 +127,7 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 					.lessThanEquals().value(endTime).addExpression().whereColumn("end_time").greaterThanEquals().value(startTime).execute().getResult().size();
 
 		} catch (Exception e) {
-			InsightsLogger.error(traceId,e);
+			InsightsLogger.error(e);
 		}
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put(eventName, query);
@@ -140,7 +140,7 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 	 * Read Record given row key and Querying for Specific Columns in a row
 	 */
 
-	public OperationResult<ColumnList<String>> read(String traceId, String columnFamilyName, String key, Collection<String> columnList) {
+	public OperationResult<ColumnList<String>> read(String columnFamilyName, String key, Collection<String> columnList) {
 		RowQuery<String, String> query = null;
 		OperationResult<ColumnList<String>> queryResult = null;
 
@@ -151,7 +151,7 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 			}
 			queryResult = query.execute();
 		} catch (Exception e) {
-			InsightsLogger.error(traceId,e);
+			InsightsLogger.error(e);
 		}
 
 		return queryResult;
@@ -166,7 +166,7 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 	 * @return key
 	 */
 
-	public OperationResult<Rows<String, String>> read(String traceId, String columnFamilyName, String column, String value, Collection<String> columnList) {
+	public OperationResult<Rows<String, String>> read(String columnFamilyName, String column, String value, Collection<String> columnList) {
 
 		IndexQuery<String, String> Columns = null;
 
@@ -181,25 +181,25 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 			query = Columns.execute();
 
 		} catch (Exception e) {
-			InsightsLogger.error(traceId,e);
+			InsightsLogger.error(e);
 		}
 		return query;
 
 	}
 
-	public int getColumnCount(String traceId, String columnFamilyName, String key) {
+	public int getColumnCount(String columnFamilyName, String key) {
 
 		OperationResult<Integer> query = null;
 		try {
 			query = getLogKeyspace().prepareQuery(this.accessColumnFamily(columnFamilyName)).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5)).getKey(key).getCount().execute();
 			return query.getResult().intValue();
 		} catch (Exception e) {
-			InsightsLogger.error(traceId,e);
+			InsightsLogger.error(e);
 		}
 		return 0;
 	}
 
-	public int getRowCount(String traceId, String columnFamilyName, Map<String, Object> whereCondition, Collection<String> columnList,int retryCount) {
+	public int getRowCount(String columnFamilyName, Map<String, Object> whereCondition, Collection<String> columnList,int retryCount) {
 
 		IndexQuery<String, String> Columns = null;
 
@@ -222,14 +222,14 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 			return Columns.execute().getResult().size();
 		} catch (Exception e) {
 			if(retryCount < 5){
-				InsightsLogger.error(traceId,e);
+				InsightsLogger.error(e);
                 try {
                         Thread.sleep(3);
                         retryCount++;
                 } catch (InterruptedException e1) {
-        			InsightsLogger.error(traceId,e);
+        			InsightsLogger.error(e);
                 }
-                return getRowCount(traceId, columnFamilyName, whereCondition, columnList ,retryCount);
+                return getRowCount(columnFamilyName, whereCondition, columnList ,retryCount);
 	        }
 
 		}
@@ -237,8 +237,7 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 
 	}
 
-	public OperationResult<Rows<String, String>> read(String traceId,
-			String columnFamilyName, String column, String value, int retryCount) {
+	public OperationResult<Rows<String, String>> read(String columnFamilyName, String column, String value, int retryCount) {
 
 		OperationResult<Rows<String, String>> Columns = null;
 		try {
@@ -251,23 +250,22 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 
 		} catch (Exception e) {
 			if (retryCount < 6) {
-				InsightsLogger.error(traceId, e);
+				InsightsLogger.error(e);
 				try {
 					Thread.sleep(3);
 					retryCount++;
 				} catch (InterruptedException e1) {
 
-					InsightsLogger.error(traceId, e);
+					InsightsLogger.error(e);
 				}
-				return read(traceId, columnFamilyName, column, value,
+				return read(columnFamilyName, column, value,
 						retryCount);
 			}
 		}
 		return Columns;
 	}
 
-	public OperationResult<Rows<String, String>> read(String traceId,
-			String columnFamilyName, String column, int value, int retryCount) {
+	public OperationResult<Rows<String, String>> read(String columnFamilyName, String column, int value, int retryCount) {
 
 		OperationResult<Rows<String, String>> Columns = null;
 		try {
@@ -280,16 +278,15 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 
 		} catch (Exception e) {
 			if (retryCount < 6) {
-				InsightsLogger.error(traceId, e);
+				InsightsLogger.error(e);
 				try {
 					Thread.sleep(3);
 					retryCount++;
 				} catch (InterruptedException e1) {
 
-					InsightsLogger.error(traceId, e);
+					InsightsLogger.error(e);
 				}
-				return read(traceId, columnFamilyName, column, value,
-						retryCount);
+				return read(columnFamilyName, column, value,retryCount);
 			}
 		}
 		return Columns;
@@ -298,7 +295,7 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 	/*
 	 * Read All rows given columName alone withColumnSlice(String... columns)
 	 */
-	public OperationResult<Rows<String, String>> readAll(String traceId, String columnFamilyName, String column,int retryCount) {
+	public OperationResult<Rows<String, String>> readAll(String columnFamilyName, String column,int retryCount) {
 
 		OperationResult<Rows<String, String>> queryResult = null;
 		try {
@@ -306,15 +303,15 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 			queryResult = getLogKeyspace().prepareQuery(this.accessColumnFamily(columnFamilyName)).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5)).getAllRows().withColumnSlice(column).execute();
 		} catch (Exception e) {
 			 if(retryCount < 6){
-					InsightsLogger.error(traceId,e);
+					InsightsLogger.error(e);
 					
                  try {
                          Thread.sleep(3);
                          retryCount++;
                  } catch (InterruptedException e1) {
-         			InsightsLogger.error(traceId,e);
+         			InsightsLogger.error(e);
                  }
-                 return readAll(traceId, columnFamilyName,column,retryCount);
+                 return readAll(columnFamilyName,column,retryCount);
 	         }
 		}
 		return queryResult;
@@ -323,7 +320,7 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 	/*
 	 * Read All rows given columName alone withRowSlice(String... Rows)
 	 */
-	public OperationResult<Rows<String, String>> readAll(String traceId, String columnFamilyName, Collection<String> keys, Collection<String> columns,int retryCount) {
+	public OperationResult<Rows<String, String>> readAll(String columnFamilyName, Collection<String> keys, Collection<String> columns,int retryCount) {
 
 		OperationResult<Rows<String, String>> queryResult = null;
 
@@ -336,14 +333,14 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 
 		} catch (Exception e) {
 			if (retryCount < 6) {
-				InsightsLogger.error(traceId,e);
+				InsightsLogger.error(e);
 				try {
 					Thread.sleep(3);
 					retryCount++;
 				} catch (InterruptedException e1) {
-					InsightsLogger.error(traceId,e);
+					InsightsLogger.error(e);
 				}
-				return readAll(traceId, columnFamilyName, keys, columns, retryCount);
+				return readAll(columnFamilyName, keys, columns, retryCount);
 			}
 
 		}
@@ -351,7 +348,7 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 
 	}
 
-	public OperationResult<Rows<String, String>> readAll(String traceId, String columnFamily, String whereColumn, String columnValue, Collection<String> columns,int retryCount) {
+	public OperationResult<Rows<String, String>> readAll(String columnFamily, String whereColumn, String columnValue, Collection<String> columns,int retryCount) {
 		OperationResult<Rows<String, String>> queryResult = null;
 		IndexQuery<String, String> indexQuery = null;
 		try {
@@ -369,21 +366,21 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 
 		} catch (Exception e) {
 			 if(retryCount < 6){
-					InsightsLogger.error(traceId,e);
+					InsightsLogger.error(e);
                  try {
                          Thread.sleep(3);
                          retryCount++;
                  } catch (InterruptedException e1) {
-         			InsightsLogger.error(traceId,e);
+         			InsightsLogger.error(e);
                  }
-                 return readAll(traceId, columnFamily, whereColumn, columnValue, columns,retryCount);
+                 return readAll(columnFamily, whereColumn, columnValue, columns,retryCount);
          }
 
 		}
 		return queryResult;
 	}
 
-	public OperationResult<Rows<String, String>> readAll(String traceId, String columnFamilyName, Map<String, Object> whereColumn, Collection<String> columnSclice,int retryCount) {
+	public OperationResult<Rows<String, String>> readAll(String columnFamilyName, Map<String, Object> whereColumn, Collection<String> columnSclice,int retryCount) {
 
 		OperationResult<Rows<String, String>> queryResult = null;
 		IndexQuery<String, String> indexQuery = null;
@@ -406,20 +403,20 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 			queryResult = indexQuery.execute();
 		} catch (Exception e) {
 			 if(retryCount < 6){
-					InsightsLogger.error(traceId,e);
+					InsightsLogger.error(e);
                  try {
                          Thread.sleep(3);
                          retryCount++;
                  } catch (InterruptedException e1) {
-         			InsightsLogger.error(traceId,e);
+         			InsightsLogger.error(e);
                  }
-                 return readAll(traceId, columnFamilyName, whereColumn, columnSclice,retryCount);
+                 return readAll(columnFamilyName, whereColumn, columnSclice,retryCount);
 	         }
 		}
 		return queryResult;
 	}
 
-	public void addRowKeyValues(String traceId, String cfName,String keyName,Map<String,Object> data){
+	public void addRowKeyValues(String cfName,String keyName,Map<String,Object> data){
 		MutationBatch m = getLogKeyspace().prepareMutationBatch()
 				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5));
 
@@ -431,11 +428,11 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 		try {
 			m.execute();
 		} catch (Exception e) {
-			InsightsLogger.error(traceId,e);
+			InsightsLogger.error(e);
 		}
 	}
 	
-	public void incrementCounterValues(String traceId, String cfName,String keyName,Map<String,Object> data) {
+	public void incrementCounterValues(String cfName,String keyName,Map<String,Object> data) {
 		MutationBatch m = getLogKeyspace().prepareMutationBatch().setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5));
 		for (String column : data.keySet()) {
 		m.withRow(this.accessColumnFamily(cfName), keyName)
@@ -444,33 +441,33 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 		try {
 			m.execute();
 		} catch (Exception e) {
-			InsightsLogger.error(traceId,e);
+			InsightsLogger.error(e);
 		}
 	}
 	
-	public void saveProfileSettings(String traceId, String cfName,String keyName,String columnName,String data) {
+	public void saveProfileSettings(String cfName,String keyName,String columnName,String data) {
 		MutationBatch m = getLogKeyspace().prepareMutationBatch().setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5));
 		m.withRow(this.accessColumnFamily(cfName), keyName)
 				.putColumnIfNotNull(columnName, data);
 		try {
 			m.execute();
 		} catch (Exception e) {
-			InsightsLogger.error(traceId,e);
+			InsightsLogger.error(e);
 		}
 	}
 	
-	public void saveDefaultProfileSettings(String traceId, String cfName, String keyName,String column, String value) {
+	public void saveDefaultProfileSettings(String cfName, String keyName,String column, String value) {
 		MutationBatch m = getLogKeyspace().prepareMutationBatch().setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5));
 		m.withRow(this.accessColumnFamily(cfName), keyName)
 				.putColumnIfNotNull(column, value);
 		try {
 			m.execute();
 		} catch (Exception e) {
-			InsightsLogger.error(traceId,e);
+			InsightsLogger.error(e);
 		}
 	}
 	
-	public void deleteRowKey(String traceId, String cfName,String keyName) {
+	public void deleteRowKey(String cfName,String keyName) {
 		MutationBatch m = getLogKeyspace().prepareMutationBatch().setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5));
 		for (String key : keyName.split(",")) {
 			m.withRow(this.accessColumnFamily(cfName), key).delete();
@@ -478,11 +475,11 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 		try {
 			m.execute();
 		} catch (Exception e) {
-			InsightsLogger.error(traceId,e);
+			InsightsLogger.error(e);
 		}
 	}
 	
-	public void deleteColumnInRow(String traceId, String cfName,String keyName,String columnName) {
+	public void deleteColumnInRow(String cfName,String keyName,String columnName) {
 		MutationBatch m = getLogKeyspace().prepareMutationBatch().setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5));
 		for(String column : columnName.split(",")) {
 			m.withRow(this.accessColumnFamily(cfName), keyName).deleteColumn(column);
@@ -490,11 +487,11 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 		try {
 			m.execute();
 		} catch (Exception e) {
-			InsightsLogger.error(traceId,e);
+			InsightsLogger.error(e);
 		}
 	}
 	
-	public boolean putStringValue(String traceId, String columnFamily,String key,Map<String,String> columns){
+	public boolean putStringValue(String columnFamily,String key,Map<String,String> columns){
 		
 		try{
 			MutationBatch mutationBatch = getLogKeyspace().prepareMutationBatch();
@@ -504,7 +501,7 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 			}
 			return true;
 		}catch(Exception e){
-			InsightsLogger.error(traceId,e);
+			InsightsLogger.error(e);
 		}
 		return false;
 	}
@@ -516,7 +513,7 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 			jobConstants = getLogKeyspace().prepareQuery(this.accessColumnFamily("job_config_settings")).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5))
 			.getKey(key).execute().getResult();
 		} catch (ConnectionException e) {
-			e.printStackTrace();
+			InsightsLogger.error(e);
 		}
 		
 		return jobConstants;

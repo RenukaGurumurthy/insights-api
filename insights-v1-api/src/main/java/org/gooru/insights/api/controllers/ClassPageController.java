@@ -10,6 +10,7 @@ import org.gooru.insights.api.constants.InsightsOperationConstants;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.security.AuthorizeOperations;
 import org.gooru.insights.api.services.ClassPageService;
+import org.gooru.insights.api.utils.RequestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,8 +33,8 @@ public class ClassPageController extends BaseController{
 	@ResponseBody
 	public ModelAndView getClasspageResourceOE(HttpServletRequest request,@PathVariable(value="collectionId") String collectionId,@RequestParam(value="data",required = false)String data,@RequestBody String rawData,HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		data = getRequestData(request,rawData);
-		return getModel(getClassPageService().getClasspageResourceOEtext(getTraceId(request),collectionId,data));
+		data = RequestUtils.getRequestData(request,rawData);
+		return getModel(getClassPageService().getClasspageResourceOEtext(collectionId,data));
 	}
 	
 	@RequestMapping(value="/{collectionId}",method ={ RequestMethod.GET,RequestMethod.POST})
@@ -41,8 +42,8 @@ public class ClassPageController extends BaseController{
 	@ResponseBody
 	public ModelAndView getClasspageCollectionUsage(HttpServletRequest request,@PathVariable(value="collectionId") String collectionId,@RequestParam(value="data",required = false)String data, @RequestBody String rawData, HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		data = getRequestData(request,rawData);
-		return getModel(getClassPageService().getClasspageCollectionUsage(getTraceId(request),collectionId,data,request.isSecure()));
+		data = RequestUtils.getRequestData(request,rawData);
+		return getModel(getClassPageService().getClasspageCollectionUsage(collectionId,data,request.isSecure()));
 		
 	}
 
@@ -51,8 +52,8 @@ public class ClassPageController extends BaseController{
 	@ResponseBody
 	public ModelAndView getClasspageResourceUsage(HttpServletRequest request,@PathVariable(value="collectionId") String collectionId,@RequestParam(value="data",required = false)String data,@RequestBody String rawData,HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		data = getRequestData(request,rawData);
-		return getModel(getClassPageService().getClasspageResourceUsage(getTraceId(request),collectionId,data,request.isSecure()));
+		data = RequestUtils.getRequestData(request,rawData);
+		return getModel(getClassPageService().getClasspageResourceUsage(collectionId,data,request.isSecure()));
 	}
 	
 	//teacher
@@ -60,8 +61,8 @@ public class ClassPageController extends BaseController{
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_PROGRESS_VIEW)
 	@ResponseBody
 	public ModelAndView getClasspageUserList(HttpServletRequest request,@PathVariable(value="classId") String classId,@RequestParam(value="data",required = false)String data,@RequestBody String rawData,HttpServletResponse response) throws Exception{
-		data = getRequestData(request,rawData);
-		return getModel(getClassPageService().getClasspageUsers(getTraceId(request),classId,data));
+		data = RequestUtils.getRequestData(request,rawData);
+		return getModel(getClassPageService().getClasspageUsers(classId,data));
 	}
 	
 	//teacher
@@ -70,8 +71,8 @@ public class ClassPageController extends BaseController{
 	@ResponseBody
 	public ModelAndView getClasspageUserUsage(HttpServletRequest request,@PathVariable(value="collectionId") String collectionId,@RequestParam(value="data",required = false)String data,@RequestBody String rawData,HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		data = getRequestData(request,rawData);
-		return getModel(getClassPageService().getClasspageUserUsage(getTraceId(request),collectionId,data,request.isSecure()));
+		data = RequestUtils.getRequestData(request,rawData);
+		return getModel(getClassPageService().getClasspageUserUsage(collectionId,data,request.isSecure()));
 	}
 	
 	@RequestMapping(value="/{collectionId}/sessions",method={RequestMethod.GET,RequestMethod.POST})
@@ -79,8 +80,8 @@ public class ClassPageController extends BaseController{
 	@ResponseBody
 	public ModelAndView getUserSessions(HttpServletRequest request,@PathVariable(value="collectionId") String collectionId,@RequestParam(value="data",required = false) String data,@RequestBody String rawData,HttpServletResponse response) throws Exception {			
 		setAllowOrigin(response);
-		data = getRequestData(request,rawData);
-		return getModel(getClassPageService().getUserSessions(getTraceId(request),data,collectionId));
+		data = RequestUtils.getRequestData(request,rawData);
+		return getModel(getClassPageService().getUserSessions(data,collectionId));
 	}
 	
 	//teacher
@@ -89,16 +90,16 @@ public class ClassPageController extends BaseController{
 	@ResponseBody
 	public ModelAndView getClassGrade(HttpServletRequest request,@PathVariable(value="classId") String classId,@RequestParam(value="data",required = false)String data,@RequestBody String rawData,HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		data = getRequestData(request,rawData);
-		return getModel(getClassPageService().getClasspageGrade(getTraceId(request),classId,data,request.isSecure()));
+		data = RequestUtils.getRequestData(request,rawData);
+		return getModel(getClassPageService().getClasspageGrade(classId,data,request.isSecure()));
 	}
 	
 	@RequestMapping(value="/{resouceId}/resource/info",method ={ RequestMethod.GET,RequestMethod.POST})
 	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_CLASS_PROGRESS_VIEW)
 	@ResponseBody
 	public ModelAndView getResourceInfo(HttpServletRequest request,@PathVariable(value="resouceId") String resouceId,@RequestParam(value="data",required = false)String data,@RequestBody String rawData,HttpServletResponse response) throws Exception{
-		data = getRequestData(request,rawData);
-		return getModel(getClassPageService().getResourceInfo(getTraceId(request),resouceId,data));
+		data = RequestUtils.getRequestData(request,rawData);
+		return getModel(getClassPageService().getResourceInfo(resouceId,data));
 	}
 	
 	@RequestMapping(value="/{classId}/{reportType}/export",method ={ RequestMethod.GET,RequestMethod.POST})
@@ -106,9 +107,9 @@ public class ClassPageController extends BaseController{
 	@ResponseBody
 	public ModelAndView getExportReports(HttpServletRequest request,@PathVariable(value="classId") String classId,@PathVariable(value="reportType") String reportType,@RequestParam(value="data",required = false)String data,@RequestParam(value="timeZone",required = true)String timeZone,@RequestBody String rawData,HttpServletResponse response) throws Exception{
 		String format = checkRequestContentType(request);
-		data = getRequestData(request,rawData);
+		data = RequestUtils.getRequestData(request,rawData);
 		setAllowOrigin(response);
-		ResponseParamDTO<Map<String,Object>> responseParamsDTO = getClassPageService().getExportReport(getTraceId(request),format,classId,reportType,data,timeZone,response);
+		ResponseParamDTO<Map<String,Object>> responseParamsDTO = getClassPageService().getExportReport(format,classId,reportType,data,timeZone,response);
 		if (responseParamsDTO.getContent() != null && !responseParamsDTO.getContent().isEmpty()) {
 			if (!format.equalsIgnoreCase("json")) {
 				for (Map<String, Object> map : responseParamsDTO.getContent()) {
@@ -129,8 +130,8 @@ public class ClassPageController extends BaseController{
 	@ResponseBody
 	public ModelAndView getClassProgress(HttpServletRequest request,@PathVariable(value="classId") String classId,@RequestParam(value="data",required = false)String data,@RequestBody String rawData,HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		data = getRequestData(request,rawData);
-		return getModel(getClassPageService().getClassProgress(getTraceId(request),classId,data));
+		data = RequestUtils.getRequestData(request,rawData);
+		return getModel(getClassPageService().getClassProgress(classId,data));
 	}
 	
 	private ClassPageService getClassPageService() {
