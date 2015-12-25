@@ -1,0 +1,7 @@
+*/target
+*-gen-*
+*.log
+*.classpath*
+*.bin/*
+*.settings
+*.project
