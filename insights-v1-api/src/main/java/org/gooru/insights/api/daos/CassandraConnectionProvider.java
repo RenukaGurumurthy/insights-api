@@ -54,12 +54,8 @@ public class CassandraConnectionProvider {
 			}
 
 			AstyanaxContext<Keyspace> logContext = new AstyanaxContext.Builder().forCluster(clusterName).forKeyspace(logKeyspaceName)
-					.withAstyanaxConfiguration(new AstyanaxConfigurationImpl()
-					.setDiscoveryType(NodeDiscoveryType.RING_DESCRIBE)
-					.setConnectionPoolType(ConnectionPoolType.ROUND_ROBIN)
-					.setCqlVersion("3.0.0").setTargetCassandraVersion("2.1.4"))
-					.withConnectionPoolConfiguration(poolConfig).withConnectionPoolMonitor(new CountingConnectionPoolMonitor())
-					.buildKeyspace(ThriftFamilyFactory.getInstance());
+					.withAstyanaxConfiguration(new AstyanaxConfigurationImpl().setDiscoveryType(NodeDiscoveryType.RING_DESCRIBE).setConnectionPoolType(ConnectionPoolType.ROUND_ROBIN))
+					.withConnectionPoolConfiguration(poolConfig).withConnectionPoolMonitor(new CountingConnectionPoolMonitor()).buildKeyspace(ThriftFamilyFactory.getInstance());
 			logContext.start();
 			logKeyspace = (Keyspace) logContext.getClient();
 			logger.info("Initialized connection to " + logKeyspaceName + " keyspace");

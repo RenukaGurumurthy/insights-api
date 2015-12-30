@@ -12,7 +12,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>dispatcher</servlet-name>
-    <url-pattern>/*</url-pattern>
+    <url-pattern>/v1/*</url-pattern>
   </servlet-mapping>
   <context-param>
     <param-name>contextConfigLocation</param-name>

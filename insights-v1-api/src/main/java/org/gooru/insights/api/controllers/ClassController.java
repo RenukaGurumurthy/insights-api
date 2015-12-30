@@ -3,12 +3,15 @@ package org.gooru.insights.api.controllers;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.InsightsOperationConstants;
 import org.gooru.insights.api.exporters.ClassExporterProcessor;
+import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.security.AuthorizeOperations;
 import org.gooru.insights.api.services.BaseService;
 import org.gooru.insights.api.services.ClassService;
@@ -23,7 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-@RequestMapping(value="/v1/")
+@RequestMapping(value="/")
 public class ClassController extends BaseController{
 
 	@Autowired
