@@ -337,8 +337,15 @@ public class ApiConstants {
 	public static final String _TOTAL_REACTION = "total_reaction";
 	public static final String _REACTED_COUNT = "reacted_count";	
 	public static final String VISIBILITY = "visibility";
-
-
+	
+	public static final String _EVENT_TYPE = "event_type";
+	public static final String _COLLECTION_UID = "collection_uid";
+	public static final String _USER_UID = "user_uid";
+	public static final String _CLASS_UID = "class_uid";
+	public static final String _COURSE_UID = "course_uid";
+	public static final String _UNIT_UID = "unit_uid";
+	public static final String _LESSON_UID = "lesson_uid";
+	public static final String _EVENT_TIME = "event_time";
 	public static final String ACTIVE_PEER_COUNT = "activePeerCount";
 	public static final String LEFT_PEER_COUNT = "leftPeerCount";
 	public static final String _LEAF_GOORU_OID = "leaf_gooru_oid";

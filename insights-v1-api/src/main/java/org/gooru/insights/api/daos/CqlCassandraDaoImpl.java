@@ -1,6 +1,7 @@
 package org.gooru.insights.api.daos;
 
 
+import org.gooru.insights.api.utils.InsightsLogger;
 import org.springframework.stereotype.Repository;
 
 import com.netflix.astyanax.connectionpool.OperationResult;
@@ -21,10 +22,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 	
 
 	public ColumnFamily<String, String> accessColumnFamily(String columnFamilyName) {
-
-		ColumnFamily<String, String> aggregateColumnFamily;
-		aggregateColumnFamily = new ColumnFamily<String, String>(columnFamilyName, StringSerializer.get(), StringSerializer.get());
-		return aggregateColumnFamily;
+		return new ColumnFamily<String, String>(columnFamilyName, StringSerializer.get(), StringSerializer.get());
 	}
 	
 	@Override
@@ -61,6 +59,18 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		return result.getResult().getRows() ;
 	}
 	
+	public CqlResult<String, String> executeCql(String columnFamilyName, String query) {
+		OperationResult<CqlResult<String, String>> result = null;
+		try {
+			result = getLogKeyspace()
+			        .prepareQuery(accessColumnFamily(columnFamilyName))
+			        .withCql(query)
+			        .execute();
+		} catch (ConnectionException e) {
+			InsightsLogger.error("CQL Exception:"+query, e);
+		}
+		return result != null ? result.getResult() : null;
+	}
 	//TODO 	Test code to be removed
 	/*public void readUsingCql(){		  
 		List<ClassActivity> classActivityList = new ArrayList<ClassActivity>();

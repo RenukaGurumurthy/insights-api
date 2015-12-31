@@ -4,12 +4,31 @@ import org.gooru.insights.api.daos.CqlCassandraDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.netflix.astyanax.model.CqlResult;
 import com.netflix.astyanax.model.ColumnList;
 import com.netflix.astyanax.model.Rows;
 
 @Service
 public class CassandraV2ServiceImpl implements CassandraV2Service{
 
+	private static final String SELECT = " SELECT ";
+	
+	private static final String FROM = " FROM ";
+	
+	private static final String WHERE = " WHERE ";
+	
+	private static final String AND = " AND ";
+	
+	private static final String ASTRIX = "*";
+	
+	private static final String KEY = "KEY";
+	
+	private static final String EQUAL = "=";
+	
+	private static final String QUOTES = "'";
+	
+	private static final String ALLOW_FILTERING = " ALLOW FILTERING";
+	
 	@Autowired
 	private CqlCassandraDao cqlDAO;
 	
@@ -21,5 +40,39 @@ public class CassandraV2ServiceImpl implements CassandraV2Service{
 	@Override
 	public Rows<String, String> readColumnsWithKey(String cfName, String key) {
 		return cqlDAO.readColumnsWithKey(cfName, key);
+	}
+	
+	public CqlResult<String, String> executeCql(String columnFamilyName, String Query) {
+		return cqlDAO.executeCql(columnFamilyName, Query);
+	}
+	
+	public CqlResult<String, String> readWithCondition(String columnFamilyName, String[][] whereCondition) {
+		return cqlDAO.executeCql(columnFamilyName, queryBuilder(SELECT,ASTRIX,FROM,columnFamilyName, appendWhere(whereCondition)));
+	}
+	
+	public CqlResult<String, String> readWithCondition(String columnFamilyName, String whereCondition) {
+		return cqlDAO.executeCql(columnFamilyName, queryBuilder(SELECT,ASTRIX,FROM,columnFamilyName, whereCondition));
+	}
+	
+	private String queryBuilder(String... fields) {
+		StringBuffer queryBuilder = new StringBuffer();
+		for(int fieldCount =0; fieldCount < fields.length; fieldCount++) {
+			queryBuilder.append(fields[fieldCount]);
+		}
+		return queryBuilder.toString();
+	}
+	
+	public static String appendWhere(Object[][] data) {
+		StringBuffer stringBuffer = new StringBuffer();
+		for(int keyIndex = 0; keyIndex < data.length; keyIndex++) {
+			stringBuffer.append(stringBuffer.length() > 0 ? AND : WHERE);
+			stringBuffer.append(data[keyIndex][0]);
+			stringBuffer.append(EQUAL);
+			stringBuffer.append(QUOTES);
+			stringBuffer.append(data[keyIndex][1]);
+			stringBuffer.append(QUOTES);
+		}
+		stringBuffer.append(ALLOW_FILTERING);
+		return stringBuffer.toString();
 	}
 }
