@@ -17,8 +17,8 @@ import javax.annotation.Resource;
 
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.options;
+import org.gooru.insights.api.constants.InsightsConstant.ColumnFamily;
 import org.gooru.insights.api.constants.ErrorMessages;
-import org.gooru.insights.api.models.InsightsConstant.ColumnFamily;
 import org.gooru.insights.api.services.BaseService;
 import org.gooru.insights.api.services.CassandraService;
 import org.slf4j.Logger;

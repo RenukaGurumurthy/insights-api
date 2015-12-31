@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.gooru.insights.api.models.InsightsConstant;
+import org.gooru.insights.api.constants.InsightsConstant;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.spring.exception.InsightsServerException;
 import org.json.JSONObject;

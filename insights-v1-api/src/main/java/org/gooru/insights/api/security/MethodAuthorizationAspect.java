@@ -38,7 +38,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.gooru.insights.api.constants.ApiConstants;
-import org.gooru.insights.api.models.InsightsConstant.ColumnFamily;
+import org.gooru.insights.api.constants.InsightsConstant.ColumnFamily;
 import org.gooru.insights.api.models.User;
 import org.gooru.insights.api.services.CassandraService;
 import org.gooru.insights.api.services.RedisService;
