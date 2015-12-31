@@ -1,11 +1,14 @@
 package org.gooru.insights.api.daos;
 
 import com.netflix.astyanax.model.CqlResult;
+import com.netflix.astyanax.model.ColumnList;
+import com.netflix.astyanax.model.Rows;
 
 public interface CqlCassandraDao {
 	
-	//TODO 	Test code to be removed
-	void saveSession(String classId, String courseId, String unitId, String topicId, String lessonId, String collectionId, String collectionType, long score, long timespent, long views);
-	
 	CqlResult<String, String> executeCql(String columnFamilyName, String Query);
+	
+	ColumnList<String> readUserCurrentLocationInClass(String cfName, String userUid, String classId);
+
+	Rows<String, String> readColumnsWithKey(String cfName, String key);
 }

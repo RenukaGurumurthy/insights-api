@@ -346,6 +346,12 @@ public class ApiConstants {
 	public static final String _UNIT_UID = "unit_uid";
 	public static final String _LESSON_UID = "lesson_uid";
 	public static final String _EVENT_TIME = "event_time";
+	public static final String ACTIVE_PEER_COUNT = "activePeerCount";
+	public static final String LEFT_PEER_COUNT = "leftPeerCount";
+	public static final String _LEAF_GOORU_OID = "leaf_gooru_oid";
+	public static final String _ACTIVE_GOORU_OID = "active_gooru_oid";
+	public static final String _LEFT_PEER_COUNT = "left_peer_count";
+
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
 		

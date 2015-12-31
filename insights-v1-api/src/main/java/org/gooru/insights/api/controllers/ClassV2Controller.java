@@ -21,7 +21,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping(value="/v2/")
-public class ClassV2Controller extends BaseController{
+public class ClassV2Controller extends BaseController {
 
 	@Autowired
 	private ClassV2Service classService;
@@ -30,30 +30,66 @@ public class ClassV2Controller extends BaseController{
 		return classService;
 	}
 	
-	//TODO 	Test code to be removed
-	@RequestMapping(value="/class/insert", method = {RequestMethod.GET})
-	public void insertClass(HttpServletRequest request,
-			HttpServletResponse response) throws JSONException, ParseException,
-			IOException {
-
-		getClassService().insertClassData();
+	@RequestMapping(value = "/class/{classGooruId}/user/{userUid}/current/location", method = { RequestMethod.GET, RequestMethod.POST })
+	public ModelAndView getUserCurrentLocationInLesson(HttpServletRequest request, 
+			@PathVariable(value ="classGooruId") String classGooruId,
+			@PathVariable(value="userUid") String userUid,
+			HttpServletResponse response) throws JSONException, ParseException, IOException {
+		setAllowOrigin(response);
+		return getModel(getClassService().getUserCurrentLocationInLesson(userUid, classGooruId));
 	}
 	
-	@RequestMapping(value="{collectionType}/{contentGooruId}/user/{userUId}/session/{sessionId}/status",method ={ RequestMethod.GET,RequestMethod.POST})
-	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/peers", method = { RequestMethod.GET, RequestMethod.POST })
+	public ModelAndView getCoursePeers(HttpServletRequest request, 
+			@PathVariable(value ="classGooruId") String classGooruId,
+			@PathVariable(value="courseGooruId") String courseGooruId,
+			HttpServletResponse response) throws JSONException, ParseException, IOException {
+		setAllowOrigin(response);
+		return getModel(getClassService().getUserPeers(classGooruId, courseGooruId, null, null));
+	}
+	
+	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/peers", method = { RequestMethod.GET, RequestMethod.POST })
+	public ModelAndView getUnitPeers(HttpServletRequest request, 
+			@PathVariable(value ="classGooruId") String classGooruId,
+			@PathVariable(value="courseGooruId") String courseGooruId,
+			@PathVariable(value="unitGooruId") String unitGooruId,
+			HttpServletResponse response) throws JSONException, ParseException, IOException {
+		setAllowOrigin(response);
+		return getModel(getClassService().getUserPeers(classGooruId, courseGooruId, unitGooruId, null));
+	}
+	
+	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/peers", method = { RequestMethod.GET, RequestMethod.POST })
+	public ModelAndView getLessonPeers(HttpServletRequest request, 
+			@PathVariable(value ="classGooruId") String classGooruId,
+			@PathVariable(value="courseGooruId") String courseGooruId,
+			@PathVariable(value="unitGooruId") String unitGooruId,
+			@PathVariable(value="lessonGooruId") String lessonGooruId,
+			HttpServletResponse response) throws JSONException, ParseException, IOException {
+		setAllowOrigin(response);
+		return getModel(getClassService().getUserPeers(classGooruId, courseGooruId, unitGooruId, lessonGooruId));
+	}
+	
+	@RequestMapping(value = "{collectionType}/{contentGooruId}/user/{userUId}/session/{sessionId}/status", method = {RequestMethod.GET, RequestMethod.POST })
+	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
-	public ModelAndView getSessionStatus(HttpServletRequest request, @PathVariable(value="userUId") String userUId, @PathVariable(value="sessionId") String sessionId,@PathVariable(value="contentGooruId") String contentGooruId, @PathVariable(value="collectionType") String collectionType, 
-			HttpServletResponse response) throws Exception {
+	public ModelAndView getSessionStatus(HttpServletRequest request, @PathVariable(value = "userUId") String userUId,
+			@PathVariable(value = "sessionId") String sessionId,
+			@PathVariable(value = "contentGooruId") String contentGooruId,
+			@PathVariable(value = "collectionType") String collectionType, HttpServletResponse response)
+					throws Exception {
 		setAllowOrigin(response);
 		return getModel(getClassService().getSessionStatus(contentGooruId, userUId, sessionId));
 	}
 	
 	@RequestMapping(value="/{collectionType}/{contentGooruId}/sessions",method ={ RequestMethod.GET,RequestMethod.POST})
-	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	//TODO @AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
-	public ModelAndView getUserSessions(HttpServletRequest request, @RequestParam(value="classGooruId", required = false) String classGooruId,
-			@RequestParam(value="courseGooruId", required = false) String courseGooruId, @RequestParam(value="unitGooruId", required = false) String unitGooruId, 
-			@RequestParam(value="lessonGooruId", required = false) String lessonGooruId,@PathVariable(value="collectionType") String collectionType, 
+	public ModelAndView getUserSessions(HttpServletRequest request, 
+			@RequestParam(value="classGooruId", required = false) String classGooruId,
+			@RequestParam(value="courseGooruId", required = false) String courseGooruId, 
+			@RequestParam(value="unitGooruId", required = false) String unitGooruId, 
+			@RequestParam(value="lessonGooruId", required = false) String lessonGooruId,
+			@PathVariable(value="collectionType") String collectionType, 
 			@PathVariable(value="contentGooruId") String contentGooruId,
 			@RequestParam(value="userUid", required = true) String userUid,
 			HttpServletResponse response) throws Exception{

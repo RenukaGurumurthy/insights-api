@@ -15,8 +15,8 @@ import javax.annotation.PostConstruct;
 
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.SessionAttributes;
+import org.gooru.insights.api.constants.InsightsConstant.ColumnFamily;
 import org.gooru.insights.api.constants.ExportFileConstants;
-import org.gooru.insights.api.models.InsightsConstant.ColumnFamily;
 import org.gooru.insights.api.services.BaseService;
 import org.gooru.insights.api.services.CassandraService;
 import org.gooru.insights.api.services.ClassService;

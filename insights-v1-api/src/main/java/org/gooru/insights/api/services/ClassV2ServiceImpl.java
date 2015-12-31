@@ -8,22 +8,20 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ErrorCodes;
+import org.gooru.insights.api.constants.InsightsConstant;
 import org.gooru.insights.api.models.ResponseParamDTO;
-import org.gooru.insights.api.models.InsightsConstant.ColumnFamily;
 import org.gooru.insights.api.utils.ServiceUtils;
 import org.gooru.insights.api.utils.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.gooru.insights.api.models.InsightsConstant;
-import com.netflix.astyanax.connectionpool.OperationResult;
-import com.netflix.astyanax.model.Column;
+
 import com.netflix.astyanax.model.ColumnList;
 import com.netflix.astyanax.model.CqlResult;
 import com.netflix.astyanax.model.Row;
 import com.netflix.astyanax.model.Rows;
 
 @Service
-public class ClassV2ServiceImpl implements ClassV2Service{
+public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	
 	@Autowired
 	private CassandraV2Service cassandraService;
@@ -32,9 +30,11 @@ public class ClassV2ServiceImpl implements ClassV2Service{
 		return cassandraService;
 	}
 	
-	//TODO 	Test code to be removed
-	public void insertClassData() {
-		getCassandraService().insertData();
+	@Autowired
+	private BaseService baseService;
+
+	private BaseService getBaseService() {
+		return baseService;
 	}
 	
 	public ResponseParamDTO<Map<String, Object>> getSessionStatus(String contentGooruId, String userUId, String sessionId) {
@@ -60,7 +60,7 @@ public class ClassV2ServiceImpl implements ClassV2Service{
 	public ResponseParamDTO<Map<String, Object>> getUserSessions(String classId, String courseId, String unitId,
 			String lessonId, String collectionId, String collectionType, String userUid) throws Exception {
 		String whereCondition = null;
-		// TODO Enabled after class varification
+		// TODO Enabled for class varification
 		// isValidClass(classId);
 		if (StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) && StringUtils.isNotBlank(unitId)
 				&& StringUtils.isNotBlank(lessonId) && StringUtils.isNotBlank(collectionId)
@@ -118,14 +118,42 @@ public class ClassV2ServiceImpl implements ClassV2Service{
 		return finalSet;
 	}
 	
-	private Map<String,Object> generateSessionObject(Column<String> sessionColumn ,ColumnList<String> sessionInfo, boolean openSession){
-		Map<String, Object> session = new HashMap<String, Object>();
-		session.put(InsightsConstant.SESSION_ID, sessionColumn.getName());
-		session.put(InsightsConstant.EVENT_TIME, sessionColumn.getLongValue());
-		if(openSession) {
-			session.put(InsightsConstant.LAST_ACCESSED_RESOURCE, sessionInfo.getStringValue(ServiceUtils.appendTilda(sessionColumn.getName(), InsightsConstant._LAST_ACCESSED_RESOURCE), null));
+	@Override
+	public ResponseParamDTO<Map<String, Object>> getUserCurrentLocationInLesson(String userUid, String classId) {
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
+		ColumnList<String> resultColumns = getCassandraService().getUserCurrentLocation(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), userUid, classId);
+		if (resultColumns != null && resultColumns.size() > 0) {
+			Map<String, Object> dataAsMap = new HashMap<String, Object>();
+			dataAsMap.put(ApiConstants.CLASS_GOORU_ID, resultColumns.getStringValue("class_uid", null));
+			dataAsMap.put("courseId", resultColumns.getStringValue("course_uid", null));
+			dataAsMap.put("unitId", resultColumns.getStringValue("unit_uid", null));
+			dataAsMap.put("lessonId", resultColumns.getStringValue("lesson_uid", null));
+			dataAsMap.put("gooruOid", resultColumns.getStringValue("collection_uid", null));
+			dataMapAsList.add(dataAsMap);
 		}
-		return session;
+		responseParamDTO.setContent(dataMapAsList);
+		return responseParamDTO;
+	}
+	
+	@Override
+	public ResponseParamDTO<Map<String, Object>> getUserPeers(String classId, String courseId, String unitId, String lessonId) {
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
+		String rowKey = getBaseService().appendTilda(classId, courseId, unitId, lessonId);
+		Rows<String, String> resultRows = getCassandraService().readColumnsWithKey(ColumnFamily.CLASS_ACTIVITY_PEER_COUNTS.getColumnFamily(), rowKey);
+		if (resultRows != null && resultRows.size() > 0) {
+			for(Row<String, String> resultRow : resultRows) {
+				Map<String, Object> dataAsMap = new HashMap<String, Object>();
+				ColumnList<String> columnList = resultRow.getColumns();
+				dataAsMap.put(ApiConstants.GOORUOID, columnList.getStringValue(ApiConstants._LEAF_GOORU_OID, null));
+				dataAsMap.put(ApiConstants.ACTIVE_PEER_COUNT, columnList.getLongValue(ApiConstants._ACTIVE_GOORU_OID, 0L));
+				dataAsMap.put(ApiConstants.LEFT_PEER_COUNT, columnList.getLongValue(ApiConstants._LEFT_PEER_COUNT, 0L));
+				dataMapAsList.add(dataAsMap);
+			}
+		}
+		responseParamDTO.setContent(dataMapAsList);
+		return responseParamDTO;
 	}
 	
 }

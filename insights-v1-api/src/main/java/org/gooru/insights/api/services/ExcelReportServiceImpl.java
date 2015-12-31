@@ -13,8 +13,8 @@ import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 
+import org.gooru.insights.api.constants.InsightsConstant;
 import org.gooru.insights.api.models.EventObject;
-import org.gooru.insights.api.models.InsightsConstant;
 import org.gooru.insights.api.models.RequestParamsDTO;
 import org.gooru.insights.api.utils.InsightsLogger;
 import org.gooru.insights.api.utils.JsonDeserializer;

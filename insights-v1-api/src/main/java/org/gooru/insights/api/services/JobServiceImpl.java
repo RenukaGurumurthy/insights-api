@@ -11,7 +11,7 @@ import javax.annotation.PostConstruct;
 
 import org.gooru.insights.api.constants.ErrorMessages;
 import org.gooru.insights.api.constants.InsightsOperationConstants;
-import org.gooru.insights.api.models.InsightsConstant.ColumnFamily;
+import org.gooru.insights.api.constants.InsightsConstant.ColumnFamily;
 import org.gooru.insights.api.models.JobStatus;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.utils.DataUtils;
