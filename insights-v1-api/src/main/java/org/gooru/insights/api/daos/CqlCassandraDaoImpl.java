@@ -3,15 +3,22 @@ package org.gooru.insights.api.daos;
 
 import org.springframework.stereotype.Repository;
 
+import com.netflix.astyanax.connectionpool.OperationResult;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import com.netflix.astyanax.model.ColumnFamily;
+import com.netflix.astyanax.model.ColumnList;
 import com.netflix.astyanax.model.ConsistencyLevel;
+import com.netflix.astyanax.model.CqlResult;
+import com.netflix.astyanax.model.Rows;
 import com.netflix.astyanax.serializers.StringSerializer;
 
 @Repository
 public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements CqlCassandraDao {
 
 	private static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.CL_QUORUM;
+
+	final String GET_CURRENT_LOCATION = "SELECT * FROM student_location WHERE class_uid = ? AND user_uid = ? ALLOW FILTERING;";
+	
 
 	public ColumnFamily<String, String> accessColumnFamily(String columnFamilyName) {
 
@@ -20,29 +27,38 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		return aggregateColumnFamily;
 	}
 	
-	//TODO 	Test code to be removed
 	@Override
-	public void saveSession(String userUid,String classId,String courseId,String unitId,String lessonId,String collectionId,String collectionType,long views, long timespent,long score){
-		final String INSERT_STATEMENT = "INSERT INTO class_activity(class_uid, course_uid,unit_uid,lesson_uid,collection_uid,user_uid,collection_type,views , time_spent,score) VALUES (?, ?, ? , ? , ? , ?,?  ,? , ? , ?);";
+	public ColumnList<String> readUserCurrentLocationInClass(String cfName, String userUid, String classId){
+		OperationResult<CqlResult<String, String>> result = null;
 		try {
-		 getLogKeyspace()
-		       .prepareQuery(accessColumnFamily("class_activity")).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
-		       .withCql(INSERT_STATEMENT)
+			result = getLogKeyspace()
+		       .prepareQuery(accessColumnFamily(cfName)).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
+		       .withCql(GET_CURRENT_LOCATION)
 		       .asPreparedStatement()
-		       .withStringValue(classId)
-		       .withStringValue(courseId)
-		       .withStringValue(unitId)
-		       .withStringValue(lessonId)
-		       .withStringValue(collectionId)
-		       .withStringValue(userUid)
-		       .withStringValue(collectionType)
-		       .withLongValue(views)
-		       .withLongValue(timespent)
-		       .withLongValue(score)
+			       .withStringValue(classId)
+			       .withStringValue(userUid)
 		       .execute();
 		} catch (ConnectionException e) {
 			e.printStackTrace();
 		}
+		Rows<String, String> resultRows = result.getResult().getRows();
+		return resultRows.size() > 0 ? resultRows.getRowByIndex(0).getColumns() : null ;
+	}
+	
+	@Override
+	public Rows<String, String> readColumnsWithKey(String cfName, String key){
+		OperationResult<CqlResult<String, String>> result = null;
+		try {
+			result = getLogKeyspace()
+		       .prepareQuery(accessColumnFamily(cfName)).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
+		       .withCql("SELECT * FROM " + cfName + " WHERE row_key = ?;")
+		       .asPreparedStatement()
+			       .withStringValue(key)
+		       .execute();
+		} catch (ConnectionException e) {
+			e.printStackTrace();
+		}
+		return result.getResult().getRows() ;
 	}
 	
 	//TODO 	Test code to be removed
@@ -81,4 +97,5 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
             System.out.println(transform);
         
 	}*/
+
 }

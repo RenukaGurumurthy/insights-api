@@ -3,8 +3,8 @@ package org.gooru.insights.api.controllers;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.gooru.insights.api.constants.InsightsConstant;
 import org.gooru.insights.api.constants.InsightsOperationConstants;
-import org.gooru.insights.api.models.InsightsConstant;
 import org.gooru.insights.api.security.AuthorizeOperations;
 import org.gooru.insights.api.services.ExcelReportService;
 import org.springframework.beans.factory.annotation.Autowired;

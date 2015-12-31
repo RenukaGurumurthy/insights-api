@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
-import org.gooru.insights.api.models.InsightsConstant;
+import org.gooru.insights.api.constants.InsightsConstant;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;

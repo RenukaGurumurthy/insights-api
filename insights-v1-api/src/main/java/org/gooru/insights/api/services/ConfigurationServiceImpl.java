@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.codehaus.jackson.type.TypeReference;
-import org.gooru.insights.api.models.InsightsConstant;
+import org.gooru.insights.api.constants.InsightsConstant;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.spring.exception.BadRequestException;
 import org.gooru.insights.api.spring.exception.InsightsServerException;

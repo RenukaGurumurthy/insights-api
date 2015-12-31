@@ -16,7 +16,7 @@ import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.SessionAttributes;
 import org.gooru.insights.api.constants.ErrorCodes;
 import org.gooru.insights.api.constants.ErrorMessages;
-import org.gooru.insights.api.models.InsightsConstant;
+import org.gooru.insights.api.constants.InsightsConstant;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.spring.exception.NotFoundException;
 import org.gooru.insights.api.utils.DataUtils;
