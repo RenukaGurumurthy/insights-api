@@ -1,11 +1,15 @@
 package org.gooru.insights.api.daos;
 
 
+import org.gooru.insights.api.utils.InsightsLogger;
 import org.springframework.stereotype.Repository;
 
+import com.netflix.astyanax.connectionpool.OperationResult;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import com.netflix.astyanax.model.ColumnFamily;
+import com.netflix.astyanax.model.ColumnList;
 import com.netflix.astyanax.model.ConsistencyLevel;
+import com.netflix.astyanax.model.CqlResult;
 import com.netflix.astyanax.serializers.StringSerializer;
 
 @Repository
@@ -14,10 +18,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 	private static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.CL_QUORUM;
 
 	public ColumnFamily<String, String> accessColumnFamily(String columnFamilyName) {
-
-		ColumnFamily<String, String> aggregateColumnFamily;
-		aggregateColumnFamily = new ColumnFamily<String, String>(columnFamilyName, StringSerializer.get(), StringSerializer.get());
-		return aggregateColumnFamily;
+		return new ColumnFamily<String, String>(columnFamilyName, StringSerializer.get(), StringSerializer.get());
 	}
 	
 	//TODO 	Test code to be removed
@@ -45,6 +46,18 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		}
 	}
 	
+	public CqlResult<String, String> executeCql(String columnFamilyName, String query) {
+		OperationResult<CqlResult<String, String>> result = null;
+		try {
+			result = getLogKeyspace()
+			        .prepareQuery(accessColumnFamily(columnFamilyName))
+			        .withCql(query)
+			        .execute();
+		} catch (ConnectionException e) {
+			InsightsLogger.error("CQL Exception:"+query, e);
+		}
+		return result != null ? result.getResult() : null;
+	}
 	//TODO 	Test code to be removed
 	/*public void readUsingCql(){		  
 		List<ClassActivity> classActivityList = new ArrayList<ClassActivity>();

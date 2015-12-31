@@ -338,6 +338,14 @@ public class ApiConstants {
 	public static final String _REACTED_COUNT = "reacted_count";	
 	public static final String VISIBILITY = "visibility";
 	
+	public static final String _EVENT_TYPE = "event_type";
+	public static final String _COLLECTION_UID = "collection_uid";
+	public static final String _USER_UID = "user_uid";
+	public static final String _CLASS_UID = "class_uid";
+	public static final String _COURSE_UID = "course_uid";
+	public static final String _UNIT_UID = "unit_uid";
+	public static final String _LESSON_UID = "lesson_uid";
+	public static final String _EVENT_TIME = "event_time";
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
 		
