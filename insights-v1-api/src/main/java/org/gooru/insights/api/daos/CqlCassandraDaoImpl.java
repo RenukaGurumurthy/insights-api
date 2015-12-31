@@ -17,7 +17,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 
 	private static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.CL_QUORUM;
 
-	final String GET_CURRENT_LOCATION = "SELECT * FROM student_location WHERE class_uid = ? AND user_uid = ? ALLOW FILTERING;";
+	final String GET_USER_CURRENT_LOCATION = "SELECT * FROM student_location WHERE class_uid = ? AND user_uid = ? ALLOW FILTERING;";
 	
 
 	public ColumnFamily<String, String> accessColumnFamily(String columnFamilyName) {
@@ -33,7 +33,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		try {
 			result = getLogKeyspace()
 		       .prepareQuery(accessColumnFamily(cfName)).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
-		       .withCql(GET_CURRENT_LOCATION)
+		       .withCql(GET_USER_CURRENT_LOCATION)
 		       .asPreparedStatement()
 			       .withStringValue(classId)
 			       .withStringValue(userUid)
