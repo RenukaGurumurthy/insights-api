@@ -351,7 +351,11 @@ public class ApiConstants {
 	public static final String _LEAF_GOORU_OID = "leaf_gooru_oid";
 	public static final String _ACTIVE_GOORU_OID = "active_gooru_oid";
 	public static final String _LEFT_PEER_COUNT = "left_peer_count";
-
+	public static final String _GOORU_OID = "gooru_oid";
+	public static final String _RESOURCE_FORMAT = "resource_format";
+	public static final String _RESOURCE_TYPE = "resource_type";
+	public static final String RESOURCES = "resources";
+	
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
 		

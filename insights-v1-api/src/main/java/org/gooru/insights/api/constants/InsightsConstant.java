@@ -74,7 +74,7 @@ public interface InsightsConstant {
 				"job_config_settings"), USER("user"), SESSION("sessions"), SESSION_ACTIVITY("session_activity")
 				,CLASS_ACTIVITY("class_activity"), SESSION_ACTIVITY_COUNTER("session_activity_counter"), 
 				CLASS("class"),USER_GROUP_ASSOCIATION("user_group_association"),CONTENT_META("content_meta"),TABLE_DATATYPES("table_datatypes"),JOB_TRACKER("job_tracker"),CLASS_COLLECTION_SETTINGS("class_collection_settings")
-				,STUDENT_LOCATION("student_location"), CLASS_ACTIVITY_PEER_COUNTS("class_activity_peer_counts"),USER_SESSIONS("user_sessions");
+				,STUDENT_LOCATION("student_location"), CLASS_ACTIVITY_PEER_COUNTS("class_activity_peer_counts"),USER_SESSIONS("user_sessions"),USER_SESSION_ACTIVITY("user_session_activity");
 
 		private String columnFamily;
 
