@@ -1,6 +1,7 @@
 package org.gooru.insights.api.services;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,12 +10,15 @@ import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ErrorCodes;
 import org.gooru.insights.api.constants.InsightsConstant;
+import org.gooru.insights.api.constants.ApiConstants.SessionAttributes;
+import org.gooru.insights.api.constants.InsightsConstant.ColumnFamily;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.utils.ServiceUtils;
 import org.gooru.insights.api.utils.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.netflix.astyanax.connectionpool.OperationResult;
 import com.netflix.astyanax.model.ColumnList;
 import com.netflix.astyanax.model.CqlResult;
 import com.netflix.astyanax.model.Row;
@@ -155,5 +159,60 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		responseParamDTO.setContent(dataMapAsList);
 		return responseParamDTO;
 	}
-	
+
+	public ResponseParamDTO<Map<String, Object>> getSummaryData(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,
+			String collectionType) throws Exception {
+		
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		List<Map<String, Object>> summaryData = new ArrayList<Map<String, Object>>();
+		Map<String,Object> usageData = new HashMap<String,Object>();
+		String sessionKey = null;
+		//TODO validate ClassId
+		//isValidClass(classId);
+		if ((sessionId != null && StringUtils.isNotBlank(sessionId.trim()))) {
+			sessionKey = sessionId;
+		} else if (StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) 
+				&& StringUtils.isNotBlank(unitId) && StringUtils.isNotBlank(lessonId)) {
+			ResponseParamDTO<Map<String, Object>> sessionObject = getUserSessions(classId, courseId, unitId,lessonId, assessmentId, collectionType, userUid);
+			List<Map<String,Object>> sessionList = sessionObject.getContent();
+			sessionKey = sessionList.size() > 0 ? sessionList.get(sessionList.size()-1).get(InsightsConstant.SESSION_ID).toString() : null;
+		} else {
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, getBaseService().appendComma("CUL Heirarchy", InsightsConstant.SESSION_ID)
+					, getBaseService().appendComma("CUL Heirarchy", InsightsConstant.SESSION_ID));
+		}
+		
+		//Fetch score and evidence of assessment
+		if (StringUtils.isNotBlank(sessionKey)) {
+			CqlResult<String, String> userSessionActivity = getCassandraService().readWithCondition(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), new String[][]{{ApiConstants._SESSION_ID, sessionKey}});
+			List<Map<String,Object>> sessionActivities = new ArrayList<Map<String,Object>>();
+			if(userSessionActivity != null && userSessionActivity.hasRows()) {
+				Rows<String,String> sessionActivties = userSessionActivity.getRows();
+				for(Row<String,String> activities : sessionActivties) {
+					Map<String,Object> sessionMetrics = new HashMap<String,Object>();
+					ColumnList<String> sessionColumns = activities.getColumns();
+					sessionMetrics.put(ApiConstants.SESSIONID, sessionColumns.getStringValue(ApiConstants._SESSION_ID, null));
+					sessionMetrics.put(ApiConstants.GOORUOID, sessionColumns.getStringValue(ApiConstants._GOORU_OID, null));
+					sessionMetrics.put(ApiConstants.RESOURCE_TYPE, sessionColumns.getStringValue(ApiConstants._RESOURCE_TYPE, null));
+					sessionMetrics.put(ApiConstants.SCORE, sessionColumns.getLongValue(ApiConstants.SCORE, null));
+					sessionMetrics.put(ApiConstants.VIEWS, sessionColumns.getLongValue(ApiConstants.VIEWS, null));
+					sessionMetrics.put(ApiConstants.TIMESPENT, sessionColumns.getLongValue(ApiConstants._TIME_SPENT, null));
+					if(sessionColumns.getStringValue(ApiConstants._RESOURCE_TYPE, ApiConstants.STRING_EMPTY).equalsIgnoreCase(ApiConstants.COLLECTION)) {
+						usageData.put(ApiConstants.COLLECTION, sessionMetrics);
+					} else {
+						sessionMetrics.put(ApiConstants.COLLECTION_ITEM_ID, sessionColumns.getStringValue(ApiConstants.COLLECTIONITEMID, null));
+						sessionMetrics.put(ApiConstants.RESOURCE_FORMAT, sessionColumns.getStringValue(ApiConstants._RESOURCE_FORMAT, null));
+						sessionMetrics.put(ApiConstants.ATTEMPTS, sessionColumns.getLongValue(ApiConstants.ATTEMPTS, null));
+						sessionMetrics.put(ApiConstants.REACTION, sessionColumns.getLongValue(ApiConstants.REACTION, null));
+						sessionMetrics.put(ApiConstants.ANSWER_OBJECT, sessionColumns.getStringValue(ApiConstants._ANSWER_OBJECT, null));
+						sessionActivities.add(sessionMetrics);
+					}
+				}
+				usageData.put(ApiConstants.RESOURCES, sessionActivities);
+			}
+			
+		}
+		summaryData.add(usageData);
+		responseParamDTO.setContent(summaryData);
+		return responseParamDTO;
+	}
 }
