@@ -26,9 +26,7 @@ public class CassandraV2ServiceImpl implements CassandraV2Service{
 	private static final String EQUAL = "=";
 	
 	private static final String QUOTES = "'";
-	
-	private static final String ALLOW_FILTERING = " ALLOW FILTERING";
-	
+		
 	@Autowired
 	private CqlCassandraDao cqlDAO;
 	
@@ -72,7 +70,6 @@ public class CassandraV2ServiceImpl implements CassandraV2Service{
 			stringBuffer.append(data[keyIndex][1]);
 			stringBuffer.append(QUOTES);
 		}
-		stringBuffer.append(ALLOW_FILTERING);
 		return stringBuffer.toString();
 	}
 }
