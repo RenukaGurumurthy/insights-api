@@ -23,7 +23,6 @@ public class ClassActivity implements Serializable{
 		this.timeSpent = timeSpent;
 	}
 
-
 	private String classUid ;
 	
 	private String courseUid ;
@@ -38,11 +37,11 @@ public class ClassActivity implements Serializable{
 	
 	private String collectionType ;
 	
-	private long score ;
+	private Long score ;
 	
-	private long views ; 
+	private Long views ; 
 	
-	private long timeSpent;
+	private Long timeSpent;
 
 	public String getClassUid() {
 		return classUid;
@@ -100,27 +99,36 @@ public class ClassActivity implements Serializable{
 		this.collectionType = collectionType;
 	}
 
-	public long getScore() {
+	public Long getScore() {
 		return score;
 	}
 
-	public void setScore(long score) {
+	public void setScore(Long score) {
+		if(score == null) {
+			score = 0L;
+		}
 		this.score = score;
 	}
 
-	public long getViews() {
+	public Long getViews() {
 		return views;
 	}
 
-	public void setViews(long views) {
+	public void setViews(Long views) {
+		if(views == null) {
+			views = 0L;
+		}
 		this.views = views;
 	}
 
-	public long getTimeSpent() {
+	public Long getTimeSpent() {
 		return timeSpent;
 	}
 
-	public void setTimeSpent(long timeSpent) {
+	public void setTimeSpent(Long timeSpent) {
+		if(timeSpent == null) {
+			timeSpent = 0L;
+		}
 		this.timeSpent = timeSpent;
 	}
 	

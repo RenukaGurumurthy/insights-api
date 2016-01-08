@@ -1,7 +1,6 @@
 package org.gooru.insights.api.services;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,15 +9,12 @@ import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ErrorCodes;
 import org.gooru.insights.api.constants.InsightsConstant;
-import org.gooru.insights.api.constants.ApiConstants.SessionAttributes;
-import org.gooru.insights.api.constants.InsightsConstant.ColumnFamily;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.utils.ServiceUtils;
 import org.gooru.insights.api.utils.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.netflix.astyanax.connectionpool.OperationResult;
 import com.netflix.astyanax.model.ColumnList;
 import com.netflix.astyanax.model.CqlResult;
 import com.netflix.astyanax.model.Row;
@@ -64,7 +60,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	public ResponseParamDTO<Map<String, Object>> getUserSessions(String classId, String courseId, String unitId,
 			String lessonId, String collectionId, String collectionType, String userUid) throws Exception {
 		String whereCondition = null;
-		// TODO Enabled for class varification
+		// TODO Enabled for class verification
 		// isValidClass(classId);
 		if (StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) && StringUtils.isNotBlank(unitId)
 				&& StringUtils.isNotBlank(lessonId) && StringUtils.isNotBlank(collectionId)
@@ -129,11 +125,11 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		ColumnList<String> resultColumns = getCassandraService().getUserCurrentLocation(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), userUid, classId);
 		if (resultColumns != null && resultColumns.size() > 0) {
 			Map<String, Object> dataAsMap = new HashMap<String, Object>();
-			dataAsMap.put(ApiConstants.CLASS_GOORU_ID, resultColumns.getStringValue("class_uid", null));
-			dataAsMap.put("courseId", resultColumns.getStringValue("course_uid", null));
-			dataAsMap.put("unitId", resultColumns.getStringValue("unit_uid", null));
-			dataAsMap.put("lessonId", resultColumns.getStringValue("lesson_uid", null));
-			dataAsMap.put("gooruOid", resultColumns.getStringValue("collection_uid", null));
+			dataAsMap.put(ApiConstants.CLASS_GOORU_ID, resultColumns.getStringValue(ApiConstants._CLASS_UID, null));
+			dataAsMap.put("courseId", resultColumns.getStringValue(ApiConstants._COURSE_UID, null));
+			dataAsMap.put("unitId", resultColumns.getStringValue(ApiConstants._UNIT_UID, null));
+			dataAsMap.put("lessonId", resultColumns.getStringValue(ApiConstants._LESSON_UID, null));
+			dataAsMap.put("gooruOid", resultColumns.getStringValue(ApiConstants._COLLECTION_UID, null));
 			dataMapAsList.add(dataAsMap);
 		}
 		responseParamDTO.setContent(dataMapAsList);
@@ -151,7 +147,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 				Map<String, Object> dataAsMap = new HashMap<String, Object>();
 				ColumnList<String> columnList = resultRow.getColumns();
 				dataAsMap.put(ApiConstants.GOORUOID, columnList.getStringValue(ApiConstants._LEAF_GOORU_OID, null));
-				dataAsMap.put(ApiConstants.ACTIVE_PEER_COUNT, columnList.getLongValue(ApiConstants._ACTIVE_GOORU_OID, 0L));
+				dataAsMap.put(ApiConstants.ACTIVE_PEER_COUNT, columnList.getLongValue(ApiConstants._ACTIVE_PEER_COUNT, 0L));
 				dataAsMap.put(ApiConstants.LEFT_PEER_COUNT, columnList.getLongValue(ApiConstants._LEFT_PEER_COUNT, 0L));
 				dataMapAsList.add(dataAsMap);
 			}
@@ -181,7 +177,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 					, getBaseService().appendComma("CUL Heirarchy", InsightsConstant.SESSION_ID));
 		}
 		
-		//Fetch score and evidence of assessment
+		//Fetch Usage Data
 		if (StringUtils.isNotBlank(sessionKey)) {
 			CqlResult<String, String> userSessionActivity = getCassandraService().readWithCondition(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), new String[][]{{ApiConstants._SESSION_ID, sessionKey}});
 			List<Map<String,Object>> sessionActivities = new ArrayList<Map<String,Object>>();
@@ -215,4 +211,49 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		responseParamDTO.setContent(summaryData);
 		return responseParamDTO;
 	}
+	
+	@Override
+	public ResponseParamDTO<Map<String, Object>> getPerformanceData(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType) {
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
+		String rowKey = getBaseService().appendTilda(classId, courseId, unitId, lessonId);
+		String whereCondition = null;
+		if (StringUtils.isNotBlank(userUid) && StringUtils.isNotBlank(collectionType)) {
+			whereCondition = CassandraV2ServiceImpl.appendWhere(new String[][] { { ApiConstants._ROW_KEY, rowKey }, { ApiConstants._USER_UID, userUid },{ ApiConstants._COLLECTION_TYPE, collectionType } });
+		} else if (StringUtils.isNotBlank(collectionType)) {
+			whereCondition = CassandraV2ServiceImpl.appendWhere(new String[][] { { ApiConstants._ROW_KEY, rowKey }, { ApiConstants._COLLECTION_TYPE, collectionType } });
+		}
+		
+		CqlResult<String, String> resultRows = getCassandraService().readWithCondition(ColumnFamily.STUDENT_CLASS_ACTIVITY.getColumnFamily(), whereCondition);
+		if (resultRows.getRows() != null && resultRows.getRows().size() > 0) {
+			Map<String, Object> userUsageAsMap = new HashMap<String, Object>();
+			for (Row<String, String> resultRow : resultRows.getRows()) {
+				List<Map<String, Object>> dataMapList = new ArrayList<Map<String, Object>>();
+				String userId = resultRow.getColumns().getStringValue(ApiConstants._USER_UID, null);
+				if (userUsageAsMap.containsKey(userId) && userUsageAsMap.get(userId) != null) {
+					dataMapList = (List<Map<String, Object>>) userUsageAsMap.get(userId);
+				}
+				addPerformanceMetrics(dataMapList, resultRow.getColumns());
+				userUsageAsMap.put(userId, dataMapList);
+			}
+			for (Map.Entry<String, Object> userUsageAsMapEntry : userUsageAsMap.entrySet()) {
+				Map<String, Object> resultAsMap = new HashMap<String, Object>(2);
+				resultAsMap.put(ApiConstants.USERUID, userUsageAsMapEntry.getKey());
+				resultAsMap.put(ApiConstants.USAGE_DATA, userUsageAsMapEntry.getValue());
+				dataMapAsList.add(resultAsMap);
+			}
+			responseParamDTO.setContent(dataMapAsList);
+		}
+		return responseParamDTO;
+	}
+	
+	private void addPerformanceMetrics(List<Map<String, Object>> dataMapList, ColumnList<String> columnList) {
+		Map<String, Object> dataAsMap = new HashMap<String, Object>(4);
+		dataAsMap.put(ApiConstants.GOORUOID, columnList.getStringValue(ApiConstants._LEAF_NODE, null));
+		dataAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, columnList.getLongValue(ApiConstants.SCORE, 0L));
+		dataAsMap.put(ApiConstants.ATTEMPTS, columnList.getLongValue(ApiConstants.VIEWS, 0L));
+		dataAsMap.put(ApiConstants.TIMESPENT, columnList.getLongValue(ApiConstants._TIME_SPENT, 0L));
+		dataMapList.add(dataAsMap);
+	}
+	
 }
