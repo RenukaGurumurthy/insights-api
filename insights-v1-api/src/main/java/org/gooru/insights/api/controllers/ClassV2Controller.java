@@ -102,7 +102,7 @@ public class ClassV2Controller extends BaseController {
 	@RequestMapping(value="/{collectionType}/{contentGooruId}/user/{userUid}",method ={ RequestMethod.GET,RequestMethod.POST})
 	// TODO @AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
-	public ModelAndView getStudentAssessmentData(HttpServletRequest request, 
+	public ModelAndView getSummaryData(HttpServletRequest request, 
 			@PathVariable(value="collectionType") String collectionType, @PathVariable(value="userUid") String userUid, 
 			@RequestParam(value="sessionId", required = false) String sessionId, @RequestParam(value="classGooruId", required = false) String classGooruId,
 			@RequestParam(value="courseGooruId", required = false) String courseGooruId, @RequestParam(value="unitGooruId", required = false) String unitGooruId, 
