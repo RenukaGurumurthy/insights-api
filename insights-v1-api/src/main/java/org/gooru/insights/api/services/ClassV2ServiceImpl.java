@@ -165,7 +165,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		String sessionKey = null;
 		//TODO validate ClassId
 		//isValidClass(classId);
-		if ((sessionId != null && StringUtils.isNotBlank(sessionId.trim()))) {
+		if (StringUtils.isNotBlank(sessionId)) {
 			sessionKey = sessionId;
 		} else if (StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) 
 				&& StringUtils.isNotBlank(unitId) && StringUtils.isNotBlank(lessonId)) {
