@@ -125,11 +125,11 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		ColumnList<String> resultColumns = getCassandraService().getUserCurrentLocation(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), userUid, classId);
 		if (resultColumns != null && resultColumns.size() > 0) {
 			Map<String, Object> dataAsMap = new HashMap<String, Object>();
-			dataAsMap.put(ApiConstants.CLASS_GOORU_ID, resultColumns.getStringValue(ApiConstants._CLASS_UID, null));
+			dataAsMap.put("classId", resultColumns.getStringValue(ApiConstants._CLASS_UID, null));
 			dataAsMap.put("courseId", resultColumns.getStringValue(ApiConstants._COURSE_UID, null));
 			dataAsMap.put("unitId", resultColumns.getStringValue(ApiConstants._UNIT_UID, null));
 			dataAsMap.put("lessonId", resultColumns.getStringValue(ApiConstants._LESSON_UID, null));
-			dataAsMap.put("gooruOid", resultColumns.getStringValue(ApiConstants._COLLECTION_UID, null));
+			dataAsMap.put(ApiConstants.GOORUOID, resultColumns.getStringValue(ApiConstants._COLLECTION_UID, null));
 			dataMapAsList.add(dataAsMap);
 		}
 		responseParamDTO.setContent(dataMapAsList);
@@ -247,12 +247,13 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return responseParamDTO;
 	}
 	
-	private void addPerformanceMetrics(List<Map<String, Object>> dataMapList, ColumnList<String> columnList) {
+	private void addPerformanceMetrics(List<Map<String, Object>> dataMapList, ColumnList<String> columns) {
 		Map<String, Object> dataAsMap = new HashMap<String, Object>(4);
-		dataAsMap.put(ApiConstants.GOORUOID, columnList.getStringValue(ApiConstants._LEAF_NODE, null));
-		dataAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, columnList.getLongValue(ApiConstants.SCORE, 0L));
-		dataAsMap.put(ApiConstants.ATTEMPTS, columnList.getLongValue(ApiConstants.VIEWS, 0L));
-		dataAsMap.put(ApiConstants.TIMESPENT, columnList.getLongValue(ApiConstants._TIME_SPENT, 0L));
+		dataAsMap.put(ApiConstants.GOORUOID, columns.getStringValue(ApiConstants._LEAF_NODE, null));
+		dataAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, columns.getLongValue(ApiConstants.SCORE, 0L));
+		dataAsMap.put(ApiConstants.ATTEMPTS, columns.getLongValue(ApiConstants.VIEWS, 0L));
+		dataAsMap.put(ApiConstants.TIMESPENT, columns.getLongValue(ApiConstants._TIME_SPENT, 0L));
+		dataAsMap.put(ApiConstants.COMPLETED, columns.getLongValue(ApiConstants.COMPLETED, 0L));
 		dataMapList.add(dataAsMap);
 	}
 	

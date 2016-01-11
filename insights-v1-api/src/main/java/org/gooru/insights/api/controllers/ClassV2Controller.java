@@ -114,7 +114,7 @@ public class ClassV2Controller extends BaseController {
 
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	public ModelAndView getUserCoursePerformance(HttpServletRequest request, 
+	public ModelAndView getCoursePerformance(HttpServletRequest request, 
 			@PathVariable(value ="classGooruId") String classGooruId,
 			@PathVariable(value = "courseGooruId") String courseGooruId,
 			@RequestParam(value = "userUid", required = false) String userUid,
@@ -126,7 +126,7 @@ public class ClassV2Controller extends BaseController {
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	public ModelAndView getUserUnitPerformance(HttpServletRequest request, 
+	public ModelAndView getUnitPerformance(HttpServletRequest request, 
 			@PathVariable(value ="classGooruId") String classGooruId,
 			@PathVariable(value = "courseGooruId") String courseGooruId,
 			@PathVariable(value = "unitGooruId") String unitGooruId,
@@ -139,7 +139,7 @@ public class ClassV2Controller extends BaseController {
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	public ModelAndView getUserLessonPerformance(HttpServletRequest request, 
+	public ModelAndView getLessonPerformance(HttpServletRequest request, 
 			@PathVariable(value = "classGooruId") String classGooruId,
 			@PathVariable(value = "courseGooruId") String courseGooruId,
 			@PathVariable(value = "unitGooruId") String unitGooruId,
