@@ -137,7 +137,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	}
 	
 	@Override
-	public ResponseParamDTO<Map<String, Object>> getUserPeers(String classId, String courseId, String unitId, String lessonId) {
+	public ResponseParamDTO<Map<String, Object>> getUserPeers(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
 		String rowKey = getBaseService().appendTilda(classId, courseId, unitId, lessonId);
@@ -146,7 +146,13 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			for(Row<String, String> resultRow : resultRows) {
 				Map<String, Object> dataAsMap = new HashMap<String, Object>();
 				ColumnList<String> columnList = resultRow.getColumns();
-				dataAsMap.put(ApiConstants.GOORUOID, columnList.getStringValue(ApiConstants._LEAF_GOORU_OID, null));
+				
+				//TODO nextLevelType is hard coded temporarily. In future, store and get nextLevelType from CF
+				if(nextLevelType.equalsIgnoreCase(ApiConstants.CONTENT)) {
+					nextLevelType = ApiConstants.getResponseNameByType(columnList.getStringValue(ApiConstants._LEVEL_TYPE, ApiConstants.CONTENT_GOORU));
+				}
+				dataAsMap.put(nextLevelType + ApiConstants._ID, columnList.getStringValue(ApiConstants._LEAF_GOORU_OID, null));
+				
 				dataAsMap.put(ApiConstants.ACTIVE_PEER_COUNT, columnList.getLongValue(ApiConstants._ACTIVE_PEER_COUNT, 0L));
 				dataAsMap.put(ApiConstants.LEFT_PEER_COUNT, columnList.getLongValue(ApiConstants._LEFT_PEER_COUNT, 0L));
 				dataMapAsList.add(dataAsMap);
@@ -190,11 +196,12 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 					sessionMetrics.put(ApiConstants.GOORUOID, sessionColumns.getStringValue(ApiConstants._GOORU_OID, null));
 					sessionMetrics.put(ApiConstants.RESOURCE_TYPE, sessionColumns.getStringValue(ApiConstants._RESOURCE_TYPE, null));
 					sessionMetrics.put(ApiConstants.SCORE, sessionColumns.getLongValue(ApiConstants.SCORE, null));
-					sessionMetrics.put(ApiConstants.VIEWS, sessionColumns.getLongValue(ApiConstants.VIEWS, null));
 					sessionMetrics.put(ApiConstants.TIMESPENT, sessionColumns.getLongValue(ApiConstants._TIME_SPENT, null));
 					if(sessionColumns.getStringValue(ApiConstants._RESOURCE_TYPE, ApiConstants.STRING_EMPTY).equalsIgnoreCase(ApiConstants.COLLECTION)) {
 						usageData.put(ApiConstants.COLLECTION, sessionMetrics);
+						sessionMetrics.put(ApiConstants.VIEWS, sessionColumns.getLongValue(ApiConstants.VIEWS, null));
 					} else {
+						sessionMetrics.put(ApiConstants.ATTEMPTS, sessionColumns.getLongValue(ApiConstants.VIEWS, null));
 						sessionMetrics.put(ApiConstants.COLLECTION_ITEM_ID, sessionColumns.getStringValue(ApiConstants.COLLECTIONITEMID, null));
 						sessionMetrics.put(ApiConstants.RESOURCE_FORMAT, sessionColumns.getStringValue(ApiConstants._RESOURCE_FORMAT, null));
 						sessionMetrics.put(ApiConstants.ATTEMPTS, sessionColumns.getLongValue(ApiConstants.ATTEMPTS, null));
@@ -213,7 +220,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	}
 	
 	@Override
-	public ResponseParamDTO<Map<String, Object>> getPerformanceData(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType) {
+	public ResponseParamDTO<Map<String, Object>> getPerformanceData(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType, String nextLevelType) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
 		String rowKey = getBaseService().appendTilda(classId, courseId, unitId, lessonId);
@@ -233,7 +240,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 				if (userUsageAsMap.containsKey(userId) && userUsageAsMap.get(userId) != null) {
 					dataMapList = (List<Map<String, Object>>) userUsageAsMap.get(userId);
 				}
-				addPerformanceMetrics(dataMapList, resultRow.getColumns());
+				addPerformanceMetrics(dataMapList, resultRow.getColumns(), collectionType, nextLevelType);
 				userUsageAsMap.put(userId, dataMapList);
 			}
 			for (Map.Entry<String, Object> userUsageAsMapEntry : userUsageAsMap.entrySet()) {
@@ -247,13 +254,21 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return responseParamDTO;
 	}
 	
-	private void addPerformanceMetrics(List<Map<String, Object>> dataMapList, ColumnList<String> columns) {
+	//TODO nextLevelType is hard coded temporarily. In future, store and get nextLevelType from CF
+	private void addPerformanceMetrics(List<Map<String, Object>> dataMapList, ColumnList<String> columns, String collectionType, String nextLevelType) {
 		Map<String, Object> dataAsMap = new HashMap<String, Object>(4);
-		dataAsMap.put(ApiConstants.GOORUOID, columns.getStringValue(ApiConstants._LEAF_NODE, null));
+		String responseNameForViews = ApiConstants.VIEWS;
+		if(nextLevelType.equalsIgnoreCase(ApiConstants.CONTENT)) {
+			nextLevelType = collectionType;
+		}
+		if(collectionType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) responseNameForViews = ApiConstants.ATTEMPTS;
+		dataAsMap.put(nextLevelType + ApiConstants._ID, columns.getStringValue(ApiConstants._LEAF_NODE, null));
 		dataAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, columns.getLongValue(ApiConstants.SCORE, 0L));
-		dataAsMap.put(ApiConstants.ATTEMPTS, columns.getLongValue(ApiConstants.VIEWS, 0L));
+		dataAsMap.put(responseNameForViews, columns.getLongValue(ApiConstants.VIEWS, 0L));
 		dataAsMap.put(ApiConstants.TIMESPENT, columns.getLongValue(ApiConstants._TIME_SPENT, 0L));
 		dataAsMap.put(ApiConstants.COMPLETED, columns.getLongValue(ApiConstants.COMPLETED, 0L));
+		//TODO Need to add logic to fetch total count meta data from Database
+		dataAsMap.put(ApiConstants.ITEM_COUNT, columns.getLongValue(ApiConstants.ITEM_COUNT, 0L));
 		dataMapList.add(dataAsMap);
 	}
 	
