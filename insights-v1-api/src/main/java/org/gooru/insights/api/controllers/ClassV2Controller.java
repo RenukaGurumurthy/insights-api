@@ -6,6 +6,7 @@ import java.text.ParseException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.services.ClassV2Service;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value="courseGooruId") String courseGooruId,
 			HttpServletResponse response) throws JSONException, ParseException, IOException {
 		setAllowOrigin(response);
-		return getModel(getClassService().getUserPeers(classGooruId, courseGooruId, null, null));
+		return getModel(getClassService().getUserPeers(classGooruId, courseGooruId, null, null, ApiConstants.UNIT));
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/peers", method = { RequestMethod.GET, RequestMethod.POST })
@@ -56,7 +57,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value="unitGooruId") String unitGooruId,
 			HttpServletResponse response) throws JSONException, ParseException, IOException {
 		setAllowOrigin(response);
-		return getModel(getClassService().getUserPeers(classGooruId, courseGooruId, unitGooruId, null));
+		return getModel(getClassService().getUserPeers(classGooruId, courseGooruId, unitGooruId, null, ApiConstants.LESSON));
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/peers", method = { RequestMethod.GET, RequestMethod.POST })
@@ -68,7 +69,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value="lessonGooruId") String lessonGooruId,
 			HttpServletResponse response) throws JSONException, ParseException, IOException {
 		setAllowOrigin(response);
-		return getModel(getClassService().getUserPeers(classGooruId, courseGooruId, unitGooruId, lessonGooruId));
+		return getModel(getClassService().getUserPeers(classGooruId, courseGooruId, unitGooruId, lessonGooruId, ApiConstants.CONTENT));
 	}
 	
 	@RequestMapping(value = "{collectionType}/{contentGooruId}/user/{userUId}/session/{sessionId}/status", method = {RequestMethod.GET, RequestMethod.POST })
@@ -121,7 +122,7 @@ public class ClassV2Controller extends BaseController {
 			@RequestParam(value = "collectionType", required = true) String collectionType,
 			HttpServletResponse response) throws JSONException, ParseException, IOException {
 		setAllowOrigin(response);
-		return getModel(getClassService().getPerformanceData(classGooruId, courseGooruId, null, null, userUid, collectionType));
+		return getModel(getClassService().getPerformanceData(classGooruId, courseGooruId, null, null, userUid, collectionType, ApiConstants.UNIT));
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
@@ -134,7 +135,7 @@ public class ClassV2Controller extends BaseController {
 			@RequestParam(value = "collectionType", required = true) String collectionType,
 			HttpServletResponse response) throws JSONException, ParseException, IOException {
 		setAllowOrigin(response);
-		return getModel(getClassService().getPerformanceData(classGooruId, courseGooruId, unitGooruId, null, userUid, collectionType));
+		return getModel(getClassService().getPerformanceData(classGooruId, courseGooruId, unitGooruId, null, userUid, collectionType, ApiConstants.LESSON));
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
@@ -148,6 +149,6 @@ public class ClassV2Controller extends BaseController {
 			@RequestParam(value = "collectionType", required = true) String collectionType,
 			HttpServletResponse response) throws JSONException, ParseException, IOException {
 		setAllowOrigin(response);
-		return getModel(getClassService().getPerformanceData(classGooruId, courseGooruId, unitGooruId, lessonGooruId, userUid, collectionType));
+		return getModel(getClassService().getPerformanceData(classGooruId, courseGooruId, unitGooruId, lessonGooruId, userUid, collectionType, ApiConstants.CONTENT));
 	}
 }

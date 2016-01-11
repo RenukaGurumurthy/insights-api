@@ -1,5 +1,10 @@
 package org.gooru.insights.api.constants;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+
 public class ApiConstants {
 
 	/**
@@ -356,7 +361,11 @@ public class ApiConstants {
 	public static final String _RESOURCE_TYPE = "resource_type";
 	public static final String RESOURCES = "resources";
 	public static final String _ROW_KEY = "row_key";
-	public static final String _LEAF_NODE = "leaf_node";
+	public static final String _LEAF_NODE = "leaf_node";	
+	public static final String _ID = "Id";
+	public static final String CONTENT = "content";
+	public static final String _LEVEL_TYPE = "level_type";
+	public static final String CONTENT_GOORU = "contentGooru";
 
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
@@ -466,5 +475,21 @@ public class ApiConstants {
 	 */
 	public static final String COURSE_PLAN_UNAVAILABLE = "Course Plan unavailable for CourseGooruOid : {} ";
 	public static final String MESSAGE = "message";
+	
+	private static Map<String, String> classHierarchyIdNameAsMap;
+
+	static {
+		classHierarchyIdNameAsMap = new HashMap<String, String>();
+		classHierarchyIdNameAsMap.put("class", "classId");
+		classHierarchyIdNameAsMap.put("course", "courseId");
+		classHierarchyIdNameAsMap.put("unit", "unitId");
+		classHierarchyIdNameAsMap.put("lesson", "lessonId");
+		classHierarchyIdNameAsMap.put("assessment", "assessmentId");
+		classHierarchyIdNameAsMap.put("collection", "collectionId");
+	}
+	
+	public static String getResponseNameByType(String type) {
+		return StringUtils.defaultIfEmpty(classHierarchyIdNameAsMap.get(type), type);
+	}
 
 }
