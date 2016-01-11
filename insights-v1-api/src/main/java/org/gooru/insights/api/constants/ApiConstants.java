@@ -357,7 +357,6 @@ public class ApiConstants {
 	public static final String RESOURCES = "resources";
 	public static final String _ROW_KEY = "row_key";
 	public static final String _LEAF_NODE = "leaf_node";
-	public static final String COMPLETION = "completion";
 
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
