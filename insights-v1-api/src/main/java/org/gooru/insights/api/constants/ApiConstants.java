@@ -486,6 +486,7 @@ public class ApiConstants {
 		classHierarchyIdNameAsMap.put("lesson", "lessonId");
 		classHierarchyIdNameAsMap.put("assessment", "assessmentId");
 		classHierarchyIdNameAsMap.put("collection", "collectionId");
+		classHierarchyIdNameAsMap.put("content", "gooruOId");
 	}
 	
 	public static String getResponseNameByType(String type) {

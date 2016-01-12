@@ -129,7 +129,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			dataAsMap.put("courseId", resultColumns.getStringValue(ApiConstants._COURSE_UID, null));
 			dataAsMap.put("unitId", resultColumns.getStringValue(ApiConstants._UNIT_UID, null));
 			dataAsMap.put("lessonId", resultColumns.getStringValue(ApiConstants._LESSON_UID, null));
-			dataAsMap.put(ApiConstants.GOORUOID, resultColumns.getStringValue(ApiConstants._COLLECTION_UID, null));
+			dataAsMap.put(ApiConstants.getResponseNameByType(resultColumns.getStringValue(ApiConstants.COLLECTION_TYPE, ApiConstants.CONTENT)), resultColumns.getStringValue(ApiConstants._COLLECTION_UID, null));
 			dataMapAsList.add(dataAsMap);
 		}
 		responseParamDTO.setContent(dataMapAsList);
@@ -149,10 +149,9 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 				
 				//TODO nextLevelType is hard coded temporarily. In future, store and get nextLevelType from CF
 				if(nextLevelType.equalsIgnoreCase(ApiConstants.CONTENT)) {
-					nextLevelType = ApiConstants.getResponseNameByType(columnList.getStringValue(ApiConstants._LEVEL_TYPE, ApiConstants.CONTENT_GOORU));
-				}
-				dataAsMap.put(nextLevelType + ApiConstants._ID, columnList.getStringValue(ApiConstants._LEAF_GOORU_OID, null));
-				
+					nextLevelType = columnList.getStringValue(ApiConstants._LEVEL_TYPE, ApiConstants.CONTENT);
+				} 
+				dataAsMap.put(ApiConstants.getResponseNameByType(nextLevelType), columnList.getStringValue(ApiConstants._LEAF_GOORU_OID, null));
 				dataAsMap.put(ApiConstants.ACTIVE_PEER_COUNT, columnList.getLongValue(ApiConstants._ACTIVE_PEER_COUNT, 0L));
 				dataAsMap.put(ApiConstants.LEFT_PEER_COUNT, columnList.getLongValue(ApiConstants._LEFT_PEER_COUNT, 0L));
 				dataMapAsList.add(dataAsMap);
@@ -197,11 +196,10 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 					sessionMetrics.put(ApiConstants.RESOURCE_TYPE, sessionColumns.getStringValue(ApiConstants._RESOURCE_TYPE, null));
 					sessionMetrics.put(ApiConstants.SCORE, sessionColumns.getLongValue(ApiConstants.SCORE, null));
 					sessionMetrics.put(ApiConstants.TIMESPENT, sessionColumns.getLongValue(ApiConstants._TIME_SPENT, null));
+					sessionMetrics.put(ApiConstants.VIEWS, sessionColumns.getLongValue(ApiConstants.VIEWS, null));
 					if(sessionColumns.getStringValue(ApiConstants._RESOURCE_TYPE, ApiConstants.STRING_EMPTY).equalsIgnoreCase(ApiConstants.COLLECTION)) {
 						usageData.put(ApiConstants.COLLECTION, sessionMetrics);
-						sessionMetrics.put(ApiConstants.VIEWS, sessionColumns.getLongValue(ApiConstants.VIEWS, null));
 					} else {
-						sessionMetrics.put(ApiConstants.ATTEMPTS, sessionColumns.getLongValue(ApiConstants.VIEWS, null));
 						sessionMetrics.put(ApiConstants.COLLECTION_ITEM_ID, sessionColumns.getStringValue(ApiConstants.COLLECTIONITEMID, null));
 						sessionMetrics.put(ApiConstants.RESOURCE_FORMAT, sessionColumns.getStringValue(ApiConstants._RESOURCE_FORMAT, null));
 						sessionMetrics.put(ApiConstants.ATTEMPTS, sessionColumns.getLongValue(ApiConstants.ATTEMPTS, null));
@@ -262,7 +260,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			nextLevelType = collectionType;
 		}
 		if(collectionType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) responseNameForViews = ApiConstants.ATTEMPTS;
-		dataAsMap.put(nextLevelType + ApiConstants._ID, columns.getStringValue(ApiConstants._LEAF_NODE, null));
+		dataAsMap.put(ApiConstants.getResponseNameByType(nextLevelType), columns.getStringValue(ApiConstants._LEAF_NODE, null));
 		dataAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, columns.getLongValue(ApiConstants.SCORE, 0L));
 		dataAsMap.put(responseNameForViews, columns.getLongValue(ApiConstants.VIEWS, 0L));
 		dataAsMap.put(ApiConstants.TIMESPENT, columns.getLongValue(ApiConstants._TIME_SPENT, 0L));
