@@ -129,7 +129,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			dataAsMap.put("courseId", resultColumns.getStringValue(ApiConstants._COURSE_UID, null));
 			dataAsMap.put("unitId", resultColumns.getStringValue(ApiConstants._UNIT_UID, null));
 			dataAsMap.put("lessonId", resultColumns.getStringValue(ApiConstants._LESSON_UID, null));
-			dataAsMap.put(ApiConstants.getResponseNameByType(resultColumns.getStringValue(ApiConstants.COLLECTION_TYPE, ApiConstants.CONTENT)), resultColumns.getStringValue(ApiConstants._COLLECTION_UID, null));
+			dataAsMap.put(ApiConstants.getResponseNameByType(resultColumns.getStringValue(ApiConstants._COLLECTION_TYPE, ApiConstants.CONTENT)), resultColumns.getStringValue(ApiConstants._COLLECTION_UID, null));
 			dataMapAsList.add(dataAsMap);
 		}
 		responseParamDTO.setContent(dataMapAsList);
@@ -149,7 +149,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 				
 				//TODO nextLevelType is hard coded temporarily. In future, store and get nextLevelType from CF
 				if(nextLevelType.equalsIgnoreCase(ApiConstants.CONTENT)) {
-					nextLevelType = columnList.getStringValue(ApiConstants._LEVEL_TYPE, ApiConstants.CONTENT);
+					nextLevelType = columnList.getStringValue(ApiConstants._COLLECTION_TYPE, ApiConstants.CONTENT);
 				} 
 				dataAsMap.put(ApiConstants.getResponseNameByType(nextLevelType), columnList.getStringValue(ApiConstants._LEAF_GOORU_OID, null));
 				dataAsMap.put(ApiConstants.ACTIVE_PEER_COUNT, columnList.getLongValue(ApiConstants._ACTIVE_PEER_COUNT, 0L));
@@ -191,17 +191,22 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 				for(Row<String,String> activities : sessionActivties) {
 					Map<String,Object> sessionMetrics = new HashMap<String,Object>();
 					ColumnList<String> sessionColumns = activities.getColumns();
+					String contentType = sessionColumns.getStringValue(ApiConstants._RESOURCE_TYPE, ApiConstants.STRING_EMPTY);
 					sessionMetrics.put(ApiConstants.SESSIONID, sessionColumns.getStringValue(ApiConstants._SESSION_ID, null));
 					sessionMetrics.put(ApiConstants.GOORUOID, sessionColumns.getStringValue(ApiConstants._GOORU_OID, null));
-					sessionMetrics.put(ApiConstants.RESOURCE_TYPE, sessionColumns.getStringValue(ApiConstants._RESOURCE_TYPE, null));
+					sessionMetrics.put(ApiConstants.RESOURCE_TYPE, contentType);
 					sessionMetrics.put(ApiConstants.SCORE, sessionColumns.getLongValue(ApiConstants.SCORE, null));
 					sessionMetrics.put(ApiConstants.TIMESPENT, sessionColumns.getLongValue(ApiConstants._TIME_SPENT, null));
 					sessionMetrics.put(ApiConstants.VIEWS, sessionColumns.getLongValue(ApiConstants.VIEWS, null));
-					if(sessionColumns.getStringValue(ApiConstants._RESOURCE_TYPE, ApiConstants.STRING_EMPTY).equalsIgnoreCase(ApiConstants.COLLECTION)) {
+					if(contentType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
 						usageData.put(ApiConstants.COLLECTION, sessionMetrics);
+					} else if (contentType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) {
+						usageData.put(ApiConstants.ASSESSMENT, sessionMetrics);
+						sessionMetrics.remove(ApiConstants.VIEWS);
+						sessionMetrics.put(ApiConstants.ATTEMPTS, sessionColumns.getLongValue(ApiConstants.VIEWS, null));
 					} else {
 						sessionMetrics.put(ApiConstants.COLLECTION_ITEM_ID, sessionColumns.getStringValue(ApiConstants.COLLECTIONITEMID, null));
-						sessionMetrics.put(ApiConstants.RESOURCE_FORMAT, sessionColumns.getStringValue(ApiConstants._RESOURCE_FORMAT, null));
+						sessionMetrics.put(ApiConstants.QUESTION_TYPE, sessionColumns.getStringValue(ApiConstants._QUESTION_TYPE, null));
 						sessionMetrics.put(ApiConstants.ATTEMPTS, sessionColumns.getLongValue(ApiConstants.ATTEMPTS, null));
 						sessionMetrics.put(ApiConstants.REACTION, sessionColumns.getLongValue(ApiConstants.REACTION, null));
 						sessionMetrics.put(ApiConstants.ANSWER_OBJECT, sessionColumns.getStringValue(ApiConstants._ANSWER_OBJECT, null));
@@ -269,5 +274,5 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		dataAsMap.put(ApiConstants.ITEM_COUNT, columns.getLongValue(ApiConstants.ITEM_COUNT, 0L));
 		dataMapList.add(dataAsMap);
 	}
-	
+
 }
