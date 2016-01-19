@@ -151,4 +151,18 @@ public class ClassV2Controller extends BaseController {
 		setAllowOrigin(response);
 		return getModel(getClassService().getPerformanceData(classGooruId, courseGooruId, unitGooruId, lessonGooruId, userUid, collectionType, ApiConstants.CONTENT));
 	}
+	
+	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/{collectionType}/{contentGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
+	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	public ModelAndView getAllStudentContentPerformance(HttpServletRequest request, 
+			@PathVariable(value = "classGooruId") String classGooruId,
+			@PathVariable(value = "courseGooruId") String courseGooruId,
+			@PathVariable(value = "unitGooruId") String unitGooruId,
+			@PathVariable(value = "lessonGooruId") String lessonGooruId,
+			@PathVariable(value = "contentGooruId") String contentGooruId,
+			@PathVariable(value = "collectionType") String collectionType,
+			HttpServletResponse response) throws Exception {
+		setAllowOrigin(response);
+		return getModel(getClassService().getAllStudentPerformanceData(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, collectionType));
+	}
 }

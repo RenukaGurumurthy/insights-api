@@ -366,6 +366,7 @@ public class ApiConstants {
 	public static final String CONTENT = "content";
 	public static final String _LEVEL_TYPE = "level_type";
 	public static final String CONTENT_GOORU = "contentGooru";
+	public static final String COLLECTION_OR_ASSESSMENT = "collection|assessment";
 
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");

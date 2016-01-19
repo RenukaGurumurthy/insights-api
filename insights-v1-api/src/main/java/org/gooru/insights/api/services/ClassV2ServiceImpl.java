@@ -167,6 +167,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> summaryData = new ArrayList<Map<String, Object>>();
 		Map<String,Object> usageData = new HashMap<String,Object>();
+		List<Map<String,Object>> sessionActivities = new ArrayList<Map<String,Object>>();
 		String sessionKey = null;
 		//TODO validate ClassId
 		//isValidClass(classId);
@@ -184,38 +185,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		
 		//Fetch Usage Data
 		if (StringUtils.isNotBlank(sessionKey)) {
-			CqlResult<String, String> userSessionActivity = getCassandraService().readWithCondition(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), new String[][]{{ApiConstants._SESSION_ID, sessionKey}});
-			List<Map<String,Object>> sessionActivities = new ArrayList<Map<String,Object>>();
-			if(userSessionActivity != null && userSessionActivity.hasRows()) {
-				Rows<String,String> sessionActivties = userSessionActivity.getRows();
-				for(Row<String,String> activities : sessionActivties) {
-					Map<String,Object> sessionMetrics = new HashMap<String,Object>();
-					ColumnList<String> sessionColumns = activities.getColumns();
-					String contentType = sessionColumns.getStringValue(ApiConstants._RESOURCE_TYPE, ApiConstants.STRING_EMPTY);
-					sessionMetrics.put(ApiConstants.SESSIONID, sessionColumns.getStringValue(ApiConstants._SESSION_ID, null));
-					sessionMetrics.put(ApiConstants.GOORUOID, sessionColumns.getStringValue(ApiConstants._GOORU_OID, null));
-					sessionMetrics.put(ApiConstants.RESOURCE_TYPE, contentType);
-					sessionMetrics.put(ApiConstants.SCORE, sessionColumns.getLongValue(ApiConstants.SCORE, null));
-					sessionMetrics.put(ApiConstants.TIMESPENT, sessionColumns.getLongValue(ApiConstants._TIME_SPENT, null));
-					sessionMetrics.put(ApiConstants.VIEWS, sessionColumns.getLongValue(ApiConstants.VIEWS, null));
-					if(contentType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
-						usageData.put(ApiConstants.COLLECTION, sessionMetrics);
-					} else if (contentType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) {
-						usageData.put(ApiConstants.ASSESSMENT, sessionMetrics);
-						sessionMetrics.remove(ApiConstants.VIEWS);
-						sessionMetrics.put(ApiConstants.ATTEMPTS, sessionColumns.getLongValue(ApiConstants.VIEWS, null));
-					} else {
-						sessionMetrics.put(ApiConstants.COLLECTION_ITEM_ID, sessionColumns.getStringValue(ApiConstants.COLLECTIONITEMID, null));
-						sessionMetrics.put(ApiConstants.QUESTION_TYPE, sessionColumns.getStringValue(ApiConstants._QUESTION_TYPE, null));
-						sessionMetrics.put(ApiConstants.ATTEMPTS, sessionColumns.getLongValue(ApiConstants.ATTEMPTS, null));
-						sessionMetrics.put(ApiConstants.REACTION, sessionColumns.getLongValue(ApiConstants.REACTION, null));
-						sessionMetrics.put(ApiConstants.ANSWER_OBJECT, sessionColumns.getStringValue(ApiConstants._ANSWER_OBJECT, null));
-						sessionActivities.add(sessionMetrics);
-					}
-				}
-				usageData.put(ApiConstants.RESOURCES, sessionActivities);
-			}
-			
+			getResourceMetricsBySession(sessionActivities, sessionKey, usageData);
 		}
 		summaryData.add(usageData);
 		responseParamDTO.setContent(summaryData);
@@ -234,7 +204,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			whereCondition = CassandraV2ServiceImpl.appendWhere(new String[][] { { ApiConstants._ROW_KEY, rowKey }, { ApiConstants._COLLECTION_TYPE, collectionType } });
 		}
 		
-		CqlResult<String, String> resultRows = getCassandraService().readWithCondition(ColumnFamily.STUDENT_CLASS_ACTIVITY.getColumnFamily(), whereCondition);
+		CqlResult<String, String> resultRows = getCassandraService().readWithCondition(ColumnFamily.CLASS_ACTIVITY_DATACUBE.getColumnFamily(), whereCondition);
 		if (resultRows.getRows() != null && resultRows.getRows().size() > 0) {
 			Map<String, Object> userUsageAsMap = new HashMap<String, Object>();
 			for (Row<String, String> resultRow : resultRows.getRows()) {
@@ -273,6 +243,73 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		//TODO Need to add logic to fetch total count meta data from Database
 		dataAsMap.put(ApiConstants.ITEM_COUNT, columns.getLongValue(ApiConstants.ITEM_COUNT, 0L));
 		dataMapList.add(dataAsMap);
+	}
+	
+	public ResponseParamDTO<Map<String, Object>> getAllStudentPerformanceData(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType) throws Exception {
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		List<Map<String, Object>> resultDataAsList = new ArrayList<Map<String, Object>>(); 
+		//TODO store and fetch student list of given class
+		List<String> userIds = new ArrayList<String>();
+		/*userIds.add("0219090c-abe6-4a09-8c9f-343911f5cd86");
+		userIds.add("6f337b1c-0b0d-49b3-8314-e279181aeddf");*/
+		
+		for (String userId : userIds) {
+			Map<String, Object> usageData = new HashMap<String, Object>(2);
+			List<Map<String, Object>> sessionActivities = new ArrayList<Map<String, Object>>();
+			usageData.put(ApiConstants.USER_UID, userId);
+			usageData.put(ApiConstants.USAGE_DATA, sessionActivities);
+			String sessionKey = getUserLatestSessionId(classId, courseId, unitId, lessonId, gooruOid, collectionType, userId);
+			// Fetch Usage Data
+			if (StringUtils.isNotBlank(sessionKey)) {
+				getResourceMetricsBySession(sessionActivities, sessionKey, new HashMap<String, Object>(2));
+			}
+			resultDataAsList.add(usageData);
+		}
+		responseParamDTO.setContent(resultDataAsList);
+		return responseParamDTO;
+	}
+
+	private void getResourceMetricsBySession(List<Map<String, Object>> sessionActivities, String sessionKey, Map<String, Object> usageData) {
+		CqlResult<String, String> userSessionActivityResult = getCassandraService().readWithCondition(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(),
+				new String[][] { { ApiConstants._SESSION_ID, sessionKey } });
+		if (userSessionActivityResult != null && userSessionActivityResult.hasRows()) {
+			for (Row<String, String> userSessionActivityRow : userSessionActivityResult.getRows()) {
+				Map<String, Object> sessionActivityMetrics = new HashMap<String, Object>();
+				ColumnList<String> sessionActivityColumns = userSessionActivityRow.getColumns();
+				String contentType = sessionActivityColumns.getStringValue(ApiConstants._RESOURCE_TYPE, ApiConstants.STRING_EMPTY);
+				sessionActivityMetrics.put(ApiConstants.SESSIONID, sessionActivityColumns.getStringValue(ApiConstants._SESSION_ID, null));
+				sessionActivityMetrics.put(ApiConstants.GOORUOID, sessionActivityColumns.getStringValue(ApiConstants._GOORU_OID, null));
+				sessionActivityMetrics.put(ApiConstants.RESOURCE_TYPE, contentType);
+				sessionActivityMetrics.put(ApiConstants.SCORE, sessionActivityColumns.getLongValue(ApiConstants.SCORE, null));
+				sessionActivityMetrics.put(ApiConstants.TIMESPENT, sessionActivityColumns.getLongValue(ApiConstants._TIME_SPENT, null));
+				sessionActivityMetrics.put(ApiConstants.VIEWS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, null));
+				if (contentType.matches(ApiConstants.COLLECTION_OR_ASSESSMENT)) {
+					if (contentType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
+						usageData.put(ApiConstants.COLLECTION, sessionActivityMetrics);
+					} else if (contentType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) {
+						usageData.put(ApiConstants.ASSESSMENT, sessionActivityMetrics);
+						sessionActivityMetrics.remove(ApiConstants.VIEWS);
+						sessionActivityMetrics.put(ApiConstants.ATTEMPTS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, null));
+					}
+				} else {
+					sessionActivityMetrics.put(ApiConstants.COLLECTION_ITEM_ID, sessionActivityColumns.getStringValue(ApiConstants.COLLECTIONITEMID, null));
+					sessionActivityMetrics.put(ApiConstants.QUESTION_TYPE, sessionActivityColumns.getStringValue(ApiConstants._QUESTION_TYPE, null));
+					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, sessionActivityColumns.getStringValue(ApiConstants._ANSWER_OBJECT, null));
+					sessionActivityMetrics.put(ApiConstants.ATTEMPTS, sessionActivityColumns.getLongValue(ApiConstants.ATTEMPTS, null));
+					sessionActivityMetrics.put(ApiConstants.REACTION, sessionActivityColumns.getLongValue(ApiConstants.REACTION, null));
+					sessionActivities.add(sessionActivityMetrics);
+				}
+			}
+			usageData.put(ApiConstants.RESOURCES, sessionActivities);
+		}
+	}
+
+	private String getUserLatestSessionId(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType, String userId) throws Exception {
+		ResponseParamDTO<Map<String, Object>> sessionObject;
+		sessionObject = getUserSessions(classId, courseId, unitId, lessonId, gooruOid, collectionType, userId);
+		List<Map<String, Object>> sessionList = sessionObject.getContent();
+		String sessionKey = sessionList.size() > 0 ? sessionList.get(sessionList.size() - 1).get(InsightsConstant.SESSION_ID).toString() : null;
+		return sessionKey;
 	}
 
 }

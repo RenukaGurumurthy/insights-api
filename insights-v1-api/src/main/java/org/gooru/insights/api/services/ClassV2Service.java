@@ -17,6 +17,8 @@ public interface ClassV2Service {
 	ResponseParamDTO<Map<String, Object>> getUserPeers(String classId, String courseId, String unitId, String lessonId, String nextLevelType);
 		
 	ResponseParamDTO<Map<String, Object>> getPerformanceData(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType, String nextLevelType );
+	
+	ResponseParamDTO<Map<String, Object>> getAllStudentPerformanceData(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType) throws Exception;
 
 }
 
