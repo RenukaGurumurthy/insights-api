@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
@@ -12,8 +14,13 @@ import org.gooru.insights.api.constants.InsightsConstant;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.utils.ServiceUtils;
 import org.gooru.insights.api.utils.ValidationUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import rx.Observable;
+import rx.schedulers.Schedulers;
 
 import com.netflix.astyanax.model.ColumnList;
 import com.netflix.astyanax.model.CqlResult;
@@ -23,6 +30,10 @@ import com.netflix.astyanax.model.Rows;
 @Service
 public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	
+	private static final Logger logger = LoggerFactory.getLogger(ClassV2ServiceImpl.class);
+
+    private final ExecutorService observableExecutor = Executors.newFixedThreadPool(10);
+    
 	@Autowired
 	private CassandraV2Service cassandraService;
 
@@ -36,7 +47,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	private BaseService getBaseService() {
 		return baseService;
 	}
-	
+
 	public ResponseParamDTO<Map<String, Object>> getSessionStatus(String contentGooruId, String userUId, String sessionId) {
 		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
@@ -120,6 +131,46 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	
 	@Override
 	public ResponseParamDTO<Map<String, Object>> getUserCurrentLocationInLesson(String userUid, String classId) {
+		Observable<ResponseParamDTO<Map<String, Object>>> userLocationObservable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+			s.onNext(getUserCurrentLocation(userUid, classId));
+			s.onCompleted();
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = userLocationObservable.toBlocking().first();
+		return responseParamDTO;
+	}
+	
+	@Override
+	public Observable<ResponseParamDTO<Map<String, Object>>> getUserPeers(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
+		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+			s.onNext(getUserPeersData(classId, courseId, unitId, lessonId, nextLevelType));
+			s.onCompleted();
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		return observable;
+	}
+	
+	@Override
+	public Observable<ResponseParamDTO<Map<String, Object>>> getPerformance(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType, String nextLevelType) {
+		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+			s.onNext(getPerformanceData(classId, courseId, unitId, lessonId, userUid, collectionType, nextLevelType));
+			s.onCompleted();
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		return observable;
+	}
+	
+	@Override
+	public Observable<ResponseParamDTO<Map<String, Object>>> getAllStudentPerformance(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType) {
+		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+			try {
+				s.onNext(getAllStudentsPerformance(classId, courseId, unitId, lessonId, gooruOid, collectionType));
+			} catch (Exception e) {
+				logger.error("Exception while fetching all student performance data", e);
+			}
+			s.onCompleted();
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		return observable;
+	}
+	
+	private ResponseParamDTO<Map<String, Object>> getUserCurrentLocation(String userUid, String classId) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
 		ColumnList<String> resultColumns = getCassandraService().getUserCurrentLocation(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), userUid, classId);
@@ -136,8 +187,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return responseParamDTO;
 	}
 	
-	@Override
-	public ResponseParamDTO<Map<String, Object>> getUserPeers(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
+	private ResponseParamDTO<Map<String, Object>> getUserPeersData(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
 		String rowKey = getBaseService().appendTilda(classId, courseId, unitId, lessonId);
@@ -192,8 +242,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return responseParamDTO;
 	}
 	
-	@Override
-	public ResponseParamDTO<Map<String, Object>> getPerformanceData(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType, String nextLevelType) {
+	private ResponseParamDTO<Map<String, Object>> getPerformanceData(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType, String nextLevelType) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
 		String rowKey = getBaseService().appendTilda(classId, courseId, unitId, lessonId);
@@ -239,13 +288,13 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		dataAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, columns.getLongValue(ApiConstants.SCORE, 0L));
 		dataAsMap.put(responseNameForViews, columns.getLongValue(ApiConstants.VIEWS, 0L));
 		dataAsMap.put(ApiConstants.TIMESPENT, columns.getLongValue(ApiConstants._TIME_SPENT, 0L));
-		dataAsMap.put(ApiConstants.COMPLETED, columns.getLongValue(ApiConstants.COMPLETED, 0L));
+		dataAsMap.put(ApiConstants.COMPLETED_COUNT, columns.getLongValue(ApiConstants.COMPLETED_COUNT, 0L));
 		//TODO Need to add logic to fetch total count meta data from Database
-		dataAsMap.put(ApiConstants.ITEM_COUNT, columns.getLongValue(ApiConstants.ITEM_COUNT, 0L));
+		dataAsMap.put(ApiConstants.TOTAL_COUNT, columns.getLongValue(ApiConstants.TOTAL_COUNT, 0L));
 		dataMapList.add(dataAsMap);
 	}
 	
-	public ResponseParamDTO<Map<String, Object>> getAllStudentPerformanceData(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getAllStudentsPerformance(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType) throws Exception {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> resultDataAsList = new ArrayList<Map<String, Object>>(); 
 		//TODO store and fetch student list of given class
@@ -292,7 +341,6 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 						sessionActivityMetrics.put(ApiConstants.ATTEMPTS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, null));
 					}
 				} else {
-					sessionActivityMetrics.put(ApiConstants.COLLECTION_ITEM_ID, sessionActivityColumns.getStringValue(ApiConstants.COLLECTIONITEMID, null));
 					sessionActivityMetrics.put(ApiConstants.QUESTION_TYPE, sessionActivityColumns.getStringValue(ApiConstants._QUESTION_TYPE, null));
 					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, sessionActivityColumns.getStringValue(ApiConstants._ANSWER_OBJECT, null));
 					sessionActivityMetrics.put(ApiConstants.ATTEMPTS, sessionActivityColumns.getLongValue(ApiConstants.ATTEMPTS, null));
@@ -311,5 +359,5 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		String sessionKey = sessionList.size() > 0 ? sessionList.get(sessionList.size() - 1).get(InsightsConstant.SESSION_ID).toString() : null;
 		return sessionKey;
 	}
-
+	
 }
