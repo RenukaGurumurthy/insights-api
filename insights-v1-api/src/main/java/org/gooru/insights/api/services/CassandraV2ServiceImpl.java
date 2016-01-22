@@ -1,5 +1,6 @@
 package org.gooru.insights.api.services;
 
+import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.daos.CqlCassandraDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class CassandraV2ServiceImpl implements CassandraV2Service{
 	
 	private static final String QUOTES = "'";
 	
-	private static final String ALLOW_FILTERING = "ALLOW FILTERING";
+	private static final String ALLOW_FILTERING = " ALLOW FILTERING";
 
 	@Autowired
 	private CqlCassandraDao cqlDAO;
@@ -65,12 +66,14 @@ public class CassandraV2ServiceImpl implements CassandraV2Service{
 	public static String appendWhere(Object[][] data) {
 		StringBuffer stringBuffer = new StringBuffer();
 		for(int keyIndex = 0; keyIndex < data.length; keyIndex++) {
-			stringBuffer.append(stringBuffer.length() > 0 ? AND : WHERE);
-			stringBuffer.append(data[keyIndex][0]);
-			stringBuffer.append(EQUAL);
-			stringBuffer.append(QUOTES);
-			stringBuffer.append(data[keyIndex][1]);
-			stringBuffer.append(QUOTES);
+			if(data[keyIndex][1] != null && StringUtils.isNotBlank(data[keyIndex][1].toString())) {
+				stringBuffer.append(stringBuffer.length() > 0 ? AND : WHERE);
+				stringBuffer.append(data[keyIndex][0]);
+				stringBuffer.append(EQUAL);
+				stringBuffer.append(QUOTES);
+				stringBuffer.append(data[keyIndex][1]);
+				stringBuffer.append(QUOTES);
+			}
 		}
 		stringBuffer.append(ALLOW_FILTERING);
 		return stringBuffer.toString();

@@ -2,13 +2,16 @@ package org.gooru.insights.api.services;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ErrorCodes;
 import org.gooru.insights.api.constants.InsightsConstant;
+import org.gooru.insights.api.models.ContentTaxonomyActivity;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.utils.ServiceUtils;
 import org.gooru.insights.api.utils.ValidationUtils;
@@ -25,6 +28,9 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	
 	@Autowired
 	private CassandraV2Service cassandraService;
+	
+	@Autowired
+	private LambdaService lambdaService;
 
 	private CassandraV2Service getCassandraService() {
 		return cassandraService;
@@ -312,4 +318,37 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return sessionKey;
 	}
 
+	public ResponseParamDTO<ContentTaxonomyActivity> getStudentTaxonomyPerformance(String studentId, String subjectId, String courseId, String domainId, String subDomainId, String standardsId, String learningTargetId, Integer depth) {
+		
+		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
+		CqlResult<String, String> userSessionActivityResult = getCassandraService().readWithCondition(ColumnFamily.CONTENT_TAXONOMY_ACTIVITY.getColumnFamily(),
+				new String[][] { { ApiConstants._USER_UID, studentId }, {ApiConstants._SUBJECT_ID, subjectId}, 
+			{ApiConstants._COURSE_ID, courseId}, {ApiConstants._DOMAIN_ID, domainId}, 
+			{ApiConstants._SUB_DOMAIN_ID, subDomainId}, {ApiConstants._STANDARDS_ID, standardsId}, {ApiConstants._LEARNING_TARGETS_ID, learningTargetId}} );
+		List<ContentTaxonomyActivity> contentTaxonomyActivityList = new ArrayList<>();
+		if(userSessionActivityResult != null && userSessionActivityResult.hasRows()) {
+			for(Row<String,String> row : userSessionActivityResult.getRows()) {
+				ColumnList<String> taxonomyUsage = row.getColumns();
+				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
+				contentTaxonomyActivity.setSubjectId(taxonomyUsage.getStringValue(ApiConstants._SUBJECT_ID, null));
+				contentTaxonomyActivity.setCourseId(taxonomyUsage.getStringValue(ApiConstants._COURSE_ID, null));
+				contentTaxonomyActivity.setDomainId(taxonomyUsage.getStringValue(ApiConstants._DOMAIN_ID, null));
+				contentTaxonomyActivity.setSubDomainId(taxonomyUsage.getStringValue(ApiConstants._SUB_DOMAIN_ID, null));
+				contentTaxonomyActivity.setStandardsId(taxonomyUsage.getStringValue(ApiConstants._STANDARDS_ID, null));
+				contentTaxonomyActivity.setLearningTargetsId(taxonomyUsage.getStringValue(ApiConstants._LEARNING_TARGETS_ID, null));
+				contentTaxonomyActivity.setGooruOid(taxonomyUsage.getStringValue(ApiConstants._GOORU_OID, null));
+				contentTaxonomyActivity.setUserUid(taxonomyUsage.getStringValue(ApiConstants._USER_UID, null));
+				contentTaxonomyActivity.setResourceFormat(taxonomyUsage.getStringValue(ApiConstants._RESOURCE_FORMAT, null));
+				contentTaxonomyActivity.setResourceType(taxonomyUsage.getStringValue(ApiConstants._RESOURCE_TYPE, null));
+				contentTaxonomyActivity.setScore(taxonomyUsage.getLongValue(ApiConstants.SCORE, 0L));
+				contentTaxonomyActivity.setTimespent(taxonomyUsage.getLongValue(ApiConstants.TIMESPENT, 0L));
+				contentTaxonomyActivity.setViews(taxonomyUsage.getLongValue(ApiConstants.VIEWS, 0L));
+				contentTaxonomyActivityList.add(contentTaxonomyActivity);
+			}
+			lambdaService.aggregateTaxonomyActivityData(contentTaxonomyActivityList, depth);
+		}
+		responseParamDTO.setContent(contentTaxonomyActivityList);
+		return responseParamDTO;
+	}
+	
 }

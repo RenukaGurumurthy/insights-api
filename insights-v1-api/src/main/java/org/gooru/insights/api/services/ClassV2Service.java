@@ -2,6 +2,7 @@ package org.gooru.insights.api.services;
 
 import java.util.Map;
 
+import org.gooru.insights.api.models.ContentTaxonomyActivity;
 import org.gooru.insights.api.models.ResponseParamDTO;
 
 public interface ClassV2Service {
@@ -20,6 +21,7 @@ public interface ClassV2Service {
 	
 	ResponseParamDTO<Map<String, Object>> getAllStudentPerformanceData(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType) throws Exception;
 
+	ResponseParamDTO<ContentTaxonomyActivity> getStudentTaxonomyPerformance(String studentId, String subjectId, String courseId, String domainId, String subDomainId, String standardsId, String learningTargetId, Integer depth);
 }
 
 
