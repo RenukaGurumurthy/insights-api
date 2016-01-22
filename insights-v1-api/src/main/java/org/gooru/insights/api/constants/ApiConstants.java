@@ -365,7 +365,6 @@ public class ApiConstants {
 	public static final String _ID = "Id";
 	public static final String CONTENT = "content";
 	public static final String _LEVEL_TYPE = "level_type";
-	public static final String CONTENT_GOORU = "contentGooru";
 	public static final String COLLECTION_OR_ASSESSMENT = "collection|assessment";
 	public static final String _SUBJECT_ID = "subject_id";
 	public static final String _COURSE_ID = "course_id";
@@ -373,6 +372,10 @@ public class ApiConstants {
 	public static final String _SUB_DOMAIN_ID = "sub_domain_id";
 	public static final String _STANDARDS_ID = "standards_id";
 	public static final String _LEARNING_TARGETS_ID = "learning_targets_id";
+	public static final String TOTAL_COUNT = "totalCount";
+	public static final String _TOTAL_COUNT = "total_count";
+	public static final String COMPLETED_COUNT = "completedCount";
+	public static final String _COMPLETED_COUNT = "completed_count";
 
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");

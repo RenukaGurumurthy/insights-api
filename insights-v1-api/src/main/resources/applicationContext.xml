@@ -35,7 +35,7 @@
 	</bean>
 
 	<!-- Cron Trigger -->
-	<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+	<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="firstTaskJobDetail" />
 		<property name="cronExpression" value="0 0 12 * * ?" />
 	</bean>

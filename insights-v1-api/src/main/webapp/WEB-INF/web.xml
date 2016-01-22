@@ -9,6 +9,7 @@
       <param-value>/WEB-INF/classes/dispatcher-servlet.xml</param-value>
     </init-param>
     <load-on-startup>2</load-on-startup>
+        <async-supported>true</async-supported>
   </servlet>
   <servlet-mapping>
     <servlet-name>dispatcher</servlet-name>
@@ -23,10 +24,11 @@
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
-
+    
         <filter>
                 <filter-name>CORS</filter-name>
                 <filter-class>com.thetransactioncompany.cors.CORSFilter</filter-class>
+                        <async-supported>true</async-supported>
                 <init-param>
                         <param-name>cors.allowGenericHttpRequests</param-name>
                         <param-value>true</param-value>
@@ -35,7 +37,7 @@
                 <init-param>
                         <param-name>cors.allowOrigin</param-name>
                         <param-value>*</param-value>
-     </init-param>
+     			</init-param>
 
                 <init-param>
                         <param-name>cors.allowSubdomains</param-name>

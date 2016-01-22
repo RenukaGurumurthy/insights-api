@@ -23,10 +23,6 @@ public class RequestUtils {
 		id = uuid.toString();
 	}
 
-	public static String getTraceId() {
-		return ((RequestUtils)ContextLoader.getCurrentWebApplicationContext().getBean("requestTracer")).getId();
-	}
-
 	public static String getSessionToken(HttpServletRequest request) {
 
 		if (request.getHeader(ApiConstants.GOORU_SESSION_TOKEN) != null) {
