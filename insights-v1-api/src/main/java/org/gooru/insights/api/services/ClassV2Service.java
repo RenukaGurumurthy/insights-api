@@ -2,6 +2,7 @@ package org.gooru.insights.api.services;
 
 import java.util.Map;
 
+import org.gooru.insights.api.models.ContentTaxonomyActivity;
 import org.gooru.insights.api.models.ResponseParamDTO;
 
 import rx.Observable;
@@ -22,7 +23,9 @@ public interface ClassV2Service {
 			String nextLevelType);
 
 	Observable<ResponseParamDTO<Map<String, Object>>> getAllStudentPerformance(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType);
-	
+
+	ResponseParamDTO<ContentTaxonomyActivity> getStudentTaxonomyPerformance(String studentId, String subjectId, String courseId, String domainId, String subDomainId, String standardsId, String learningTargetId, Integer depth);
+
 }
 
 
