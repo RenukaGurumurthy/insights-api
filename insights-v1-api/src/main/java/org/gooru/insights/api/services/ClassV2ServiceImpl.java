@@ -2,11 +2,14 @@ package org.gooru.insights.api.services;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ErrorCodes;
@@ -24,6 +27,7 @@ import com.netflix.astyanax.model.ColumnList;
 import com.netflix.astyanax.model.CqlResult;
 import com.netflix.astyanax.model.Row;
 import com.netflix.astyanax.model.Rows;
+import com.netflix.astyanax.serializers.SetSerializer;
 
 import rx.Observable;
 import rx.schedulers.Schedulers;
@@ -146,7 +150,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	@Override
 	public Observable<ResponseParamDTO<Map<String, Object>>> getUserPeers(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
 		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
-			s.onNext(getUserPeersData(classId, courseId, unitId, lessonId, nextLevelType));
+			s.onNext(getUserPeersDetail(classId, courseId, unitId, lessonId, nextLevelType));
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
 		return observable;
@@ -191,23 +195,27 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return responseParamDTO;
 	}
 	
-	private ResponseParamDTO<Map<String, Object>> getUserPeersData(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
+	private ResponseParamDTO<Map<String, Object>> getUserPeersDetail(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
 		String rowKey = getBaseService().appendTilda(classId, courseId, unitId, lessonId);
-		Rows<String, String> resultRows = getCassandraService().readColumnsWithKey(ColumnFamily.CLASS_ACTIVITY_PEER_COUNTS.getColumnFamily(), rowKey);
+		Rows<String, String> resultRows = getCassandraService().readColumnsWithKey(ColumnFamily.CLASS_ACTIVITY_PEER_DETAIL.getColumnFamily(), rowKey);
 		if (resultRows != null && resultRows.size() > 0) {
 			for(Row<String, String> resultRow : resultRows) {
-				Map<String, Object> dataAsMap = new HashMap<String, Object>();
+				Map<String, Object> dataAsMap = new HashMap<String, Object>(5);
+				SetSerializer<String> setSerializer = new SetSerializer<String>(UTF8Type.instance);
 				ColumnList<String> columnList = resultRow.getColumns();
-				
-				//TODO nextLevelType is hard coded temporarily. In future, store and get nextLevelType from CF
-				if(nextLevelType.equalsIgnoreCase(ApiConstants.CONTENT)) {
-					nextLevelType = columnList.getStringValue(ApiConstants._COLLECTION_TYPE, ApiConstants.CONTENT);
-				} 
+				Set<String> activePeers = columnList.getValue(ApiConstants._ACTIVE_PEERS, setSerializer, new HashSet<String>());
+				Set<String> leftPeers = columnList.getValue(ApiConstants._LEFT_PEERS, setSerializer, new HashSet<String>());
+				dataAsMap.put(ApiConstants.ACTIVE_PEER_COUNT, leftPeers.size());
+				dataAsMap.put(ApiConstants.LEFT_PEER_COUNT, activePeers.size());
+				nextLevelType = columnList.getStringValue(ApiConstants._COLLECTION_TYPE, ApiConstants.CONTENT);
+				if(nextLevelType.matches(ApiConstants.COLLECTION_OR_ASSESSMENT)) {
+					dataAsMap.put(ApiConstants.ACTIVE_PEER_UIDS, leftPeers);
+					dataAsMap.put(ApiConstants.LEFT_PEER_UIDS, activePeers);
+				}
 				dataAsMap.put(ApiConstants.getResponseNameByType(nextLevelType), columnList.getStringValue(ApiConstants._LEAF_GOORU_OID, null));
-				dataAsMap.put(ApiConstants.ACTIVE_PEER_COUNT, columnList.getLongValue(ApiConstants._ACTIVE_PEER_COUNT, 0L));
-				dataAsMap.put(ApiConstants.LEFT_PEER_COUNT, columnList.getLongValue(ApiConstants._LEFT_PEER_COUNT, 0L));
+
 				dataMapAsList.add(dataAsMap);
 			}
 		}
