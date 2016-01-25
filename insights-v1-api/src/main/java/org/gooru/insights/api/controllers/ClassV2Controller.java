@@ -9,18 +9,18 @@ import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.services.ClassV2Service;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.ModelAndView;
 
 import rx.Observable;
 
-@Controller
+@RestController
 @RequestMapping(value="/v2/")
 public class ClassV2Controller extends BaseController {
 
@@ -43,7 +43,6 @@ public class ClassV2Controller extends BaseController {
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/peers", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	@ResponseBody
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getCoursePeers(HttpServletRequest request, 
 			@PathVariable(value ="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId,
@@ -57,7 +56,6 @@ public class ClassV2Controller extends BaseController {
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/peers", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	@ResponseBody
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getUnitPeers(HttpServletRequest request, 
 			@PathVariable(value ="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId,
@@ -72,7 +70,6 @@ public class ClassV2Controller extends BaseController {
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/peers", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	@ResponseBody
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getLessonPeers(HttpServletRequest request, 
 			@PathVariable(value ="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId,
@@ -128,7 +125,6 @@ public class ClassV2Controller extends BaseController {
 
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	@ResponseBody
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getCoursePerformance(HttpServletRequest request, 
 			@PathVariable(value ="classGooruId") String classGooruId,
 			@PathVariable(value = "courseGooruId") String courseGooruId,
@@ -144,7 +140,6 @@ public class ClassV2Controller extends BaseController {
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	@ResponseBody
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getUnitPerformance(HttpServletRequest request, 
 			@PathVariable(value ="classGooruId") String classGooruId,
 			@PathVariable(value = "courseGooruId") String courseGooruId,
@@ -161,7 +156,6 @@ public class ClassV2Controller extends BaseController {
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	@ResponseBody
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getLessonPerformance(HttpServletRequest request, 
 			@PathVariable(value = "classGooruId") String classGooruId,
 			@PathVariable(value = "courseGooruId") String courseGooruId,
@@ -179,7 +173,6 @@ public class ClassV2Controller extends BaseController {
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/{collectionType}/{contentGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	@ResponseBody
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getAllStudentContentPerformance(HttpServletRequest request, 
 			@PathVariable(value = "classGooruId") String classGooruId,
 			@PathVariable(value = "courseGooruId") String courseGooruId,

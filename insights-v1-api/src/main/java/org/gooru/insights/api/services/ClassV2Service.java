@@ -22,7 +22,7 @@ public interface ClassV2Service {
 			String nextLevelType);
 
 	Observable<ResponseParamDTO<Map<String, Object>>> getAllStudentPerformance(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType);
-
+	
 }
 
 

@@ -365,11 +365,15 @@ public class ApiConstants {
 	public static final String _ID = "Id";
 	public static final String CONTENT = "content";
 	public static final String _LEVEL_TYPE = "level_type";
-	public static final String COLLECTION_OR_ASSESSMENT = "collection|assessment";
+	public static final String COLLECTION_OR_ASSESSMENT = "collection|assessment|content";
 	public static final String TOTAL_COUNT = "totalCount";
 	public static final String _TOTAL_COUNT = "total_count";
 	public static final String COMPLETED_COUNT = "completedCount";
 	public static final String _COMPLETED_COUNT = "completed_count";
+	public static final String ACTIVE_PEER_UIDS = "activePeerUids";
+	public static final String LEFT_PEER_UIDS = "leftPeerUids";
+	public static final String _ACTIVE_PEERS = "active_peers";
+	public static final String _LEFT_PEERS = "left_peers";
 
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
