@@ -87,10 +87,12 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			whereCondition = CassandraV2ServiceImpl.appendWhere(
 					new String[][] { { ApiConstants._CLASS_UID, classId }, { ApiConstants._COURSE_UID, courseId },
 							{ ApiConstants._UNIT_UID, unitId }, { ApiConstants._LESSON_UID, lessonId },
-							{ ApiConstants._COLLECTION_UID, collectionId }, { ApiConstants._USER_UID, userUid } });
+							{ ApiConstants._COLLECTION_UID, collectionId }, { ApiConstants._USER_UID, userUid }, 
+							{ ApiConstants._COLLECTION_TYPE, collectionType } });
 		} else if (StringUtils.isNotBlank(collectionId) && StringUtils.isNotBlank(userUid)) {
 			whereCondition = CassandraV2ServiceImpl.appendWhere(new String[][] {
-					{ ApiConstants._COLLECTION_UID, collectionId }, { ApiConstants._USER_UID, userUid } });
+					{ ApiConstants._COLLECTION_UID, collectionId }, { ApiConstants._USER_UID, userUid },
+					{ ApiConstants._COLLECTION_TYPE, collectionType } });
 		} else {
 			ValidationUtils.rejectInvalidRequest(ErrorCodes.E106);
 		}
