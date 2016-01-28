@@ -8,8 +8,6 @@ public class ContentTaxonomyActivity {
 	
 	private String domainId;
 	
-	private String subDomainId;
-	
 	private String standardsId;
 	
 	private String learningTargetsId;
@@ -35,7 +33,6 @@ public class ContentTaxonomyActivity {
 		this.setSubjectId(contentTaxonomyActivity.getSubjectId());
 		this.setCourseId(contentTaxonomyActivity.getCourseId());
 		this.setDomainId(contentTaxonomyActivity.getDomainId());
-		this.setSubDomainId(contentTaxonomyActivity.getSubDomainId());
 		this.setStandardsId(contentTaxonomyActivity.getStandardsId());
 		this.setLearningTargetsId(contentTaxonomyActivity.getLearningTargetsId());
 		this.setResourceFormat(contentTaxonomyActivity.getResourceFormat());
@@ -47,7 +44,6 @@ public class ContentTaxonomyActivity {
 		this.setSubjectId(subjectId);
 		this.setCourseId(courseId);
 		this.setDomainId(domainId);
-		this.setSubDomainId(subDomainId);
 		this.setStandardsId(standardId);
 		this.setLearningTargetsId(learningTargetId);
 		this.setResourceFormat(resourceFormat);
@@ -80,14 +76,6 @@ public class ContentTaxonomyActivity {
 
 	public void setDomainId(String domainId) {
 		this.domainId = domainId;
-	}
-
-	public String getSubDomainId() {
-		return subDomainId;
-	}
-
-	public void setSubDomainId(String subDomainId) {
-		this.subDomainId = subDomainId;
 	}
 
 	public String getStandardsId() {
@@ -170,10 +158,8 @@ public class ContentTaxonomyActivity {
 		} else if(depth == 2) {
 			return contentTaxonomyActivity.getDomainId();
 		} else if(depth == 3) {
-			return contentTaxonomyActivity.getSubDomainId();
-		} else if(depth == 4) {
 			return contentTaxonomyActivity.getStandardsId();
-		} else if(depth == 5) {
+		} else if(depth == 4) {
 			return contentTaxonomyActivity.getLearningTargetsId();
 		}
 		return contentTaxonomyActivity.getSubjectId();

@@ -19,6 +19,8 @@ public class ApiConstants {
 	
 	public static final String TILDA = "~";
 	
+	public static final String QUESTION_MARK = "?";
+	
 	public static final String FORWARD_SLASH = "/";
 	
 	public static final String HYPHEN = "-";
@@ -380,6 +382,7 @@ public class ApiConstants {
 	public static final String LEFT_PEER_UIDS = "leftPeerUids";
 	public static final String _ACTIVE_PEERS = "active_peers";
 	public static final String _LEFT_PEERS = "left_peers";
+	public static final String COURSE_IDS = "courseIds";
 
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
