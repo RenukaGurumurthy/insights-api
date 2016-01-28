@@ -1,6 +1,7 @@
 package org.gooru.insights.api.daos;
 
 
+import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.utils.InsightsLogger;
 import org.springframework.stereotype.Repository;
 
@@ -11,6 +12,8 @@ import com.netflix.astyanax.model.ColumnList;
 import com.netflix.astyanax.model.ConsistencyLevel;
 import com.netflix.astyanax.model.CqlResult;
 import com.netflix.astyanax.model.Rows;
+import com.netflix.astyanax.query.ColumnFamilyQuery;
+import com.netflix.astyanax.query.PreparedCqlQuery;
 import com.netflix.astyanax.serializers.StringSerializer;
 
 @Repository
@@ -23,6 +26,33 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 
 	public ColumnFamily<String, String> accessColumnFamily(String columnFamilyName) {
 		return new ColumnFamily<String, String>(columnFamilyName, StringSerializer.get(), StringSerializer.get());
+	}
+	
+	private ColumnFamilyQuery<String, String> getColumnFamilyQuery(String columnFamilyName) {
+		return getLogKeyspace().prepareQuery(accessColumnFamily(columnFamilyName)).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+	}
+	
+	private PreparedCqlQuery<String, String> setParameters(PreparedCqlQuery<String, String> cqlQuery, String... parameters) {
+		
+		for(int parameterCount = 0; parameterCount < parameters.length; parameterCount++) {
+			if(StringUtils.isNotEmpty(parameters[parameterCount])) {
+				cqlQuery.withStringValue(parameters[parameterCount]);	
+			}
+		}
+		return cqlQuery;
+	}
+	
+	public CqlResult<String, String> executeCqlQuery(String columnFamilyName, String query, String... parameters) {
+	
+		OperationResult<CqlResult<String, String>> result = null;
+		try {
+			PreparedCqlQuery<String, String> cqlQuery = getColumnFamilyQuery(columnFamilyName).withCql(query).asPreparedStatement();
+			cqlQuery = setParameters(cqlQuery, parameters);
+			result = cqlQuery.execute();
+		} catch (ConnectionException e) {
+			InsightsLogger.error("CQL Exception:"+query, e);
+		}
+		return result != null ? result.getResult() : null;	
 	}
 	
 	@Override
@@ -64,7 +94,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		try {
 			result = getLogKeyspace()
 			        .prepareQuery(accessColumnFamily(columnFamilyName))
-			        .withCql(query)
+			        .withCql(query).asPreparedStatement()
 			        .execute();
 		} catch (ConnectionException e) {
 			InsightsLogger.error("CQL Exception:"+query, e);

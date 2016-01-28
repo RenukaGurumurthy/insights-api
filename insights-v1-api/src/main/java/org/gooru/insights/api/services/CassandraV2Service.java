@@ -15,4 +15,8 @@ public interface CassandraV2Service {
 	ColumnList<String> getUserCurrentLocation(String cfName, String userUid, String classId);
 
 	Rows<String, String> readColumnsWithKey(String cfName, String key);
+	
+	CqlResult<String, String> readWithCondition(String columnFamilyName, String[] fieldNames, String[] values, boolean allowFilter);
+
+	CqlResult<String, String> readWithCondition(String columnFamilyName, String whereCondition, String[] values);
 }

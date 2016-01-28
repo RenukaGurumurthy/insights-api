@@ -1,6 +1,7 @@
 package org.gooru.insights.api.services;
 
 import org.apache.commons.lang.StringUtils;
+import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.daos.CqlCassandraDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -55,6 +56,14 @@ public class CassandraV2ServiceImpl implements CassandraV2Service{
 		return cqlDAO.executeCql(columnFamilyName, queryBuilder(SELECT,ASTRIX,FROM,columnFamilyName, whereCondition));
 	}
 	
+	public CqlResult<String, String> readWithCondition(String columnFamilyName, String[] fieldNames, String[] values, boolean allowFilter) {
+		return cqlDAO.executeCqlQuery(columnFamilyName, queryBuilder(SELECT,ASTRIX,FROM,columnFamilyName, appendWhere(fieldNames, values, allowFilter)), values);
+	}
+	
+	public CqlResult<String, String> readWithCondition(String columnFamilyName, String whereCondition, String[] values) {
+		return cqlDAO.executeCqlQuery(columnFamilyName, queryBuilder(SELECT,ASTRIX,FROM,columnFamilyName, whereCondition), values);
+	}
+	
 	private String queryBuilder(String... fields) {
 		StringBuffer queryBuilder = new StringBuffer();
 		for(int fieldCount =0; fieldCount < fields.length; fieldCount++) {
@@ -66,7 +75,7 @@ public class CassandraV2ServiceImpl implements CassandraV2Service{
 	public static String appendWhere(Object[][] data) {
 		StringBuffer stringBuffer = new StringBuffer();
 		for(int keyIndex = 0; keyIndex < data.length; keyIndex++) {
-			if(data[keyIndex][1] != null && StringUtils.isNotBlank(data[keyIndex][1].toString())) {
+			if(data[keyIndex][1] !=null && StringUtils.isNotBlank(data[keyIndex][1].toString())) {
 				stringBuffer.append(stringBuffer.length() > 0 ? AND : WHERE);
 				stringBuffer.append(data[keyIndex][0]);
 				stringBuffer.append(EQUAL);
@@ -76,6 +85,38 @@ public class CassandraV2ServiceImpl implements CassandraV2Service{
 			}
 		}
 		stringBuffer.append(ALLOW_FILTERING);
+		return stringBuffer.toString();
+	}
+	
+	public static String appendWhere(String[] field, boolean allowFilter) {
+		StringBuffer stringBuffer = new StringBuffer();
+		for(int fieldIndex = 0; fieldIndex < field.length; fieldIndex++) {
+			if(StringUtils.isNotBlank(field[fieldIndex])) {
+				stringBuffer.append(stringBuffer.length() > 0 ? AND : WHERE);
+				stringBuffer.append(field[fieldIndex]);
+				stringBuffer.append(EQUAL);
+				stringBuffer.append(ApiConstants.QUESTION_MARK);
+			}
+		}
+		if(allowFilter == true) {
+			stringBuffer.append(ALLOW_FILTERING);
+		}
+		return stringBuffer.toString();
+	}
+	
+	public static String appendWhere(String[] field, String[] value, boolean allowFilter) {
+		StringBuffer stringBuffer = new StringBuffer();
+		for(int fieldIndex = 0; fieldIndex < field.length; fieldIndex++) {
+			if(StringUtils.isNotBlank(field[fieldIndex]) && StringUtils.isNotBlank(value[fieldIndex])) {
+				stringBuffer.append(stringBuffer.length() > 0 ? AND : WHERE);
+				stringBuffer.append(field[fieldIndex]);
+				stringBuffer.append(EQUAL);
+				stringBuffer.append(ApiConstants.QUESTION_MARK);
+			}
+		}
+		if(allowFilter == true) {
+			stringBuffer.append(ALLOW_FILTERING);
+		}
 		return stringBuffer.toString();
 	}
 }

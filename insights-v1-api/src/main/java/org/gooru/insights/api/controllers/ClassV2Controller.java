@@ -194,7 +194,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getStudentTaxonomyPerformance(userUid, subjectId, null, null, null, null, null, 1));
+		return getModel(getClassService().getUserStandardsMastery(userUid, subjectId, null, null, null, null, 1));
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/course/{courseId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
@@ -204,7 +204,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value = "courseId") String courseId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getStudentTaxonomyPerformance(userUid, subjectId, courseId, null, null, null, null, 2));
+		return getModel(getClassService().getUserStandardsMastery(userUid, subjectId, courseId, null, null, null, 2));
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/course/{courseId}/domain/{domainId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
@@ -214,29 +214,27 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value = "courseId") String courseId, @PathVariable(value = "domainId") String domainId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getStudentTaxonomyPerformance(userUid, subjectId, courseId, domainId, null, null, null, 3));
+		return getModel(getClassService().getUserStandardsMastery(userUid, subjectId, courseId, domainId, null, null, 3));
 	}
 	
-	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/course/{courseId}/domain/{domainId}/subdomain/{subdomainId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
-	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	public ModelAndView getUserSubDomainMastery(HttpServletRequest request, 
-			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
-			@PathVariable(value = "courseId") String courseId, @PathVariable(value = "domainId") String domainId,
-			@PathVariable(value = "subdomainId") String subdomainId,
-			HttpServletResponse response) throws Exception {
-		setAllowOrigin(response);
-		return getModel(getClassService().getStudentTaxonomyPerformance(userUid, subjectId, courseId, domainId, subdomainId, null, null, 4));
-	}
-	
-	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/course/{courseId}/domain/{domainId}/subdomain/{subdomainId}/standards/{standardsId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
+	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/course/{courseId}/domain/{domainId}/standards/{standardsId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public ModelAndView getUserStandardsMastery(HttpServletRequest request, 
 			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
 			@PathVariable(value = "courseId") String courseId, @PathVariable(value = "domainId") String domainId,
-			@PathVariable(value = "subdomainId") String subdomainId, @PathVariable(value = "standardsId") String standardsId,
+			@PathVariable(value = "standardsId") String standardsId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getStudentTaxonomyPerformance(userUid, subjectId, courseId, domainId, subdomainId, standardsId, null, 5));
+		return getModel(getClassService().getUserStandardsMastery(userUid, subjectId, courseId, domainId, standardsId, null, 4));
 	}
 	
+	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/courses/domain/{domainId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
+	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	public ModelAndView getUserDomainParentMastery(HttpServletRequest request, 
+			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
+			 @PathVariable(value = "domainId") String domainId, @RequestParam(value = "courseIds", required = true) String courseIds,HttpServletResponse response) throws Exception {
+		setAllowOrigin(response);
+		return getModel(getClassService().getUserDomainParentMastery(userUid, subjectId, courseIds, domainId));
+	}
+
 }

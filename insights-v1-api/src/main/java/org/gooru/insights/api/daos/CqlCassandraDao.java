@@ -1,7 +1,7 @@
 package org.gooru.insights.api.daos;
 
-import com.netflix.astyanax.model.CqlResult;
 import com.netflix.astyanax.model.ColumnList;
+import com.netflix.astyanax.model.CqlResult;
 import com.netflix.astyanax.model.Rows;
 
 public interface CqlCassandraDao {
@@ -11,4 +11,6 @@ public interface CqlCassandraDao {
 	ColumnList<String> readUserCurrentLocationInClass(String cfName, String userUid, String classId);
 
 	Rows<String, String> readColumnsWithKey(String cfName, String key);
+	
+	CqlResult<String, String> executeCqlQuery(String columnFamilyName, String query, String... parameters);
 }
