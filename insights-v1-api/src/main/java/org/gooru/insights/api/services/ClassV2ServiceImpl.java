@@ -302,9 +302,9 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		dataAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, columns.getLongValue(ApiConstants.SCORE, 0L));
 		dataAsMap.put(responseNameForViews, columns.getLongValue(ApiConstants.VIEWS, 0L));
 		dataAsMap.put(ApiConstants.TIMESPENT, columns.getLongValue(ApiConstants._TIME_SPENT, 0L));
-		dataAsMap.put(ApiConstants.COMPLETED_COUNT, columns.getLongValue(ApiConstants.COMPLETED_COUNT, 0L));
+		dataAsMap.put(ApiConstants.COMPLETED_COUNT, columns.getLongValue(ApiConstants._COMPLETED_COUNT, 0L));
 		//TODO Need to add logic to fetch total count meta data from Database
-		dataAsMap.put(ApiConstants.TOTAL_COUNT, columns.getLongValue(ApiConstants.TOTAL_COUNT, 0L));
+		dataAsMap.put(ApiConstants.TOTAL_COUNT, columns.getLongValue(ApiConstants._TOTAL_COUNT, 0L));
 		dataMapList.add(dataAsMap);
 	}
 	
