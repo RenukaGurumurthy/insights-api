@@ -87,11 +87,11 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		if (StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) && StringUtils.isNotBlank(unitId)
 				&& StringUtils.isNotBlank(lessonId) && StringUtils.isNotBlank(collectionId)
 				&& StringUtils.isNotBlank(userUid)) {
-			whereCondition = CassandraV2ServiceImpl.appendWhere(new String[]{ApiConstants._CLASS_UID, ApiConstants._COURSE_UID, ApiConstants._UNIT_UID, ApiConstants._LESSON_UID, ApiConstants._COLLECTION_UID, ApiConstants._USER_UID}, true);
-			parameters = new String[] {classId, courseId, unitId, lessonId, collectionId, userUid};
+			whereCondition = CassandraV2ServiceImpl.appendWhere(new String[]{ApiConstants._CLASS_UID, ApiConstants._COURSE_UID, ApiConstants._UNIT_UID, ApiConstants._LESSON_UID, ApiConstants._COLLECTION_UID, ApiConstants._USER_UID, ApiConstants._COLLECTION_TYPE}, true);
+			parameters = new String[] {classId, courseId, unitId, lessonId, collectionId, userUid, collectionType};
 		} else if (StringUtils.isNotBlank(collectionId) && StringUtils.isNotBlank(userUid)) {
-			parameters = new String[] { collectionId, userUid};
-			whereCondition = CassandraV2ServiceImpl.appendWhere(new String[] {ApiConstants._COLLECTION_UID, ApiConstants._USER_UID}, false);
+			parameters = new String[] { collectionId, userUid, collectionType};
+			whereCondition = CassandraV2ServiceImpl.appendWhere(new String[] {ApiConstants._COLLECTION_UID, ApiConstants._USER_UID, ApiConstants._COLLECTION_TYPE}, false);
 		} else {
 			ValidationUtils.rejectInvalidRequest(ErrorCodes.E106);
 		}
