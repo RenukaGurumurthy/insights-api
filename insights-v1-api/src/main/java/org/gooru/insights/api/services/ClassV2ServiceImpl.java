@@ -56,12 +56,10 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return baseService;
 	}
 
-	public ResponseParamDTO<Map<String, Object>> getSessionStatus(String contentGooruId, String userUId, String sessionId) {
+	public ResponseParamDTO<Map<String, Object>> getSessionStatus(String sessionId, String contentGooruId) {
 		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		CqlResult<String, String> sessionDetails = getCassandraService().readWithCondition(ColumnFamily.USER_SESSIONS.getColumnFamily(), new String[] {ApiConstants._COLLECTION_UID, ApiConstants._USER_UID, ApiConstants._SESSION_ID}, new String[]{contentGooruId, userUId, sessionId}, false);
-		//Testing
-		//CqlResult<String, String> sessionDetails = getCassandraService().readWithCondition(ColumnFamily.USER_SESSIONS.getColumnFamily(), new String[][]{{ApiConstants._COLLECTION_UID,contentGooruId},{ApiConstants._USER_UID,userUId},{ApiConstants._SESSION_ID,sessionId}});
+		CqlResult<String, String> sessionDetails = getCassandraService().readWithCondition(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), new String[] {ApiConstants._SESSION_ID, ApiConstants._GOORU_OID}, new String[]{sessionId, contentGooruId}, false);
 		if (sessionDetails != null && sessionDetails.hasRows()) {
 			Rows<String, String> sessionList = sessionDetails.getRows();
 			for(Row<String, String> row : sessionList) {
@@ -80,23 +78,14 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 
 	public ResponseParamDTO<Map<String, Object>> getUserSessions(String classId, String courseId, String unitId,
 			String lessonId, String collectionId, String collectionType, String userUid) throws Exception {
-		String whereCondition = null;
-		String parameters[] = null;
+
 		// TODO Enabled for class verification
 		// isValidClass(classId);
-		if (StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) && StringUtils.isNotBlank(unitId)
-				&& StringUtils.isNotBlank(lessonId) && StringUtils.isNotBlank(collectionId)
-				&& StringUtils.isNotBlank(userUid)) {
-			whereCondition = CassandraV2ServiceImpl.appendWhere(new String[]{ApiConstants._CLASS_UID, ApiConstants._COURSE_UID, ApiConstants._UNIT_UID, ApiConstants._LESSON_UID, ApiConstants._COLLECTION_UID, ApiConstants._USER_UID, ApiConstants._COLLECTION_TYPE}, true);
-			parameters = new String[] {classId, courseId, unitId, lessonId, collectionId, userUid, collectionType};
-		} else if (StringUtils.isNotBlank(collectionId) && StringUtils.isNotBlank(userUid)) {
-			parameters = new String[] { collectionId, userUid, collectionType};
-			whereCondition = CassandraV2ServiceImpl.appendWhere(new String[] {ApiConstants._COLLECTION_UID, ApiConstants._USER_UID, ApiConstants._COLLECTION_TYPE}, false);
-		} else {
-			ValidationUtils.rejectInvalidRequest(ErrorCodes.E106);
-		}
-		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		String whereCondition = null;
+		String parameters[] = null;
+		whereCondition = CassandraV2ServiceImpl.appendWhere(new String[]{ApiConstants._USER_UID,  ApiConstants._COLLECTION_UID, ApiConstants._COLLECTION_TYPE, ApiConstants._CLASS_UID, ApiConstants._COURSE_UID, ApiConstants._UNIT_UID, ApiConstants._LESSON_UID}, false);
+		parameters = new String[] {userUid, collectionId, collectionType, classId, courseId, unitId, lessonId};
 		List<Map<String, Object>> resultSet = getSessionInfo(whereCondition, collectionType, parameters);
 		resultSet = ServiceUtils.sortBy(resultSet, InsightsConstant.EVENT_TIME, ApiConstants.ASC);
 		responseParamDTO.setContent(addSequence(resultSet));
@@ -105,7 +94,6 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	
 	private List<Map<String, Object>> getSessionInfo(String whereCondition, String collectionType, String[] parameters) {
 		
-//		CqlResult<String, String> sessions = getCassandraService().readWithCondition(ColumnFamily.USER_SESSIONS.getColumnFamily(), whereCondition);
 		CqlResult<String, String> sessions = getCassandraService().readWithCondition(ColumnFamily.USER_SESSIONS.getColumnFamily(), whereCondition, parameters);
 		List<Map<String,Object>> sessionList = new ArrayList<Map<String,Object>>();
 		if( sessions != null && sessions.hasRows()) {

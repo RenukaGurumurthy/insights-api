@@ -83,25 +83,25 @@ public class ClassV2Controller extends BaseController {
 		return defferedResponse;
 	}
 	
-	@RequestMapping(value = "{collectionType}/{contentGooruId}/user/{userUId}/session/{sessionId}/status", method = {RequestMethod.GET, RequestMethod.POST })
+	@RequestMapping(value = "{collectionType}/{contentGooruId}/session/{sessionId}/status", method = {RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
-	public ModelAndView getSessionStatus(HttpServletRequest request, @PathVariable(value = "userUId") String userUId,
+	public ModelAndView getSessionStatus(HttpServletRequest request,
 			@PathVariable(value = "sessionId") String sessionId,
 			@PathVariable(value = "contentGooruId") String contentGooruId,
 			@PathVariable(value = "collectionType") String collectionType, HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getSessionStatus(contentGooruId, userUId, sessionId));
+		return getModel(getClassService().getSessionStatus(sessionId, contentGooruId));
 	}
 	
 	@RequestMapping(value="/{collectionType}/{contentGooruId}/sessions",method ={ RequestMethod.GET,RequestMethod.POST})
 	//TODO @AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public ModelAndView getUserSessions(HttpServletRequest request, 
-			@RequestParam(value="classGooruId", required = false) String classGooruId,
-			@RequestParam(value="courseGooruId", required = false) String courseGooruId, 
-			@RequestParam(value="unitGooruId", required = false) String unitGooruId, 
-			@RequestParam(value="lessonGooruId", required = false) String lessonGooruId,
+			@RequestParam(value="classGooruId", required = false, defaultValue = "NA") String classGooruId,
+			@RequestParam(value="courseGooruId", required = false, defaultValue = "NA") String courseGooruId, 
+			@RequestParam(value="unitGooruId", required = false, defaultValue = "NA") String unitGooruId, 
+			@RequestParam(value="lessonGooruId", required = false, defaultValue = "NA") String lessonGooruId,
 			@PathVariable(value="collectionType") String collectionType, 
 			@PathVariable(value="contentGooruId") String contentGooruId,
 			@RequestParam(value="userUid", required = true) String userUid,
