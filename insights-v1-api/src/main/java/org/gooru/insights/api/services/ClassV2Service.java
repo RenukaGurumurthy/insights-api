@@ -9,7 +9,7 @@ import rx.Observable;
 
 public interface ClassV2Service {
 
-	ResponseParamDTO<Map<String, Object>> getSessionStatus(String contentGooruId, String userUid, String sessionId);
+	ResponseParamDTO<Map<String, Object>> getSessionStatus(String sessionId, String contentGooruId);
 
 	ResponseParamDTO<Map<String, Object>> getUserSessions(String classId, String courseId, String unitId, String lessonId, String collectionId, String collectionType, String userUid) throws Exception;
 	

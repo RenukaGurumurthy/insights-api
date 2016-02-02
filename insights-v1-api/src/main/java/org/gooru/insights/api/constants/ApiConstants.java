@@ -383,6 +383,7 @@ public class ApiConstants {
 	public static final String _ACTIVE_PEERS = "active_peers";
 	public static final String _LEFT_PEERS = "left_peers";
 	public static final String COURSE_IDS = "courseIds";
+	public static final String NA = "NA";
 
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
