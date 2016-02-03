@@ -28,6 +28,7 @@ public interface ClassV2Service {
 
 	ResponseParamDTO<ContentTaxonomyActivity> getUserDomainParentMastery(String studentId, String subjectId, String courseIds, String domainId);
 
+	ResponseParamDTO<Map<String, Object>> getResourceUsage(String sessionId, String resourceIds);
 }
 
 

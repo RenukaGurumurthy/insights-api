@@ -236,5 +236,14 @@ public class ClassV2Controller extends BaseController {
 		setAllowOrigin(response);
 		return getModel(getClassService().getUserDomainParentMastery(userUid, subjectId, courseIds, domainId));
 	}
+	
+	@RequestMapping(value = "/{resourceType}/usage/session/{sessionId}", method = { RequestMethod.GET, RequestMethod.POST })
+	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	public ModelAndView getResourceUsage(HttpServletRequest request, 
+			@PathVariable(value = "resourceType") String resourceType, @PathVariable(value = "sessionId") String sessionId,
+			@RequestParam(value = "resourceIds") String resourceIds,HttpServletResponse response) throws Exception {
+		setAllowOrigin(response);
+		return getModel(getClassService().getResourceUsage(sessionId, resourceIds));
+	}
 
 }
