@@ -10,7 +10,6 @@ import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.InsightsOperationConstants;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.security.AuthorizeOperations;
-import org.gooru.insights.api.services.BaseService;
 import org.gooru.insights.api.services.ClassV2Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,9 +26,6 @@ import rx.Observable;
 @RestController
 @RequestMapping(value="/v2/")
 public class ClassV2Controller extends BaseController {
-
-	@Autowired
-	private BaseService baseService;
 	
 	@Autowired
 	private ClassV2Service classService;
@@ -38,9 +34,6 @@ public class ClassV2Controller extends BaseController {
 		return classService;
 	}
 	
-	private BaseService getBaseService() {
-		return baseService;
-	}
 	@RequestMapping(value = "/class/{classGooruId}/user/{userUid}/current/location", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public ModelAndView getUserCurrentLocationInLesson(HttpServletRequest request, 
