@@ -384,6 +384,7 @@ public class ApiConstants {
 	public static final String _LEFT_PEERS = "left_peers";
 	public static final String COURSE_IDS = "courseIds";
 	public static final String NA = "NA";
+	public static final String _TEACHER_UID = "teacher_uid";
 	public static final String ANSWER_STATUS = "answer_status";
 	public static final String RESOURCE_IDS = "resourceIds";
 
