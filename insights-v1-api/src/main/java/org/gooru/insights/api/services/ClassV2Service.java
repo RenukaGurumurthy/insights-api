@@ -31,6 +31,7 @@ public interface ClassV2Service {
 	ResponseParamDTO<Map<String, Object>> fetchTeacherGrade(String teacherUid, String userUid, String sessionId);
 
 
+	ResponseParamDTO<Map<String, Object>> getResourceUsage(String sessionId, String resourceIds);
 }
 
 
