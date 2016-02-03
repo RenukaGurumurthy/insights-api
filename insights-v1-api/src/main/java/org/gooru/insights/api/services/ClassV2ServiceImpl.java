@@ -413,4 +413,38 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		}
 		return contentTaxonomyActivityList;
 	}
+	
+	public ResponseParamDTO<Map<String, Object>> getResourceUsage(String sessionId, String resourceIds) {
+		
+		if(StringUtils.isBlank(resourceIds)) {
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E104, ApiConstants.RESOURCE_IDS);	
+		}
+		ResponseParamDTO<Map<String, Object>> resourceUsageObject = new ResponseParamDTO<Map<String, Object>>();
+		List<Map<String,Object>> resourceUsageList = new ArrayList<Map<String,Object>>();
+		for(String resourceId : resourceIds.split(ApiConstants.COMMA)) {
+			CqlResult<String, String> userSessionActivityResult = getCassandraService().readWithCondition(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), new String[]{ApiConstants._SESSION_ID, ApiConstants._GOORU_OID}, new String[]{sessionId, resourceId}, false); 
+			if(userSessionActivityResult != null && userSessionActivityResult.hasRows()) {
+				Rows<String, String> rows = userSessionActivityResult.getRows();
+				for(Row<String,String> row : rows) {
+					Map<String, Object> resourceUsage = new HashMap<String,Object>();
+					ColumnList<String> userSessionColumn = row.getColumns();
+					resourceUsage.put(ApiConstants.GOORUOID, userSessionColumn.getStringValue(ApiConstants._GOORU_OID, ApiConstants.STRING_EMPTY));
+					resourceUsage.put(ApiConstants.RESOURCE_TYPE, userSessionColumn.getStringValue(ApiConstants._RESOURCE_TYPE, ApiConstants.STRING_EMPTY));
+					resourceUsage.put(ApiConstants.QUESTION_TYPE, userSessionColumn.getStringValue(ApiConstants._QUESTION_TYPE, ApiConstants.STRING_EMPTY));
+					resourceUsage.put(ApiConstants.ANSWER_OBJECT, userSessionColumn.getStringValue(ApiConstants._ANSWER_OBJECT, ApiConstants.STRING_EMPTY));
+					resourceUsage.put(ApiConstants.STATUS, userSessionColumn.getStringValue(ApiConstants.ANSWER_STATUS, ApiConstants.STRING_EMPTY));
+					resourceUsage.put(ApiConstants.VIEWS, userSessionColumn.getLongValue(ApiConstants.VIEWS, 0L));
+					resourceUsage.put(ApiConstants.TIMESPENT, userSessionColumn.getLongValue(ApiConstants._TIME_SPENT, 0L));
+					resourceUsage.put(ApiConstants.SCORE, userSessionColumn.getLongValue(ApiConstants.SCORE, 0L));
+					resourceUsage.put(ApiConstants.ATTEMPTS, userSessionColumn.getLongValue(ApiConstants.ATTEMPTS, 0L));
+					resourceUsage.put(ApiConstants.REACTION, userSessionColumn.getLongValue(ApiConstants.REACTION, 0L));
+					if(!resourceUsage.isEmpty()) {
+						resourceUsageList.add(resourceUsage);		
+					}
+				}
+			}
+		}
+		resourceUsageObject.setContent(resourceUsageList);	
+		return resourceUsageObject;
+	}
 }
