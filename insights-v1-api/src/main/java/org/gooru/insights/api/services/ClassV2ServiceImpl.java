@@ -413,4 +413,24 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		}
 		return contentTaxonomyActivityList;
 	}
+	
+	@Override
+	public ResponseParamDTO<Map<String, Object>> fetchTeacherGrade(String teacherUid, String userUid, String sessionId) {
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		CqlResult<String, String> result = getCassandraService().readWithCondition(ColumnFamily.STUDENT_QUESTION_GRADE.getColumnFamily(), 
+				new String[]{ApiConstants._TEACHER_UID, ApiConstants._USER_UID, ApiConstants._SESSION_ID}, 
+				new String[]{teacherUid, userUid}, false);
+		List<Map<String, Object>> teacherGradeAsList = new ArrayList<>();
+		if(result != null && result.hasRows()) {
+			for(Row<String,String> row : result.getRows()) {
+				Map<String, Object> teacherGradeAsMap = new HashMap<String, Object>();
+				ColumnList<String> rowColumnList = row.getColumns();
+				teacherGradeAsMap.put(ApiConstants.QUESTION_ID, rowColumnList.getStringValue(ApiConstants._QUESTION_ID, null));
+				teacherGradeAsMap.put(ApiConstants.SCORE, rowColumnList.getLongValue(ApiConstants.SCORE, 0L));
+				teacherGradeAsList.add(teacherGradeAsMap);
+			}
+			responseParamDTO.setContent(teacherGradeAsList);
+		}
+		return responseParamDTO;
+	}
 }

@@ -5,8 +5,12 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
+import org.gooru.insights.api.constants.InsightsOperationConstants;
 import org.gooru.insights.api.models.ResponseParamDTO;
+import org.gooru.insights.api.security.AuthorizeOperations;
+import org.gooru.insights.api.services.BaseService;
 import org.gooru.insights.api.services.ClassV2Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,12 +29,18 @@ import rx.Observable;
 public class ClassV2Controller extends BaseController {
 
 	@Autowired
+	private BaseService baseService;
+	
+	@Autowired
 	private ClassV2Service classService;
 
 	private ClassV2Service getClassService() {
 		return classService;
 	}
 	
+	private BaseService getBaseService() {
+		return baseService;
+	}
 	@RequestMapping(value = "/class/{classGooruId}/user/{userUid}/current/location", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public ModelAndView getUserCurrentLocationInLesson(HttpServletRequest request, 
@@ -235,6 +245,28 @@ public class ClassV2Controller extends BaseController {
 			 @PathVariable(value = "domainId") String domainId, @RequestParam(value = "courseIds", required = true) String courseIds,HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
 		return getModel(getClassService().getUserDomainParentMastery(userUid, subjectId, courseIds, domainId));
+	}
+	
+	@RequestMapping(value = "/user/{userUid}/grade", method = { RequestMethod.GET, RequestMethod.POST })
+	//@AuthorizeOperations(operations = InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	public ModelAndView getTeacherGrade(HttpServletRequest request, 
+			@PathVariable(value = "userUid") String userUid,
+			@RequestParam(value = "sessionId", required = true) String sessionId,
+			@RequestParam(value = "teacherId", required = false) String teacherId,
+			HttpServletResponse response) throws Exception {
+		setAllowOrigin(response);
+		//TODO Infer teacherUid from sessionToken and save to request attribute when authorizing API Caller, after this logic is added remove teacherId request parameter.
+		String teacherUid = null;
+		if(request.getAttributeNames() != null) {
+			if(request.getAttributeNames().toString().contains(ApiConstants.GOORU_U_ID)) 
+				teacherUid = (String) request.getAttribute(ApiConstants.GOORU_U_ID);
+		} else if(teacherId != null){
+			teacherUid = teacherId;
+		}
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = null;
+		if(StringUtils.isNotBlank(teacherUid)) 
+			responseParamDTO = getClassService().fetchTeacherGrade(teacherUid, userUid, sessionId);
+		return getModel(responseParamDTO);
 	}
 
 }
