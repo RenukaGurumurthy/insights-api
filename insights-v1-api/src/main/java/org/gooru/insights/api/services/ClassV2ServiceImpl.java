@@ -218,6 +218,20 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return responseParamDTO;
 	}
 
+	@Override
+	public Observable<ResponseParamDTO<Map<String, Object>>> getPriorUsage(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,String collectionType) {
+		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+			try {
+				s.onNext(getSummaryData(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid, collectionType));
+			} catch (Exception e) {
+				logger.error("Exception while reading prior data", e);
+			}
+			s.onCompleted();
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		return observable;
+	}
+	
+	
 	public ResponseParamDTO<Map<String, Object>> getSummaryData(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,
 			String collectionType) throws Exception {
 		

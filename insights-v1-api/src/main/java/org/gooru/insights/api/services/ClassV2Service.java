@@ -32,6 +32,8 @@ public interface ClassV2Service {
 
 
 	ResponseParamDTO<Map<String, Object>> getResourceUsage(String sessionId, String resourceIds);
+
+	Observable<ResponseParamDTO<Map<String, Object>>> getPriorUsage(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid, String collectionType);
 }
 
 
