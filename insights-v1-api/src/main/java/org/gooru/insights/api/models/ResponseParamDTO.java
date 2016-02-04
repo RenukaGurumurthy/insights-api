@@ -3,8 +3,6 @@ package org.gooru.insights.api.models;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.HttpStatus;
-
 public class ResponseParamDTO<M> {
 
 	private List<M> content;
