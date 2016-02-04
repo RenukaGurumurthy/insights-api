@@ -77,22 +77,27 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	}
 
 	public ResponseParamDTO<Map<String, Object>> getUserSessions(String classId, String courseId, String unitId,
-			String lessonId, String collectionId, String collectionType, String userUid) throws Exception {
+			String lessonId, String collectionId, String collectionType, String userUid, boolean fetchOpenSession) throws Exception {
 
 		// TODO Enabled for class verification
 		// isValidClass(classId);
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		String whereCondition = null;
 		String parameters[] = null;
-		whereCondition = CassandraV2ServiceImpl.appendWhere(new String[]{ApiConstants._USER_UID,  ApiConstants._COLLECTION_UID, ApiConstants._COLLECTION_TYPE, ApiConstants._CLASS_UID, ApiConstants._COURSE_UID, ApiConstants._UNIT_UID, ApiConstants._LESSON_UID}, false);
-		parameters = new String[] {userUid, collectionId, collectionType, classId, courseId, unitId, lessonId};
-		List<Map<String, Object>> resultSet = getSessionInfo(whereCondition, collectionType, parameters);
+		if(fetchOpenSession) {
+			whereCondition = CassandraV2ServiceImpl.appendWhere(new String[]{ApiConstants._USER_UID,  ApiConstants._COLLECTION_UID, ApiConstants._COLLECTION_TYPE, ApiConstants._CLASS_UID, ApiConstants._COURSE_UID, ApiConstants._UNIT_UID, ApiConstants._LESSON_UID, ApiConstants._EVENT_TYPE}, false);
+			parameters = new String[] {userUid, collectionId, collectionType, classId, courseId, unitId, lessonId, ApiConstants.START};
+		} else {
+			whereCondition = CassandraV2ServiceImpl.appendWhere(new String[]{ApiConstants._USER_UID,  ApiConstants._COLLECTION_UID, ApiConstants._COLLECTION_TYPE, ApiConstants._CLASS_UID, ApiConstants._COURSE_UID, ApiConstants._UNIT_UID, ApiConstants._LESSON_UID}, false);
+			parameters = new String[] {userUid, collectionId, collectionType, classId, courseId, unitId, lessonId};
+		}
+		List<Map<String, Object>> resultSet = getSessionInfo(whereCondition, collectionType, fetchOpenSession, parameters);
 		resultSet = ServiceUtils.sortBy(resultSet, InsightsConstant.EVENT_TIME, ApiConstants.ASC);
 		responseParamDTO.setContent(addSequence(resultSet));
 		return responseParamDTO;
 	}
 	
-	private List<Map<String, Object>> getSessionInfo(String whereCondition, String collectionType, String[] parameters) {
+	private List<Map<String, Object>> getSessionInfo(String whereCondition, String collectionType, boolean fetchOpenSession, String[] parameters) {
 		
 		CqlResult<String, String> sessions = getCassandraService().readWithCondition(ColumnFamily.USER_SESSIONS.getColumnFamily(), whereCondition, parameters);
 		List<Map<String,Object>> sessionList = new ArrayList<Map<String,Object>>();
@@ -100,7 +105,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			for(Row<String,String> row : sessions.getRows()) {
 				ColumnList<String> columnList = row.getColumns();
 				boolean include = true;
-				if (collectionType.equalsIgnoreCase(InsightsConstant.ASSESSMENT) && !columnList.getStringValue(ApiConstants._EVENT_TYPE, ApiConstants.STRING_EMPTY).equalsIgnoreCase(InsightsConstant.STOP)) {
+				if (!fetchOpenSession  && collectionType.equalsIgnoreCase(InsightsConstant.ASSESSMENT) && !columnList.getStringValue(ApiConstants._EVENT_TYPE, ApiConstants.STRING_EMPTY).equalsIgnoreCase(InsightsConstant.STOP)) {
 					include = false;
 				}
 				if(include) {
@@ -227,7 +232,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			sessionKey = sessionId;
 		} else if (StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) 
 				&& StringUtils.isNotBlank(unitId) && StringUtils.isNotBlank(lessonId)) {
-			ResponseParamDTO<Map<String, Object>> sessionObject = getUserSessions(classId, courseId, unitId,lessonId, assessmentId, collectionType, userUid);
+			ResponseParamDTO<Map<String, Object>> sessionObject = getUserSessions(classId, courseId, unitId,lessonId, assessmentId, collectionType, userUid, false);
 			List<Map<String,Object>> sessionList = sessionObject.getContent();
 			sessionKey = sessionList.size() > 0 ? sessionList.get(sessionList.size()-1).get(InsightsConstant.SESSION_ID).toString() : null;
 		} else {
@@ -356,7 +361,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 
 	private String getUserLatestSessionId(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType, String userId) throws Exception {
 		ResponseParamDTO<Map<String, Object>> sessionObject;
-		sessionObject = getUserSessions(classId, courseId, unitId, lessonId, gooruOid, collectionType, userId);
+		sessionObject = getUserSessions(classId, courseId, unitId, lessonId, gooruOid, collectionType, userId, false);
 		List<Map<String, Object>> sessionList = sessionObject.getContent();
 		String sessionKey = sessionList.size() > 0 ? sessionList.get(sessionList.size() - 1).get(InsightsConstant.SESSION_ID).toString() : null;
 		return sessionKey;

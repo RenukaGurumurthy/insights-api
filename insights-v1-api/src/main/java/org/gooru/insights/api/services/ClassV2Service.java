@@ -11,7 +11,7 @@ public interface ClassV2Service {
 
 	ResponseParamDTO<Map<String, Object>> getSessionStatus(String sessionId, String contentGooruId);
 
-	ResponseParamDTO<Map<String, Object>> getUserSessions(String classId, String courseId, String unitId, String lessonId, String collectionId, String collectionType, String userUid) throws Exception;
+	ResponseParamDTO<Map<String, Object>> getUserSessions(String classId, String courseId, String unitId, String lessonId, String collectionId, String collectionType, String userUid, boolean openSession) throws Exception;
 	
 	ResponseParamDTO<Map<String, Object>> getSummaryData(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid, String collectionType) throws Exception;
 
