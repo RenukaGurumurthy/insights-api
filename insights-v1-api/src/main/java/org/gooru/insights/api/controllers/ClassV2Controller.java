@@ -108,9 +108,10 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value="collectionType") String collectionType, 
 			@PathVariable(value="contentGooruId") String contentGooruId,
 			@RequestParam(value="userUid", required = true) String userUid,
+			@RequestParam(value="openSession", required = false) boolean openSession,
 			HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		return getModel(getClassService().getUserSessions(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, collectionType, userUid));
+		return getModel(getClassService().getUserSessions(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, collectionType, userUid, openSession));
 	}
 	
 	@RequestMapping(value="/{collectionType}/{contentGooruId}/user/{userUid}",method ={ RequestMethod.GET,RequestMethod.POST})
