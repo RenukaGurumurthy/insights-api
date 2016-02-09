@@ -19,4 +19,6 @@ public interface CassandraV2Service {
 	CqlResult<String, String> readWithCondition(String columnFamilyName, String[] fieldNames, String[] values, boolean allowFilter);
 
 	CqlResult<String, String> readWithCondition(String columnFamilyName, String whereCondition, String[] values);
+
+	CqlResult<String, String> getAllUserLocationInClass(String cfName, String classUid);
 }

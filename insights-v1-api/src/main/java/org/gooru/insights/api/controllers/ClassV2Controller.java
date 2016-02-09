@@ -51,7 +51,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value="courseGooruId") String courseGooruId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<Map<String, Object>>> peersObserver = getClassService().getUserPeers(classGooruId, courseGooruId, null, null, ApiConstants.UNIT);
+		Observable<ResponseParamDTO<Map<String, Object>>> peersObserver = getClassService().getUserPeers(classGooruId, courseGooruId, null, ApiConstants.UNIT);
 		DeferredResult<ResponseParamDTO<Map<String, Object>>> defferedResponse = new DeferredResult<>();
 		peersObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
 		return defferedResponse;
@@ -65,7 +65,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value="unitGooruId") String unitGooruId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<Map<String, Object>>> peersObserver = getClassService().getUserPeers(classGooruId, courseGooruId, unitGooruId, null, ApiConstants.LESSON);
+		Observable<ResponseParamDTO<Map<String, Object>>> peersObserver = getClassService().getUserPeers(classGooruId, courseGooruId, unitGooruId, ApiConstants.LESSON);
 		DeferredResult<ResponseParamDTO<Map<String, Object>>> defferedResponse = new DeferredResult<>();
 		peersObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
 		return defferedResponse;
@@ -286,5 +286,5 @@ public class ClassV2Controller extends BaseController {
 		setAllowOrigin(response);
 		return getModel(getClassService().getResourceUsage(sessionId, resourceIds));
 	}
-
+	
 }

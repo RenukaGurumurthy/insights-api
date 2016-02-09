@@ -387,7 +387,11 @@ public class ApiConstants {
 	public static final String _TEACHER_UID = "teacher_uid";
 	public static final String ANSWER_STATUS = "answer_status";
 	public static final String RESOURCE_IDS = "resourceIds";
-
+	public static final String _SESSION_TIME = "session_time";
+	public static final String PEER_COUNT = "peerCount";
+	public static final String ACTIVE = "Active";
+	public static final String IN_ACTIVE = "Inactive";
+	
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
 		

@@ -17,8 +17,6 @@ public interface ClassV2Service {
 
 	ResponseParamDTO<Map<String, Object>> getUserCurrentLocationInLesson(String userUid, String classId);
 
-	Observable<ResponseParamDTO<Map<String, Object>>> getUserPeers(String classId, String courseId, String unitId, String lessonId, String nextLevelType);
-
 	Observable<ResponseParamDTO<Map<String, Object>>> getPerformance(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType,
 			String nextLevelType);
 
@@ -30,10 +28,13 @@ public interface ClassV2Service {
 	
 	ResponseParamDTO<Map<String, Object>> fetchTeacherGrade(String teacherUid, String userUid, String sessionId);
 
-
 	ResponseParamDTO<Map<String, Object>> getResourceUsage(String sessionId, String resourceIds);
 
 	Observable<ResponseParamDTO<Map<String, Object>>> getPriorUsage(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid, String collectionType);
+		
+	Observable<ResponseParamDTO<Map<String, Object>>> getUserPeers(String classId, String courseId, String unitId, String nextLevelType);
+
+	Observable<ResponseParamDTO<Map<String, Object>>> getUserPeers(String classId, String courseId, String unitId, String lessonId, String nextLevelType);
 }
 
 

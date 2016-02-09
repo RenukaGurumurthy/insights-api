@@ -13,4 +13,6 @@ public interface CqlCassandraDao {
 	Rows<String, String> readColumnsWithKey(String cfName, String key);
 	
 	CqlResult<String, String> executeCqlQuery(String columnFamilyName, String query, String... parameters);
+	
+	CqlResult<String, String> readPeers(String cfName, String classId);
 }
