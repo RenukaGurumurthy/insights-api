@@ -119,4 +119,9 @@ public class CassandraV2ServiceImpl implements CassandraV2Service{
 		}
 		return stringBuffer.toString();
 	}
+	
+	@Override
+	public CqlResult<String, String> getAllUserLocationInClass(String cfName, String classUid) {
+		return cqlDAO.readPeers(cfName, classUid);
+	}
 }

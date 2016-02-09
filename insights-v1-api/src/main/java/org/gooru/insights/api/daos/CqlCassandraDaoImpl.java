@@ -21,9 +21,10 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 
 	private static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.CL_QUORUM;
 
-	final String GET_USER_CURRENT_LOCATION = "SELECT * FROM student_location WHERE class_uid = ? AND user_uid = ? ;";
+	final static String GET_USER_CURRENT_LOCATION_IN_CLASS = "SELECT * FROM student_location WHERE class_uid = ? AND user_uid = ? ";
 	
-
+	final static String GET_ALL_USER_CURRENT_LOCATION_IN_CLASS = "SELECT * FROM student_location WHERE class_uid = ? ";
+	
 	public ColumnFamily<String, String> accessColumnFamily(String columnFamilyName) {
 		return new ColumnFamily<String, String>(columnFamilyName, StringSerializer.get(), StringSerializer.get());
 	}
@@ -61,7 +62,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		try {
 			result = getLogKeyspace()
 		       .prepareQuery(accessColumnFamily(cfName)).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
-		       .withCql(GET_USER_CURRENT_LOCATION)
+		       .withCql(GET_USER_CURRENT_LOCATION_IN_CLASS)
 		       .asPreparedStatement()
 			       .withStringValue(classId)
 			       .withStringValue(userUid)
@@ -94,10 +95,25 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		try {
 			result = getLogKeyspace()
 			        .prepareQuery(accessColumnFamily(columnFamilyName))
+			        .setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
 			        .withCql(query).asPreparedStatement()
 			        .execute();
 		} catch (ConnectionException e) {
 			InsightsLogger.error("CQL Exception:"+query, e);
+		}
+		return result != null ? result.getResult() : null;
+	}
+	
+	public CqlResult<String, String> readPeers(String cfName, String classId) {
+		OperationResult<CqlResult<String, String>> result = null;
+		try {
+			result = getLogKeyspace().prepareQuery(accessColumnFamily(cfName))
+					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
+					.withCql(GET_ALL_USER_CURRENT_LOCATION_IN_CLASS).asPreparedStatement()
+					.withStringValue(classId)
+					.execute();
+		} catch (ConnectionException e) {
+			InsightsLogger.error("CQL Exception:" + GET_ALL_USER_CURRENT_LOCATION_IN_CLASS, e);
 		}
 		return result != null ? result.getResult() : null;
 	}

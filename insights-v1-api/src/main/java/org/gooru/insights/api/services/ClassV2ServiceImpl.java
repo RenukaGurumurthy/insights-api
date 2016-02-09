@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.commons.lang.StringUtils;
@@ -16,6 +17,7 @@ import org.gooru.insights.api.constants.ErrorCodes;
 import org.gooru.insights.api.constants.InsightsConstant;
 import org.gooru.insights.api.models.ContentTaxonomyActivity;
 import org.gooru.insights.api.models.ResponseParamDTO;
+import org.gooru.insights.api.models.UserContentLocation;
 import org.gooru.insights.api.utils.ServiceUtils;
 import org.gooru.insights.api.utils.ValidationUtils;
 import org.slf4j.Logger;
@@ -23,14 +25,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import rx.Observable;
+import rx.schedulers.Schedulers;
+
 import com.netflix.astyanax.model.ColumnList;
 import com.netflix.astyanax.model.CqlResult;
 import com.netflix.astyanax.model.Row;
 import com.netflix.astyanax.model.Rows;
 import com.netflix.astyanax.serializers.SetSerializer;
-
-import rx.Observable;
-import rx.schedulers.Schedulers;
 
 @Service
 public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
@@ -135,7 +137,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	@Override
 	public ResponseParamDTO<Map<String, Object>> getUserCurrentLocationInLesson(String userUid, String classId) {
 		Observable<ResponseParamDTO<Map<String, Object>>> userLocationObservable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
-			s.onNext(getUserCurrentLocation(userUid, classId));
+			s.onNext(getStudentCurrentLocation(userUid, classId));
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = userLocationObservable.toBlocking().first();
@@ -143,18 +145,27 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	}
 	
 	@Override
-	public Observable<ResponseParamDTO<Map<String, Object>>> getUserPeers(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
+	public Observable<ResponseParamDTO<Map<String, Object>>> getPerformance(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType, String nextLevelType) {
 		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
-			s.onNext(getUserPeersDetail(classId, courseId, unitId, lessonId, nextLevelType));
+			s.onNext(getPerformanceData(classId, courseId, unitId, lessonId, userUid, collectionType, nextLevelType));
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
 		return observable;
 	}
 	
 	@Override
-	public Observable<ResponseParamDTO<Map<String, Object>>> getPerformance(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType, String nextLevelType) {
+	public Observable<ResponseParamDTO<Map<String, Object>>> getUserPeers(String classId, String courseId, String unitId, String nextLevelType) {
 		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
-			s.onNext(getPerformanceData(classId, courseId, unitId, lessonId, userUid, collectionType, nextLevelType));
+			s.onNext(getUserPeerData(classId, courseId, unitId, nextLevelType));
+			s.onCompleted();
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		return observable;
+	}
+	
+	@Override
+	public Observable<ResponseParamDTO<Map<String, Object>>> getUserPeers(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
+		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+			s.onNext(getUserPeerData(classId, courseId, unitId, lessonId, nextLevelType));
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
 		return observable;
@@ -173,23 +184,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return observable;
 	}
 	
-	private ResponseParamDTO<Map<String, Object>> getUserCurrentLocation(String userUid, String classId) {
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
-		ColumnList<String> resultColumns = getCassandraService().getUserCurrentLocation(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), userUid, classId);
-		if (resultColumns != null && resultColumns.size() > 0) {
-			Map<String, Object> dataAsMap = new HashMap<String, Object>();
-			dataAsMap.put("classId", resultColumns.getStringValue(ApiConstants._CLASS_UID, null));
-			dataAsMap.put("courseId", resultColumns.getStringValue(ApiConstants._COURSE_UID, null));
-			dataAsMap.put("unitId", resultColumns.getStringValue(ApiConstants._UNIT_UID, null));
-			dataAsMap.put("lessonId", resultColumns.getStringValue(ApiConstants._LESSON_UID, null));
-			dataAsMap.put(ApiConstants.getResponseNameByType(resultColumns.getStringValue(ApiConstants._COLLECTION_TYPE, ApiConstants.CONTENT)), resultColumns.getStringValue(ApiConstants._COLLECTION_UID, null));
-			dataMapAsList.add(dataAsMap);
-		}
-		responseParamDTO.setContent(dataMapAsList);
-		return responseParamDTO;
-	}
-	
+	@Deprecated
 	private ResponseParamDTO<Map<String, Object>> getUserPeersDetail(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
@@ -210,7 +205,6 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 					dataAsMap.put(ApiConstants.LEFT_PEER_UIDS, activePeers);
 				}
 				dataAsMap.put(ApiConstants.getResponseNameByType(nextLevelType), columnList.getStringValue(ApiConstants._LEAF_GOORU_OID, null));
-
 				dataMapAsList.add(dataAsMap);
 			}
 		}
@@ -263,6 +257,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return responseParamDTO;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private ResponseParamDTO<Map<String, Object>> getPerformanceData(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType, String nextLevelType) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
@@ -486,4 +481,96 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		resourceUsageObject.setContent(resourceUsageList);	
 		return resourceUsageObject;
 	}
+	
+	private ResponseParamDTO<Map<String, Object>> getStudentCurrentLocation(String userUid, String classId) {
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
+		ColumnList<String> resultColumns = getCassandraService().getUserCurrentLocation(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), userUid, classId);
+		if (resultColumns != null && resultColumns.size() > 0) {
+			Map<String, Object> dataAsMap = new HashMap<String, Object>();
+			dataAsMap.put(ApiConstants.getResponseNameByType(ApiConstants.CLASS), resultColumns.getStringValue(ApiConstants._CLASS_UID, null));
+			dataAsMap.put(ApiConstants.getResponseNameByType(ApiConstants.COURSE), resultColumns.getStringValue(ApiConstants._COURSE_UID, null));
+			dataAsMap.put(ApiConstants.getResponseNameByType(ApiConstants.UNIT), resultColumns.getStringValue(ApiConstants._UNIT_UID, null));
+			dataAsMap.put(ApiConstants.getResponseNameByType(ApiConstants.LESSON), resultColumns.getStringValue(ApiConstants._LESSON_UID, null));
+			dataAsMap.put(ApiConstants.getResponseNameByType(resultColumns.getStringValue(ApiConstants._COLLECTION_TYPE, ApiConstants.CONTENT)), resultColumns.getStringValue(ApiConstants._COLLECTION_UID, null));
+			dataMapAsList.add(dataAsMap);
+		}
+		responseParamDTO.setContent(dataMapAsList);
+		return responseParamDTO;
+	}
+	
+	private ResponseParamDTO<Map<String, Object>> getUserPeerData(String classId, String courseId, String unitId, String nextLevelType) {
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
+		List<UserContentLocation> userContentLocationObject = new ArrayList<>(1);
+		CqlResult<String, String> resultRows = getCassandraService().getAllUserLocationInClass(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), classId);
+		if (resultRows != null && resultRows.getRows() != null && resultRows.getRows().size() > 0) {
+			Rows<String, String> rows = resultRows.getRows();
+			for (Row<String, String> row : rows) {
+				ColumnList<String> columnList = row.getColumns();
+				String courseUId = columnList.getStringValue(ApiConstants._COURSE_UID, null);
+				String unitUId = columnList.getStringValue(ApiConstants._UNIT_UID, null);
+				String lessonUId = columnList.getStringValue(ApiConstants._LESSON_UID, null);
+				if (courseUId.equalsIgnoreCase(courseId) && (StringUtils.isNotBlank(unitId) && unitUId.equalsIgnoreCase(unitId)) && StringUtils.isNotBlank(lessonUId)) {
+					generateUserLocationObject(classId, nextLevelType, userContentLocationObject, columnList, courseUId, unitUId, lessonUId);
+				} else if (courseUId.equalsIgnoreCase(courseId) && StringUtils.isBlank(unitId) && StringUtils.isNotBlank(unitUId)) {
+					generateUserLocationObject(classId, nextLevelType, userContentLocationObject, columnList, courseUId, unitUId, lessonUId);
+				}
+			}
+			Map<String, Long> peers = userContentLocationObject.stream().collect(Collectors.groupingBy(object -> {return getGroupByField(object, nextLevelType);}, Collectors.counting()));
+			for (Map.Entry<String, Long> peer : peers.entrySet()) {
+				Map<String, Object> dataAsMap = new HashMap<String, Object>();
+				dataAsMap.put(ApiConstants.getResponseNameByType(nextLevelType), peer.getKey());
+				dataAsMap.put(ApiConstants.PEER_COUNT, peer.getValue());
+				dataMapAsList.add(dataAsMap);
+			}
+		}
+		responseParamDTO.setContent(dataMapAsList);
+		return responseParamDTO;
+	}
+
+	private ResponseParamDTO<Map<String, Object>> getUserPeerData(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
+		CqlResult<String, String> resultRows = getCassandraService().getAllUserLocationInClass(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), classId);
+		if (resultRows != null && resultRows.getRows() != null && resultRows.getRows().size() > 0) {
+			for (Row<String, String> row : resultRows.getRows()) {
+				ColumnList<String> columnList = row.getColumns();
+				String courseUId = columnList.getStringValue(ApiConstants._COURSE_UID, null); String unitUId = columnList.getStringValue(ApiConstants._UNIT_UID, null);
+				String lessonUId = columnList.getStringValue(ApiConstants._LESSON_UID, null); String collectionUId = columnList.getStringValue(ApiConstants._COLLECTION_UID, null);
+				nextLevelType = columnList.getStringValue(ApiConstants._COLLECTION_TYPE, ApiConstants.CONTENT);
+				if (courseUId.equalsIgnoreCase(courseId) && unitUId.equalsIgnoreCase(unitId) && lessonUId.equalsIgnoreCase(lessonId) && StringUtils.isNotBlank(collectionUId)) {
+					String status = ApiConstants.IN_ACTIVE; String userId = columnList.getStringValue(ApiConstants._USER_UID, null); Long sessionTime = columnList.getLongValue(ApiConstants._SESSION_TIME, 0L);
+					//TODO make this time limit configurable
+					if (sessionTime >= (System.currentTimeMillis() - 900000)) {
+						status = ApiConstants.ACTIVE;
+					}
+					Map<String, Object> dataAsMap = new HashMap<String, Object>(3);
+					dataAsMap.put(ApiConstants.USER_UID, userId);
+					dataAsMap.put(ApiConstants.STATUS, status);
+					dataAsMap.put(ApiConstants.getResponseNameByType(nextLevelType), collectionUId);
+					dataMapAsList.add(dataAsMap);
+				}
+			}
+		}
+		responseParamDTO.setContent(dataMapAsList);
+		return responseParamDTO;
+	}
+	
+	private void generateUserLocationObject(String classId, String nextLevelType, List<UserContentLocation> userContentLocationObject, ColumnList<String> columnList, String courseUId, String unitUId,
+			String lessonUId) {
+		String userId = columnList.getStringValue(ApiConstants._USER_UID, null);
+		UserContentLocation userLocation = new UserContentLocation(classId, courseUId, unitUId, lessonUId, null, userId, nextLevelType);
+		userContentLocationObject.add(userLocation);
+	}
+	
+	private String getGroupByField(UserContentLocation userLocation, String nextLevelType) {
+		if(nextLevelType.equalsIgnoreCase(ApiConstants.UNIT)) { 
+			return userLocation.getUnitUid();
+		} else if (nextLevelType.equalsIgnoreCase(ApiConstants.LESSON))  {
+			return userLocation.getLessonUid();
+		}
+		return userLocation.getUnitUid();
+	}
+	
 }
