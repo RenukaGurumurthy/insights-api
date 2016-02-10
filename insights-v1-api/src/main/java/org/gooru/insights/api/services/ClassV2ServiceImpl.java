@@ -298,6 +298,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		String responseNameForViews = ApiConstants.VIEWS;
 		if(nextLevelType.equalsIgnoreCase(ApiConstants.CONTENT)) {
 			nextLevelType = collectionType;
+			dataAsMap.put(ApiConstants.REACTION, columns.getLongValue(ApiConstants.REACTION, 0L));
 		}
 		if(collectionType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) responseNameForViews = ApiConstants.ATTEMPTS;
 		dataAsMap.put(ApiConstants.getResponseNameByType(nextLevelType), columns.getStringValue(ApiConstants._LEAF_NODE, null));
@@ -345,21 +346,20 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 				sessionActivityMetrics.put(ApiConstants.SESSIONID, sessionActivityColumns.getStringValue(ApiConstants._SESSION_ID, null));
 				sessionActivityMetrics.put(ApiConstants.GOORUOID, sessionActivityColumns.getStringValue(ApiConstants._GOORU_OID, null));
 				sessionActivityMetrics.put(ApiConstants.RESOURCE_TYPE, contentType);
-				sessionActivityMetrics.put(ApiConstants.SCORE, sessionActivityColumns.getLongValue(ApiConstants.SCORE, null));
-				sessionActivityMetrics.put(ApiConstants.TIMESPENT, sessionActivityColumns.getLongValue(ApiConstants._TIME_SPENT, null));
-				sessionActivityMetrics.put(ApiConstants.VIEWS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, null));
+				sessionActivityMetrics.put(ApiConstants.SCORE, sessionActivityColumns.getLongValue(ApiConstants.SCORE, 0L));
+				sessionActivityMetrics.put(ApiConstants.TIMESPENT, sessionActivityColumns.getLongValue(ApiConstants._TIME_SPENT, 0L));
+				sessionActivityMetrics.put(ApiConstants.VIEWS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, 0L));
+				sessionActivityMetrics.put(ApiConstants.REACTION, sessionActivityColumns.getLongValue(ApiConstants.REACTION, 0L));
 				if (contentType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
-					sessionActivityMetrics.put(ApiConstants.REACTION, sessionActivityColumns.getLongValue(ApiConstants.REACTION, null));
 					usageData.put(ApiConstants.COLLECTION, sessionActivityMetrics);
 				} else if (contentType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) {
 					usageData.put(ApiConstants.ASSESSMENT, sessionActivityMetrics);
 					sessionActivityMetrics.remove(ApiConstants.VIEWS);
-					sessionActivityMetrics.put(ApiConstants.ATTEMPTS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, null));
+					sessionActivityMetrics.put(ApiConstants.ATTEMPTS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, 0L));
 				} else {
 					sessionActivityMetrics.put(ApiConstants.QUESTION_TYPE, sessionActivityColumns.getStringValue(ApiConstants._QUESTION_TYPE, null));
 					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, sessionActivityColumns.getStringValue(ApiConstants._ANSWER_OBJECT, null));
-					sessionActivityMetrics.put(ApiConstants.ATTEMPTS, sessionActivityColumns.getLongValue(ApiConstants.ATTEMPTS, null));
-					sessionActivityMetrics.put(ApiConstants.REACTION, sessionActivityColumns.getLongValue(ApiConstants.REACTION, null));
+					sessionActivityMetrics.put(ApiConstants.ATTEMPTS, sessionActivityColumns.getLongValue(ApiConstants.ATTEMPTS, 0L));
 					sessionActivities.add(sessionActivityMetrics);
 				}
 			}
@@ -501,7 +501,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	private ResponseParamDTO<Map<String, Object>> getUserPeerData(String classId, String courseId, String unitId, String nextLevelType) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
-		List<UserContentLocation> userContentLocationObject = new ArrayList<>(1);
+		List<UserContentLocation> userContentLocationObject = new ArrayList<>();
 		CqlResult<String, String> resultRows = getCassandraService().getAllUserLocationInClass(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), classId);
 		if (resultRows != null && resultRows.getRows() != null && resultRows.getRows().size() > 0) {
 			Rows<String, String> rows = resultRows.getRows();
