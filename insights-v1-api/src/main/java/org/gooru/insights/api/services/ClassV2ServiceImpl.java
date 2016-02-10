@@ -350,6 +350,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 				sessionActivityMetrics.put(ApiConstants.VIEWS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, null));
 				if (contentType.matches(ApiConstants.COLLECTION_OR_ASSESSMENT)) {
 					if (contentType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
+						sessionActivityMetrics.put(ApiConstants.REACTION, sessionActivityColumns.getLongValue(ApiConstants.REACTION, null));
 						usageData.put(ApiConstants.COLLECTION, sessionActivityMetrics);
 					} else if (contentType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) {
 						usageData.put(ApiConstants.ASSESSMENT, sessionActivityMetrics);
