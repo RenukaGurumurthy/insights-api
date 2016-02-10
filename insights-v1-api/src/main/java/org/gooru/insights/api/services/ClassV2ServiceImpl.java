@@ -348,15 +348,13 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 				sessionActivityMetrics.put(ApiConstants.SCORE, sessionActivityColumns.getLongValue(ApiConstants.SCORE, null));
 				sessionActivityMetrics.put(ApiConstants.TIMESPENT, sessionActivityColumns.getLongValue(ApiConstants._TIME_SPENT, null));
 				sessionActivityMetrics.put(ApiConstants.VIEWS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, null));
-				if (contentType.matches(ApiConstants.COLLECTION_OR_ASSESSMENT)) {
-					if (contentType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
-						sessionActivityMetrics.put(ApiConstants.REACTION, sessionActivityColumns.getLongValue(ApiConstants.REACTION, null));
-						usageData.put(ApiConstants.COLLECTION, sessionActivityMetrics);
-					} else if (contentType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) {
-						usageData.put(ApiConstants.ASSESSMENT, sessionActivityMetrics);
-						sessionActivityMetrics.remove(ApiConstants.VIEWS);
-						sessionActivityMetrics.put(ApiConstants.ATTEMPTS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, null));
-					}
+				if (contentType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
+					sessionActivityMetrics.put(ApiConstants.REACTION, sessionActivityColumns.getLongValue(ApiConstants.REACTION, null));
+					usageData.put(ApiConstants.COLLECTION, sessionActivityMetrics);
+				} else if (contentType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) {
+					usageData.put(ApiConstants.ASSESSMENT, sessionActivityMetrics);
+					sessionActivityMetrics.remove(ApiConstants.VIEWS);
+					sessionActivityMetrics.put(ApiConstants.ATTEMPTS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, null));
 				} else {
 					sessionActivityMetrics.put(ApiConstants.QUESTION_TYPE, sessionActivityColumns.getStringValue(ApiConstants._QUESTION_TYPE, null));
 					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, sessionActivityColumns.getStringValue(ApiConstants._ANSWER_OBJECT, null));
