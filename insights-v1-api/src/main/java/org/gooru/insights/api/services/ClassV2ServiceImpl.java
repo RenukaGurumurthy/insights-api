@@ -213,10 +213,10 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	}
 
 	@Override
-	public Observable<ResponseParamDTO<Map<String, Object>>> getPriorUsage(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,String collectionType) {
+	public Observable<ResponseParamDTO<Map<String, Object>>> getPriorDetail(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,String collectionType) {
 		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
 			try {
-				s.onNext(getSummaryData(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid, collectionType));
+				s.onNext(getPriorUsage(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid, collectionType));
 			} catch (Exception e) {
 				logger.error("Exception while reading prior data", e);
 			}
@@ -225,6 +225,17 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return observable;
 	}
 	
+	private ResponseParamDTO<Map<String, Object>> getPriorUsage(String classId, String courseId, String unitId,
+			String lessonId, String assessmentId, String sessionId, String userUid, String collectionType) throws Exception {
+
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		String sessionKey = getSession(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid,
+				collectionType);
+		if (StringUtils.isNotBlank(sessionKey)) {
+			responseParamDTO.setContent(getPriorUsage(sessionKey));
+		}
+		return responseParamDTO;
+	}
 	
 	public ResponseParamDTO<Map<String, Object>> getSummaryData(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,
 			String collectionType) throws Exception {
@@ -233,20 +244,9 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		List<Map<String, Object>> summaryData = new ArrayList<Map<String, Object>>();
 		Map<String,Object> usageData = new HashMap<String,Object>();
 		List<Map<String,Object>> sessionActivities = new ArrayList<Map<String,Object>>();
-		String sessionKey = null;
 		//TODO validate ClassId
 		//isValidClass(classId);
-		if (StringUtils.isNotBlank(sessionId)) {
-			sessionKey = sessionId;
-		} else if (StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) 
-				&& StringUtils.isNotBlank(unitId) && StringUtils.isNotBlank(lessonId)) {
-			ResponseParamDTO<Map<String, Object>> sessionObject = getUserSessions(classId, courseId, unitId,lessonId, assessmentId, collectionType, userUid, false);
-			List<Map<String,Object>> sessionList = sessionObject.getContent();
-			sessionKey = sessionList.size() > 0 ? sessionList.get(sessionList.size()-1).get(InsightsConstant.SESSION_ID).toString() : null;
-		} else {
-			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, getBaseService().appendComma("CUL Heirarchy", InsightsConstant.SESSION_ID)
-					, getBaseService().appendComma("CUL Heirarchy", InsightsConstant.SESSION_ID));
-		}
+		String sessionKey = getSession(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid, collectionType);
 		
 		//Fetch Usage Data
 		if (StringUtils.isNotBlank(sessionKey)) {
@@ -255,6 +255,21 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		}
 		responseParamDTO.setContent(summaryData);
 		return responseParamDTO;
+	}
+	
+	private String getSession(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid, String collectionType) throws Exception {
+		if (StringUtils.isNotBlank(sessionId)) {
+			return sessionId;
+		} else if (StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) 
+				&& StringUtils.isNotBlank(unitId) && StringUtils.isNotBlank(lessonId)) {
+			ResponseParamDTO<Map<String, Object>> sessionObject = getUserSessions(classId, courseId, unitId,lessonId, assessmentId, collectionType, userUid, false);
+			List<Map<String,Object>> sessionList = sessionObject.getContent();
+			return  sessionList.size() > 0 ? sessionList.get(sessionList.size()-1).get(InsightsConstant.SESSION_ID).toString() : null;
+		} else {
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, getBaseService().appendComma("CUL Heirarchy", InsightsConstant.SESSION_ID)
+					, getBaseService().appendComma("CUL Heirarchy", InsightsConstant.SESSION_ID));
+		}
+		return null;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -335,6 +350,30 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return responseParamDTO;
 	}
 
+	private List<Map<String, Object>> getPriorUsage(String sessionKey) {
+	
+		List<Map<String, Object>> sessionActivities = new ArrayList<Map<String,Object>>();
+		CqlResult<String, String> userSessionActivityResult = getCassandraService().readWithCondition(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), new String[]{ApiConstants._SESSION_ID}, new String[]{sessionKey}, false);
+		if (userSessionActivityResult != null && userSessionActivityResult.hasRows()) {
+			for (Row<String, String> userSessionActivityRow : userSessionActivityResult.getRows()) {
+				Map<String, Object> sessionActivityMetrics = new HashMap<String, Object>();
+				ColumnList<String> sessionActivityColumns = userSessionActivityRow.getColumns();
+				String contentType = sessionActivityColumns.getStringValue(ApiConstants._RESOURCE_TYPE, ApiConstants.STRING_EMPTY);
+				if(contentType.matches(ApiConstants.COLLECTION_OR_ASSESSMENT)) {
+					continue;
+				} else {
+					sessionActivityMetrics.put(ApiConstants.GOORUOID, sessionActivityColumns.getStringValue(ApiConstants._GOORU_OID, null));
+					sessionActivityMetrics.put(ApiConstants.RESOURCE_TYPE, contentType);
+					sessionActivityMetrics.put(ApiConstants.SCORE, sessionActivityColumns.getLongValue(ApiConstants.SCORE, 0L));
+					sessionActivityMetrics.put(ApiConstants.VIEWS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, 0L));
+					sessionActivityMetrics.put(ApiConstants.TIMESPENT, sessionActivityColumns.getLongValue(ApiConstants._TIME_SPENT, 0L));
+					sessionActivityMetrics.put(ApiConstants.REACTION, sessionActivityColumns.getLongValue(ApiConstants.REACTION, 0L));
+					sessionActivities.add(sessionActivityMetrics);
+				}
+			}
+		}
+		return sessionActivities;
+	}
 	private void getResourceMetricsBySession(List<Map<String, Object>> sessionActivities, String sessionKey, Map<String, Object> usageData) {
 		
 		CqlResult<String, String> userSessionActivityResult = getCassandraService().readWithCondition(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), new String[]{ApiConstants._SESSION_ID}, new String[]{sessionKey}, false);
