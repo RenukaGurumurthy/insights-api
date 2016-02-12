@@ -25,14 +25,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import rx.Observable;
-import rx.schedulers.Schedulers;
-
 import com.netflix.astyanax.model.ColumnList;
 import com.netflix.astyanax.model.CqlResult;
 import com.netflix.astyanax.model.Row;
 import com.netflix.astyanax.model.Rows;
 import com.netflix.astyanax.serializers.SetSerializer;
+
+import rx.Observable;
+import rx.schedulers.Schedulers;
 
 @Service
 public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
@@ -215,12 +215,13 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	@Override
 	public Observable<ResponseParamDTO<Map<String, Object>>> getPriorDetail(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,String collectionType) {
 		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
-			try {
-				s.onNext(getPriorUsage(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid, collectionType));
-			} catch (Exception e) {
-				logger.error("Exception while reading prior data", e);
-			}
-			s.onCompleted();
+					try {
+						s.onNext(getPriorUsage(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid,
+								collectionType));
+					} catch (Throwable t) {
+						s.onError(t);
+					}
+					s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
 		return observable;
 	}
@@ -363,10 +364,8 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 					continue;
 				} else {
 					sessionActivityMetrics.put(ApiConstants.GOORUOID, sessionActivityColumns.getStringValue(ApiConstants._GOORU_OID, null));
-					sessionActivityMetrics.put(ApiConstants.RESOURCE_TYPE, contentType);
-					sessionActivityMetrics.put(ApiConstants.SCORE, sessionActivityColumns.getLongValue(ApiConstants.SCORE, 0L));
+					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, ServiceUtils.castJSONToMap(sessionActivityColumns.getStringValue(ApiConstants._ANSWER_OBJECT, null)));
 					sessionActivityMetrics.put(ApiConstants.VIEWS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, 0L));
-					sessionActivityMetrics.put(ApiConstants.TIMESPENT, sessionActivityColumns.getLongValue(ApiConstants._TIME_SPENT, 0L));
 					sessionActivityMetrics.put(ApiConstants.REACTION, sessionActivityColumns.getLongValue(ApiConstants.REACTION, 0L));
 					sessionActivities.add(sessionActivityMetrics);
 				}
@@ -378,6 +377,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		
 		CqlResult<String, String> userSessionActivityResult = getCassandraService().readWithCondition(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), new String[]{ApiConstants._SESSION_ID}, new String[]{sessionKey}, false);
 		if (userSessionActivityResult != null && userSessionActivityResult.hasRows()) {
+			String itemName = ApiConstants.RESOURCES;
 			for (Row<String, String> userSessionActivityRow : userSessionActivityResult.getRows()) {
 				Map<String, Object> sessionActivityMetrics = new HashMap<String, Object>();
 				ColumnList<String> sessionActivityColumns = userSessionActivityRow.getColumns();
@@ -394,15 +394,15 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 				} else if (contentType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) {
 					usageData.put(ApiConstants.ASSESSMENT, sessionActivityMetrics);
 					sessionActivityMetrics.remove(ApiConstants.VIEWS);
+					itemName = ApiConstants.QUESTIONS;
 					sessionActivityMetrics.put(ApiConstants.ATTEMPTS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, 0L));
 				} else {
 					sessionActivityMetrics.put(ApiConstants.QUESTION_TYPE, sessionActivityColumns.getStringValue(ApiConstants._QUESTION_TYPE, null));
-					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, sessionActivityColumns.getStringValue(ApiConstants._ANSWER_OBJECT, null));
-					sessionActivityMetrics.put(ApiConstants.ATTEMPTS, sessionActivityColumns.getLongValue(ApiConstants.ATTEMPTS, 0L));
+					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, ServiceUtils.castJSONToMap(sessionActivityColumns.getStringValue(ApiConstants._ANSWER_OBJECT, null)));
 					sessionActivities.add(sessionActivityMetrics);
 				}
 			}
-			usageData.put(ApiConstants.RESOURCES, sessionActivities);
+			usageData.put(itemName, sessionActivities);
 		}
 	}
 
@@ -610,5 +610,4 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		}
 		return userLocation.getUnitUid();
 	}
-	
 }

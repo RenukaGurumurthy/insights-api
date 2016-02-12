@@ -215,6 +215,8 @@ public class ApiConstants {
 	
 	public static final String QUESTION = "question";
 	
+	public static final String QUESTIONS = "questions";
+	
 	public static final String QUESTION_TYPE = "questionType";
 	
 	public static final String QUESTION_MATCH = "question.questionType|question.type";
