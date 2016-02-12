@@ -10,8 +10,13 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 public class ServiceUtils {
 
+	private static Gson gson = new Gson();
+	
 	public static Collection<String> generateCommaSeparatedStringToKeys(
 			String fields, String prefix, Collection<String> suffix) {
 		Collection<String> resultFields = generateCommaSeparatedStringToKeys(
@@ -183,6 +188,10 @@ public class ServiceUtils {
 		return sb.toString();
 	}
 	
+	public static Map<String,Object> castJSONToMap(String data) {
+				return gson.fromJson(data, (new TypeToken<Map<String, Object>>() {}).getType());
+	}
+	
 	public static List<Map<String, Object>> sortBy(List<Map<String, Object>> requestData, String sortBy, String sortOrder) {
 
 		if (notNull(sortBy)) {
@@ -233,5 +242,6 @@ public class ServiceUtils {
 		}
 		return 0;
 	}	
-
+	
+	
 }
