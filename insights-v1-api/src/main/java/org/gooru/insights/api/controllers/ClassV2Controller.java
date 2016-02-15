@@ -1,5 +1,6 @@
 package org.gooru.insights.api.controllers;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -8,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.InsightsOperationConstants;
+import org.gooru.insights.api.models.ContentTaxonomyActivity;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.security.AuthorizeOperations;
 import org.gooru.insights.api.services.ClassV2Service;
@@ -134,9 +136,10 @@ public class ClassV2Controller extends BaseController {
 			@RequestParam(value="sessionId", required = false) String sessionId, @RequestParam(value="classGooruId", required = false) String classGooruId,
 			@RequestParam(value="courseGooruId", required = false) String courseGooruId, @RequestParam(value="unitGooruId", required = false) String unitGooruId, 
 			@RequestParam(value="lessonGooruId", required = false) String lessonGooruId, @PathVariable(value="contentGooruId") String contentGooruId,
+			@RequestParam(value="openSession", defaultValue = "true", required = false) boolean openSession, 
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<Map<String, Object>>> peersObserver = getClassService().getPriorDetail(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, sessionId, userUid,collectionType);
+		Observable<ResponseParamDTO<Map<String, Object>>> peersObserver = getClassService().getPriorDetail(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, sessionId, userUid,collectionType, openSession);
 		DeferredResult<ResponseParamDTO<Map<String, Object>>> defferedResponse = new DeferredResult<>();
 		peersObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
 		return defferedResponse;
@@ -209,51 +212,66 @@ public class ClassV2Controller extends BaseController {
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	public ModelAndView getUserSubjectMastery(HttpServletRequest request, 
+	public DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> getUserSubjectMastery(HttpServletRequest request, 
 			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getUserStandardsMastery(userUid, subjectId, null, null, null, null, 1));
+		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getUserStandardsMastery(userUid, subjectId, null, null, null, null, 1);
+		DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> defferedResponse = new DeferredResult<>();
+		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
+		return defferedResponse;
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/course/{courseId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	public ModelAndView getUserCourseMastery(HttpServletRequest request, 
+	public DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> getUserCourseMastery(HttpServletRequest request, 
 			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
 			@PathVariable(value = "courseId") String courseId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getUserStandardsMastery(userUid, subjectId, courseId, null, null, null, 2));
+		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getUserStandardsMastery(userUid, subjectId, courseId, null, null, null, 2);
+		DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> defferedResponse = new DeferredResult<>();
+		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
+		return defferedResponse;
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/course/{courseId}/domain/{domainId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	public ModelAndView getUserDomainMastery(HttpServletRequest request, 
+	public DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> getUserDomainMastery(HttpServletRequest request, 
 			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
 			@PathVariable(value = "courseId") String courseId, @PathVariable(value = "domainId") String domainId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getUserStandardsMastery(userUid, subjectId, courseId, domainId, null, null, 3));
+		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getUserStandardsMastery(userUid, subjectId, courseId, domainId, null, null, 3);
+		DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> defferedResponse = new DeferredResult<>();
+		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
+		return defferedResponse;
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/course/{courseId}/domain/{domainId}/standards/{standardsId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	public ModelAndView getUserStandardsMastery(HttpServletRequest request, 
+	public DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> getUserStandardsMastery(HttpServletRequest request, 
 			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
 			@PathVariable(value = "courseId") String courseId, @PathVariable(value = "domainId") String domainId,
 			@PathVariable(value = "standardsId") String standardsId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getUserStandardsMastery(userUid, subjectId, courseId, domainId, standardsId, null, 4));
+		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getUserStandardsMastery(userUid, subjectId, courseId, domainId, standardsId, null, 4);
+		DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> defferedResponse = new DeferredResult<>();
+		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
+		return defferedResponse;
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/courses/domain/{domainId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	public ModelAndView getUserDomainParentMastery(HttpServletRequest request, 
+	public DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> getUserDomainParentMastery(HttpServletRequest request, 
 			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
 			 @PathVariable(value = "domainId") String domainId, @RequestParam(value = "courseIds", required = true) String courseIds,HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getUserDomainParentMastery(userUid, subjectId, courseIds, domainId));
+		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getUserDomainParentMastery(userUid, subjectId, courseIds, domainId);
+		DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> defferedResponse = new DeferredResult<>();
+		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
+		return defferedResponse;
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/grade", method = { RequestMethod.GET, RequestMethod.POST })

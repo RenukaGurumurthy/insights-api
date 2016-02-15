@@ -1,5 +1,6 @@
 package org.gooru.insights.api.services;
 
+import java.util.List;
 import java.util.Map;
 
 import org.gooru.insights.api.models.ContentTaxonomyActivity;
@@ -22,15 +23,15 @@ public interface ClassV2Service {
 
 	Observable<ResponseParamDTO<Map<String, Object>>> getAllStudentPerformance(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType);
 
-	ResponseParamDTO<ContentTaxonomyActivity> getUserStandardsMastery(String studentId, String subjectId, String courseId, String domainId, String standardsId, String learningTargetId, Integer depth);
+	Observable<ResponseParamDTO<ContentTaxonomyActivity>> getUserStandardsMastery(String studentId, String subjectId, String courseId, String domainId, String standardsId, String learningTargetId, Integer depth);
 
-	ResponseParamDTO<ContentTaxonomyActivity> getUserDomainParentMastery(String studentId, String subjectId, String courseIds, String domainId);
+	Observable<ResponseParamDTO<ContentTaxonomyActivity>> getUserDomainParentMastery(String studentId, String subjectId, String courseIds, String domainId);
 	
 	ResponseParamDTO<Map<String, Object>> fetchTeacherGrade(String teacherUid, String userUid, String sessionId);
 
 	ResponseParamDTO<Map<String, Object>> getResourceUsage(String sessionId, String resourceIds);
 
-	Observable<ResponseParamDTO<Map<String, Object>>> getPriorDetail(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid, String collectionType);
+	Observable<ResponseParamDTO<Map<String, Object>>> getPriorDetail(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid, String collectionType, boolean openSession);
 		
 	Observable<ResponseParamDTO<Map<String, Object>>> getUserPeers(String classId, String courseId, String unitId, String nextLevelType);
 

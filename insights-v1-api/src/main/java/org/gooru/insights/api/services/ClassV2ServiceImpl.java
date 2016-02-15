@@ -213,11 +213,11 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	}
 
 	@Override
-	public Observable<ResponseParamDTO<Map<String, Object>>> getPriorDetail(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,String collectionType) {
+	public Observable<ResponseParamDTO<Map<String, Object>>> getPriorDetail(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,String collectionType, boolean openSession) {
 		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
 					try {
 						s.onNext(getPriorUsage(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid,
-								collectionType));
+								collectionType, openSession));
 					} catch (Throwable t) {
 						s.onError(t);
 					}
@@ -227,11 +227,14 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	}
 	
 	private ResponseParamDTO<Map<String, Object>> getPriorUsage(String classId, String courseId, String unitId,
-			String lessonId, String assessmentId, String sessionId, String userUid, String collectionType) throws Exception {
+			String lessonId, String assessmentId, String sessionId, String userUid, String collectionType, boolean openSession) throws Exception {
 
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		if(openSession && ApiConstants.COLLECTION.equalsIgnoreCase(collectionType)) {
+			openSession = false;
+		}
 		String sessionKey = getSession(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid,
-				collectionType);
+				collectionType, openSession);
 		if (StringUtils.isNotBlank(sessionKey)) {
 			responseParamDTO.setContent(getPriorUsage(sessionKey));
 		}
@@ -247,7 +250,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		List<Map<String,Object>> sessionActivities = new ArrayList<Map<String,Object>>();
 		//TODO validate ClassId
 		//isValidClass(classId);
-		String sessionKey = getSession(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid, collectionType);
+		String sessionKey = getSession(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid, collectionType, false);
 		
 		//Fetch Usage Data
 		if (StringUtils.isNotBlank(sessionKey)) {
@@ -258,12 +261,12 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return responseParamDTO;
 	}
 	
-	private String getSession(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid, String collectionType) throws Exception {
+	private String getSession(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid, String collectionType, boolean openSession) throws Exception {
 		if (StringUtils.isNotBlank(sessionId)) {
 			return sessionId;
 		} else if (StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) 
 				&& StringUtils.isNotBlank(unitId) && StringUtils.isNotBlank(lessonId)) {
-			ResponseParamDTO<Map<String, Object>> sessionObject = getUserSessions(classId, courseId, unitId,lessonId, assessmentId, collectionType, userUid, false);
+			ResponseParamDTO<Map<String, Object>> sessionObject = getUserSessions(classId, courseId, unitId,lessonId, assessmentId, collectionType, userUid, openSession);
 			List<Map<String,Object>> sessionList = sessionObject.getContent();
 			return  sessionList.size() > 0 ? sessionList.get(sessionList.size()-1).get(InsightsConstant.SESSION_ID).toString() : null;
 		} else {
@@ -414,15 +417,33 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return sessionKey;
 	}
 
-	public ResponseParamDTO<ContentTaxonomyActivity> getUserStandardsMastery(String studentId, String subjectId, String courseId, String domainId, String standardsId, String learningTargetId, Integer depth) {
+	public Observable<ResponseParamDTO<ContentTaxonomyActivity>> getUserStandardsMastery(String studentId, String subjectId, String courseId, String domainId, String standardsId, String learningTargetId, Integer depth) {
 		
-		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
-		List<ContentTaxonomyActivity> contentTaxonomyActivity = getTaxonomyActivity(studentId, subjectId, courseId, domainId, standardsId, learningTargetId, depth);
-		responseParamDTO.setContent(contentTaxonomyActivity);
-		return responseParamDTO;
+		Observable<ResponseParamDTO<ContentTaxonomyActivity>> observable = Observable.<ResponseParamDTO<ContentTaxonomyActivity>> create(s -> {
+			try {
+				s.onNext(getTaxonomyActivity(studentId, subjectId, courseId, domainId, standardsId, learningTargetId, depth));
+			} catch (Throwable t) {
+				s.onError(t);
+			}
+			s.onCompleted();
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		return observable;
 	}
 	
-	public ResponseParamDTO<ContentTaxonomyActivity> getUserDomainParentMastery(String studentId, String subjectId, String courseIds, String domainId) {
+	public Observable<ResponseParamDTO<ContentTaxonomyActivity>> getUserDomainParentMastery(String studentId, String subjectId, String courseIds, String domainId) {
+	
+		Observable<ResponseParamDTO<ContentTaxonomyActivity>> observable = Observable.<ResponseParamDTO<ContentTaxonomyActivity>> create(s -> {
+			try {
+					s.onNext(getUserDomainParentMasteryUsage(studentId, subjectId, courseIds, domainId));		
+			} catch (Throwable t) {
+				s.onError(t);
+			}
+			s.onCompleted();
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		return observable;
+	}
+	
+	private ResponseParamDTO<ContentTaxonomyActivity> getUserDomainParentMasteryUsage(String studentId, String subjectId, String courseIds, String domainId) {
 		
 		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
 		List<ContentTaxonomyActivity> activityList = new ArrayList<ContentTaxonomyActivity>();
@@ -431,39 +452,30 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			
 		}
 		for(String courseId : courseIds.split(ApiConstants.COMMA)) {
-			activityList.addAll(getTaxonomyActivity(studentId, subjectId, courseId, domainId, null, null, 1));	
+			activityList.addAll(getTaxonomyActivity(studentId, subjectId, courseId, domainId, null, null, 1).getContent());
 		}
 		responseParamDTO.setContent(activityList);
 		return responseParamDTO;
 	}
 	
-	private List<ContentTaxonomyActivity> getTaxonomyActivity(String studentId, String subjectId, String courseId, String domainId, String standardsId, String learningTargetId, Integer depth) {
+	private ResponseParamDTO<ContentTaxonomyActivity> getTaxonomyActivity(String studentId, String subjectId, String courseId, String domainId, String standardsId, String learningTargetId, Integer depth) {
 		
+		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
 		CqlResult<String, String> userSessionActivityResult = getCassandraService().readWithCondition(ColumnFamily.CONTENT_TAXONOMY_ACTIVITY.getColumnFamily(), 
 				new String[]{ApiConstants._USER_UID, ApiConstants._SUBJECT_ID, ApiConstants._COURSE_ID, ApiConstants._DOMAIN_ID, ApiConstants._STANDARDS_ID, ApiConstants._LEARNING_TARGETS_ID}, 
 				new String[]{studentId, subjectId, courseId, domainId, standardsId, learningTargetId}, false);
 		List<ContentTaxonomyActivity> contentTaxonomyActivityList = new ArrayList<>();
+		Map<String,Set<String>> itemMap = new HashMap<String,Set<String>>();
 		if(userSessionActivityResult != null && userSessionActivityResult.hasRows()) {
 			for(Row<String,String> row : userSessionActivityResult.getRows()) {
-				ColumnList<String> taxonomyUsage = row.getColumns();
-				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
-				contentTaxonomyActivity.setSubjectId(taxonomyUsage.getStringValue(ApiConstants._SUBJECT_ID, null));
-				contentTaxonomyActivity.setCourseId(taxonomyUsage.getStringValue(ApiConstants._COURSE_ID, null));
-				contentTaxonomyActivity.setDomainId(taxonomyUsage.getStringValue(ApiConstants._DOMAIN_ID, null));
-				contentTaxonomyActivity.setStandardsId(taxonomyUsage.getStringValue(ApiConstants._STANDARDS_ID, null));
-				contentTaxonomyActivity.setLearningTargetsId(taxonomyUsage.getStringValue(ApiConstants._LEARNING_TARGETS_ID, null));
-				contentTaxonomyActivity.setGooruOid(taxonomyUsage.getStringValue(ApiConstants._GOORU_OID, null));
-				contentTaxonomyActivity.setUserUid(taxonomyUsage.getStringValue(ApiConstants._USER_UID, null));
-				contentTaxonomyActivity.setResourceFormat(taxonomyUsage.getStringValue(ApiConstants._RESOURCE_FORMAT, null));
-				contentTaxonomyActivity.setResourceType(taxonomyUsage.getStringValue(ApiConstants._RESOURCE_TYPE, null));
-				contentTaxonomyActivity.setScore(taxonomyUsage.getLongValue(ApiConstants.SCORE, 0L));
-				contentTaxonomyActivity.setTimespent(taxonomyUsage.getLongValue(ApiConstants.TIMESPENT, 0L));
-				contentTaxonomyActivity.setViews(taxonomyUsage.getLongValue(ApiConstants.VIEWS, 0L));
+				ContentTaxonomyActivity contentTaxonomyActivity = includeItem(itemMap, row.getColumns(), depth);;
 				contentTaxonomyActivityList.add(contentTaxonomyActivity);
 			}
-			lambdaService.aggregateTaxonomyActivityData(contentTaxonomyActivityList, depth);
+			contentTaxonomyActivityList = lambdaService.aggregateTaxonomyActivityData(contentTaxonomyActivityList, depth);
+			combineTaxonomyData(contentTaxonomyActivityList, itemMap, depth);
 		}
-		return contentTaxonomyActivityList;
+		responseParamDTO.setContent(contentTaxonomyActivityList);
+		return responseParamDTO;
 	}
 	
 	@Override
@@ -609,5 +621,73 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			return userLocation.getLessonUid();
 		}
 		return userLocation.getUnitUid();
+	}
+	
+	private ContentTaxonomyActivity includeItem(Map<String,Set<String>> itemMap, ColumnList<String> taxonomyUsage, Integer depth) {
+		
+		String parentKey = null;
+		String childKey = null;
+		ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
+		if(depth == 0) {
+			parentKey = taxonomyUsage.getStringValue(ApiConstants._SUBJECT_ID, null);
+			childKey = taxonomyUsage.getStringValue(ApiConstants._COURSE_ID, null);
+			contentTaxonomyActivity.setSubjectId(parentKey);
+		} else if (depth == 1) {
+			parentKey = taxonomyUsage.getStringValue(ApiConstants._COURSE_ID, null);
+			childKey = taxonomyUsage.getStringValue(ApiConstants._DOMAIN_ID, null);
+			contentTaxonomyActivity.setCourseId(parentKey);
+		} else if (depth == 2) {
+			parentKey = taxonomyUsage.getStringValue(ApiConstants._DOMAIN_ID, null);
+			childKey = taxonomyUsage.getStringValue(ApiConstants._STANDARDS_ID, null);
+			contentTaxonomyActivity.setDomainId(parentKey);
+		} else if (depth == 3) {
+			parentKey = taxonomyUsage.getStringValue(ApiConstants._STANDARDS_ID, null);
+			childKey = taxonomyUsage.getStringValue(ApiConstants._LEARNING_TARGETS_ID, null);
+			contentTaxonomyActivity.setStandardsId(parentKey);
+		} else if (depth == 4) {
+			contentTaxonomyActivity.setLearningTargetsId(taxonomyUsage.getStringValue(ApiConstants._LEARNING_TARGETS_ID, null));
+		}
+		contentTaxonomyActivity.setResourceType(taxonomyUsage.getStringValue(ApiConstants._RESOURCE_TYPE, null));
+		if(ApiConstants.QUESTION.equalsIgnoreCase(contentTaxonomyActivity.getResourceType())) {
+			
+			contentTaxonomyActivity.setScore(taxonomyUsage.getLongValue(ApiConstants.SCORE, 0L));
+			contentTaxonomyActivity.setAttempts(taxonomyUsage.getLongValue(ApiConstants.VIEWS, 0L));
+		} else {
+			contentTaxonomyActivity.setTimespent(taxonomyUsage.getLongValue(ApiConstants.TIME_SPENT, 0L));
+		}
+		if(itemMap.containsKey(parentKey)) {
+			itemMap.get(parentKey).add(childKey);
+		} else {
+			Set<String> childItems = new HashSet<String>();
+			childItems.add(childKey);
+			itemMap.put(parentKey, childItems);
+		}
+		return contentTaxonomyActivity;
+	}
+	
+	private void combineTaxonomyData(List<ContentTaxonomyActivity> taxonomyActivities, Map<String,Set<String>> itemMap, Integer depth) {
+		
+		for(ContentTaxonomyActivity contentTaxonomyActivity : taxonomyActivities) {
+			
+			if(depth == 0) {
+				contentTaxonomyActivity.setItemCount(includeItems(contentTaxonomyActivity.getSubjectId(), itemMap));
+			} else if(depth == 1) {
+				contentTaxonomyActivity.setItemCount(includeItems(contentTaxonomyActivity.getCourseId(), itemMap));
+			} else if(depth == 2) {
+				contentTaxonomyActivity.setItemCount(includeItems(contentTaxonomyActivity.getDomainId(), itemMap));
+			} else if(depth == 3) {
+				contentTaxonomyActivity.setItemCount(includeItems(contentTaxonomyActivity.getStandardsId(), itemMap));
+			} else if(depth == 4) {
+				contentTaxonomyActivity.setItemCount(includeItems(contentTaxonomyActivity.getLearningTargetsId(), itemMap));
+			}
+		}
+	}
+	
+	private int includeItems(String id, Map<String,Set<String>> itemMap) {
+		if(itemMap.containsKey(id)) {
+			return itemMap.get(id).size();
+		} else {
+			return 0;
+		}
 	}
 }

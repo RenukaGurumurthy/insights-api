@@ -317,6 +317,7 @@ public class ApiConstants {
 	public static final String OPEN_BRACE = "{";
 	public static final String CLOSE_BRACE = "}";
 	public static final String UTF8 = "UTF-8";
+	public static final String TIME_SPENT = "timespent";
 	
 	public static final String HAS_FRAME_BREAKER = "hasFrameBreaker";
 	public static final String QUESTION_DOT_TYPE = "question.type";

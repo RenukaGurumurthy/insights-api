@@ -8,5 +8,5 @@ public interface LambdaService {
 
 	void aggregateTaxonomyActivityData(List<ContentTaxonomyActivity> resultList, Integer depth1, Integer depth2);
 
-	void aggregateTaxonomyActivityData(List<ContentTaxonomyActivity> resultList, Integer depth);
+	List<ContentTaxonomyActivity> aggregateTaxonomyActivityData(List<ContentTaxonomyActivity> resultList, Integer depth);
 }
