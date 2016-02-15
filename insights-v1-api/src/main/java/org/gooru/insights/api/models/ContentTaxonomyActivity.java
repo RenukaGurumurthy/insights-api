@@ -20,40 +20,34 @@ public class ContentTaxonomyActivity {
 	
 	private Long views;
 	
+	private Long attempts;
+	
 	private Long timespent;
 	
 	private Long score;
 	
 	private String userUid;
-	
+
+	private Integer itemCount;
+
 	public ContentTaxonomyActivity() {
 	}
 	
-	public ContentTaxonomyActivity(ContentTaxonomyActivity contentTaxonomyActivity) {
-		this.setSubjectId(contentTaxonomyActivity.getSubjectId());
-		this.setCourseId(contentTaxonomyActivity.getCourseId());
-		this.setDomainId(contentTaxonomyActivity.getDomainId());
-		this.setStandardsId(contentTaxonomyActivity.getStandardsId());
-		this.setLearningTargetsId(contentTaxonomyActivity.getLearningTargetsId());
-		this.setResourceFormat(contentTaxonomyActivity.getResourceFormat());
-		this.setResourceType(contentTaxonomyActivity.getResourceType());
-		this.setUserUid(contentTaxonomyActivity.getUserUid());
+	public ContentTaxonomyActivity(ContentTaxonomyActivity contentTaxonomyActivity, Integer depth) {
+		
+		if(depth == 0) {
+			this.setSubjectId(contentTaxonomyActivity.getSubjectId());
+		} else if(depth == 1) {
+			this.setCourseId(contentTaxonomyActivity.getCourseId());
+		} else if(depth == 2) {
+			this.setDomainId(contentTaxonomyActivity.getDomainId());
+		} else if(depth == 3) {
+			this.setStandardsId(contentTaxonomyActivity.getStandardsId());
+		} else if(depth == 4) {
+			this.setLearningTargetsId(contentTaxonomyActivity.getLearningTargetsId());
+		}
 	}
 	
-	ContentTaxonomyActivity(String subjectId, String courseId, String domainId, String subDomainId, String standardId, String learningTargetId, String resourceFormat, String resourceType, String userUid, Long views, Long timespent, Long score) {
-		this.setSubjectId(subjectId);
-		this.setCourseId(courseId);
-		this.setDomainId(domainId);
-		this.setStandardsId(standardId);
-		this.setLearningTargetsId(learningTargetId);
-		this.setResourceFormat(resourceFormat);
-		this.setResourceType(resourceType);
-		this.setUserUid(userUid);
-		this.setViews(views);
-		this.setTimespent(timespent);
-		this.setScore(score);
-	}
- 
 	public String getSubjectId() {
 		return subjectId;
 	}
@@ -163,5 +157,21 @@ public class ContentTaxonomyActivity {
 			return contentTaxonomyActivity.getLearningTargetsId();
 		}
 		return contentTaxonomyActivity.getSubjectId();
+	}
+
+	public Long getAttempts() {
+		return attempts;
+	}
+
+	public void setAttempts(Long attempts) {
+		this.attempts = attempts;
+	}
+
+	public Integer getItemCount() {
+		return itemCount;
+	}
+
+	public void setItemCount(Integer itemCount) {
+		this.itemCount = itemCount;
 	}
 }
