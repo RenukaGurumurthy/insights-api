@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.apache.cassandra.db.marshal.UTF8Type;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ErrorCodes;
 import org.gooru.insights.api.constants.InsightsConstant;

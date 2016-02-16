@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ErrorMessages;
 import org.gooru.insights.api.models.RequestParamsDTO;

@@ -28,7 +28,7 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 @Entity(name="user")
 public class User {

@@ -11,7 +11,7 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.SessionAttributes;
 import org.gooru.insights.api.constants.ErrorCodes;

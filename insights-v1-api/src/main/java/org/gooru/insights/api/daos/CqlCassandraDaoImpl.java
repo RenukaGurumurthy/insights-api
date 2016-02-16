@@ -1,7 +1,7 @@
 package org.gooru.insights.api.daos;
 
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.gooru.insights.api.utils.InsightsLogger;
 import org.springframework.stereotype.Repository;
 

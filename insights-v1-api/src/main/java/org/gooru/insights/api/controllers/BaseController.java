@@ -10,15 +10,12 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.poi.util.IOUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.apiHeaders;
 import org.gooru.insights.api.constants.ApiConstants.fileAttributes;
 import org.gooru.insights.api.constants.ApiConstants.modelAttributes;
-import org.gooru.insights.api.constants.ErrorMessages;
 import org.gooru.insights.api.models.ResponseParamDTO;
-import org.gooru.insights.api.spring.exception.BadRequestException;
 import org.gooru.insights.api.utils.InsightsLogger;
 import org.json.JSONObject;
 import org.springframework.web.servlet.ModelAndView;

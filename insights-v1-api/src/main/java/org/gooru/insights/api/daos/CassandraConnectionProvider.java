@@ -57,7 +57,7 @@ public class CassandraConnectionProvider {
 					.withAstyanaxConfiguration(new AstyanaxConfigurationImpl()
 					.setDiscoveryType(NodeDiscoveryType.RING_DESCRIBE)
 					.setConnectionPoolType(ConnectionPoolType.ROUND_ROBIN)
-					.setCqlVersion("3.0.0").setTargetCassandraVersion("2.1.4"))
+					.setCqlVersion("3.4.0").setTargetCassandraVersion("3.3"))
 					.withConnectionPoolConfiguration(poolConfig).withConnectionPoolMonitor(new CountingConnectionPoolMonitor())
 					.buildKeyspace(ThriftFamilyFactory.getInstance());
 			logContext.start();
