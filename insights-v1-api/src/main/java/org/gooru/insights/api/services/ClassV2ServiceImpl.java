@@ -61,7 +61,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	public ResponseParamDTO<Map<String, Object>> getSessionStatus(String sessionId, String contentGooruId) {
 		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		CqlResult<String, String> sessionDetails = getCassandraService().readWithCondition(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), new String[] {ApiConstants._SESSION_ID, ApiConstants._GOORU_OID}, new String[]{sessionId, contentGooruId}, false);
+		CqlResult<String, String> sessionDetails = getCassandraService().read(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), CqlQueries.GET_SESSION_ACTIVITY.getQuery(), sessionId, contentGooruId);
 		if (sessionDetails != null && sessionDetails.hasRows()) {
 			Rows<String, String> sessionList = sessionDetails.getRows();
 			for(Row<String, String> row : sessionList) {

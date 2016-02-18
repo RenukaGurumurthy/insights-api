@@ -64,6 +64,10 @@ public class CassandraV2ServiceImpl implements CassandraV2Service{
 		return cqlDAO.executeCqlQuery(columnFamilyName, queryBuilder(SELECT,ASTRIX,FROM,columnFamilyName, whereCondition), values);
 	}
 	
+	public CqlResult<String, String> read(String columnFamilyName, String query, String... values) {
+		return cqlDAO.executeCqlQuery(columnFamilyName, query, values);
+	}
+	
 	private String queryBuilder(String... fields) {
 		StringBuffer queryBuilder = new StringBuffer();
 		for(int fieldCount =0; fieldCount < fields.length; fieldCount++) {
