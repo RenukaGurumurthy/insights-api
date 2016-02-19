@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
+import org.gooru.insights.api.constants.CqlQueries;
 import org.gooru.insights.api.constants.ErrorCodes;
 import org.gooru.insights.api.constants.InsightsConstant;
 import org.gooru.insights.api.models.ContentTaxonomyActivity;
@@ -47,21 +48,21 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	@Autowired
 	private LambdaService lambdaService;
 
-	private CassandraV2Service getCassandraService() {
-		return cassandraService;
-	}
-	
 	@Autowired
 	private BaseService baseService;
 
 	private BaseService getBaseService() {
 		return baseService;
 	}
+	
+	private CassandraV2Service getCassandraService() {
+		return cassandraService;
+	}
 
 	public ResponseParamDTO<Map<String, Object>> getSessionStatus(String sessionId, String contentGooruId) {
 		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		CqlResult<String, String> sessionDetails = getCassandraService().readWithCondition(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), new String[] {ApiConstants._SESSION_ID, ApiConstants._GOORU_OID}, new String[]{sessionId, contentGooruId}, false);
+		CqlResult<String, String> sessionDetails = getCassandraService().readRows(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), CqlQueries.GET_SESSION_ACTIVITY, sessionId, contentGooruId);
 		if (sessionDetails != null && sessionDetails.hasRows()) {
 			Rows<String, String> sessionList = sessionDetails.getRows();
 			for(Row<String, String> row : sessionList) {
@@ -83,25 +84,21 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 
 		// TODO Enabled for class verification
 		// isValidClass(classId);
+		List<Map<String, Object>> resultSet =  null;
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		String whereCondition = null;
-		String parameters[] = null;
 		if(fetchOpenSession) {
-			whereCondition = CassandraV2ServiceImpl.appendWhere(new String[]{ApiConstants._USER_UID,  ApiConstants._COLLECTION_UID, ApiConstants._COLLECTION_TYPE, ApiConstants._CLASS_UID, ApiConstants._COURSE_UID, ApiConstants._UNIT_UID, ApiConstants._LESSON_UID, ApiConstants._EVENT_TYPE}, false);
-			parameters = new String[] {userUid, collectionId, collectionType, classId, courseId, unitId, lessonId, ApiConstants.START};
+			resultSet = getSessionInfo(fetchOpenSession, CqlQueries.GET_USER_OPEN_SESSIONS, collectionType, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId, ApiConstants.START);
 		} else {
-			whereCondition = CassandraV2ServiceImpl.appendWhere(new String[]{ApiConstants._USER_UID,  ApiConstants._COLLECTION_UID, ApiConstants._COLLECTION_TYPE, ApiConstants._CLASS_UID, ApiConstants._COURSE_UID, ApiConstants._UNIT_UID, ApiConstants._LESSON_UID}, false);
-			parameters = new String[] {userUid, collectionId, collectionType, classId, courseId, unitId, lessonId};
+			resultSet = getSessionInfo(fetchOpenSession, CqlQueries.GET_USER_SESSIONS, collectionType, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId);
 		}
-		List<Map<String, Object>> resultSet = getSessionInfo(whereCondition, collectionType, fetchOpenSession, parameters);
 		resultSet = ServiceUtils.sortBy(resultSet, InsightsConstant.EVENT_TIME, ApiConstants.ASC);
 		responseParamDTO.setContent(addSequence(resultSet));
 		return responseParamDTO;
 	}
 	
-	private List<Map<String, Object>> getSessionInfo(String whereCondition, String collectionType, boolean fetchOpenSession, String[] parameters) {
+	private List<Map<String, Object>> getSessionInfo(boolean fetchOpenSession, String query, String collectionType, String... parameters) {
 		
-		CqlResult<String, String> sessions = getCassandraService().readWithCondition(ColumnFamily.USER_SESSIONS.getColumnFamily(), whereCondition, parameters);
+		CqlResult<String, String> sessions = getCassandraService().readRows(ColumnFamily.USER_SESSIONS.getColumnFamily(), query, parameters);
 		List<Map<String,Object>> sessionList = new ArrayList<Map<String,Object>>();
 		if( sessions != null && sessions.hasRows()) {
 			for(Row<String,String> row : sessions.getRows()) {
@@ -177,7 +174,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			try {
 				s.onNext(getAllStudentsPerformance(classId, courseId, unitId, lessonId, gooruOid, collectionType));
 			} catch (Exception e) {
-				logger.error("Exception while fetching all student performance data", e);
+				s.onError(e);
 			}
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
@@ -189,7 +186,8 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
 		String rowKey = getBaseService().appendTilda(classId, courseId, unitId, lessonId);
-		Rows<String, String> resultRows = getCassandraService().readColumnsWithKey(ColumnFamily.CLASS_ACTIVITY_PEER_DETAIL.getColumnFamily(), rowKey);
+		CqlResult<String, String> result = getCassandraService().readRows(ColumnFamily.CLASS_ACTIVITY_PEER_DETAIL.getColumnFamily(), CqlQueries.GET_USER_PEER_DETAIL, rowKey);
+		Rows<String,String> resultRows = result != null ? result.getRows() : null; 
 		if (resultRows != null && resultRows.size() > 0) {
 			for(Row<String, String> resultRow : resultRows) {
 				Map<String, Object> dataAsMap = new HashMap<String, Object>(5);
@@ -281,14 +279,13 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
 		String rowKey = getBaseService().appendTilda(classId, courseId, unitId, lessonId);
-		String whereCondition = null;
+		CqlResult<String, String> resultRows = null;
 		if (StringUtils.isNotBlank(userUid) && StringUtils.isNotBlank(collectionType)) {
-			whereCondition = CassandraV2ServiceImpl.appendWhere(new String[][] { { ApiConstants._ROW_KEY, rowKey }, { ApiConstants._USER_UID, userUid },{ ApiConstants._COLLECTION_TYPE, collectionType } });
+			resultRows = getCassandraService().readRows(ColumnFamily.CLASS_ACTIVITY_DATACUBE.getColumnFamily(), CqlQueries.GET_USER_CLASS_ACTIVITY_DATACUBE, rowKey, userUid, collectionType);
 		} else if (StringUtils.isNotBlank(collectionType)) {
-			whereCondition = CassandraV2ServiceImpl.appendWhere(new String[][] { { ApiConstants._ROW_KEY, rowKey }, { ApiConstants._COLLECTION_TYPE, collectionType } });
+
+			resultRows = getCassandraService().readRows(ColumnFamily.CLASS_ACTIVITY_DATACUBE.getColumnFamily(), CqlQueries.GET_CLASS_ACTIVITY_DATACUBE, rowKey, collectionType);
 		}
-		
-		CqlResult<String, String> resultRows = getCassandraService().readWithCondition(ColumnFamily.CLASS_ACTIVITY_DATACUBE.getColumnFamily(), whereCondition);
 		if (resultRows.getRows() != null && resultRows.getRows().size() > 0) {
 			Map<String, Object> userUsageAsMap = new HashMap<String, Object>();
 			for (Row<String, String> resultRow : resultRows.getRows()) {
@@ -313,7 +310,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	
 	//TODO nextLevelType is hard coded temporarily. In future, store and get nextLevelType from CF
 	private void addPerformanceMetrics(List<Map<String, Object>> dataMapList, ColumnList<String> columns, String collectionType, String nextLevelType) {
-		Map<String, Object> dataAsMap = new HashMap<String, Object>(4);
+		Map<String, Object> dataAsMap = new HashMap<String, Object>(8);
 		String responseNameForViews = ApiConstants.VIEWS;
 		if(nextLevelType.equalsIgnoreCase(ApiConstants.CONTENT)) {
 			nextLevelType = collectionType;
@@ -357,7 +354,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	private List<Map<String, Object>> getPriorUsage(String sessionKey) {
 	
 		List<Map<String, Object>> sessionActivities = new ArrayList<Map<String,Object>>();
-		CqlResult<String, String> userSessionActivityResult = getCassandraService().readWithCondition(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), new String[]{ApiConstants._SESSION_ID}, new String[]{sessionKey}, false);
+		CqlResult<String, String> userSessionActivityResult = getCassandraService().readRows(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), CqlQueries.GET_USER_SESSION_ACTIVITY, sessionKey);
 		if (userSessionActivityResult != null && userSessionActivityResult.hasRows()) {
 			for (Row<String, String> userSessionActivityRow : userSessionActivityResult.getRows()) {
 				Map<String, Object> sessionActivityMetrics = new HashMap<String, Object>();
@@ -378,7 +375,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	}
 	private void getResourceMetricsBySession(List<Map<String, Object>> sessionActivities, String sessionKey, Map<String, Object> usageData) {
 		
-		CqlResult<String, String> userSessionActivityResult = getCassandraService().readWithCondition(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), new String[]{ApiConstants._SESSION_ID}, new String[]{sessionKey}, false);
+		CqlResult<String, String> userSessionActivityResult = getCassandraService().readRows(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), CqlQueries.GET_USER_SESSION_ACTIVITY,  sessionKey);
 		if (userSessionActivityResult != null && userSessionActivityResult.hasRows()) {
 			String itemName = ApiConstants.RESOURCES;
 			for (Row<String, String> userSessionActivityRow : userSessionActivityResult.getRows()) {
@@ -417,19 +414,6 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return sessionKey;
 	}
 
-	public Observable<ResponseParamDTO<ContentTaxonomyActivity>> getUserStandardsMastery(String studentId, String subjectId, String courseId, String domainId, String standardsId, String learningTargetId, Integer depth) {
-		
-		Observable<ResponseParamDTO<ContentTaxonomyActivity>> observable = Observable.<ResponseParamDTO<ContentTaxonomyActivity>> create(s -> {
-			try {
-				s.onNext(getTaxonomyActivity(studentId, subjectId, courseId, domainId, standardsId, learningTargetId, depth));
-			} catch (Throwable t) {
-				s.onError(t);
-			}
-			s.onCompleted();
-		}).subscribeOn(Schedulers.from(observableExecutor));
-		return observable;
-	}
-	
 	public Observable<ResponseParamDTO<ContentTaxonomyActivity>> getUserDomainParentMastery(String studentId, String subjectId, String courseIds, String domainId) {
 	
 		Observable<ResponseParamDTO<ContentTaxonomyActivity>> observable = Observable.<ResponseParamDTO<ContentTaxonomyActivity>> create(s -> {
@@ -452,28 +436,124 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			
 		}
 		for(String courseId : courseIds.split(ApiConstants.COMMA)) {
-			activityList.addAll(getTaxonomyActivity(studentId, subjectId, courseId, domainId, null, null, 1).getContent());
+			activityList.addAll(getDomainActivity(studentId, subjectId, courseId, domainId).getContent());
 		}
 		responseParamDTO.setContent(activityList);
 		return responseParamDTO;
 	}
 	
-	private ResponseParamDTO<ContentTaxonomyActivity> getTaxonomyActivity(String studentId, String subjectId, String courseId, String domainId, String standardsId, String learningTargetId, Integer depth) {
-		
+	
+	public Observable<ResponseParamDTO<ContentTaxonomyActivity>> getTaxonomyActivity(Integer depth, String... taxonomyLevelId) {
+
+		Observable<ResponseParamDTO<ContentTaxonomyActivity>> observable = Observable.<ResponseParamDTO<ContentTaxonomyActivity>> create(s -> {
+			try {
+				switch(depth) {
+				case 1: 
+					s.onNext(getSubjectActivity(taxonomyLevelId[0], taxonomyLevelId[1]));
+					break;
+				case 2:
+					s.onNext(getCourseActivity(taxonomyLevelId[0], taxonomyLevelId[1], taxonomyLevelId[2]));
+					break;
+				case 3:
+					s.onNext(getDomainActivity(taxonomyLevelId[0], taxonomyLevelId[1], taxonomyLevelId[2], taxonomyLevelId[3]));
+					break;
+				case 4:
+					s.onNext(getStandardActivity(taxonomyLevelId[0], taxonomyLevelId[1], taxonomyLevelId[2], taxonomyLevelId[3], taxonomyLevelId[4]));
+					break;
+				}
+			} catch (Throwable t) {
+				s.onError(t);
+			}
+			s.onCompleted();
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		return observable;
+	}
+	
+	private ResponseParamDTO<ContentTaxonomyActivity> getSubjectActivity(String studentId, String subjectId) {
+
 		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
-		CqlResult<String, String> userSessionActivityResult = getCassandraService().readWithCondition(ColumnFamily.CONTENT_TAXONOMY_ACTIVITY.getColumnFamily(), 
-				new String[]{ApiConstants._USER_UID, ApiConstants._SUBJECT_ID, ApiConstants._COURSE_ID, ApiConstants._DOMAIN_ID, ApiConstants._STANDARDS_ID, ApiConstants._LEARNING_TARGETS_ID}, 
-				new String[]{studentId, subjectId, courseId, domainId, standardsId, learningTargetId}, false);
 		List<ContentTaxonomyActivity> contentTaxonomyActivityList = new ArrayList<>();
-		Map<String,Set<String>> itemMap = new HashMap<String,Set<String>>();
-		if(userSessionActivityResult != null && userSessionActivityResult.hasRows()) {
-			for(Row<String,String> row : userSessionActivityResult.getRows()) {
-				ContentTaxonomyActivity contentTaxonomyActivity = includeItem(itemMap, row.getColumns(), depth);;
+		CqlResult<String, String> userSubjectActivityResult = getCassandraService().readRows(ColumnFamily.CONTENT_TAXONOMY_ACTIVITY.getColumnFamily(), CqlQueries.GET_SUBJECT_ACTIVITY, studentId, subjectId);
+		Map<String, Set<String>> itemMap = new HashMap<String, Set<String>>();
+		if (userSubjectActivityResult != null && userSubjectActivityResult.hasRows()) {
+			for (Row<String, String> row : userSubjectActivityResult.getRows()) {
+				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
+				ColumnList<String> subjectUsage = row.getColumns();
+				String courseId =  subjectUsage.getStringValue(ApiConstants._COURSE_ID, null);
+				String domainId =  subjectUsage.getStringValue(ApiConstants._DOMAIN_ID, null);
+				contentTaxonomyActivity.setCourseId(courseId);
+				itemMap = childActivityMetrics(contentTaxonomyActivity, subjectUsage, courseId, domainId);
 				contentTaxonomyActivityList.add(contentTaxonomyActivity);
 			}
-			contentTaxonomyActivityList = lambdaService.aggregateTaxonomyActivityData(contentTaxonomyActivityList, depth);
-			combineTaxonomyData(contentTaxonomyActivityList, itemMap, depth);
 		}
+		contentTaxonomyActivityList = lambdaService.aggregateTaxonomyActivityData(contentTaxonomyActivityList, 1);
+		includeActiveChildCount(contentTaxonomyActivityList, itemMap, 1);
+		responseParamDTO.setContent(contentTaxonomyActivityList);
+		return responseParamDTO;
+	}
+	
+	private ResponseParamDTO<ContentTaxonomyActivity> getCourseActivity(String studentId, String subjectId, String courseId) {
+		
+		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
+		List<ContentTaxonomyActivity> contentTaxonomyActivityList = new ArrayList<>();
+		CqlResult<String, String> userCourseActivityResult = getCassandraService().readRows(ColumnFamily.CONTENT_TAXONOMY_ACTIVITY.getColumnFamily(), CqlQueries.GET_COURSE_ACTIVITY, studentId, subjectId, courseId);
+		Map<String, Set<String>> itemMap = new HashMap<String, Set<String>>();
+		if (userCourseActivityResult != null && userCourseActivityResult.hasRows()) {
+			for (Row<String, String> row : userCourseActivityResult.getRows()) {
+				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
+				ColumnList<String> courseUsage = row.getColumns();
+				String domainId = courseUsage.getStringValue(ApiConstants._DOMAIN_ID, null);
+				String standardsId = courseUsage.getStringValue(ApiConstants._STANDARDS_ID, null);
+				contentTaxonomyActivity.setDomainId(domainId);
+				itemMap = childActivityMetrics(contentTaxonomyActivity, courseUsage, domainId, standardsId);
+				contentTaxonomyActivityList.add(contentTaxonomyActivity);
+			}
+		}
+		contentTaxonomyActivityList = lambdaService.aggregateTaxonomyActivityData(contentTaxonomyActivityList, 2);
+		includeActiveChildCount(contentTaxonomyActivityList, itemMap, 2);
+		responseParamDTO.setContent(contentTaxonomyActivityList);
+		return responseParamDTO;
+	}
+	
+	private ResponseParamDTO<ContentTaxonomyActivity> getDomainActivity(String studentId, String subjectId, String courseId, String domainId) {
+		
+		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
+		List<ContentTaxonomyActivity> contentTaxonomyActivityList = new ArrayList<>();
+		CqlResult<String, String> userDomainActivityResult = getCassandraService().readRows(ColumnFamily.CONTENT_TAXONOMY_ACTIVITY.getColumnFamily(), CqlQueries.GET_DOMAIN_ACTIVITY, studentId, subjectId, courseId, domainId);
+		Map<String, Set<String>> itemMap = new HashMap<String, Set<String>>();
+		if (userDomainActivityResult != null && userDomainActivityResult.hasRows()) {
+			for (Row<String, String> row : userDomainActivityResult.getRows()) {
+				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
+				ColumnList<String> domainUsage = row.getColumns();
+				String standardsId = domainUsage.getStringValue(ApiConstants._STANDARDS_ID, null);
+				String learningTargetId = domainUsage.getStringValue(ApiConstants._LEARNING_TARGETS_ID, null);
+				contentTaxonomyActivity.setStandardsId(standardsId);
+				itemMap = childActivityMetrics(contentTaxonomyActivity, domainUsage, standardsId, learningTargetId);
+				contentTaxonomyActivityList.add(contentTaxonomyActivity);
+			}
+		}
+		contentTaxonomyActivityList = lambdaService.aggregateTaxonomyActivityData(contentTaxonomyActivityList, 3);
+		includeActiveChildCount(contentTaxonomyActivityList, itemMap, 3);
+		responseParamDTO.setContent(contentTaxonomyActivityList);
+		return responseParamDTO;
+	}
+	
+	private ResponseParamDTO<ContentTaxonomyActivity> getStandardActivity(String studentId, String subjectId, String courseId, String domainId, String standardsId) {
+
+		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
+		List<ContentTaxonomyActivity> contentTaxonomyActivityList = new ArrayList<>();
+		CqlResult<String, String> userStandardActivityResult = getCassandraService().readRows(ColumnFamily.CONTENT_TAXONOMY_ACTIVITY.getColumnFamily(), CqlQueries.GET_STANDARDS_ACTIVITY, studentId, subjectId, courseId, domainId, standardsId);
+		if (userStandardActivityResult != null && userStandardActivityResult.hasRows()) {
+			for (Row<String, String> row : userStandardActivityResult.getRows()) {
+				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
+				ColumnList<String> standardUsage = row.getColumns();
+				String learningTargetId = standardUsage.getStringValue(ApiConstants._LEARNING_TARGETS_ID, null);
+				contentTaxonomyActivity.setLearningTargetsId(learningTargetId);
+				childActivityMetrics(contentTaxonomyActivity, standardUsage, learningTargetId, null);
+				contentTaxonomyActivityList.add(contentTaxonomyActivity);
+			}
+		}
+		contentTaxonomyActivityList = lambdaService.aggregateTaxonomyActivityData(contentTaxonomyActivityList, 4);
 		responseParamDTO.setContent(contentTaxonomyActivityList);
 		return responseParamDTO;
 	}
@@ -481,9 +561,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	@Override
 	public ResponseParamDTO<Map<String, Object>> fetchTeacherGrade(String teacherUid, String userUid, String sessionId) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		CqlResult<String, String> result = getCassandraService().readWithCondition(ColumnFamily.STUDENT_QUESTION_GRADE.getColumnFamily(), 
-				new String[]{ApiConstants._TEACHER_UID, ApiConstants._USER_UID, ApiConstants._SESSION_ID}, 
-				new String[]{teacherUid, userUid}, false);
+		CqlResult<String, String> result = getCassandraService().readRows(ColumnFamily.STUDENT_QUESTION_GRADE.getColumnFamily(), CqlQueries.GET_STUDENT_QUESTION_GRADE, teacherUid, userUid, sessionId);
 		List<Map<String, Object>> teacherGradeAsList = new ArrayList<>();
 		if(result != null && result.hasRows()) {
 			for(Row<String,String> row : result.getRows()) {
@@ -506,7 +584,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		ResponseParamDTO<Map<String, Object>> resourceUsageObject = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String,Object>> resourceUsageList = new ArrayList<Map<String,Object>>();
 		for(String resourceId : resourceIds.split(ApiConstants.COMMA)) {
-			CqlResult<String, String> userSessionActivityResult = getCassandraService().readWithCondition(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), new String[]{ApiConstants._SESSION_ID, ApiConstants._GOORU_OID}, new String[]{sessionId, resourceId}, false); 
+			CqlResult<String, String> userSessionActivityResult = getCassandraService().readRows(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), CqlQueries.GET_USER_SESSION_CONTENT_ACTIVITY, sessionId, resourceId); 
 			if(userSessionActivityResult != null && userSessionActivityResult.hasRows()) {
 				Rows<String, String> rows = userSessionActivityResult.getRows();
 				for(Row<String,String> row : rows) {
@@ -535,7 +613,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	private ResponseParamDTO<Map<String, Object>> getStudentCurrentLocation(String userUid, String classId) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
-		ColumnList<String> resultColumns = getCassandraService().getUserCurrentLocation(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), userUid, classId);
+		ColumnList<String> resultColumns = getCassandraService().readRow(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), CqlQueries.GET_USER_CURRENT_LOCATION_IN_CLASS, classId, userUid);
 		if (resultColumns != null && resultColumns.size() > 0) {
 			Map<String, Object> dataAsMap = new HashMap<String, Object>();
 			dataAsMap.put(ApiConstants.getResponseNameByType(ApiConstants.CLASS), resultColumns.getStringValue(ApiConstants._CLASS_UID, null));
@@ -553,7 +631,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
 		List<UserContentLocation> userContentLocationObject = new ArrayList<>();
-		CqlResult<String, String> resultRows = getCassandraService().getAllUserLocationInClass(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), classId);
+		CqlResult<String, String> resultRows = getCassandraService().readRows(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), CqlQueries.GET_ALL_USER_CURRENT_LOCATION_IN_CLASS, classId);
 		if (resultRows != null && resultRows.getRows() != null && resultRows.getRows().size() > 0) {
 			Rows<String, String> rows = resultRows.getRows();
 			for (Row<String, String> row : rows) {
@@ -582,7 +660,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	private ResponseParamDTO<Map<String, Object>> getUserPeerData(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
-		CqlResult<String, String> resultRows = getCassandraService().getAllUserLocationInClass(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), classId);
+		CqlResult<String, String> resultRows = getCassandraService().readRows(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), CqlQueries.GET_ALL_USER_CURRENT_LOCATION_IN_CLASS, classId);
 		if (resultRows != null && resultRows.getRows() != null && resultRows.getRows().size() > 0) {
 			for (Row<String, String> row : resultRows.getRows()) {
 				ColumnList<String> columnList = row.getColumns();
@@ -623,67 +701,49 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return userLocation.getUnitUid();
 	}
 	
-	private ContentTaxonomyActivity includeItem(Map<String,Set<String>> itemMap, ColumnList<String> taxonomyUsage, Integer depth) {
+	private Map<String,Set<String>> childActivityMetrics(ContentTaxonomyActivity contentTaxonomyActivity, ColumnList<String> taxonomyUsage, String parentKey, String childKey) {
 		
-		String parentKey = null;
-		String childKey = null;
-		ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
-		if(depth == 0) {
-			parentKey = taxonomyUsage.getStringValue(ApiConstants._SUBJECT_ID, null);
-			childKey = taxonomyUsage.getStringValue(ApiConstants._COURSE_ID, null);
-			contentTaxonomyActivity.setSubjectId(parentKey);
-		} else if (depth == 1) {
-			parentKey = taxonomyUsage.getStringValue(ApiConstants._COURSE_ID, null);
-			childKey = taxonomyUsage.getStringValue(ApiConstants._DOMAIN_ID, null);
-			contentTaxonomyActivity.setCourseId(parentKey);
-		} else if (depth == 2) {
-			parentKey = taxonomyUsage.getStringValue(ApiConstants._DOMAIN_ID, null);
-			childKey = taxonomyUsage.getStringValue(ApiConstants._STANDARDS_ID, null);
-			contentTaxonomyActivity.setDomainId(parentKey);
-		} else if (depth == 3) {
-			parentKey = taxonomyUsage.getStringValue(ApiConstants._STANDARDS_ID, null);
-			childKey = taxonomyUsage.getStringValue(ApiConstants._LEARNING_TARGETS_ID, null);
-			contentTaxonomyActivity.setStandardsId(parentKey);
-		} else if (depth == 4) {
-			contentTaxonomyActivity.setLearningTargetsId(taxonomyUsage.getStringValue(ApiConstants._LEARNING_TARGETS_ID, null));
-		}
+		Map<String,Set<String>> itemMap = new HashMap<>();
 		contentTaxonomyActivity.setResourceType(taxonomyUsage.getStringValue(ApiConstants._RESOURCE_TYPE, null));
 		if(ApiConstants.QUESTION.equalsIgnoreCase(contentTaxonomyActivity.getResourceType())) {
-			
 			contentTaxonomyActivity.setScore(taxonomyUsage.getLongValue(ApiConstants.SCORE, 0L));
 			contentTaxonomyActivity.setAttempts(taxonomyUsage.getLongValue(ApiConstants.VIEWS, 0L));
 		} else {
 			contentTaxonomyActivity.setTimespent(taxonomyUsage.getLongValue(ApiConstants.TIME_SPENT, 0L));
 		}
-		if(itemMap.containsKey(parentKey)) {
-			itemMap.get(parentKey).add(childKey);
-		} else {
-			Set<String> childItems = new HashSet<String>();
-			childItems.add(childKey);
-			itemMap.put(parentKey, childItems);
+		if(childKey != null) {
+			if(itemMap.containsKey(parentKey)) {
+				itemMap.get(parentKey).add(childKey);
+			} else {
+				Set<String> childItems = new HashSet<String>();
+				childItems.add(childKey);
+				itemMap.put(parentKey, childItems);
+			}
 		}
-		return contentTaxonomyActivity;
+		return itemMap;
 	}
 	
-	private void combineTaxonomyData(List<ContentTaxonomyActivity> taxonomyActivities, Map<String,Set<String>> itemMap, Integer depth) {
+	private void includeActiveChildCount(List<ContentTaxonomyActivity> taxonomyActivities, Map<String,Set<String>> itemMap, Integer depth) {
 		
 		for(ContentTaxonomyActivity contentTaxonomyActivity : taxonomyActivities) {
-			
-			if(depth == 0) {
-				contentTaxonomyActivity.setItemCount(includeItems(contentTaxonomyActivity.getSubjectId(), itemMap));
-			} else if(depth == 1) {
-				contentTaxonomyActivity.setItemCount(includeItems(contentTaxonomyActivity.getCourseId(), itemMap));
-			} else if(depth == 2) {
-				contentTaxonomyActivity.setItemCount(includeItems(contentTaxonomyActivity.getDomainId(), itemMap));
-			} else if(depth == 3) {
-				contentTaxonomyActivity.setItemCount(includeItems(contentTaxonomyActivity.getStandardsId(), itemMap));
-			} else if(depth == 4) {
-				contentTaxonomyActivity.setItemCount(includeItems(contentTaxonomyActivity.getLearningTargetsId(), itemMap));
+			switch(depth) {
+			case 1:
+				contentTaxonomyActivity.setItemCount(getItemCount(contentTaxonomyActivity.getCourseId(), itemMap));
+				break;
+			case 2:
+				contentTaxonomyActivity.setItemCount(getItemCount(contentTaxonomyActivity.getDomainId(), itemMap));
+				break;
+			case 3:
+				contentTaxonomyActivity.setItemCount(getItemCount(contentTaxonomyActivity.getStandardsId(), itemMap));
+				break;
+			case 4:
+				contentTaxonomyActivity.setItemCount(getItemCount(contentTaxonomyActivity.getLearningTargetsId(), itemMap));
+				break;
 			}
 		}
 	}
 	
-	private int includeItems(String id, Map<String,Set<String>> itemMap) {
+	private int getItemCount(String id, Map<String,Set<String>> itemMap) {
 		if(itemMap.containsKey(id)) {
 			return itemMap.get(id).size();
 		} else {
