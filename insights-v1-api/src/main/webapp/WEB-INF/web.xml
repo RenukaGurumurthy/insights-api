@@ -13,7 +13,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>dispatcher</servlet-name>
-    <url-pattern>/rest/*</url-pattern>
+    <url-pattern>/nucleus-insights/*</url-pattern>
   </servlet-mapping>
   <context-param>
     <param-name>contextConfigLocation</param-name>
