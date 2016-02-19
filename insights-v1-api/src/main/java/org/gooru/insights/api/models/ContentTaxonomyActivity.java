@@ -30,24 +30,6 @@ public class ContentTaxonomyActivity {
 
 	private Integer itemCount;
 
-	public ContentTaxonomyActivity() {
-	}
-	
-	public ContentTaxonomyActivity(ContentTaxonomyActivity contentTaxonomyActivity, Integer depth) {
-		
-		if(depth == 0) {
-			this.setSubjectId(contentTaxonomyActivity.getSubjectId());
-		} else if(depth == 1) {
-			this.setCourseId(contentTaxonomyActivity.getCourseId());
-		} else if(depth == 2) {
-			this.setDomainId(contentTaxonomyActivity.getDomainId());
-		} else if(depth == 3) {
-			this.setStandardsId(contentTaxonomyActivity.getStandardsId());
-		} else if(depth == 4) {
-			this.setLearningTargetsId(contentTaxonomyActivity.getLearningTargetsId());
-		}
-	}
-	
 	public String getSubjectId() {
 		return subjectId;
 	}
@@ -143,21 +125,6 @@ public class ContentTaxonomyActivity {
 	public void setUserUid(String userUid) {
 		this.userUid = userUid;
 	}
-	
-	public static String taxonomyDepthField(ContentTaxonomyActivity contentTaxonomyActivity,Integer depth) {
-		if(depth == 0) {
-			return contentTaxonomyActivity.getSubjectId();
-		} else if(depth == 1) {
-			return contentTaxonomyActivity.getCourseId();
-		} else if(depth == 2) {
-			return contentTaxonomyActivity.getDomainId();
-		} else if(depth == 3) {
-			return contentTaxonomyActivity.getStandardsId();
-		} else if(depth == 4) {
-			return contentTaxonomyActivity.getLearningTargetsId();
-		}
-		return contentTaxonomyActivity.getSubjectId();
-	}
 
 	public Long getAttempts() {
 		return attempts;
@@ -173,5 +140,41 @@ public class ContentTaxonomyActivity {
 
 	public void setItemCount(Integer itemCount) {
 		this.itemCount = itemCount;
+	}
+	
+	public ContentTaxonomyActivity() {
+	}
+	
+	public ContentTaxonomyActivity(ContentTaxonomyActivity contentTaxonomyActivity, Integer depth) {
+		
+		switch(depth) {
+		case 1:
+			this.setCourseId(taxonomyDepthField(contentTaxonomyActivity, depth));
+			break;
+		case 2:
+			this.setDomainId(contentTaxonomyActivity.getDomainId());
+			break;
+		case 3:
+			this.setStandardsId(contentTaxonomyActivity.getStandardsId());
+			break;
+		case 4:
+			this.setLearningTargetsId(contentTaxonomyActivity.getLearningTargetsId());
+			break;
+		}
+	}
+	
+	public static String taxonomyDepthField(ContentTaxonomyActivity contentTaxonomyActivity,Integer depth) {
+		
+		switch(depth) {
+		case 1:
+			return contentTaxonomyActivity.getCourseId();
+		case 2:
+			return contentTaxonomyActivity.getDomainId();
+		case 3:
+			return contentTaxonomyActivity.getStandardsId();
+		case 4:
+			return contentTaxonomyActivity.getLearningTargetsId();
+		}
+		return contentTaxonomyActivity.getCourseId();
 	}
 }

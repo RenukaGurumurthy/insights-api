@@ -1,6 +1,5 @@
 package org.gooru.insights.api.controllers;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -8,10 +7,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
-import org.gooru.insights.api.constants.InsightsOperationConstants;
 import org.gooru.insights.api.models.ContentTaxonomyActivity;
 import org.gooru.insights.api.models.ResponseParamDTO;
-import org.gooru.insights.api.security.AuthorizeOperations;
 import org.gooru.insights.api.services.ClassV2Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -216,7 +213,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getUserStandardsMastery(userUid, subjectId, null, null, null, null, 1);
+		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getTaxonomyActivity(1, userUid, subjectId);
 		DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> defferedResponse = new DeferredResult<>();
 		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
 		return defferedResponse;
@@ -229,7 +226,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value = "courseId") String courseId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getUserStandardsMastery(userUid, subjectId, courseId, null, null, null, 2);
+		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getTaxonomyActivity(2, userUid, subjectId, courseId);
 		DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> defferedResponse = new DeferredResult<>();
 		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
 		return defferedResponse;
@@ -242,7 +239,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value = "courseId") String courseId, @PathVariable(value = "domainId") String domainId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getUserStandardsMastery(userUid, subjectId, courseId, domainId, null, null, 3);
+		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getTaxonomyActivity(3, userUid, subjectId, courseId, domainId);
 		DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> defferedResponse = new DeferredResult<>();
 		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
 		return defferedResponse;
@@ -256,7 +253,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value = "standardsId") String standardsId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getUserStandardsMastery(userUid, subjectId, courseId, domainId, standardsId, null, 4);
+		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getTaxonomyActivity(4, userUid, subjectId, courseId, domainId, standardsId);
 		DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> defferedResponse = new DeferredResult<>();
 		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
 		return defferedResponse;

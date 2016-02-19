@@ -77,7 +77,10 @@ public class LambdaServiceImpl implements LambdaService{
 	}
 	
 	private Map<Object, List<ContentTaxonomyActivity>> aggregateActivity(List<ContentTaxonomyActivity> resultList, Integer depth) {
-		
+	
+		for(ContentTaxonomyActivity contentTaxonomyActivity : resultList) {
+			System.out.println("aggregateActivity:"+contentTaxonomyActivity+" depth:"+depth+" course:"+contentTaxonomyActivity.getCourseId());	
+		}
 		return resultList.stream().collect(Collectors.groupingBy(object -> { return ContentTaxonomyActivity.taxonomyDepthField(object,depth); }));
 	}
 

@@ -21,11 +21,34 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 
 	private static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.CL_QUORUM;
 
-	final static String GET_USER_CURRENT_LOCATION_IN_CLASS = "SELECT * FROM student_location WHERE class_uid = ? AND user_uid = ? ";
+	public CqlResult<String, String> executeCqlRowsQuery(String columnFamilyName, String query, String... parameters) {
 	
-	final static String GET_ALL_USER_CURRENT_LOCATION_IN_CLASS = "SELECT * FROM student_location WHERE class_uid = ? ";
+		OperationResult<CqlResult<String, String>> result = null;
+		try {
+			PreparedCqlQuery<String, String> cqlQuery = getColumnFamilyQuery(columnFamilyName).withCql(query).asPreparedStatement();
+			cqlQuery = setParameters(cqlQuery, parameters);
+			result = cqlQuery.execute();
+		} catch (ConnectionException e) {
+			InsightsLogger.error("CQL Exception:"+query, e);
+		}
+		return result != null ? result.getResult() : null;	
+	}
 	
-	public ColumnFamily<String, String> accessColumnFamily(String columnFamilyName) {
+	public ColumnList<String> executeCqlRowQuery(String columnFamilyName, String query, String... parameters) {
+		
+		OperationResult<CqlResult<String, String>> result = null;
+		try {
+			PreparedCqlQuery<String, String> cqlQuery = getColumnFamilyQuery(columnFamilyName).withCql(query).asPreparedStatement();
+			cqlQuery = setParameters(cqlQuery, parameters);
+			result = cqlQuery.execute();
+		} catch (ConnectionException e) {
+			InsightsLogger.error("CQL Exception:"+query, e);
+		}
+		Rows<String, String> resultRows = result != null ? result.getResult().getRows() : null;
+		return (resultRows != null && resultRows.size() > 0) ? resultRows.getRowByIndex(0).getColumns() : null ;
+	}
+	
+	private ColumnFamily<String, String> accessColumnFamily(String columnFamilyName) {
 		return new ColumnFamily<String, String>(columnFamilyName, StringSerializer.get(), StringSerializer.get());
 	}
 	
@@ -42,80 +65,5 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		}
 		return cqlQuery;
 	}
-	
-	public CqlResult<String, String> executeCqlQuery(String columnFamilyName, String query, String... parameters) {
-	
-		OperationResult<CqlResult<String, String>> result = null;
-		try {
-			PreparedCqlQuery<String, String> cqlQuery = getColumnFamilyQuery(columnFamilyName).withCql(query).asPreparedStatement();
-			cqlQuery = setParameters(cqlQuery, parameters);
-			result = cqlQuery.execute();
-		} catch (ConnectionException e) {
-			InsightsLogger.error("CQL Exception:"+query, e);
-		}
-		return result != null ? result.getResult() : null;	
-	}
-	
-	@Override
-	public ColumnList<String> readUserCurrentLocationInClass(String cfName, String userUid, String classId){
-		OperationResult<CqlResult<String, String>> result = null;
-		try {
-			result = getLogKeyspace()
-		       .prepareQuery(accessColumnFamily(cfName)).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
-		       .withCql(GET_USER_CURRENT_LOCATION_IN_CLASS)
-		       .asPreparedStatement()
-			       .withStringValue(classId)
-			       .withStringValue(userUid)
-		       .execute();
-		} catch (ConnectionException e) {
-			InsightsLogger.error("CQL Exception:", e);
-		}
-		Rows<String, String> resultRows = result.getResult().getRows();
-		return resultRows.size() > 0 ? resultRows.getRowByIndex(0).getColumns() : null ;
-	}
-	
-	@Override
-	public Rows<String, String> readColumnsWithKey(String cfName, String key){
-		OperationResult<CqlResult<String, String>> result = null;
-		try {
-			result = getLogKeyspace()
-		       .prepareQuery(accessColumnFamily(cfName)).setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
-		       .withCql("SELECT * FROM " + cfName + " WHERE row_key = ?;")
-		       .asPreparedStatement()
-			       .withStringValue(key)
-		       .execute();
-		} catch (ConnectionException e) {
-			InsightsLogger.error("CQL Exception:", e);
-		}
-		return result.getResult().getRows() ;
-	}
-	
-	public CqlResult<String, String> executeCql(String columnFamilyName, String query) {
-		OperationResult<CqlResult<String, String>> result = null;
-		try {
-			result = getLogKeyspace()
-			        .prepareQuery(accessColumnFamily(columnFamilyName))
-			        .setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
-			        .withCql(query).asPreparedStatement()
-			        .execute();
-		} catch (ConnectionException e) {
-			InsightsLogger.error("CQL Exception:"+query, e);
-		}
-		return result != null ? result.getResult() : null;
-	}
-	
-	public CqlResult<String, String> readPeers(String cfName, String classId) {
-		OperationResult<CqlResult<String, String>> result = null;
-		try {
-			result = getLogKeyspace().prepareQuery(accessColumnFamily(cfName))
-					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
-					.withCql(GET_ALL_USER_CURRENT_LOCATION_IN_CLASS).asPreparedStatement()
-					.withStringValue(classId)
-					.execute();
-		} catch (ConnectionException e) {
-			InsightsLogger.error("CQL Exception:" + GET_ALL_USER_CURRENT_LOCATION_IN_CLASS, e);
-		}
-		return result != null ? result.getResult() : null;
-	}
-	
+
 }
