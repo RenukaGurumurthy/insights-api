@@ -6,13 +6,8 @@ import com.netflix.astyanax.model.Rows;
 
 public interface CqlCassandraDao {
 	
-	CqlResult<String, String> executeCql(String columnFamilyName, String Query);
+	CqlResult<String, String> executeCqlRowsQuery(String columnFamilyName, String query, String... parameters);
 	
-	ColumnList<String> readUserCurrentLocationInClass(String cfName, String userUid, String classId);
-
-	Rows<String, String> readColumnsWithKey(String cfName, String key);
+	ColumnList<String> executeCqlRowQuery(String columnFamilyName, String query, String... parameters);
 	
-	CqlResult<String, String> executeCqlQuery(String columnFamilyName, String query, String... parameters);
-	
-	CqlResult<String, String> readPeers(String cfName, String classId);
 }

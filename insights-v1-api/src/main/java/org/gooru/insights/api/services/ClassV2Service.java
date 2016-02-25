@@ -23,8 +23,6 @@ public interface ClassV2Service {
 
 	Observable<ResponseParamDTO<Map<String, Object>>> getAllStudentPerformance(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType);
 
-	Observable<ResponseParamDTO<ContentTaxonomyActivity>> getUserStandardsMastery(String studentId, String subjectId, String courseId, String domainId, String standardsId, String learningTargetId, Integer depth);
-
 	Observable<ResponseParamDTO<ContentTaxonomyActivity>> getUserDomainParentMastery(String studentId, String subjectId, String courseIds, String domainId);
 	
 	ResponseParamDTO<Map<String, Object>> fetchTeacherGrade(String teacherUid, String userUid, String sessionId);
@@ -36,6 +34,8 @@ public interface ClassV2Service {
 	Observable<ResponseParamDTO<Map<String, Object>>> getUserPeers(String classId, String courseId, String unitId, String nextLevelType);
 
 	Observable<ResponseParamDTO<Map<String, Object>>> getUserPeers(String classId, String courseId, String unitId, String lessonId, String nextLevelType);
+	
+	Observable<ResponseParamDTO<ContentTaxonomyActivity>> getTaxonomyActivity(Integer depth, String... taxonomyLevelIds);
 }
 
 
