@@ -88,33 +88,31 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		// isValidClass(classId);
 		List<Map<String, Object>> resultSet =  null;
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		if(fetchOpenSession) {
-			resultSet = getSessionInfo(fetchOpenSession, CqlQueries.GET_USER_OPEN_SESSIONS, collectionType, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId, ApiConstants.START);
-		} else {
-			resultSet = getSessionInfo(fetchOpenSession, CqlQueries.GET_USER_SESSIONS, collectionType, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId);
-		}
+			if(collectionType.equalsIgnoreCase(InsightsConstant.ASSESSMENT)) {
+				if(fetchOpenSession) {
+					resultSet = getSessionInfo(CqlQueries.GET_USER_ASSESSMENT_SESSIONS, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId, ApiConstants.START);
+				} else {
+					resultSet = getSessionInfo(CqlQueries.GET_USER_ASSESSMENT_SESSIONS, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId, ApiConstants.STOP);
+				}
+			} else {
+				resultSet = getSessionInfo(CqlQueries.GET_USER_COLLECTION_SESSIONS, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId);
+			}
 		resultSet = ServiceUtils.sortBy(resultSet, InsightsConstant.EVENT_TIME, ApiConstants.ASC);
 		responseParamDTO.setContent(addSequence(resultSet));
 		return responseParamDTO;
 	}
 	
-	private List<Map<String, Object>> getSessionInfo(boolean fetchOpenSession, String query, String collectionType, String... parameters) {
+	private List<Map<String, Object>> getSessionInfo(String query, String... parameters) {
 		
 		CqlResult<String, String> sessions = getCassandraService().readRows(ColumnFamily.USER_SESSIONS.getColumnFamily(), query, parameters);
 		List<Map<String,Object>> sessionList = new ArrayList<Map<String,Object>>();
 		if( sessions != null && sessions.hasRows()) {
 			for(Row<String,String> row : sessions.getRows()) {
 				ColumnList<String> columnList = row.getColumns();
-				boolean include = true;
-				if (!fetchOpenSession  && collectionType.equalsIgnoreCase(InsightsConstant.ASSESSMENT) && !columnList.getStringValue(ApiConstants._EVENT_TYPE, ApiConstants.STRING_EMPTY).equalsIgnoreCase(InsightsConstant.STOP)) {
-					include = false;
-				}
-				if(include) {
 					Map<String, Object> sessionMap = new HashMap<String,Object>();
 					sessionMap.put(InsightsConstant.SESSION_ID,columnList.getStringValue(ApiConstants._SESSION_ID, null));
 					sessionMap.put(InsightsConstant.EVENT_TIME,columnList.getLongValue(ApiConstants._EVENT_TIME, 0L));
 					sessionList.add(sessionMap);
-				}
 			}
 		}
 		return sessionList;
