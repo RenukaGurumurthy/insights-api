@@ -116,14 +116,17 @@ public class ClassV2Controller extends BaseController {
 	@RequestMapping(value="/{collectionType}/{contentGooruId}/user/{userUid}",method ={ RequestMethod.GET,RequestMethod.POST})
 	// TODO @AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
-	public ModelAndView getSummaryData(HttpServletRequest request, 
+	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getSummaryData(HttpServletRequest request, 
 			@PathVariable(value="collectionType") String collectionType, @PathVariable(value="userUid") String userUid, 
 			@RequestParam(value="sessionId", required = false) String sessionId, @RequestParam(value="classGooruId", required = false) String classGooruId,
 			@RequestParam(value="courseGooruId", required = false) String courseGooruId, @RequestParam(value="unitGooruId", required = false) String unitGooruId, 
 			@RequestParam(value="lessonGooruId", required = false) String lessonGooruId, @PathVariable(value="contentGooruId") String contentGooruId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getSummaryData(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, sessionId, userUid, collectionType));
+		Observable<ResponseParamDTO<Map<String, Object>>> peersObserver = getClassService().getSummaryData(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, sessionId, userUid, collectionType);
+		DeferredResult<ResponseParamDTO<Map<String, Object>>> defferedResponse = new DeferredResult<>();
+		peersObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
+		return defferedResponse;
 	}
 
 	@RequestMapping(value = "/{collectionType}/{contentGooruId}/user/{userUid}/prior/usage", method = { RequestMethod.GET, RequestMethod.POST })

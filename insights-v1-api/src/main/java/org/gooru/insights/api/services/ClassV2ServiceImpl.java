@@ -21,6 +21,8 @@ import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.models.UserContentLocation;
 import org.gooru.insights.api.utils.ServiceUtils;
 import org.gooru.insights.api.utils.ValidationUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -239,23 +241,37 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return responseParamDTO;
 	}
 	
-	public ResponseParamDTO<Map<String, Object>> getSummaryData(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,
+	public Observable<ResponseParamDTO<Map<String, Object>>> getSummaryData(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,
 			String collectionType) throws Exception {
 		
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		List<Map<String, Object>> summaryData = new ArrayList<Map<String, Object>>();
-		Map<String,Object> usageData = new HashMap<String,Object>();
-		List<Map<String,Object>> sessionActivities = new ArrayList<Map<String,Object>>();
+		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+			try {
+				s.onNext(fetchSummaryData(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid,
+						collectionType));
+			} catch (Throwable t) {
+				s.onError(t);
+			}
+			s.onCompleted();
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		return observable;
+	}
+	
+	private ResponseParamDTO<Map<String, Object>> fetchSummaryData(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,
+			String collectionType) throws Exception {
+		
 		//TODO validate ClassId
 		//isValidClass(classId);
+		Map<String,Object> usageData = new HashMap<String,Object>();
+		List<Map<String,Object>> sessionActivities = new ArrayList<Map<String,Object>>();
+		List<Map<String, Object>> summaryData = new ArrayList<Map<String, Object>>();
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		String sessionKey = getSession(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid, collectionType, false);
-		
-		//Fetch Usage Data
 		if (StringUtils.isNotBlank(sessionKey)) {
-			getResourceMetricsBySession(sessionActivities, sessionKey, usageData);
+			//Fetch Usage Data
+			getResourceMetricsBySession(sessionActivities, sessionKey, usageData);		
 			summaryData.add(usageData);
 		}
-		responseParamDTO.setContent(summaryData);
+		responseParamDTO.setContent(summaryData);  
 		return responseParamDTO;
 	}
 	
@@ -364,7 +380,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 					continue;
 				} else {
 					sessionActivityMetrics.put(ApiConstants.GOORUOID, sessionActivityColumns.getStringValue(ApiConstants._GOORU_OID, null));
-					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, ServiceUtils.castJSONToMap(sessionActivityColumns.getStringValue(ApiConstants._ANSWER_OBJECT, null)));
+					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, ServiceUtils.castJSONToList(sessionActivityColumns.getStringValue(ApiConstants._ANSWER_OBJECT, ApiConstants.NA)));
 					sessionActivityMetrics.put(ApiConstants.VIEWS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, 0L));
 					sessionActivityMetrics.put(ApiConstants.REACTION, sessionActivityColumns.getLongValue(ApiConstants.REACTION, 0L));
 					sessionActivities.add(sessionActivityMetrics);
@@ -398,7 +414,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 					sessionActivityMetrics.put(ApiConstants.ATTEMPTS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, 0L));
 				} else {
 					sessionActivityMetrics.put(ApiConstants.QUESTION_TYPE, sessionActivityColumns.getStringValue(ApiConstants._QUESTION_TYPE, null));
-					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, ServiceUtils.castJSONToMap(sessionActivityColumns.getStringValue(ApiConstants._ANSWER_OBJECT, null)));
+					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, ServiceUtils.castJSONToList(sessionActivityColumns.getStringValue(ApiConstants._ANSWER_OBJECT, ApiConstants.NA)));
 					sessionActivities.add(sessionActivityMetrics);
 				}
 			}
