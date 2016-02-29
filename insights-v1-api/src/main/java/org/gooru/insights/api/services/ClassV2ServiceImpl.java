@@ -88,33 +88,31 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		// isValidClass(classId);
 		List<Map<String, Object>> resultSet =  null;
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		if(fetchOpenSession) {
-			resultSet = getSessionInfo(fetchOpenSession, CqlQueries.GET_USER_OPEN_SESSIONS, collectionType, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId, ApiConstants.START);
-		} else {
-			resultSet = getSessionInfo(fetchOpenSession, CqlQueries.GET_USER_SESSIONS, collectionType, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId);
-		}
+			if(collectionType.equalsIgnoreCase(InsightsConstant.ASSESSMENT)) {
+				if(fetchOpenSession) {
+					resultSet = getSessionInfo(CqlQueries.GET_USER_ASSESSMENT_SESSIONS, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId, ApiConstants.START);
+				} else {
+					resultSet = getSessionInfo(CqlQueries.GET_USER_ASSESSMENT_SESSIONS, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId, ApiConstants.STOP);
+				}
+			} else {
+				resultSet = getSessionInfo(CqlQueries.GET_USER_COLLECTION_SESSIONS, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId);
+			}
 		resultSet = ServiceUtils.sortBy(resultSet, InsightsConstant.EVENT_TIME, ApiConstants.ASC);
 		responseParamDTO.setContent(addSequence(resultSet));
 		return responseParamDTO;
 	}
 	
-	private List<Map<String, Object>> getSessionInfo(boolean fetchOpenSession, String query, String collectionType, String... parameters) {
+	private List<Map<String, Object>> getSessionInfo(String query, String... parameters) {
 		
 		CqlResult<String, String> sessions = getCassandraService().readRows(ColumnFamily.USER_SESSIONS.getColumnFamily(), query, parameters);
 		List<Map<String,Object>> sessionList = new ArrayList<Map<String,Object>>();
 		if( sessions != null && sessions.hasRows()) {
 			for(Row<String,String> row : sessions.getRows()) {
 				ColumnList<String> columnList = row.getColumns();
-				boolean include = true;
-				if (!fetchOpenSession  && collectionType.equalsIgnoreCase(InsightsConstant.ASSESSMENT) && !columnList.getStringValue(ApiConstants._EVENT_TYPE, ApiConstants.STRING_EMPTY).equalsIgnoreCase(InsightsConstant.STOP)) {
-					include = false;
-				}
-				if(include) {
 					Map<String, Object> sessionMap = new HashMap<String,Object>();
 					sessionMap.put(InsightsConstant.SESSION_ID,columnList.getStringValue(ApiConstants._SESSION_ID, null));
 					sessionMap.put(InsightsConstant.EVENT_TIME,columnList.getLongValue(ApiConstants._EVENT_TIME, 0L));
 					sessionList.add(sessionMap);
-				}
 			}
 		}
 		return sessionList;
@@ -171,10 +169,10 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	}
 	
 	@Override
-	public Observable<ResponseParamDTO<Map<String, Object>>> getAllStudentPerformance(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType) {
+	public Observable<ResponseParamDTO<Map<String, Object>>> getAllStudentPerformance(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType, String userUid) {
 		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
 			try {
-				s.onNext(getAllStudentsPerformance(classId, courseId, unitId, lessonId, gooruOid, collectionType));
+				s.onNext(getAllStudentsPerformance(classId, courseId, unitId, lessonId, gooruOid, collectionType, userUid));
 			} catch (Exception e) {
 				s.onError(e);
 			}
@@ -343,23 +341,19 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		dataMapList.add(dataAsMap);
 	}
 	
-	public ResponseParamDTO<Map<String, Object>> getAllStudentsPerformance(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType) throws Exception {
+	public ResponseParamDTO<Map<String, Object>> getAllStudentsPerformance(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType, String userUid) throws Exception {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> resultDataAsList = new ArrayList<Map<String, Object>>(); 
-		//TODO store and fetch student list of given class
-		List<String> userIds = new ArrayList<String>();
-		/*userIds.add("0219090c-abe6-4a09-8c9f-343911f5cd86");
-		userIds.add("6f337b1c-0b0d-49b3-8314-e279181aeddf");*/
-		
-		for (String userId : userIds) {
+		//Fetch student Latest session for the class
+		Map<String, String> userSessions = getUsersLatestSessionId(classId, courseId, unitId, lessonId, gooruOid, userUid);
+		for (String sessionId : userSessions.keySet()) {
 			Map<String, Object> usageData = new HashMap<String, Object>(2);
 			List<Map<String, Object>> sessionActivities = new ArrayList<Map<String, Object>>();
-			usageData.put(ApiConstants.USER_UID, userId);
+			usageData.put(ApiConstants.USER_UID, userSessions.get(sessionId));
 			usageData.put(ApiConstants.USAGE_DATA, sessionActivities);
-			String sessionKey = getUserLatestSessionId(classId, courseId, unitId, lessonId, gooruOid, collectionType, userId);
 			// Fetch Usage Data
-			if (StringUtils.isNotBlank(sessionKey)) {
-				getResourceMetricsBySession(sessionActivities, sessionKey, new HashMap<String, Object>(2));
+			if (StringUtils.isNotBlank(sessionId)) {
+				getResourceMetricsBySession(sessionActivities, sessionId, new HashMap<String, Object>(2));
 			}
 			resultDataAsList.add(usageData);
 		}
@@ -420,14 +414,6 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			}
 			usageData.put(itemName, sessionActivities);
 		}
-	}
-
-	private String getUserLatestSessionId(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType, String userId) throws Exception {
-		ResponseParamDTO<Map<String, Object>> sessionObject;
-		sessionObject = getUserSessions(classId, courseId, unitId, lessonId, gooruOid, collectionType, userId, false);
-		List<Map<String, Object>> sessionList = sessionObject.getContent();
-		String sessionKey = sessionList.size() > 0 ? sessionList.get(sessionList.size() - 1).get(InsightsConstant.SESSION_ID).toString() : null;
-		return sessionKey;
 	}
 
 	public Observable<ResponseParamDTO<ContentTaxonomyActivity>> getUserDomainParentMastery(String studentId, String subjectId, String courseIds, String domainId) {
@@ -766,4 +752,20 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			return 0;
 		}
 	}
-}
+	
+	private Map<String, String> getUsersLatestSessionId(String classId, String courseId, String unitId, String lessonId, String collectionId, String userId) {
+		
+		Map<String,String> usersSession = new HashMap<String,String>();
+		CqlResult<String, String>  usersLatestSession = null;
+		if(StringUtils.isNotBlank(userId)) {
+			usersLatestSession = cassandraService.readRows(ColumnFamily.USER_CLASS_COLLECTION_LAST_SESSIONS.getColumnFamily(), CqlQueries.GET_USER_CLASS_CONTENT_LATEST_SESSION, classId, courseId, unitId, lessonId, collectionId, userId);
+		} else {
+			usersLatestSession = cassandraService.readRows(ColumnFamily.USER_CLASS_COLLECTION_LAST_SESSIONS.getColumnFamily(), CqlQueries.GET_USERS_CLASS_CONTENT_LATEST_SESSION, classId, courseId, unitId, lessonId, collectionId);
+		}
+		for(Row<String, String> row : usersLatestSession.getRows()) {
+			ColumnList<String> columnList = row.getColumns();
+			usersSession.put(columnList.getStringValue(ApiConstants._SESSION_ID, null), columnList.getStringValue(ApiConstants._USER_UID, null));
+		}
+		return usersSession;
+	}
+} 
