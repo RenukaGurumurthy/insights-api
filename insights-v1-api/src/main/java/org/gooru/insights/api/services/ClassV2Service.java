@@ -1,6 +1,5 @@
 package org.gooru.insights.api.services;
 
-import java.util.List;
 import java.util.Map;
 
 import org.gooru.insights.api.models.ContentTaxonomyActivity;
@@ -14,7 +13,7 @@ public interface ClassV2Service {
 
 	ResponseParamDTO<Map<String, Object>> getUserSessions(String classId, String courseId, String unitId, String lessonId, String collectionId, String collectionType, String userUid, boolean openSession) throws Exception;
 	
-	ResponseParamDTO<Map<String, Object>> getSummaryData(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid, String collectionType) throws Exception;
+	Observable<ResponseParamDTO<Map<String, Object>>> getSummaryData(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid, String collectionType) throws Exception;
 
 	ResponseParamDTO<Map<String, Object>> getUserCurrentLocationInLesson(String userUid, String classId);
 

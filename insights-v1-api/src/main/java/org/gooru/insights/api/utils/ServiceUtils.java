@@ -188,8 +188,11 @@ public class ServiceUtils {
 		return sb.toString();
 	}
 	
-	public static Map<String,Object> castJSONToMap(String data) {
-				return gson.fromJson(data, (new TypeToken<Map<String, Object>>() {}).getType());
+	public static Object castJSONToList(String data) {
+		if(StringUtils.isBlank(data) || ApiConstants.NA.equals(data)) {
+			return ApiConstants.NA;
+		}
+		return gson.fromJson(data, (new TypeToken<List<Map<String, Object>>>() {}).getType());
 	}
 	
 	public static List<Map<String, Object>> sortBy(List<Map<String, Object>> requestData, String sortBy, String sortOrder) {
