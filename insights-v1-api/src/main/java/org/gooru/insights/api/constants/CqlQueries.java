@@ -19,6 +19,11 @@ public class CqlQueries {
 	public static final String GET_ALL_USER_CURRENT_LOCATION_IN_CLASS = "SELECT * FROM student_location WHERE class_uid = ?";
 
 	// Class Query's
+	
+	public static final String GET_USER_CLASS_CONTENT_LATEST_SESSION = "SELECT session_id,user_uid FROM user_class_collection_last_sessions WHERE class_uid = ? AND course_uid = ? AND unit_uid = ? AND lesson_uid = ? AND collection_uid = ? AND user_uid = ?";
+	
+	public static final String GET_USERS_CLASS_CONTENT_LATEST_SESSION = "SELECT session_id,user_uid FROM user_class_collection_last_sessions WHERE class_uid = ? AND course_uid = ? AND unit_uid = ? AND lesson_uid = ? AND collection_uid = ?";
+	
 	public static final String GET_USER_CLASS_ACTIVITY_DATACUBE = "SELECT * FROM class_activity_datacube WHERE row_key = ? AND user_uid = ? AND collection_type = ?";
 	
 	public static final String GET_CLASS_ACTIVITY_DATACUBE = "SELECT * FROM class_activity_datacube WHERE row_key = ? AND collection_type = ?";

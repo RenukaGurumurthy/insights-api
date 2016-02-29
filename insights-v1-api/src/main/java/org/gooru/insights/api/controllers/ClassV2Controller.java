@@ -202,9 +202,10 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value = "lessonGooruId") String lessonGooruId,
 			@PathVariable(value = "contentGooruId") String contentGooruId,
 			@PathVariable(value = "collectionType") String collectionType,
+			@RequestParam(value = "userUid", required = false) String userUid,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<Map<String, Object>>> performanceObserver = getClassService().getAllStudentPerformance(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, collectionType);
+		Observable<ResponseParamDTO<Map<String, Object>>> performanceObserver = getClassService().getAllStudentPerformance(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, collectionType, userUid);
 		DeferredResult<ResponseParamDTO<Map<String, Object>>> defferedResponse = new DeferredResult<>();
 		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
 		return defferedResponse;
