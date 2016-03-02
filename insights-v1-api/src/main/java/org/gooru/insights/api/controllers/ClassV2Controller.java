@@ -12,6 +12,7 @@ import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.services.ClassV2Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -297,11 +298,11 @@ public class ClassV2Controller extends BaseController {
 		return getModel(responseParamDTO);
 	}
 
-	@RequestMapping(value = "/{resourceType}/usage/session/{sessionId}", method = { RequestMethod.GET, RequestMethod.POST })
+	@RequestMapping(value = "/{resourceType}/usage/session/{sessionId}", method = RequestMethod.POST)
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public ModelAndView getResourceUsage(HttpServletRequest request, 
 			@PathVariable(value = "resourceType") String resourceType, @PathVariable(value = "sessionId") String sessionId,
-			@RequestParam(value = "resourceIds") String resourceIds,HttpServletResponse response) throws Exception {
+			@RequestBody String resourceIds,HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
 		return getModel(getClassService().getResourceUsage(sessionId, resourceIds));
 	}

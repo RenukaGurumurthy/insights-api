@@ -373,6 +373,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 				if(contentType.matches(ApiConstants.COLLECTION_OR_ASSESSMENT)) {
 					continue;
 				} else {
+					sessionActivityMetrics.put(ApiConstants.PARENT_EVENT_ID, sessionActivityColumns.getStringValue(ApiConstants._PARENT_EVENT_ID, null));
 					sessionActivityMetrics.put(ApiConstants.GOORUOID, sessionActivityColumns.getStringValue(ApiConstants._GOORU_OID, null));
 					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, ServiceUtils.castJSONToList(sessionActivityColumns.getStringValue(ApiConstants._ANSWER_OBJECT, ApiConstants.NA)));
 					sessionActivityMetrics.put(ApiConstants.VIEWS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, 0L));
@@ -432,15 +433,13 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	private ResponseParamDTO<ContentTaxonomyActivity> getUserDomainParentMasteryUsage(String studentId, String subjectId, String courseIds, String domainId) {
 		
 		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
-		List<ContentTaxonomyActivity> activityList = new ArrayList<ContentTaxonomyActivity>();
 		if(StringUtils.isEmpty(courseIds)) {
 			ValidationUtils.rejectInvalidRequest(ErrorCodes.E104, ApiConstants.COURSE_IDS);
 			
 		}
 		for(String courseId : courseIds.split(ApiConstants.COMMA)) {
-			activityList.addAll(getDomainActivity(studentId, subjectId, courseId, domainId).getContent());
+			responseParamDTO.setContent(getDomainActivity(studentId, subjectId, courseId, domainId).getContent());
 		}
-		responseParamDTO.setContent(activityList);
 		return responseParamDTO;
 	}
 	
@@ -586,7 +585,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		ResponseParamDTO<Map<String, Object>> resourceUsageObject = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String,Object>> resourceUsageList = new ArrayList<Map<String,Object>>();
 		for(String resourceId : resourceIds.split(ApiConstants.COMMA)) {
-			CqlResult<String, String> userSessionActivityResult = getCassandraService().readRows(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), CqlQueries.GET_USER_SESSION_CONTENT_ACTIVITY, sessionId, resourceId); 
+			CqlResult<String, String> userSessionActivityResult = getCassandraService().readRows(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), CqlQueries.GET_USER_SESSION_CONTENT_ACTIVITY, sessionId, resourceId.trim()); 
 			if(userSessionActivityResult != null && userSessionActivityResult.hasRows()) {
 				Rows<String, String> rows = userSessionActivityResult.getRows();
 				for(Row<String,String> row : rows) {

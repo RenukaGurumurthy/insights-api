@@ -1,5 +1,6 @@
 package org.gooru.insights.api.models;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -11,12 +12,16 @@ public class ResponseParamDTO<M> {
 
 	private Map<String, Object> paginate;
 
+	public ResponseParamDTO() {
+		 content = new ArrayList<M>();
+	}
+	
 	public List<M> getContent() {
 		return content;
 	}
 
 	public void setContent(List<M> content) {
-		this.content = content;
+		this.content.addAll(content);
 	}
 
 	public M getMessage() {
