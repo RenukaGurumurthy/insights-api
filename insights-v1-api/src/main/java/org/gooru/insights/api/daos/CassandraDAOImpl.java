@@ -84,7 +84,7 @@ public class CassandraDAOImpl extends CassandraConnectionProvider implements Cas
 			operators = getLogKeyspace().prepareQuery(this.accessColumnFamily("monitor_events"))
 					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL).withRetryPolicy(new ConstantBackoff(2000, 5))
 					.getAllRows()
-					.withColumnRange(new RangeBuilder().setMaxSize(10).build())
+					.withColumnRange(new RangeBuilder().setLimit(10).build())
 			        .setExceptionCallback(new ExceptionCallback() {
 			             @Override
 			             public boolean onException(ConnectionException e) {

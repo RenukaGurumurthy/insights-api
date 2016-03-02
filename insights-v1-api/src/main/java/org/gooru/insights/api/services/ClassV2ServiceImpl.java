@@ -373,6 +373,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 				if(contentType.matches(ApiConstants.COLLECTION_OR_ASSESSMENT)) {
 					continue;
 				} else {
+					sessionActivityMetrics.put(ApiConstants.PARENT_EVENT_ID, sessionActivityColumns.getStringValue(ApiConstants._PARENT_EVENT_ID, null));
 					sessionActivityMetrics.put(ApiConstants.GOORUOID, sessionActivityColumns.getStringValue(ApiConstants._GOORU_OID, null));
 					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, ServiceUtils.castJSONToList(sessionActivityColumns.getStringValue(ApiConstants._ANSWER_OBJECT, ApiConstants.NA)));
 					sessionActivityMetrics.put(ApiConstants.VIEWS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, 0L));
