@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Session;
 import com.netflix.astyanax.AstyanaxContext;
 import com.netflix.astyanax.Keyspace;
 import com.netflix.astyanax.connectionpool.NodeDiscoveryType;
@@ -26,6 +28,8 @@ public class CassandraConnectionProvider {
     private static String clusterName;
     private static String logKeyspaceName;
     private static String logDataCentre;
+    private static Cluster cluster;
+    private static Session session;
     
     private static final Logger logger = LoggerFactory.getLogger(CassandraConnectionProvider.class);
 
@@ -41,9 +45,17 @@ public class CassandraConnectionProvider {
         logKeyspaceName = this.getCassandraConstant().getProperty("log.keyspace");
         logDataCentre = this.getCassandraConstant().getProperty("log.datacentre");
         initInsights();
+        initCassandraClient();
         }
     }
-    
+    private static void initCassandraClient() {
+		try {
+			cluster = Cluster.builder().withClusterName(clusterName).addContactPoint(hosts).build();
+			session = cluster.connect(logKeyspaceName);
+		} catch (Exception e) {
+			logger.error("Error while initializing cassandra : {}", e);
+		}
+	} 
 	private static void initInsights() {
 		try {
 			logger.info("Loading cassandra connection properties");
@@ -75,7 +87,12 @@ public class CassandraConnectionProvider {
 		}
 		return logKeyspace;
 	}
-    
+	public Session getCassSession() {
+		if(session == null) {
+			initConnection();
+		}
+		return session;
+	}    
     private Properties getCassandraConstant() {
 		return cassandra;
 	}

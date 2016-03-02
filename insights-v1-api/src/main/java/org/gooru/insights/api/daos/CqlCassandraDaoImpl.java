@@ -1,10 +1,14 @@
 package org.gooru.insights.api.daos;
 
 
+
 import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.utils.InsightsLogger;
 import org.springframework.stereotype.Repository;
 
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
 import com.netflix.astyanax.connectionpool.OperationResult;
 import com.netflix.astyanax.connectionpool.exceptions.ConnectionException;
 import com.netflix.astyanax.model.ColumnFamily;
@@ -65,5 +69,11 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		}
 		return cqlQuery;
 	}
-
+	
+	public ResultSet executeCqlRowsQuery(String parameters) {
+		Statement select = QueryBuilder.select().all()
+				.from("event_logger_insights", "user_session_activity")
+				.where(QueryBuilder.eq("session_id", parameters));
+		return getCassSession().execute(select);
+	}
 }

@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.datastax.driver.core.ResultSet;
 import com.netflix.astyanax.model.ColumnList;
 import com.netflix.astyanax.model.CqlResult;
 import com.netflix.astyanax.model.Row;
@@ -386,30 +387,29 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	}
 	private void getResourceMetricsBySession(List<Map<String, Object>> sessionActivities, String sessionKey, Map<String, Object> usageData) {
 		
-		CqlResult<String, String> userSessionActivityResult = getCassandraService().readRows(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), CqlQueries.GET_USER_SESSION_ACTIVITY,  sessionKey);
-		if (userSessionActivityResult != null && userSessionActivityResult.hasRows()) {
+		ResultSet userSessionActivityResult = getCassandraService().readRows(sessionKey);
+		if (userSessionActivityResult != null) {
 			String itemName = ApiConstants.RESOURCES;
-			for (Row<String, String> userSessionActivityRow : userSessionActivityResult.getRows()) {
+			for (com.datastax.driver.core.Row userSessionActivityRow : userSessionActivityResult) {
 				Map<String, Object> sessionActivityMetrics = new HashMap<String, Object>();
-				ColumnList<String> sessionActivityColumns = userSessionActivityRow.getColumns();
-				String contentType = sessionActivityColumns.getStringValue(ApiConstants._RESOURCE_TYPE, ApiConstants.STRING_EMPTY);
-				sessionActivityMetrics.put(ApiConstants.SESSIONID, sessionActivityColumns.getStringValue(ApiConstants._SESSION_ID, null));
-				sessionActivityMetrics.put(ApiConstants.GOORUOID, sessionActivityColumns.getStringValue(ApiConstants._GOORU_OID, null));
+				String contentType = userSessionActivityRow.getString(ApiConstants._RESOURCE_TYPE);
+				sessionActivityMetrics.put(ApiConstants.SESSIONID, userSessionActivityRow.getString(ApiConstants._SESSION_ID));
+				sessionActivityMetrics.put(ApiConstants.GOORUOID, userSessionActivityRow.getString(ApiConstants._GOORU_OID));
 				sessionActivityMetrics.put(ApiConstants.RESOURCE_TYPE, contentType);
-				sessionActivityMetrics.put(ApiConstants.SCORE, sessionActivityColumns.getLongValue(ApiConstants.SCORE, 0L));
-				sessionActivityMetrics.put(ApiConstants.TIMESPENT, sessionActivityColumns.getLongValue(ApiConstants._TIME_SPENT, 0L));
-				sessionActivityMetrics.put(ApiConstants.VIEWS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, 0L));
-				sessionActivityMetrics.put(ApiConstants.REACTION, sessionActivityColumns.getLongValue(ApiConstants.REACTION, 0L));
+				sessionActivityMetrics.put(ApiConstants.SCORE, userSessionActivityRow.getLong(ApiConstants.SCORE));
+				sessionActivityMetrics.put(ApiConstants.TIMESPENT, userSessionActivityRow.getLong(ApiConstants._TIME_SPENT));
+				sessionActivityMetrics.put(ApiConstants.VIEWS, userSessionActivityRow.getLong(ApiConstants.VIEWS));
+				sessionActivityMetrics.put(ApiConstants.REACTION, userSessionActivityRow.getLong(ApiConstants.REACTION));
 				if (contentType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
 					usageData.put(ApiConstants.COLLECTION, sessionActivityMetrics);
 				} else if (contentType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) {
 					usageData.put(ApiConstants.ASSESSMENT, sessionActivityMetrics);
 					sessionActivityMetrics.remove(ApiConstants.VIEWS);
 					itemName = ApiConstants.QUESTIONS;
-					sessionActivityMetrics.put(ApiConstants.ATTEMPTS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, 0L));
+					sessionActivityMetrics.put(ApiConstants.ATTEMPTS, userSessionActivityRow.getLong(ApiConstants.VIEWS));
 				} else {
-					sessionActivityMetrics.put(ApiConstants.QUESTION_TYPE, sessionActivityColumns.getStringValue(ApiConstants._QUESTION_TYPE, null));
-					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, ServiceUtils.castJSONToList(sessionActivityColumns.getStringValue(ApiConstants._ANSWER_OBJECT, ApiConstants.NA)));
+					sessionActivityMetrics.put(ApiConstants.QUESTION_TYPE, userSessionActivityRow.getString(ApiConstants._QUESTION_TYPE));
+					//ssessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, ServiceUtils.castJSONToList(userSessionActivityRow.getString(ApiConstants._ANSWER_OBJECT)));
 					sessionActivities.add(sessionActivityMetrics);
 				}
 			}
