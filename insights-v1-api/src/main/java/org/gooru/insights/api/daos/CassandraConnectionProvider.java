@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
+import com.datastax.driver.core.policies.DefaultRetryPolicy;
+import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.netflix.astyanax.AstyanaxContext;
 import com.netflix.astyanax.Keyspace;
 import com.netflix.astyanax.connectionpool.NodeDiscoveryType;
@@ -50,7 +53,14 @@ public class CassandraConnectionProvider {
     }
     private static void initCassandraClient() {
 		try {
-			cluster = Cluster.builder().withClusterName(clusterName).addContactPoint(hosts).build();
+			cluster = Cluster
+					.builder()
+					.withClusterName(clusterName)
+					.addContactPoint(hosts)
+					.withRetryPolicy(DefaultRetryPolicy.INSTANCE)
+					.withLoadBalancingPolicy(
+							new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
+					.build();
 			session = cluster.connect(logKeyspaceName);
 		} catch (Exception e) {
 			logger.error("Error while initializing cassandra : {}", e);
