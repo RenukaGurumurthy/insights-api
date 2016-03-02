@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
 public class ServiceUtils {
@@ -192,7 +193,11 @@ public class ServiceUtils {
 		if(StringUtils.isBlank(data) || ApiConstants.NA.equals(data)) {
 			return ApiConstants.NA;
 		}
-		return gson.fromJson(data, (new TypeToken<List<Map<String, Object>>>() {}).getType());
+		try {
+			return gson.fromJson(data, (new TypeToken<List<Map<String, Object>>>() {}).getType());
+		}catch(JsonSyntaxException e) {
+			return ApiConstants.NA;
+		}
 	}
 	
 	public static List<Map<String, Object>> sortBy(List<Map<String, Object>> requestData, String sortBy, String sortOrder) {
