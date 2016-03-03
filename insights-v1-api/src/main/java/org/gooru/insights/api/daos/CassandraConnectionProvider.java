@@ -11,6 +11,11 @@ import org.springframework.stereotype.Component;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
+import com.datastax.driver.core.SocketOptions;
+import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
+import com.datastax.driver.core.policies.DefaultRetryPolicy;
+import com.datastax.driver.core.policies.ExponentialReconnectionPolicy;
+import com.datastax.driver.core.policies.TokenAwarePolicy;
 import com.netflix.astyanax.AstyanaxContext;
 import com.netflix.astyanax.Keyspace;
 import com.netflix.astyanax.connectionpool.NodeDiscoveryType;
@@ -48,9 +53,24 @@ public class CassandraConnectionProvider {
         initCassandraClient();
         }
     }
-    private static void initCassandraClient() {
+
+	private static void initCassandraClient() {
 		try {
-			cluster = Cluster.builder().withClusterName(clusterName).addContactPoint(hosts).build();
+			SocketOptions socketOptions = new SocketOptions();
+			socketOptions.setConnectTimeoutMillis(30000);
+			socketOptions.setReadTimeoutMillis(30000);
+			socketOptions.setKeepAlive(true);
+
+			cluster = Cluster
+					.builder()
+					.withClusterName(clusterName)
+					.addContactPoint(hosts)
+					.withRetryPolicy(DefaultRetryPolicy.INSTANCE)
+					.withReconnectionPolicy(
+							new ExponentialReconnectionPolicy(1000, 30000))
+					.withLoadBalancingPolicy(
+							new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
+					.withPort(9160).withSocketOptions(socketOptions).build();
 			session = cluster.connect(logKeyspaceName);
 		} catch (Exception e) {
 			logger.error("Error while initializing cassandra : {}", e);
