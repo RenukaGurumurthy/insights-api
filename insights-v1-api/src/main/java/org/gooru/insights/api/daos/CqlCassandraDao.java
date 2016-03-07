@@ -10,6 +10,6 @@ public interface CqlCassandraDao {
 	
 	ColumnList<String> executeCqlRowQuery(String columnFamilyName, String query, String... parameters);
 	
-	ResultSet getSessionInfo(String parameters);
+	ResultSet getUserSessionActivity(String parameters);
 	
 }

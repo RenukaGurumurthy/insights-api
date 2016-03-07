@@ -3,7 +3,7 @@ package org.gooru.insights.api.constants;
 public class CqlQueries {
 
 	// Session Query's
-	public static final String GET_SESSION_ACTIVITY = "SELECT event_type FROM user_session_activity WHERE session_id = ? AND gooru_oid = ?";
+	public static final String GET_SESSION_ACTIVITY_TYPE = "SELECT event_type FROM user_session_activity WHERE session_id = ? AND gooru_oid = ?";
 
 	public static final String GET_USER_COLLECTION_SESSIONS = "SELECT event_time,session_id,event_type FROM user_sessions WHERE user_uid = ? AND collection_uid = ? AND collection_type = ? AND class_uid = ? AND course_uid = ? AND unit_uid = ? AND lesson_uid = ?";
 

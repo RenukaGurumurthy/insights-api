@@ -24,7 +24,7 @@ public class CassandraV2ServiceImpl implements CassandraV2Service{
 	}
 	@Override
 	public ResultSet getSessionInfo(String value) {
-		return cqlDAO.getSessionInfo(value);
+		return cqlDAO.getUserSessionActivity(value);
 	}
 	
 }
