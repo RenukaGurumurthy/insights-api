@@ -387,7 +387,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	}
 	private void getResourceMetricsBySession(List<Map<String, Object>> sessionActivities, String sessionKey, Map<String, Object> usageData) {
 		
-		ResultSet userSessionActivityResult = getCassandraService().readRows(sessionKey);
+		ResultSet userSessionActivityResult = getCassandraService().getSessionInfo(sessionKey);
 		if (userSessionActivityResult != null) {
 			String itemName = ApiConstants.RESOURCES;
 			for (com.datastax.driver.core.Row userSessionActivityRow : userSessionActivityResult) {

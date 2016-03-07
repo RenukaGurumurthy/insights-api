@@ -9,7 +9,7 @@ public interface CqlCassandraDao {
 	CqlResult<String, String> executeCqlRowsQuery(String columnFamilyName, String query, String... parameters);
 	
 	ColumnList<String> executeCqlRowQuery(String columnFamilyName, String query, String... parameters);
-
-	ResultSet executeCqlRowsQuery(String parameters);
+	
+	ResultSet getSessionInfo(String parameters);
 	
 }

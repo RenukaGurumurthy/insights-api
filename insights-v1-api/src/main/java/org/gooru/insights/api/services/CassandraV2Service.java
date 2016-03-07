@@ -10,5 +10,5 @@ public interface CassandraV2Service {
 	
 	ColumnList<String> readRow(String columnFamilyName, String query, String... values);
 
-	ResultSet readRows(String value);
+	ResultSet getSessionInfo(String value);
 }
