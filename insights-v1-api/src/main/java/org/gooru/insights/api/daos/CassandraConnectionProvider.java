@@ -1,8 +1,5 @@
 package org.gooru.insights.api.daos;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
