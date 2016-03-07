@@ -23,8 +23,8 @@ public class CassandraV2ServiceImpl implements CassandraV2Service{
 		return cqlDAO.executeCqlRowQuery(columnFamilyName, query, values);
 	}
 	@Override
-	public ResultSet readRows(String value) {
-		return cqlDAO.executeCqlRowsQuery(value);
+	public ResultSet getSessionInfo(String value) {
+		return cqlDAO.getSessionInfo(value);
 	}
 	
 }

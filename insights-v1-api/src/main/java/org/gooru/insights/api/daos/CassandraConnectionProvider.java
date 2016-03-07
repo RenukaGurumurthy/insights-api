@@ -1,5 +1,8 @@
 package org.gooru.insights.api.daos;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
@@ -70,8 +73,9 @@ public class CassandraConnectionProvider {
 							new ExponentialReconnectionPolicy(1000, 30000))
 					.withLoadBalancingPolicy(
 							new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
-					.withPort(9160).withSocketOptions(socketOptions).build();
+					.withPort(9042).withSocketOptions(socketOptions).build();
 			session = cluster.connect(logKeyspaceName);
+
 		} catch (Exception e) {
 			logger.error("Error while initializing cassandra : {}", e);
 		}
@@ -107,6 +111,9 @@ public class CassandraConnectionProvider {
 		}
 		return logKeyspace;
 	}
+	public static String getLogKeyspaceName() {
+		return logKeyspaceName;
+	}
 	public Session getCassSession() {
 		if(session == null) {
 			initConnection();
@@ -114,7 +121,8 @@ public class CassandraConnectionProvider {
 		return session;
 	}    
     private Properties getCassandraConstant() {
-		return cassandra;
+    	return cassandra;
+		
 	}
-    
+
 }

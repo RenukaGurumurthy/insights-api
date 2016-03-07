@@ -70,9 +70,9 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		return cqlQuery;
 	}
 	
-	public ResultSet executeCqlRowsQuery(String parameters) {
+	public ResultSet getSessionInfo(String parameters) {
 		Statement select = QueryBuilder.select().all()
-				.from("event_logger_insights", "user_session_activity")
+				.from(getLogKeyspaceName(), "user_session_activity")
 				.where(QueryBuilder.eq("session_id", parameters));
 		return getCassSession().execute(select);
 	}
