@@ -70,8 +70,9 @@ public class CassandraConnectionProvider {
 							new ExponentialReconnectionPolicy(1000, 30000))
 					.withLoadBalancingPolicy(
 							new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
-					.withPort(9160).withSocketOptions(socketOptions).build();
+					.withPort(9042).withSocketOptions(socketOptions).build();
 			session = cluster.connect(logKeyspaceName);
+
 		} catch (Exception e) {
 			logger.error("Error while initializing cassandra : {}", e);
 		}
@@ -107,6 +108,9 @@ public class CassandraConnectionProvider {
 		}
 		return logKeyspace;
 	}
+	public static String getLogKeyspaceName() {
+		return logKeyspaceName;
+	}
 	public Session getCassSession() {
 		if(session == null) {
 			initConnection();
@@ -114,7 +118,8 @@ public class CassandraConnectionProvider {
 		return session;
 	}    
     private Properties getCassandraConstant() {
-		return cassandra;
+    	return cassandra;
+		
 	}
-    
+
 }
