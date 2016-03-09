@@ -17,7 +17,7 @@ import javax.annotation.Resource;
 
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.options;
-import org.gooru.insights.api.constants.InsightsConstant.ColumnFamily;
+import org.gooru.insights.api.constants.InsightsConstant.ColumnFamilySet;
 import org.gooru.insights.api.constants.ErrorMessages;
 import org.gooru.insights.api.services.BaseService;
 import org.gooru.insights.api.services.CassandraService;
@@ -89,13 +89,13 @@ public class DataUtils {
 	private void includeTableDataType(){
 		if (columnFamilyDataTypes == null) {
 			columnFamilyDataTypes = new HashMap<String, Map<String, String>>();
-			ColumnFamily[] columnFamilies = ColumnFamily.values();
+			ColumnFamilySet[] columnFamilies = ColumnFamilySet.values();
 			Set<String> columnFamiliesName = new HashSet<String>();
-			for (ColumnFamily columnFamily : columnFamilies) {
+			for (ColumnFamilySet columnFamily : columnFamilies) {
 				columnFamiliesName.add(columnFamily.getColumnFamily());
 			}
 			OperationResult<Rows<String, String>> tableDataType = getCassandraService()
-					.read(ColumnFamily.TABLE_DATATYPES.getColumnFamily(),
+					.read(ColumnFamilySet.TABLE_DATATYPES.getColumnFamily(),
 							columnFamiliesName);
 			if (tableDataType != null && !tableDataType.getResult().isEmpty()) {
 				for (Row<String, String> row : tableDataType.getResult()) {
@@ -155,7 +155,7 @@ public class DataUtils {
 		Map<String,List<String>> dependentColumn = new HashMap<String,List<String>>();
 		dependentColumn.put(getBaseService().appendComma(ApiConstants.GOORUOID,ApiConstants._GOORUOID), ServiceUtils.generateList(ApiConstants.GOORUOID,ApiConstants._GOORUOID));
 		dependentColumn.put(getBaseService().appendComma(ApiConstants.QUESTION_DOT_QUESTION_TYPE,ApiConstants.QUESTION_DOT_TYPE), ServiceUtils.generateList(ApiConstants.QUESTION_DOT_QUESTION_TYPE,ApiConstants.QUESTION_DOT_TYPE));
-		mergeDualColumnValues.put(ColumnFamily.RESOURCE.getColumnFamily(), dependentColumn);
+		mergeDualColumnValues.put(ColumnFamilySet.RESOURCE.getColumnFamily(), dependentColumn);
 	}
 	
 	public static Set<Object> convertArrayToSet(Object[] keyList){

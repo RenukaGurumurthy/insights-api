@@ -91,7 +91,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 					formulaDetails = new HashMap<String, String>();
 					formulaDetails.put(formulaDetail.FORMULA.getName(), json.toString());
 					formulaDetails.put(formulaDetail.AGGREGATETYPE.getName(), aggregateType != null ? aggregateType : formulaDetail.DEFAULT_AGGREGATETYPE.getName());
-					getCassandraService().putStringValue(ColumnFamily.FORMULA_DETAIL.getColumnFamily(), eventName, formulaDetails);
+					getCassandraService().putStringValue(ColumnFamilySet.FORMULA_DETAIL.getColumnFamily(), eventName, formulaDetails);
 				} catch (JSONException e) {
 					throw new InsightsServerException("OOP's something went wrong !!! Try after some time" + e);
 				}
@@ -115,7 +115,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 		List<Map<String,String>> resultList = new ArrayList<Map<String,String>>();
 			List<String> columnList = new ArrayList<String>();
 			columnList.add(formulaDetail.FORMULA.getName());
-			Map<String, String> resultMap = getBaseService().getStringValue(getCassandraService().read(ColumnFamily.FORMULA_DETAIL.getColumnFamily(), eventName, columnList));
+			Map<String, String> resultMap = getBaseService().getStringValue(getCassandraService().read(ColumnFamilySet.FORMULA_DETAIL.getColumnFamily(), eventName, columnList));
 			for (Map.Entry<String, String> entry : resultMap.entrySet()) {
 				if (formulaDetail.FORMULA.getName().equalsIgnoreCase(entry.getKey())) {
 					resultMap = new HashMap<String, String>();
@@ -136,7 +136,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 		Map<String, Object> dataMap = new JsonDeserializer().deserializeTypeRef(dataObj.toString(), new TypeReference<Map<String, Object>>() {
 		});
 		if (cfName == null) {
-			cfName = ColumnFamily.CONFIG_SETTING.getColumnFamily();
+			cfName = ColumnFamilySet.CONFIG_SETTING.getColumnFamily();
 		}
 		getCassandraService().addRowKeyValues(cfName, keyName, dataMap);
 		dataMap = new HashMap<String, Object>();
@@ -153,7 +153,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
 		Map<String,Object> dataMap = new JsonDeserializer().deserializeTypeRef(dataObj.toString(), new TypeReference<Map<String,Object>>() {});
 		if(cfName == null){
-			cfName = ColumnFamily.CONFIG_SETTING.getColumnFamily();
+			cfName = ColumnFamilySet.CONFIG_SETTING.getColumnFamily();
 		}
 		getCassandraService().addCounterRowKeyValues(cfName,keyName,dataMap);
 		dataMap = new HashMap<String, Object>();
@@ -167,7 +167,7 @@ public class ConfigurationServiceImpl implements ConfigurationService, InsightsC
 		
 		
 		if (cfName == null) {
-			cfName = ColumnFamily.CONFIG_SETTING.getColumnFamily();
+			cfName = ColumnFamilySet.CONFIG_SETTING.getColumnFamily();
 		}
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();

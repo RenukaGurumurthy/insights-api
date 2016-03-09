@@ -21,27 +21,22 @@ import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.models.UserContentLocation;
 import org.gooru.insights.api.utils.ServiceUtils;
 import org.gooru.insights.api.utils.ValidationUtils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.datastax.driver.core.ResultSet;
-import com.netflix.astyanax.model.ColumnList;
-import com.netflix.astyanax.model.CqlResult;
-import com.netflix.astyanax.model.Row;
-import com.netflix.astyanax.model.Rows;
-import com.netflix.astyanax.serializers.SetSerializer;
-
 import rx.Observable;
 import rx.schedulers.Schedulers;
+
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
+import com.netflix.astyanax.serializers.SetSerializer;
 
 @Service
 public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	
-	private static final Logger logger = LoggerFactory.getLogger(ClassV2ServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ClassV2ServiceImpl.class);
 
     private final ExecutorService observableExecutor = Executors.newFixedThreadPool(10);
     
@@ -65,12 +60,12 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	public ResponseParamDTO<Map<String, Object>> getSessionStatus(String sessionId, String contentGooruId) {
 		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		CqlResult<String, String> sessionDetails = getCassandraService().readRows(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), CqlQueries.GET_SESSION_ACTIVITY_TYPE, sessionId, contentGooruId);
-		if (sessionDetails != null && sessionDetails.hasRows()) {
-			Rows<String, String> sessionList = sessionDetails.getRows();
-			for(Row<String, String> row : sessionList) {
+		//CqlResult<String, String> sessionDetails = getCassandraService().readRows(ColumnFamilySet.USER_SESSION_ACTIVITY.getColumnFamily(), CqlQueries.GET_SESSION_ACTIVITY_TYPE, sessionId, contentGooruId);
+		ResultSet sessionDetails = getCassandraService().getSessionActivityType(sessionId, contentGooruId);
+		if (sessionDetails != null) {
+			for(Row row : sessionDetails) {
 				Map<String, Object> sessionDataMap = new HashMap<String, Object>();
-				String status = row.getColumns().getStringValue(ApiConstants._EVENT_TYPE, ApiConstants.STRING_EMPTY);
+				String status = row.getString(ApiConstants._EVENT_TYPE);
 				sessionDataMap.put(ApiConstants.SESSIONID, sessionId);
 				status = status.equalsIgnoreCase(ApiConstants.STOP) ? ApiConstants.COMPLETED : ApiConstants.INPROGRESS;
 				sessionDataMap.put(InsightsConstant.STATUS, status);
@@ -95,24 +90,24 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 				} else {
 					resultSet = getSessionInfo(CqlQueries.GET_USER_ASSESSMENT_SESSIONS, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId, ApiConstants.STOP);
 				}
-			} else {
-				resultSet = getSessionInfo(CqlQueries.GET_USER_COLLECTION_SESSIONS, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId);
-			}
+			}/* else {
+				resultSet = getSessionInfo(CqlQueries.GET_USER_COLLECTION_SESSIONS, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId,null);
+			}*/
 		resultSet = ServiceUtils.sortBy(resultSet, InsightsConstant.EVENT_TIME, ApiConstants.ASC);
 		responseParamDTO.setContent(addSequence(resultSet));
 		return responseParamDTO;
 	}
 	
-	private List<Map<String, Object>> getSessionInfo(String query, String... parameters) {
+	private List<Map<String, Object>> getSessionInfo(String query, String userUid, String collectionUid, String collectionType, String classUid, String courseUid, String unitUid, String lessonUid, String eventType) {
 		
-		CqlResult<String, String> sessions = getCassandraService().readRows(ColumnFamily.USER_SESSIONS.getColumnFamily(), query, parameters);
+		//CqlResult<String, String> sessions = getCassandraService().readRows(ColumnFamilySet.USER_SESSIONS.getColumnFamily(), query, parameters);
+		ResultSet sessions = getCassandraService().getUserAssessmentSessions(userUid, collectionUid, collectionType, classUid, courseUid, unitUid, lessonUid, eventType);
 		List<Map<String,Object>> sessionList = new ArrayList<Map<String,Object>>();
-		if( sessions != null && sessions.hasRows()) {
-			for(Row<String,String> row : sessions.getRows()) {
-				ColumnList<String> columnList = row.getColumns();
+		if( sessions != null) {
+			for(Row row : sessions) {
 					Map<String, Object> sessionMap = new HashMap<String,Object>();
-					sessionMap.put(InsightsConstant.SESSION_ID,columnList.getStringValue(ApiConstants._SESSION_ID, null));
-					sessionMap.put(InsightsConstant.EVENT_TIME,columnList.getLongValue(ApiConstants._EVENT_TIME, 0L));
+					sessionMap.put(InsightsConstant.SESSION_ID,row.getString(ApiConstants._SESSION_ID));
+					sessionMap.put(InsightsConstant.EVENT_TIME,row.getLong(ApiConstants._EVENT_TIME));
 					sessionList.add(sessionMap);
 			}
 		}
@@ -187,23 +182,22 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
 		String rowKey = getBaseService().appendTilda(classId, courseId, unitId, lessonId);
-		CqlResult<String, String> result = getCassandraService().readRows(ColumnFamily.CLASS_ACTIVITY_PEER_DETAIL.getColumnFamily(), CqlQueries.GET_USER_PEER_DETAIL, rowKey);
-		Rows<String,String> resultRows = result != null ? result.getRows() : null; 
-		if (resultRows != null && resultRows.size() > 0) {
-			for(Row<String, String> resultRow : resultRows) {
+		//CqlResult<String, String> result = getCassandraService().readRows(ColumnFamilySet.CLASS_ACTIVITY_PEER_DETAIL.getColumnFamily(), CqlQueries.GET_USER_PEER_DETAIL, rowKey);
+		ResultSet result = getCassandraService().getUserPeerDetail(rowKey);
+		if (result != null ) {
+			for(Row resultRow : result) {
 				Map<String, Object> dataAsMap = new HashMap<String, Object>(5);
 				SetSerializer<String> setSerializer = new SetSerializer<String>(UTF8Type.instance);
-				ColumnList<String> columnList = resultRow.getColumns();
-				Set<String> activePeers = columnList.getValue(ApiConstants._ACTIVE_PEERS, setSerializer, new HashSet<String>());
-				Set<String> leftPeers = columnList.getValue(ApiConstants._LEFT_PEERS, setSerializer, new HashSet<String>());
+				Set<String> activePeers = resultRow.getSet(ApiConstants._ACTIVE_PEERS, String.class);
+				Set<String> leftPeers = resultRow.getSet(ApiConstants._LEFT_PEERS, String.class);
 				dataAsMap.put(ApiConstants.ACTIVE_PEER_COUNT, leftPeers.size());
 				dataAsMap.put(ApiConstants.LEFT_PEER_COUNT, activePeers.size());
-				nextLevelType = columnList.getStringValue(ApiConstants._COLLECTION_TYPE, ApiConstants.CONTENT);
+				nextLevelType = resultRow.getString(ApiConstants._COLLECTION_TYPE);
 				if(nextLevelType.matches(ApiConstants.COLLECTION_OR_ASSESSMENT)) {
 					dataAsMap.put(ApiConstants.ACTIVE_PEER_UIDS, leftPeers);
 					dataAsMap.put(ApiConstants.LEFT_PEER_UIDS, activePeers);
 				}
-				dataAsMap.put(ApiConstants.getResponseNameByType(nextLevelType), columnList.getStringValue(ApiConstants._LEAF_GOORU_OID, null));
+				dataAsMap.put(ApiConstants.getResponseNameByType(nextLevelType), resultRow.getString(ApiConstants._LEAF_GOORU_OID));
 				dataMapAsList.add(dataAsMap);
 			}
 		}
@@ -294,22 +288,23 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
 		String rowKey = getBaseService().appendTilda(classId, courseId, unitId, lessonId);
-		CqlResult<String, String> resultRows = null;
+		ResultSet resultRows = null;
 		if (StringUtils.isNotBlank(userUid) && StringUtils.isNotBlank(collectionType)) {
-			resultRows = getCassandraService().readRows(ColumnFamily.CLASS_ACTIVITY_DATACUBE.getColumnFamily(), CqlQueries.GET_USER_CLASS_ACTIVITY_DATACUBE, rowKey, userUid, collectionType);
+			//resultRows = getCassandraService().readRows(ColumnFamilySet.CLASS_ACTIVITY_DATACUBE.getColumnFamily(), CqlQueries.GET_USER_CLASS_ACTIVITY_DATACUBE, rowKey, userUid, collectionType);
+			resultRows = getCassandraService().getUserClassActivityDatacube(rowKey, userUid, collectionType);
 		} else if (StringUtils.isNotBlank(collectionType)) {
-
-			resultRows = getCassandraService().readRows(ColumnFamily.CLASS_ACTIVITY_DATACUBE.getColumnFamily(), CqlQueries.GET_CLASS_ACTIVITY_DATACUBE, rowKey, collectionType);
+			//resultRows = getCassandraService().readRows(ColumnFamilySet.CLASS_ACTIVITY_DATACUBE.getColumnFamily(), CqlQueries.GET_CLASS_ACTIVITY_DATACUBE, rowKey, collectionType);
+			resultRows = getCassandraService().getClassActivityDatacube(rowKey, collectionType);
 		}
-		if (resultRows.getRows() != null && resultRows.getRows().size() > 0) {
+		if (resultRows != null) {
 			Map<String, Object> userUsageAsMap = new HashMap<String, Object>();
-			for (Row<String, String> resultRow : resultRows.getRows()) {
+			for (Row resultRow : resultRows) {
 				List<Map<String, Object>> dataMapList = new ArrayList<Map<String, Object>>();
-				String userId = resultRow.getColumns().getStringValue(ApiConstants._USER_UID, null);
+				String userId = resultRow.getString(ApiConstants._USER_UID);
 				if (userUsageAsMap.containsKey(userId) && userUsageAsMap.get(userId) != null) {
 					dataMapList = (List<Map<String, Object>>) userUsageAsMap.get(userId);
 				}
-				addPerformanceMetrics(dataMapList, resultRow.getColumns(), collectionType, nextLevelType);
+				addPerformanceMetrics(dataMapList, resultRow, collectionType, nextLevelType);
 				userUsageAsMap.put(userId, dataMapList);
 			}
 			for (Map.Entry<String, Object> userUsageAsMapEntry : userUsageAsMap.entrySet()) {
@@ -324,21 +319,21 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	}
 	
 	//TODO nextLevelType is hard coded temporarily. In future, store and get nextLevelType from CF
-	private void addPerformanceMetrics(List<Map<String, Object>> dataMapList, ColumnList<String> columns, String collectionType, String nextLevelType) {
+	private void addPerformanceMetrics(List<Map<String, Object>> dataMapList, Row resultRow, String collectionType, String nextLevelType) {
 		Map<String, Object> dataAsMap = new HashMap<String, Object>(8);
 		String responseNameForViews = ApiConstants.VIEWS;
 		if(nextLevelType.equalsIgnoreCase(ApiConstants.CONTENT)) {
 			nextLevelType = collectionType;
-			dataAsMap.put(ApiConstants.REACTION, columns.getLongValue(ApiConstants.REACTION, 0L));
+			dataAsMap.put(ApiConstants.REACTION, resultRow.getLong(ApiConstants.REACTION));
 		}
 		if(collectionType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) responseNameForViews = ApiConstants.ATTEMPTS;
-		dataAsMap.put(ApiConstants.getResponseNameByType(nextLevelType), columns.getStringValue(ApiConstants._LEAF_NODE, null));
-		dataAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, columns.getLongValue(ApiConstants.SCORE, 0L));
-		dataAsMap.put(responseNameForViews, columns.getLongValue(ApiConstants.VIEWS, 0L));
-		dataAsMap.put(ApiConstants.TIMESPENT, columns.getLongValue(ApiConstants._TIME_SPENT, 0L));
-		dataAsMap.put(ApiConstants.COMPLETED_COUNT, columns.getLongValue(ApiConstants._COMPLETED_COUNT, 0L));
+		dataAsMap.put(ApiConstants.getResponseNameByType(nextLevelType), resultRow.getString(ApiConstants._LEAF_NODE));
+		dataAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, resultRow.getLong(ApiConstants.SCORE));
+		dataAsMap.put(responseNameForViews, resultRow.getLong(ApiConstants.VIEWS));
+		dataAsMap.put(ApiConstants.TIMESPENT, resultRow.getLong(ApiConstants._TIME_SPENT));
+		dataAsMap.put(ApiConstants.COMPLETED_COUNT, resultRow.getLong(ApiConstants._COMPLETED_COUNT));
 		//TODO Need to add logic to fetch total count meta data from Database
-		dataAsMap.put(ApiConstants.TOTAL_COUNT, columns.getLongValue(ApiConstants._TOTAL_COUNT, 0L));
+		dataAsMap.put(ApiConstants.TOTAL_COUNT, resultRow.getLong(ApiConstants._TOTAL_COUNT));
 		dataMapList.add(dataAsMap);
 	}
 	
@@ -365,20 +360,19 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	private List<Map<String, Object>> getPriorUsage(String sessionKey) {
 	
 		List<Map<String, Object>> sessionActivities = new ArrayList<Map<String,Object>>();
-		CqlResult<String, String> userSessionActivityResult = getCassandraService().readRows(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), CqlQueries.GET_USER_SESSION_ACTIVITY, sessionKey);
-		if (userSessionActivityResult != null && userSessionActivityResult.hasRows()) {
-			for (Row<String, String> userSessionActivityRow : userSessionActivityResult.getRows()) {
+		ResultSet userSessionActivityResult = getCassandraService().getUserSessionActivity(sessionKey);
+		if (userSessionActivityResult != null) {
+			for (Row userSessionActivityRow : userSessionActivityResult) {
 				Map<String, Object> sessionActivityMetrics = new HashMap<String, Object>();
-				ColumnList<String> sessionActivityColumns = userSessionActivityRow.getColumns();
-				String contentType = sessionActivityColumns.getStringValue(ApiConstants._RESOURCE_TYPE, ApiConstants.STRING_EMPTY);
+				String contentType = userSessionActivityRow.getString(ApiConstants._RESOURCE_TYPE);
 				if(contentType.matches(ApiConstants.COLLECTION_OR_ASSESSMENT)) {
 					continue;
 				} else {
-					sessionActivityMetrics.put(ApiConstants.PARENT_EVENT_ID, sessionActivityColumns.getStringValue(ApiConstants._PARENT_EVENT_ID, null));
-					sessionActivityMetrics.put(ApiConstants.GOORUOID, sessionActivityColumns.getStringValue(ApiConstants._GOORU_OID, null));
-					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, ServiceUtils.castJSONToList(sessionActivityColumns.getStringValue(ApiConstants._ANSWER_OBJECT, ApiConstants.NA)));
-					sessionActivityMetrics.put(ApiConstants.VIEWS, sessionActivityColumns.getLongValue(ApiConstants.VIEWS, 0L));
-					sessionActivityMetrics.put(ApiConstants.REACTION, sessionActivityColumns.getLongValue(ApiConstants.REACTION, 0L));
+					sessionActivityMetrics.put(ApiConstants.PARENT_EVENT_ID, userSessionActivityRow.getString(ApiConstants._PARENT_EVENT_ID));
+					sessionActivityMetrics.put(ApiConstants.GOORUOID, userSessionActivityRow.getString(ApiConstants._GOORU_OID));
+					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, ServiceUtils.castJSONToList(userSessionActivityRow.getString(ApiConstants._ANSWER_OBJECT)));
+					sessionActivityMetrics.put(ApiConstants.VIEWS, userSessionActivityRow.getLong(ApiConstants.VIEWS));
+					sessionActivityMetrics.put(ApiConstants.REACTION, userSessionActivityRow.getLong(ApiConstants.REACTION));
 					sessionActivities.add(sessionActivityMetrics);
 				}
 			}
@@ -387,10 +381,10 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	}
 	private void getResourceMetricsBySession(List<Map<String, Object>> sessionActivities, String sessionKey, Map<String, Object> usageData) {
 		
-		ResultSet userSessionActivityResult = getCassandraService().getSessionInfo(sessionKey);
+		ResultSet userSessionActivityResult = getCassandraService().getUserSessionActivity(sessionKey);
 		if (userSessionActivityResult != null) {
 			String itemName = ApiConstants.RESOURCES;
-			for (com.datastax.driver.core.Row userSessionActivityRow : userSessionActivityResult) {
+			for (Row userSessionActivityRow : userSessionActivityResult) {
 				Map<String, Object> sessionActivityMetrics = new HashMap<String, Object>();
 				String contentType = userSessionActivityRow.getString(ApiConstants._RESOURCE_TYPE);
 				sessionActivityMetrics.put(ApiConstants.SESSIONID, userSessionActivityRow.getString(ApiConstants._SESSION_ID));
@@ -474,16 +468,15 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 
 		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
 		List<ContentTaxonomyActivity> contentTaxonomyActivityList = new ArrayList<>();
-		CqlResult<String, String> userSubjectActivityResult = getCassandraService().readRows(ColumnFamily.CONTENT_TAXONOMY_ACTIVITY.getColumnFamily(), CqlQueries.GET_SUBJECT_ACTIVITY, studentId, subjectId);
+		ResultSet userSubjectActivityResult = getCassandraService().getSubjectActivity(studentId, subjectId);
 		Map<String, Set<String>> itemMap = new HashMap<String, Set<String>>();
-		if (userSubjectActivityResult != null && userSubjectActivityResult.hasRows()) {
-			for (Row<String, String> row : userSubjectActivityResult.getRows()) {
+		if (userSubjectActivityResult != null) {
+			for (Row row : userSubjectActivityResult) {
 				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
-				ColumnList<String> subjectUsage = row.getColumns();
-				String courseId =  subjectUsage.getStringValue(ApiConstants._COURSE_ID, null);
-				String domainId =  subjectUsage.getStringValue(ApiConstants._DOMAIN_ID, null);
+				String courseId =  row.getString(ApiConstants._COURSE_ID);
+				String domainId =  row.getString(ApiConstants._DOMAIN_ID);
 				contentTaxonomyActivity.setCourseId(courseId);
-				itemMap = childActivityMetrics(contentTaxonomyActivity, subjectUsage, courseId, domainId);
+				itemMap = childActivityMetrics(contentTaxonomyActivity, row, courseId, domainId);
 				contentTaxonomyActivityList.add(contentTaxonomyActivity);
 			}
 		}
@@ -497,16 +490,15 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		
 		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
 		List<ContentTaxonomyActivity> contentTaxonomyActivityList = new ArrayList<>();
-		CqlResult<String, String> userCourseActivityResult = getCassandraService().readRows(ColumnFamily.CONTENT_TAXONOMY_ACTIVITY.getColumnFamily(), CqlQueries.GET_COURSE_ACTIVITY, studentId, subjectId, courseId);
+		ResultSet userCourseActivityResult = getCassandraService().getCourseActivity(studentId, subjectId, courseId);
 		Map<String, Set<String>> itemMap = new HashMap<String, Set<String>>();
-		if (userCourseActivityResult != null && userCourseActivityResult.hasRows()) {
-			for (Row<String, String> row : userCourseActivityResult.getRows()) {
+		if (userCourseActivityResult != null) {
+			for (Row row : userCourseActivityResult) {
 				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
-				ColumnList<String> courseUsage = row.getColumns();
-				String domainId = courseUsage.getStringValue(ApiConstants._DOMAIN_ID, null);
-				String standardsId = courseUsage.getStringValue(ApiConstants._STANDARDS_ID, null);
+				String domainId = row.getString(ApiConstants._DOMAIN_ID);
+				String standardsId = row.getString(ApiConstants._STANDARDS_ID);
 				contentTaxonomyActivity.setDomainId(domainId);
-				itemMap = childActivityMetrics(contentTaxonomyActivity, courseUsage, domainId, standardsId);
+				itemMap = childActivityMetrics(contentTaxonomyActivity, row, domainId, standardsId);
 				contentTaxonomyActivityList.add(contentTaxonomyActivity);
 			}
 		}
@@ -520,16 +512,15 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		
 		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
 		List<ContentTaxonomyActivity> contentTaxonomyActivityList = new ArrayList<>();
-		CqlResult<String, String> userDomainActivityResult = getCassandraService().readRows(ColumnFamily.CONTENT_TAXONOMY_ACTIVITY.getColumnFamily(), CqlQueries.GET_DOMAIN_ACTIVITY, studentId, subjectId, courseId, domainId);
+		ResultSet userDomainActivityResult = getCassandraService().getDomainActivity(studentId, subjectId, courseId, domainId);
 		Map<String, Set<String>> itemMap = new HashMap<String, Set<String>>();
-		if (userDomainActivityResult != null && userDomainActivityResult.hasRows()) {
-			for (Row<String, String> row : userDomainActivityResult.getRows()) {
+		if (userDomainActivityResult != null) {
+			for (Row row : userDomainActivityResult) {
 				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
-				ColumnList<String> domainUsage = row.getColumns();
-				String standardsId = domainUsage.getStringValue(ApiConstants._STANDARDS_ID, null);
-				String learningTargetId = domainUsage.getStringValue(ApiConstants._LEARNING_TARGETS_ID, null);
+				String standardsId = row.getString(ApiConstants._STANDARDS_ID);
+				String learningTargetId = row.getString(ApiConstants._LEARNING_TARGETS_ID);
 				contentTaxonomyActivity.setStandardsId(standardsId);
-				itemMap = childActivityMetrics(contentTaxonomyActivity, domainUsage, standardsId, learningTargetId);
+				itemMap = childActivityMetrics(contentTaxonomyActivity, row, standardsId, learningTargetId);
 				contentTaxonomyActivityList.add(contentTaxonomyActivity);
 			}
 		}
@@ -543,14 +534,13 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 
 		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
 		List<ContentTaxonomyActivity> contentTaxonomyActivityList = new ArrayList<>();
-		CqlResult<String, String> userStandardActivityResult = getCassandraService().readRows(ColumnFamily.CONTENT_TAXONOMY_ACTIVITY.getColumnFamily(), CqlQueries.GET_STANDARDS_ACTIVITY, studentId, subjectId, courseId, domainId, standardsId);
-		if (userStandardActivityResult != null && userStandardActivityResult.hasRows()) {
-			for (Row<String, String> row : userStandardActivityResult.getRows()) {
+		ResultSet userStandardActivityResult = getCassandraService().getStandardsActivity(studentId, subjectId, courseId, domainId, standardsId);
+		if (userStandardActivityResult != null) {
+			for (Row row : userStandardActivityResult) {
 				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
-				ColumnList<String> standardUsage = row.getColumns();
-				String learningTargetId = standardUsage.getStringValue(ApiConstants._LEARNING_TARGETS_ID, null);
+				String learningTargetId = row.getString(ApiConstants._LEARNING_TARGETS_ID);
 				contentTaxonomyActivity.setLearningTargetsId(learningTargetId);
-				childActivityMetrics(contentTaxonomyActivity, standardUsage, learningTargetId, null);
+				childActivityMetrics(contentTaxonomyActivity, row, learningTargetId, null);
 				contentTaxonomyActivityList.add(contentTaxonomyActivity);
 			}
 		}
@@ -562,14 +552,13 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	@Override
 	public ResponseParamDTO<Map<String, Object>> fetchTeacherGrade(String teacherUid, String userUid, String sessionId) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		CqlResult<String, String> result = getCassandraService().readRows(ColumnFamily.STUDENT_QUESTION_GRADE.getColumnFamily(), CqlQueries.GET_STUDENT_QUESTION_GRADE, teacherUid, userUid, sessionId);
+		ResultSet result = getCassandraService().getStudentQuestionGrade(teacherUid, userUid, sessionId);
 		List<Map<String, Object>> teacherGradeAsList = new ArrayList<>();
-		if(result != null && result.hasRows()) {
-			for(Row<String,String> row : result.getRows()) {
+		if(result != null) {
+			for(Row row : result) {
 				Map<String, Object> teacherGradeAsMap = new HashMap<String, Object>();
-				ColumnList<String> rowColumnList = row.getColumns();
-				teacherGradeAsMap.put(ApiConstants.QUESTION_ID, rowColumnList.getStringValue(ApiConstants._QUESTION_ID, null));
-				teacherGradeAsMap.put(ApiConstants.SCORE, rowColumnList.getLongValue(ApiConstants.SCORE, 0L));
+				teacherGradeAsMap.put(ApiConstants.QUESTION_ID, row.getString(ApiConstants._QUESTION_ID));
+				teacherGradeAsMap.put(ApiConstants.SCORE, row.getLong(ApiConstants.SCORE));
 				teacherGradeAsList.add(teacherGradeAsMap);
 			}
 			responseParamDTO.setContent(teacherGradeAsList);
@@ -585,22 +574,20 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		ResponseParamDTO<Map<String, Object>> resourceUsageObject = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String,Object>> resourceUsageList = new ArrayList<Map<String,Object>>();
 		for(String resourceId : resourceIds.split(ApiConstants.COMMA)) {
-			CqlResult<String, String> userSessionActivityResult = getCassandraService().readRows(ColumnFamily.USER_SESSION_ACTIVITY.getColumnFamily(), CqlQueries.GET_USER_SESSION_CONTENT_ACTIVITY, sessionId, resourceId.trim()); 
-			if(userSessionActivityResult != null && userSessionActivityResult.hasRows()) {
-				Rows<String, String> rows = userSessionActivityResult.getRows();
-				for(Row<String,String> row : rows) {
+			ResultSet userSessionActivityResult = getCassandraService().getUserSessionContentActivity(sessionId, resourceId.trim()); 
+			if(userSessionActivityResult != null) {
+				for(Row userSessionColumn : userSessionActivityResult) {
 					Map<String, Object> resourceUsage = new HashMap<String,Object>();
-					ColumnList<String> userSessionColumn = row.getColumns();
-					resourceUsage.put(ApiConstants.GOORUOID, userSessionColumn.getStringValue(ApiConstants._GOORU_OID, ApiConstants.STRING_EMPTY));
-					resourceUsage.put(ApiConstants.RESOURCE_TYPE, userSessionColumn.getStringValue(ApiConstants._RESOURCE_TYPE, ApiConstants.STRING_EMPTY));
-					resourceUsage.put(ApiConstants.QUESTION_TYPE, userSessionColumn.getStringValue(ApiConstants._QUESTION_TYPE, ApiConstants.STRING_EMPTY));
-					resourceUsage.put(ApiConstants.ANSWER_OBJECT, userSessionColumn.getStringValue(ApiConstants._ANSWER_OBJECT, ApiConstants.STRING_EMPTY));
-					resourceUsage.put(ApiConstants.STATUS, userSessionColumn.getStringValue(ApiConstants.ANSWER_STATUS, ApiConstants.STRING_EMPTY));
-					resourceUsage.put(ApiConstants.VIEWS, userSessionColumn.getLongValue(ApiConstants.VIEWS, 0L));
-					resourceUsage.put(ApiConstants.TIMESPENT, userSessionColumn.getLongValue(ApiConstants._TIME_SPENT, 0L));
-					resourceUsage.put(ApiConstants.SCORE, userSessionColumn.getLongValue(ApiConstants.SCORE, 0L));
-					resourceUsage.put(ApiConstants.ATTEMPTS, userSessionColumn.getLongValue(ApiConstants.ATTEMPTS, 0L));
-					resourceUsage.put(ApiConstants.REACTION, userSessionColumn.getLongValue(ApiConstants.REACTION, 0L));
+					resourceUsage.put(ApiConstants.GOORUOID, userSessionColumn.getString(ApiConstants._GOORU_OID));
+					resourceUsage.put(ApiConstants.RESOURCE_TYPE, userSessionColumn.getString(ApiConstants._RESOURCE_TYPE));
+					resourceUsage.put(ApiConstants.QUESTION_TYPE, userSessionColumn.getString(ApiConstants._QUESTION_TYPE));
+					resourceUsage.put(ApiConstants.ANSWER_OBJECT, userSessionColumn.getString(ApiConstants._ANSWER_OBJECT));
+					resourceUsage.put(ApiConstants.STATUS, userSessionColumn.getString(ApiConstants.ANSWER_STATUS));
+					resourceUsage.put(ApiConstants.VIEWS, userSessionColumn.getLong(ApiConstants.VIEWS));
+					resourceUsage.put(ApiConstants.TIMESPENT, userSessionColumn.getLong(ApiConstants._TIME_SPENT));
+					resourceUsage.put(ApiConstants.SCORE, userSessionColumn.getLong(ApiConstants.SCORE));
+					resourceUsage.put(ApiConstants.ATTEMPTS, userSessionColumn.getLong(ApiConstants.ATTEMPTS));
+					resourceUsage.put(ApiConstants.REACTION, userSessionColumn.getLong(ApiConstants.REACTION));
 					if(!resourceUsage.isEmpty()) {
 						resourceUsageList.add(resourceUsage);		
 					}
@@ -614,15 +601,17 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	private ResponseParamDTO<Map<String, Object>> getStudentCurrentLocation(String userUid, String classId) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
-		ColumnList<String> resultColumns = getCassandraService().readRow(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), CqlQueries.GET_USER_CURRENT_LOCATION_IN_CLASS, classId, userUid);
-		if (resultColumns != null && resultColumns.size() > 0) {
+		ResultSet resultRows = getCassandraService().getUserCurrentLocationInClass(classId, userUid);
+		if (resultRows != null) {
+			for(Row resultColumns : resultRows){	
 			Map<String, Object> dataAsMap = new HashMap<String, Object>();
-			dataAsMap.put(ApiConstants.getResponseNameByType(ApiConstants.CLASS), resultColumns.getStringValue(ApiConstants._CLASS_UID, null));
-			dataAsMap.put(ApiConstants.getResponseNameByType(ApiConstants.COURSE), resultColumns.getStringValue(ApiConstants._COURSE_UID, null));
-			dataAsMap.put(ApiConstants.getResponseNameByType(ApiConstants.UNIT), resultColumns.getStringValue(ApiConstants._UNIT_UID, null));
-			dataAsMap.put(ApiConstants.getResponseNameByType(ApiConstants.LESSON), resultColumns.getStringValue(ApiConstants._LESSON_UID, null));
-			dataAsMap.put(ApiConstants.getResponseNameByType(resultColumns.getStringValue(ApiConstants._COLLECTION_TYPE, ApiConstants.CONTENT)), resultColumns.getStringValue(ApiConstants._COLLECTION_UID, null));
+			dataAsMap.put(ApiConstants.getResponseNameByType(ApiConstants.CLASS), resultColumns.getString(ApiConstants._CLASS_UID));
+			dataAsMap.put(ApiConstants.getResponseNameByType(ApiConstants.COURSE), resultColumns.getString(ApiConstants._COURSE_UID));
+			dataAsMap.put(ApiConstants.getResponseNameByType(ApiConstants.UNIT), resultColumns.getString(ApiConstants._UNIT_UID));
+			dataAsMap.put(ApiConstants.getResponseNameByType(ApiConstants.LESSON), resultColumns.getString(ApiConstants._LESSON_UID));
+			dataAsMap.put(ApiConstants.getResponseNameByType(resultColumns.getString(ApiConstants._COLLECTION_TYPE)), resultColumns.getString(ApiConstants._COLLECTION_UID));
 			dataMapAsList.add(dataAsMap);
+			}
 		}
 		responseParamDTO.setContent(dataMapAsList);
 		return responseParamDTO;
@@ -632,14 +621,12 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
 		List<UserContentLocation> userContentLocationObject = new ArrayList<>();
-		CqlResult<String, String> resultRows = getCassandraService().readRows(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), CqlQueries.GET_ALL_USER_CURRENT_LOCATION_IN_CLASS, classId);
-		if (resultRows != null && resultRows.getRows() != null && resultRows.getRows().size() > 0) {
-			Rows<String, String> rows = resultRows.getRows();
-			for (Row<String, String> row : rows) {
-				ColumnList<String> columnList = row.getColumns();
-				String courseUId = columnList.getStringValue(ApiConstants._COURSE_UID, null);
-				String unitUId = columnList.getStringValue(ApiConstants._UNIT_UID, null);
-				String lessonUId = columnList.getStringValue(ApiConstants._LESSON_UID, null);
+		ResultSet resultRows = getCassandraService().getAllUserCurrentLocationInClass(classId);
+		if (resultRows != null) {
+			for (Row columnList : resultRows) {
+				String courseUId = columnList.getString(ApiConstants._COURSE_UID);
+				String unitUId = columnList.getString(ApiConstants._UNIT_UID);
+				String lessonUId = columnList.getString(ApiConstants._LESSON_UID);
 				if (courseUId.equalsIgnoreCase(courseId) && (StringUtils.isNotBlank(unitId) && unitUId.equalsIgnoreCase(unitId)) && StringUtils.isNotBlank(lessonUId)) {
 					generateUserLocationObject(classId, nextLevelType, userContentLocationObject, columnList, courseUId, unitUId, lessonUId);
 				} else if (courseUId.equalsIgnoreCase(courseId) && StringUtils.isBlank(unitId) && StringUtils.isNotBlank(unitUId)) {
@@ -661,15 +648,14 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	private ResponseParamDTO<Map<String, Object>> getUserPeerData(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
-		CqlResult<String, String> resultRows = getCassandraService().readRows(ColumnFamily.STUDENT_LOCATION.getColumnFamily(), CqlQueries.GET_ALL_USER_CURRENT_LOCATION_IN_CLASS, classId);
-		if (resultRows != null && resultRows.getRows() != null && resultRows.getRows().size() > 0) {
-			for (Row<String, String> row : resultRows.getRows()) {
-				ColumnList<String> columnList = row.getColumns();
-				String courseUId = columnList.getStringValue(ApiConstants._COURSE_UID, null); String unitUId = columnList.getStringValue(ApiConstants._UNIT_UID, null);
-				String lessonUId = columnList.getStringValue(ApiConstants._LESSON_UID, null); String collectionUId = columnList.getStringValue(ApiConstants._COLLECTION_UID, null);
-				nextLevelType = columnList.getStringValue(ApiConstants._COLLECTION_TYPE, ApiConstants.CONTENT);
+		ResultSet resultRows = getCassandraService().getAllUserCurrentLocationInClass(classId);
+		if (resultRows != null) {
+			for (Row columnList : resultRows) {
+				String courseUId = columnList.getString(ApiConstants._COURSE_UID); String unitUId = columnList.getString(ApiConstants._UNIT_UID);
+				String lessonUId = columnList.getString(ApiConstants._LESSON_UID); String collectionUId = columnList.getString(ApiConstants._COLLECTION_UID);
+				nextLevelType = columnList.getString(ApiConstants._COLLECTION_TYPE);
 				if (courseUId.equalsIgnoreCase(courseId) && unitUId.equalsIgnoreCase(unitId) && lessonUId.equalsIgnoreCase(lessonId) && StringUtils.isNotBlank(collectionUId)) {
-					String status = ApiConstants.IN_ACTIVE; String userId = columnList.getStringValue(ApiConstants._USER_UID, null); Long sessionTime = columnList.getLongValue(ApiConstants._SESSION_TIME, 0L);
+					String status = ApiConstants.IN_ACTIVE; String userId = columnList.getString(ApiConstants._USER_UID); Long sessionTime = columnList.getLong(ApiConstants._SESSION_TIME);
 					//TODO make this time limit configurable
 					if (sessionTime >= (System.currentTimeMillis() - 900000)) {
 						status = ApiConstants.ACTIVE;
@@ -686,9 +672,9 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return responseParamDTO;
 	}
 	
-	private void generateUserLocationObject(String classId, String nextLevelType, List<UserContentLocation> userContentLocationObject, ColumnList<String> columnList, String courseUId, String unitUId,
+	private void generateUserLocationObject(String classId, String nextLevelType, List<UserContentLocation> userContentLocationObject, Row columnList, String courseUId, String unitUId,
 			String lessonUId) {
-		String userId = columnList.getStringValue(ApiConstants._USER_UID, null);
+		String userId = columnList.getString(ApiConstants._USER_UID);
 		UserContentLocation userLocation = new UserContentLocation(classId, courseUId, unitUId, lessonUId, null, userId, nextLevelType);
 		userContentLocationObject.add(userLocation);
 	}
@@ -702,15 +688,15 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return userLocation.getUnitUid();
 	}
 	
-	private Map<String,Set<String>> childActivityMetrics(ContentTaxonomyActivity contentTaxonomyActivity, ColumnList<String> taxonomyUsage, String parentKey, String childKey) {
+	private Map<String,Set<String>> childActivityMetrics(ContentTaxonomyActivity contentTaxonomyActivity, Row taxonomyUsage, String parentKey, String childKey) {
 		
 		Map<String,Set<String>> itemMap = new HashMap<>();
-		contentTaxonomyActivity.setResourceType(taxonomyUsage.getStringValue(ApiConstants._RESOURCE_TYPE, null));
+		contentTaxonomyActivity.setResourceType(taxonomyUsage.getString(ApiConstants._RESOURCE_TYPE));
 		if(ApiConstants.QUESTION.equalsIgnoreCase(contentTaxonomyActivity.getResourceType())) {
-			contentTaxonomyActivity.setScore(taxonomyUsage.getLongValue(ApiConstants.SCORE, 0L));
-			contentTaxonomyActivity.setAttempts(taxonomyUsage.getLongValue(ApiConstants.VIEWS, 0L));
+			contentTaxonomyActivity.setScore(taxonomyUsage.getLong(ApiConstants.SCORE));
+			contentTaxonomyActivity.setAttempts(taxonomyUsage.getLong(ApiConstants.VIEWS));
 		} else {
-			contentTaxonomyActivity.setTimespent(taxonomyUsage.getLongValue(ApiConstants.TIME_SPENT, 0L));
+			contentTaxonomyActivity.setTimespent(taxonomyUsage.getLong(ApiConstants.TIME_SPENT));
 		}
 		if(childKey != null) {
 			if(itemMap.containsKey(parentKey)) {
@@ -755,15 +741,14 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	private Map<String, String> getUsersLatestSessionId(String classId, String courseId, String unitId, String lessonId, String collectionId, String userId) {
 		
 		Map<String,String> usersSession = new HashMap<String,String>();
-		CqlResult<String, String>  usersLatestSession = null;
+		ResultSet  usersLatestSession = null;
 		if(StringUtils.isNotBlank(userId)) {
-			usersLatestSession = cassandraService.readRows(ColumnFamily.USER_CLASS_COLLECTION_LAST_SESSIONS.getColumnFamily(), CqlQueries.GET_USER_CLASS_CONTENT_LATEST_SESSION, classId, courseId, unitId, lessonId, collectionId, userId);
+			usersLatestSession = cassandraService.getUserClassContentLatestSession(classId, courseId, unitId, lessonId, collectionId, userId);
 		} else {
-			usersLatestSession = cassandraService.readRows(ColumnFamily.USER_CLASS_COLLECTION_LAST_SESSIONS.getColumnFamily(), CqlQueries.GET_USERS_CLASS_CONTENT_LATEST_SESSION, classId, courseId, unitId, lessonId, collectionId);
+			usersLatestSession = cassandraService.getUsersClassContentLatestSession(classId, courseId, unitId, lessonId, collectionId);
 		}
-		for(Row<String, String> row : usersLatestSession.getRows()) {
-			ColumnList<String> columnList = row.getColumns();
-			usersSession.put(columnList.getStringValue(ApiConstants._SESSION_ID, null), columnList.getStringValue(ApiConstants._USER_UID, null));
+		for(Row columnList : usersLatestSession) {
+			usersSession.put(columnList.getString(ApiConstants._SESSION_ID), columnList.getString(ApiConstants._USER_UID));
 		}
 		return usersSession;
 	}

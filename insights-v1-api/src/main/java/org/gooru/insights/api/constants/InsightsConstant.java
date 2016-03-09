@@ -62,7 +62,7 @@ public interface InsightsConstant {
 	
 	String USAGE_SIGNALS_AVAILABLE = "userSignalsAvailable";
 
-	public enum ColumnFamily {
+	public enum ColumnFamilySet {
 		RESOURCE("resource"), DIM_RESOURCE("dim_resource"), REAL_TIME_DASHBOARD(
 				"real_time_aggregator"), CUSTOM_FIELDS("custom_fields_data"), LIVE_DASHBOARD(
 				"live_dashboard"), COLLECTION("collection"), COLLECTION_ITEM(
@@ -81,7 +81,7 @@ public interface InsightsConstant {
 
 		private String columnFamily;
 
-		private ColumnFamily(String value) {
+		private ColumnFamilySet(String value) {
 			columnFamily = value;
 		}
 
