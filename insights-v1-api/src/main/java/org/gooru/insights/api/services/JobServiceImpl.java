@@ -11,7 +11,7 @@ import javax.annotation.PostConstruct;
 
 import org.gooru.insights.api.constants.ErrorMessages;
 import org.gooru.insights.api.constants.InsightsOperationConstants;
-import org.gooru.insights.api.constants.InsightsConstant.ColumnFamily;
+import org.gooru.insights.api.constants.InsightsConstant.ColumnFamilySet;
 import org.gooru.insights.api.models.JobStatus;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.utils.DataUtils;
@@ -92,7 +92,7 @@ public class JobServiceImpl implements JobService {
 	private String getSingleJobStatus(String queue) {
 		String lagTime = null;
 		try {
-			ColumnList<String> settingsMap = cassandraService.read(ColumnFamily.CONFIG_SETTING.getColumnFamily(), monitoringKeys.get(queue)).getResult();
+			ColumnList<String> settingsMap = cassandraService.read(ColumnFamilySet.CONFIG_SETTING.getColumnFamily(), monitoringKeys.get(queue)).getResult();
 			Date lastRunTime = minFormatter.parse(settingsMap.getColumnByName(InsightsOperationConstants.CONSTANT_VALUE).getStringValue());
 			lagTime = DataUtils.getTimeDifference(lastRunTime);
 		} catch (Exception e2) {
@@ -107,7 +107,7 @@ public class JobServiceImpl implements JobService {
 		List<Map<String,Object>> jobList = new ArrayList<Map<String,Object>>();
 		Map<String,Object> errorMap = new HashMap<String,Object>();
 		if(jobStatus != null) {
-			Rows<String, String> runningJobs = getCassandraService().read(ColumnFamily.JOB_TRACKER.getColumnFamily(), "running_status", 1).getResult();
+			Rows<String, String> runningJobs = getCassandraService().read(ColumnFamilySet.JOB_TRACKER.getColumnFamily(), "running_status", 1).getResult();
 			Map<String,String> jobDetails = new HashMap<String,String>();
 			for(int i=0;i<runningJobs.size();i++) {
 				jobDetails.put(runningJobs.getRowByIndex(i).getKey(), runningJobs.getRowByIndex(i).getColumns().getColumnByName("modified_on").getStringValue());

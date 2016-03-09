@@ -15,7 +15,7 @@ import javax.annotation.PostConstruct;
 
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.SessionAttributes;
-import org.gooru.insights.api.constants.InsightsConstant.ColumnFamily;
+import org.gooru.insights.api.constants.InsightsConstant.ColumnFamilySet;
 import org.gooru.insights.api.constants.ExportFileConstants;
 import org.gooru.insights.api.services.BaseService;
 import org.gooru.insights.api.services.CassandraService;
@@ -95,7 +95,7 @@ public class ClassExporterProcessor {
 				if(sessionIds.size() > 0){
 					sessionId = sessionIds.get(0);
 				}
-				ColumnList<String> resourceActivity = getCassandraService().read(ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), sessionId).getResult();
+				ColumnList<String> resourceActivity = getCassandraService().read(ColumnFamilySet.SESSION_ACTIVITY.getColumnFamily(), sessionId).getResult();
 				if(asessmentData){
 					keyPrefix = getBaseService().buildString(ApiConstants.QUESTION,asessmentCount,ApiConstants.HYPHEN);
 					if(resourceActivity == null || resourceActivity.isEmpty() ) {
@@ -162,7 +162,7 @@ public class ClassExporterProcessor {
 					asessmentData = true;
 				}
 			}
-			ColumnList<String> resourceActivity = getCassandraService().read(ColumnFamily.SESSION_ACTIVITY.getColumnFamily(), sessionId).getResult();
+			ColumnList<String> resourceActivity = getCassandraService().read(ColumnFamilySet.SESSION_ACTIVITY.getColumnFamily(), sessionId).getResult();
 			if(!includCollectionData){
 				if(resourceActivity == null || resourceActivity.isEmpty() ) {
 					collectionData.put(getBaseService().buildString(collectionKeyPrefix,ExportFileConstants.SCORE_IN_PERCENTAGE),ApiConstants.HYPHEN);

@@ -38,7 +38,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.gooru.insights.api.constants.ApiConstants;
-import org.gooru.insights.api.constants.InsightsConstant.ColumnFamily;
+import org.gooru.insights.api.constants.InsightsConstant.ColumnFamilySet;
 import org.gooru.insights.api.models.User;
 import org.gooru.insights.api.services.CassandraService;
 import org.gooru.insights.api.services.RedisService;
@@ -314,7 +314,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 		String teacherUid = null;
 		if (StringUtils.isNotBlank(classGooruId)) {
 			try {
-				OperationResult<ColumnList<String>> classData = cassandraService.read(ColumnFamily.CLASS.getColumnFamily(), classGooruId);
+				OperationResult<ColumnList<String>> classData = cassandraService.read(ColumnFamilySet.CLASS.getColumnFamily(), classGooruId);
 				if (!classData.getResult().isEmpty() && classData.getResult().size() > 0) {
 					teacherUid = classData.getResult().getStringValue(ApiConstants._CREATOR_UID, null);
 				}

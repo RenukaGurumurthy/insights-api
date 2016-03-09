@@ -308,7 +308,7 @@ public class ExcelReportServiceImpl implements ExcelReportService,InsightsConsta
 			}else{
 				subTimeLineKeys = timLinekeys.subList(a, timLinekeys.size());
 			}
-			OperationResult<Rows<String, String>> locationDetails = cassandraService.read(ColumnFamily.EVENT_TIMELINE.getColumnFamily(), subTimeLineKeys);
+			OperationResult<Rows<String, String>> locationDetails = cassandraService.read(ColumnFamilySet.EVENT_TIMELINE.getColumnFamily(), subTimeLineKeys);
 			 for (Row<String, String> row : locationDetails.getResult()) {
 				 	ColumnList<String> eventUUID = row.getColumns();
 				    if(eventUUID == null && eventUUID.isEmpty() ) {
@@ -328,7 +328,7 @@ public class ExcelReportServiceImpl implements ExcelReportService,InsightsConsta
 				}else{
 					subEventDetailkeys = eventDetailkeys.subList(b, eventDetailkeys.size());
 				}
-				OperationResult<Rows<String, String>> results = cassandraService.readAll(ColumnFamily.EVENT_DETAIL.getColumnFamily(), subEventDetailkeys, columns);
+				OperationResult<Rows<String, String>> results = cassandraService.readAll(ColumnFamilySet.EVENT_DETAIL.getColumnFamily(), subEventDetailkeys, columns);
 				 	for (Row<String, String> row : results.getResult()) {
 				 		JsonObject eventObj = new JsonParser().parse(row.getColumns().getStringValue("fields", null)).getAsJsonObject();
 				 		EventObject eventObject = gson.fromJson(eventObj, EventObject.class);

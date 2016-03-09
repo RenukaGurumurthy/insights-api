@@ -1,14 +1,52 @@
 package org.gooru.insights.api.services;
 
 import com.datastax.driver.core.ResultSet;
-import com.netflix.astyanax.model.ColumnList;
-import com.netflix.astyanax.model.CqlResult;
 
-public interface CassandraV2Service {
+public interface CassandraV2Service {	
 
-	CqlResult<String, String> readRows(String columnFamilyName, String query, String... values);
-	
-	ColumnList<String> readRow(String columnFamilyName, String query, String... values);
+	ResultSet getSessionActivityType(String sessionId, String gooruOid);
 
-	ResultSet getSessionInfo(String value);
+	ResultSet getUserCollectionSessions(String userUid, String collectionUid,
+			String collectionType, String classUid, String courseUid,
+			String unitUid, String lessonUid);
+
+	ResultSet getUserAssessmentSessions(String userUid, String collectionUid,
+			String collectionType, String classUid, String courseUid,
+			String unitUid, String lessonUid, String eventType);
+
+	ResultSet getUserSessionActivity(String sessionId);
+
+	ResultSet getUserSessionContentActivity(String sessionId, String gooruOid);
+
+	ResultSet getUserCurrentLocationInClass(String classUid, String userUid);
+
+	ResultSet getAllUserCurrentLocationInClass(String classUid);
+
+	ResultSet getUserClassContentLatestSession(String classUid,
+			String courseUid, String unitUid, String lessonUid,
+			String collectionUid, String userUid);
+
+	ResultSet getUsersClassContentLatestSession(String classUid,
+			String courseUid, String unitUid, String lessonUid,
+			String collectionUid);
+
+	ResultSet getUserClassActivityDatacube(String rowKey, String userUid,
+			String collectionType);
+
+	ResultSet getClassActivityDatacube(String sessionId, String collectionType);
+
+	ResultSet getUserPeerDetail(String rowKey);
+
+	ResultSet getSubjectActivity(String rowKey, String subjectId);
+
+	ResultSet getCourseActivity(String rowKey, String subjectId, String courseId);
+
+	ResultSet getDomainActivity(String rowKey, String subjectId,
+			String courseId, String domainId);
+
+	ResultSet getStandardsActivity(String rowKey, String subjectId,
+			String courseId, String domainId, String standardsId);
+
+	ResultSet getStudentQuestionGrade(String teacherUid, String userUid,
+			String sessionId);
 }
