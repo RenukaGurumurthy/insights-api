@@ -42,9 +42,6 @@ import com.netflix.astyanax.model.Rows;
 public class BaseServiceImpl implements BaseService {
 
 	@Autowired
-	private SelectParamsService selectParamsService;
-
-	@Autowired
 	private CassandraService cassandraService;
 	
 	private SimpleDateFormat dateFormatter;
@@ -169,11 +166,6 @@ public class BaseServiceImpl implements BaseService {
 			return true;
 		}
 		return false;
-	}
-
-	private SelectParamsService getSelectParameter() {
-
-		return selectParamsService;
 	}
 
 	public long getTimeStamp(String Date) throws ParseException {
