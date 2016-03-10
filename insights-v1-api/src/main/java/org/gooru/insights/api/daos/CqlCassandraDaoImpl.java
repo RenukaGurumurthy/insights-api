@@ -248,6 +248,18 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		return getCassSession().execute(select);
 	}
 	
+	//public static final String GET_CLASS_COLLECTION_COUNT = "SELECT assessment_count,collection_count FROM class_collection_count WHERE class_uid=? AND collection_uid=?";
+		@Override
+	public ResultSet getClassCollectionCount(String classUid,
+			String collectionUid) {
+		Statement select = QueryBuilder
+				.select().all().from(getLogKeyspaceName(),ColumnFamilySet.CLASS_COLLECTION_SETTINGS.getColumnFamily())
+				.where(QueryBuilder.eq(ApiConstants._CLASS_UID, classUid))
+				.and(QueryBuilder.eq(ApiConstants._COLLECTION_UID,collectionUid))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+		return getCassSession().execute(select);
+	}
+		
 	private Statement getUserSessionStatmentForAssessment(String userUid,
 			String collectionUid, String collectionType, String classUid,
 			String courseUid, String unitUid, String lessonUid, String eventType){

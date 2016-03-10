@@ -301,7 +301,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 				if (userUsageAsMap.containsKey(userId) && userUsageAsMap.get(userId) != null) {
 					dataMapList = (List<Map<String, Object>>) userUsageAsMap.get(userId);
 				}
-				addPerformanceMetrics(dataMapList, resultRow, collectionType, nextLevelType);
+				addPerformanceMetrics(classId, lessonId, dataMapList, resultRow, collectionType, nextLevelType);
 				userUsageAsMap.put(userId, dataMapList);
 			}
 			for (Map.Entry<String, Object> userUsageAsMapEntry : userUsageAsMap.entrySet()) {
@@ -316,7 +316,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	}
 	
 	//TODO nextLevelType is hard coded temporarily. In future, store and get nextLevelType from CF
-	private void addPerformanceMetrics(List<Map<String, Object>> dataMapList, Row resultRow, String collectionType, String nextLevelType) {
+	private void addPerformanceMetrics(String classId, String lessonId, List<Map<String, Object>> dataMapList, Row resultRow, String collectionType, String nextLevelType) {
 		Map<String, Object> dataAsMap = new HashMap<String, Object>(8);
 		String responseNameForViews = ApiConstants.VIEWS;
 		if(nextLevelType.equalsIgnoreCase(ApiConstants.CONTENT)) {
@@ -324,13 +324,15 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			dataAsMap.put(ApiConstants.REACTION, resultRow.getLong(ApiConstants.REACTION));
 		}
 		if(collectionType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) responseNameForViews = ApiConstants.ATTEMPTS;
+		String leafNodeId = resultRow.getString(ApiConstants._LEAF_NODE);
+		if(lessonId != null) leafNodeId = lessonId;
 		dataAsMap.put(ApiConstants.getResponseNameByType(nextLevelType), resultRow.getString(ApiConstants._LEAF_NODE));
 		dataAsMap.put(ApiConstants.SCORE_IN_PERCENTAGE, resultRow.getLong(ApiConstants.SCORE));
 		dataAsMap.put(responseNameForViews, resultRow.getLong(ApiConstants.VIEWS));
 		dataAsMap.put(ApiConstants.TIMESPENT, resultRow.getLong(ApiConstants._TIME_SPENT));
 		dataAsMap.put(ApiConstants.COMPLETED_COUNT, resultRow.getLong(ApiConstants._COMPLETED_COUNT));
 		//TODO Need to add logic to fetch total count meta data from Database
-		dataAsMap.put(ApiConstants.TOTAL_COUNT, resultRow.getLong(ApiConstants._TOTAL_COUNT));
+		dataAsMap.put(ApiConstants.TOTAL_COUNT, getCulCollectionCount(classId, leafNodeId, collectionType));
 		dataMapList.add(dataAsMap);
 	}
 	
@@ -748,5 +750,20 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			usersSession.put(columnList.getString(ApiConstants._SESSION_ID), columnList.getString(ApiConstants._USER_UID));
 		}
 		return usersSession;
+	}
+
+	private long getCulCollectionCount(String classId, String leafNodeId,
+			String collectionType) {
+		long totalCount = 0L;
+		String columnName = ApiConstants.COLLECTION.equals(collectionType) ? ApiConstants._COLLECTION_COUNT
+				: ApiConstants._ASSESSMENT_COUNT;
+		ResultSet columnList = cassandraService.getClassCollectionCount(
+				classId, leafNodeId);
+		if (columnList != null) {
+			for (Row columns : columnList) {
+				totalCount = columns.getLong(columnName);
+			}
+		}
+		return totalCount;
 	}
 } 

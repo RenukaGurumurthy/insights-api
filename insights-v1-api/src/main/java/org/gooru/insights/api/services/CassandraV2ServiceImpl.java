@@ -109,4 +109,9 @@ public class CassandraV2ServiceImpl implements CassandraV2Service{
 			String sessionId) {
 		return cqlDAO.getStudentQuestionGrade(teacherUid, userUid, sessionId);
 	}
+	
+	@Override
+	public ResultSet getClassCollectionCount(String classUid, String collectionUid) {
+		return cqlDAO.getClassCollectionCount(classUid, collectionUid);
+	}
 }

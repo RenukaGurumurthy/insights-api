@@ -49,4 +49,6 @@ public interface CassandraV2Service {
 
 	ResultSet getStudentQuestionGrade(String teacherUid, String userUid,
 			String sessionId);
+
+	ResultSet getClassCollectionCount(String classUid, String collectionUid);
 }

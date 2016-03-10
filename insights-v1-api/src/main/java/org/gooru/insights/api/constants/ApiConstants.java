@@ -396,6 +396,8 @@ public class ApiConstants {
 	public static final String IN_ACTIVE = "Inactive";
 	public static final String _PARENT_EVENT_ID = "parent_event_id";
 	public static final String PARENT_EVENT_ID = "parentEventId";
+	public static final String _COLLECTION_COUNT = "collection_count";
+	public static final String _ASSESSMENT_COUNT = "assessment_count";
 	
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");

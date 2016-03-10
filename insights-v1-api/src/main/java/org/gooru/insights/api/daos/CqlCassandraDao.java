@@ -50,4 +50,6 @@ public interface CqlCassandraDao {
 
 	ResultSet getSessionActivityType(String sessionId, String gooruOid);
 
+	ResultSet getClassCollectionCount(String classUid, String collectionUid);
+
 }
