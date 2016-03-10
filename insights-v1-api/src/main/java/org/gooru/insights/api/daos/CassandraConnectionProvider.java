@@ -3,6 +3,7 @@ package org.gooru.insights.api.daos;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
 import org.slf4j.Logger;
@@ -39,9 +40,16 @@ public class CassandraConnectionProvider {
         initCassandraClient();
         
     }
-
+    
+    @PreDestroy
+    private void closeConnection(){
+    	System.out.print("closingg connection.....");
+    	session.close();
+    }
+    
 	private static void initCassandraClient() {
 		try {
+			System.out.print("Init connection.....");
 			cluster = Cluster
 					.builder()
 					.withClusterName(clusterName)
