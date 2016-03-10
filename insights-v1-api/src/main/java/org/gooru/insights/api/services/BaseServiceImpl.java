@@ -30,7 +30,6 @@ import org.gooru.insights.api.utils.JsonDeserializer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.netflix.astyanax.connectionpool.OperationResult;
@@ -41,9 +40,7 @@ import com.netflix.astyanax.model.Rows;
 @Service
 public class BaseServiceImpl implements BaseService {
 
-	@Autowired
-	private CassandraService cassandraService;
-	
+
 	private SimpleDateFormat dateFormatter;
 	
 	public List<Map<String, Object>> sortBy(List<Map<String, Object>> requestData, String sortBy, String sortOrder) {
@@ -1350,32 +1347,6 @@ public JSONObject mergeJSONObject(String raw,String custom,String arrayObjectIde
 		return null;
 	}
 }
-    public Map<String,String> getDisplayKey(String dashboardKeys){
-        Map<String,String> returnDate = new LinkedHashMap<String, String>();
-        SimpleDateFormat dateFormatter = null;
-        if(dashboardKeys != null){
-                for(String key : dashboardKeys.split(",")){
-                        String rowKeys = "";
-                        ColumnList<String> defination = cassandraService.getDashBoardKeys(key);
-                        	String[] parts = key.split("~");
-	            	        for(int i = 0 ; i < parts.length ; i++){
-	            	        	if(parts[i].startsWith("D:")){
-	            	        		String[] subKey = parts[i].split(":");
-	            	    			dateFormatter = new SimpleDateFormat(subKey[1]);
-	            	    			rowKeys += "~"+dateFormatter.format(new Date()).toString();
-	            	        	}else if(parts[i].startsWith("C:")){
-	            	        		String[] subKey = parts[i].split(":");
-	            	        		rowKeys += "~"+subKey[1];
-	            	        	}else{
-	            	        		throw new RuntimeException("Invalide key format : "+ key);
-	            	        	}
-	            	        }	            	        
-	            	        returnDate.put(rowKeys.substring(1).trim(), defination.getStringValue("constant_value", null));
-	            	        
-                        }
-                }        
-        return returnDate;
-    }
     
     public Map<String,String> generateDiffYMWDValues(String dashboardKeys) throws ParseException{
 		Map<String,String> returnDate = new LinkedHashMap<String, String>();
@@ -1737,4 +1708,5 @@ public JSONObject mergeJSONObject(String raw,String custom,String arrayObjectIde
 			long lsecs = (long) Math.floor(secs - (hrs * 3600) - (mins * 60));
 			return ((hrs < 10) ? 0L + "" + hrs : hrs) + ":" + ((mins < 10) ? 0L + "" + mins : mins) + ":" + ((lsecs < 10) ? 0L + "" + lsecs : lsecs);
 		}
+
 }

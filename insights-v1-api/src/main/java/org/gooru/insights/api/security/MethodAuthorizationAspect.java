@@ -40,7 +40,6 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.InsightsConstant.ColumnFamilySet;
 import org.gooru.insights.api.models.User;
-import org.gooru.insights.api.services.CassandraService;
 import org.gooru.insights.api.services.RedisService;
 import org.gooru.insights.api.utils.InsightsLogger;
 import org.gooru.insights.api.utils.RequestUtils;
@@ -70,10 +69,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 
 	@Autowired
 	private RedisService redisService;
-	
-	@Autowired
-	private CassandraService cassandraService;
-	
+		
 	private ColumnList<String> endPoint;
 	
 	private ColumnList<String> entityOperationsRole;
@@ -89,8 +85,8 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	
 	@PostConstruct
 	private void init(){
-		 endPoint = cassandraService.getDashBoardKeys(ApiConstants.GOORU_REST_ENDPOINT);
-		 entityOperationsRole = cassandraService.getDashBoardKeys(ApiConstants.ENTITY_ROLE_OPERATIONS);
+		/* endPoint = cassandraService.getDashBoardKeys(ApiConstants.GOORU_REST_ENDPOINT);
+		 entityOperationsRole = cassandraService.getDashBoardKeys(ApiConstants.ENTITY_ROLE_OPERATIONS);*/
 	}
 	
 	@Around("accessCheckPointcut() && @annotation(authorizeOperations) && @annotation(requestMapping)")
@@ -313,6 +309,9 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	private String getTeacherUid(String classGooruId) {
 		String teacherUid = null;
 		if (StringUtils.isNotBlank(classGooruId)) {
+			/**
+			 * Re-look at this area
+			 * 
 			try {
 				OperationResult<ColumnList<String>> classData = cassandraService.read(ColumnFamilySet.CLASS.getColumnFamily(), classGooruId);
 				if (!classData.getResult().isEmpty() && classData.getResult().size() > 0) {
@@ -321,7 +320,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			} catch (Exception e) {
 				InsightsLogger.error("Exception", e);
 			}
-		}
+		*/}
 		return teacherUid;
 	}
 }

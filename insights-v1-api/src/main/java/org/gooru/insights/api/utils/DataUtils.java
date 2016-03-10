@@ -17,10 +17,9 @@ import javax.annotation.Resource;
 
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.options;
-import org.gooru.insights.api.constants.InsightsConstant.ColumnFamilySet;
 import org.gooru.insights.api.constants.ErrorMessages;
+import org.gooru.insights.api.constants.InsightsConstant.ColumnFamilySet;
 import org.gooru.insights.api.services.BaseService;
-import org.gooru.insights.api.services.CassandraService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,9 +61,6 @@ public class DataUtils {
 	@Autowired
 	private BaseService baseService;
 	
-	@Autowired
-	private CassandraService cassandraService;
-	
 	@Resource
 	private Properties filePath;
 
@@ -72,7 +68,6 @@ public class DataUtils {
 
 	@PostConstruct
 	private void init() {
-		includeTableDataType();
 		putResourceFields();
 		putMergeDualColumnValues();
 		putNFSLocation();
@@ -86,28 +81,6 @@ public class DataUtils {
 		nfsLocation = filePath.getProperty(ApiConstants.NFS_BUCKET);
 	}
 	
-	private void includeTableDataType(){
-		if (ColumnFamilySetDataTypes == null) {
-			ColumnFamilySetDataTypes = new HashMap<String, Map<String, String>>();
-			ColumnFamilySet[] columnFamilies = ColumnFamilySet.values();
-			Set<String> columnFamiliesName = new HashSet<String>();
-			for (ColumnFamilySet ColumnFamilySet : columnFamilies) {
-				columnFamiliesName.add(ColumnFamilySet.getColumnFamily());
-			}
-			OperationResult<Rows<String, String>> tableDataType = getCassandraService()
-					.read(ColumnFamilySet.TABLE_DATATYPES.getColumnFamily(),
-							columnFamiliesName);
-			if (tableDataType != null && !tableDataType.getResult().isEmpty()) {
-				for (Row<String, String> row : tableDataType.getResult()) {
-					Map<String, String> dataType = new HashMap<String, String>();
-					for (Column<String> column : row.getColumns()) {
-						dataType.put(column.getName(), column.getStringValue());
-					}
-					ColumnFamilySetDataTypes.put(row.getKey(), dataType);
-				}
-			}
-		}
-	}
 	
 	private void putResourceFields(){
 		
@@ -494,13 +467,7 @@ public class DataUtils {
 	public void setBaseService(BaseService baseService) {
 		this.baseService = baseService;
 	}
-	public CassandraService getCassandraService() {
-		return cassandraService;
-	}
-	public void setCassandraService(CassandraService cassandraService) {
-		this.cassandraService = cassandraService;
-	}
-
+	
 	public static Map<String, Map<String, String>> getColumnFamilySetDataTypes() {
 		return ColumnFamilySetDataTypes;
 	}

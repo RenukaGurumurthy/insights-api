@@ -26,19 +26,6 @@ public interface BaseService {
 	
 	RequestParamsDTO buildRequestParameters(String data) throws Exception;
 	
-	List<Map<String,Object>> getColumnValues(OperationResult<ColumnList<String>> columnList);
-	
-	Map<String,Object> getColumnValue(OperationResult<ColumnList<String>> columnList);
-	
-	Map<String,Object> getLongValue(OperationResult<ColumnList<String>> columnList);
-	
-	Map<String, Object> getRowLongValue(OperationResult<Rows<String, String>> rowList);
-	
-	Map<String, Object> getRowLongValues(OperationResult<Rows<String, String>> rowList);
-	
-	Map<String,String> getStringValue(OperationResult<ColumnList<String>> columnList);
-	
-	List<Map<String,Object>> getRowsColumnValues(OperationResult<Rows<String, String>> rowList);
 	
 	List<Map<String,Object>> getData(List<Map<String,Object>> requestData,String coreKey);
 	
@@ -101,9 +88,7 @@ public interface BaseService {
 	Collection<String> generateYMWDKey(String keys);
 	
 	String convertListToString(Collection<String> keyList);
-	
-	Map<String,String> getDisplayKey(String dashboardKeys);	
-	
+		
 	String generateTimeConversion(long mseconds);
 
 	Map<String,String> generateDiffYMWDValues(String dashboardKeys) throws ParseException;

@@ -45,17 +45,16 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 	public ResultSet getUserAssessmentSessions(String userUid,
 			String collectionUid, String collectionType, String classUid,
 			String courseUid, String unitUid, String lessonUid, String eventType) {
-		Statement select = QueryBuilder.select().all()
-				.from(getLogKeyspaceName(), ColumnFamilySet.USER_SESSIONS.getColumnFamily())
-				.where(QueryBuilder.eq(ApiConstants._USER_UID, userUid))
-				.and(QueryBuilder.eq(ApiConstants._COLLECTION_UID, collectionUid))
-				.and(QueryBuilder.eq(ApiConstants._COLLECTION_TYPE, collectionType))
-				.and(QueryBuilder.eq(ApiConstants._CLASS_UID, classUid))
-				.and(QueryBuilder.eq(ApiConstants._COURSE_UID, courseUid))
-				.and(QueryBuilder.eq(ApiConstants._UNIT_UID, unitUid))
-				.and(QueryBuilder.eq(ApiConstants._LESSON_UID, lessonUid))
-				.and(QueryBuilder.eq(ApiConstants._EVENT_TYPE, eventType))
-				;
+		Statement select = null;
+		if (eventType != null) {
+			select = getUserSessionStatmentForAssessment(userUid,
+					collectionUid, collectionType, classUid, courseUid,
+					unitUid, lessonUid, eventType);
+		} else {
+			select = getUserSessionStatmentForCollection(userUid,
+					collectionUid, collectionType, classUid, courseUid,
+					unitUid, lessonUid, eventType);
+		}
 		return getCassSession().execute(select);
 	}
 	
@@ -228,5 +227,38 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 				.and(QueryBuilder.eq(ApiConstants._USER_UID, userUid))
 				.and(QueryBuilder.eq(ApiConstants._SESSION_ID, sessionId));
 		return getCassSession().execute(select);
+	}
+	
+	private Statement getUserSessionStatmentForAssessment(String userUid,
+			String collectionUid, String collectionType, String classUid,
+			String courseUid, String unitUid, String lessonUid, String eventType){
+		Statement select = QueryBuilder.select().all()
+				.from(getLogKeyspaceName(), ColumnFamilySet.USER_SESSIONS.getColumnFamily())
+				.where(QueryBuilder.eq(ApiConstants._USER_UID, userUid))
+				.and(QueryBuilder.eq(ApiConstants._COLLECTION_UID, collectionUid))
+				.and(QueryBuilder.eq(ApiConstants._COLLECTION_TYPE, collectionType))
+				.and(QueryBuilder.eq(ApiConstants._CLASS_UID, classUid))
+				.and(QueryBuilder.eq(ApiConstants._COURSE_UID, courseUid))
+				.and(QueryBuilder.eq(ApiConstants._UNIT_UID, unitUid))
+				.and(QueryBuilder.eq(ApiConstants._LESSON_UID, lessonUid))
+				.and(QueryBuilder.eq(ApiConstants._EVENT_TYPE, eventType))
+				;
+		return select;
+	}
+	
+	private Statement getUserSessionStatmentForCollection(String userUid,
+			String collectionUid, String collectionType, String classUid,
+			String courseUid, String unitUid, String lessonUid, String eventType){
+		Statement select = QueryBuilder.select().all()
+				.from(getLogKeyspaceName(), ColumnFamilySet.USER_SESSIONS.getColumnFamily())
+				.where(QueryBuilder.eq(ApiConstants._USER_UID, userUid))
+				.and(QueryBuilder.eq(ApiConstants._COLLECTION_UID, collectionUid))
+				.and(QueryBuilder.eq(ApiConstants._COLLECTION_TYPE, collectionType))
+				.and(QueryBuilder.eq(ApiConstants._CLASS_UID, classUid))
+				.and(QueryBuilder.eq(ApiConstants._COURSE_UID, courseUid))
+				.and(QueryBuilder.eq(ApiConstants._UNIT_UID, unitUid))
+				.and(QueryBuilder.eq(ApiConstants._LESSON_UID, lessonUid))
+				;
+		return select;
 	}
 }

@@ -23,18 +23,13 @@
 
 	<context:annotation-config />
 
-
-	<!-- schduler for removing files -->
-	<bean id="excelReportController"
-		class="org.gooru.insights.api.controllers.ExcelReportController" />
-
-	<bean id="firstTaskJobDetail"
+<!-- 	<bean id="firstTaskJobDetail"
 		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
 		<property name="targetObject" ref="excelReportController" />
 		<property name="targetMethod" value="removeExpiredFiles" />
 	</bean>
 
-	<!-- Cron Trigger -->
+	Cron Trigger
 	<bean id="cronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="firstTaskJobDetail" />
 		<property name="cronExpression" value="0 0 12 * * ?" />
@@ -48,11 +43,11 @@
 		</property>
 		<property name="triggers">
 			<list>
-				<ref bean="cronTrigger" /><!-- use cronTrigger instead of simpleTrigger -->
+				<ref bean="cronTrigger" />use cronTrigger instead of simpleTrigger
 			</list>
 		</property>
 	</bean>
-
+ -->
 	<bean id="gooruConstants"
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="properties">
