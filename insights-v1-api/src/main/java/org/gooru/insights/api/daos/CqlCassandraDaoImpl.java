@@ -253,7 +253,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 	public ResultSet getClassCollectionCount(String classUid,
 			String collectionUid) {
 		Statement select = QueryBuilder
-				.select().all().from(getLogKeyspaceName(),ColumnFamilySet.CLASS_COLLECTION_SETTINGS.getColumnFamily())
+				.select().all().from(getLogKeyspaceName(),ColumnFamilySet.CLASS_COLLECTION_COUNT.getColumnFamily())
 				.where(QueryBuilder.eq(ApiConstants._CLASS_UID, classUid))
 				.and(QueryBuilder.eq(ApiConstants._COLLECTION_UID,collectionUid))
 				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
