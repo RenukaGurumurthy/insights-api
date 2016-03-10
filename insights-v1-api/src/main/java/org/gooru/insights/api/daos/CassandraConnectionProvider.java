@@ -23,6 +23,7 @@ public class CassandraConnectionProvider {
     private static String hosts;
     private static String clusterName;
     private static String logKeyspaceName;
+    private static String logDataCeter;
     private static Cluster cluster;
     private static Session session;
     
@@ -37,28 +38,27 @@ public class CassandraConnectionProvider {
         hosts = this.getCassandraConstant().getProperty("cluster.hosts");
         clusterName = this.getCassandraConstant().getProperty("cluster.name");
         logKeyspaceName = this.getCassandraConstant().getProperty("log.keyspace");
+        logDataCeter = this.getCassandraConstant().getProperty("log.datacentre");
         initCassandraClient();
         
     }
     
     @PreDestroy
     private void closeConnection(){
-    	System.out.print("closingg connection.....");
     	session.close();
     }
     
 	private static void initCassandraClient() {
 		try {
-			System.out.print("Init connection.....");
 			cluster = Cluster
 					.builder()
 					.withClusterName(clusterName)
 					.addContactPoint(hosts)
 					.withRetryPolicy(DefaultRetryPolicy.INSTANCE)
-					.withReconnectionPolicy(
-							new ExponentialReconnectionPolicy(1000, 30000))
+					/*.withReconnectionPolicy(
+							new ExponentialReconnectionPolicy(1000, 30000))*/
 					.withLoadBalancingPolicy(
-							new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
+							new TokenAwarePolicy(new DCAwareRoundRobinPolicy(logDataCeter)))
 					.build();
 			session = cluster.connect(logKeyspaceName);
 
