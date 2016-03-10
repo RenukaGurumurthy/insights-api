@@ -25,12 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.netflix.astyanax.connectionpool.OperationResult;
-import com.netflix.astyanax.model.Column;
-import com.netflix.astyanax.model.ColumnList;
-import com.netflix.astyanax.model.Row;
-import com.netflix.astyanax.model.Rows;
-
 @Component
 public class DataUtils {
 
@@ -283,110 +277,7 @@ public class DataUtils {
 			Collection<String> collectionSummaryResourceColumns) {
 		DataUtils.collectionSummaryResourceColumns = collectionSummaryResourceColumns;
 	}
-	
-	public static Map<String,Object> getColumnFamilySetContent(String ColumnFamilySet, ColumnList<String> columnList, Map<String,String> aliesNames, String key, Collection<String> columnNames, Map<String,List<String>> mergeResourceDualColumnValues, boolean isSecure){
-	
-		Map<String,String> dataTypes = getColumnFamilySetDataTypes().get(ColumnFamilySet);
-		Map<String,Object> dataMap = new HashMap<String,Object>();
-		Collection<String> RequestedColumns = new ArrayList<String>(columnNames);
-		if(RequestedColumns.contains(ApiConstants.THUMBNAIL)){
-			buildThumbnailURL(columnList,isSecure, dataMap);
-			RequestedColumns.remove(ApiConstants.THUMBNAIL);
-			RequestedColumns.remove(ApiConstants.FOLDER);
-		}
-		if(mergeResourceDualColumnValues != null){
-			handleMergeColumnValues(ColumnFamilySet, columnList, RequestedColumns, dataMap, dataTypes, aliesNames, mergeResourceDualColumnValues);
-		}
-		for(String columnName : RequestedColumns){
-			String apiField = aliesNames.get(columnName) != null ? aliesNames.get(columnName) : columnName;
-			fetchData(ColumnFamilySet, dataTypes, key, columnName, apiField, columnList, dataMap);
-		}
-		return dataMap;
-	}
-	
-	private static void buildThumbnailURL(ColumnList<String> columns, boolean isSecure, Map<String,Object> resourceMetaData){
 		
-		String thumbnail = null;
-		thumbnail = columns.getStringValue(ApiConstants.THUMBNAIL, null);
-		if(thumbnail != null && !thumbnail.startsWith(ApiConstants.HTTP)) {
-			String path = columns.getStringValue(ApiConstants.FOLDER, ApiConstants.STRING_EMPTY);
-			path = ServiceUtils.appendForwardSlash(nfsLocation, thumbnail.contains(path) ? null : path, thumbnail);
-			thumbnail = ServiceUtils.buildString(isSecure ? ApiConstants._HTTPS : ApiConstants._HTTP,path);
-		}
-		resourceMetaData.put(ApiConstants.THUMBNAIL, thumbnail);
-	}
-	
-	private static void handleMergeColumnValues(String ColumnFamilySet,
-			ColumnList<String> columnList, Collection<String> RequestedColumns,
-			Map<String, Object> dataMap, Map<String, String> dataTypes,
-			Map<String, String> aliesNames,
-			Map<String, List<String>> mergeResourceDualColumnValues) {
-
-		for (Map.Entry<String, List<String>> mergeColumns : mergeResourceDualColumnValues.entrySet()) {
-			if (RequestedColumns.containsAll(mergeColumns.getValue())) {
-				for (String column : mergeColumns.getValue()) {
-					String apiField = aliesNames.get(column) != null ? aliesNames
-							.get(column) : column;
-					fetchData(ColumnFamilySet, dataTypes, null, column,
-							apiField, columnList, dataMap);
-					if (dataMap.get(apiField) != null) {
-						RequestedColumns.removeAll(mergeColumns.getValue());
-						break;
-					}
-				}
-			}
-		}
-	}
-	
-	public static void fetchData(String ColumnFamilySet, Map<String,String> dataTypes,String columnPrefix, String columnName, String apiField, ColumnList<String> columns, Map<String,Object> dataMap){
-
-		String fetchColumnName = columnName;
-		if(columnPrefix != null){
-			fetchColumnName = columnPrefix+ApiConstants.TILDA+columnName;
-		}
-		if(!customFetchData(columnPrefix, columnName, dataMap, columns)) {
-			if(dataTypes.get(columnName) != null){
-				if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.STRING.dataType()) || dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.TEXT.dataType())){
-					dataMap.put(apiField, columns.getStringValue(fetchColumnName, null));
-				}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.INT.dataType())){
-					dataMap.put(apiField, columns.getIntegerValue(fetchColumnName, 0));
-				}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.LONG.dataType())){
-					dataMap.put(apiField, columns.getLongValue(fetchColumnName, 0L));
-				}else if(dataTypes.get(columnName).equalsIgnoreCase(ApiConstants.dataTypes.DATE.dataType())){
-					dataMap.put(apiField, columns.getDateValue(fetchColumnName, null));
-				}else{
-					dataMap.put(apiField, columns.getStringValue(fetchColumnName, null));
-					InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,ColumnFamilySet,columnName));
-				}
-			}else {
-				dataMap.put(apiField, columns.getStringValue(fetchColumnName, null));
-				InsightsLogger.debug(buildMessage(ErrorMessages.UNHANDLED_FIELD,ColumnFamilySet,columnName));
-			}
-		}
-	}
-	
-	private static boolean customFetchData(String columnPrefix, String columnName, Map<String,Object> dataMap, ColumnList<String> columns) {
-	
-		boolean processed = true;
-			if(columnName.equals(ApiConstants.OPTIONS)) {
-				Map<String,Long> optionsMap = new HashMap<String,Long>();
-				optionsMap.put(ApiConstants.options.A.name(), columns.getLongValue(ServiceUtils.appendTilda(columnPrefix,ApiConstants.options.A.name()), 0L));
-				optionsMap.put(ApiConstants.options.B.name(), columns.getLongValue(ServiceUtils.appendTilda(columnPrefix,ApiConstants.options.B.name()), 0L));
-				optionsMap.put(ApiConstants.options.C.name(), columns.getLongValue(ServiceUtils.appendTilda(columnPrefix,ApiConstants.options.C.name()), 0L));
-				optionsMap.put(ApiConstants.options.D.name(), columns.getLongValue(ServiceUtils.appendTilda(columnPrefix,ApiConstants.options.D.name()), 0L));
-				optionsMap.put(ApiConstants.options.E.name(), columns.getLongValue(ServiceUtils.appendTilda(columnPrefix,ApiConstants.options.E.name()), 0L));
-				optionsMap.put(ApiConstants.options.F.name(), columns.getLongValue(ServiceUtils.appendTilda(columnPrefix,ApiConstants.options.F.name()), 0L));
-				dataMap.put(ApiConstants.OPTIONS, optionsMap);
-			} else if(columnName.equals(ApiConstants._QUESTION_STATUS)) {
-				String responseStatus = columns.getStringValue(ServiceUtils.appendTilda(columnPrefix,columnName), null);
-				dataMap.put(ApiConstants.STATUS, responseStatus);
-				dataMap.put(ApiConstants.SCORE, (responseStatus != null && responseStatus.equalsIgnoreCase(ApiConstants.CORRECT)) ? 1L : 0L);
-			} else {
-				processed = false;
-			}
-		return processed;
-	}
-	
 	private static boolean customFetchDefaultData(String columnName, Map<String,Object> dataMap) {
 		
 		boolean processed = true;

@@ -1,16 +1,10 @@
 package org.gooru.insights.api.services;
 
-import org.gooru.insights.api.constants.ApiConstants;
-import org.gooru.insights.api.constants.InsightsConstant.ColumnFamilySet;
 import org.gooru.insights.api.daos.CqlCassandraDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.datastax.driver.core.ResultSet;
-import com.datastax.driver.core.Statement;
-import com.datastax.driver.core.querybuilder.QueryBuilder;
-import com.netflix.astyanax.model.ColumnList;
-import com.netflix.astyanax.model.CqlResult;
 
 @Service
 public class CassandraV2ServiceImpl implements CassandraV2Service{

@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.CqlQueries;
@@ -31,7 +30,6 @@ import rx.schedulers.Schedulers;
 
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
-import com.netflix.astyanax.serializers.SetSerializer;
 
 @Service
 public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
@@ -187,7 +185,6 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		if (result != null ) {
 			for(Row resultRow : result) {
 				Map<String, Object> dataAsMap = new HashMap<String, Object>(5);
-				SetSerializer<String> setSerializer = new SetSerializer<String>(UTF8Type.instance);
 				Set<String> activePeers = resultRow.getSet(ApiConstants._ACTIVE_PEERS, String.class);
 				Set<String> leftPeers = resultRow.getSet(ApiConstants._LEFT_PEERS, String.class);
 				dataAsMap.put(ApiConstants.ACTIVE_PEER_COUNT, leftPeers.size());

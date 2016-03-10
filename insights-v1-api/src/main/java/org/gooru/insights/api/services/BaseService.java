@@ -10,10 +10,6 @@ import java.util.Set;
 import org.gooru.insights.api.models.RequestParamsDTO;
 import org.json.JSONObject;
 
-import com.netflix.astyanax.connectionpool.OperationResult;
-import com.netflix.astyanax.model.ColumnList;
-import com.netflix.astyanax.model.Rows;
-
 public interface BaseService {
 
 	boolean notNull(String parameter);
@@ -25,7 +21,6 @@ public interface BaseService {
 	List<Map<String,Object>> changeDataType(Map<String,String> changableDataType,List<Map<String,Object>> requestList);
 	
 	RequestParamsDTO buildRequestParameters(String data) throws Exception;
-	
 	
 	List<Map<String,Object>> getData(List<Map<String,Object>> requestData,String coreKey);
 	
@@ -52,8 +47,6 @@ public interface BaseService {
 	List<Map<String,Object>> buildJSON(List<Map<String,Object>> resultSet,Collection<String> additionParameter,Map<String,String> surName,boolean checkSession);
 
 	List<Map<String,Object>> RandomJoin(List<Map<String,Object>> record1,List<Map<String,Object>> record2);
-
-	Map<String,Object> getColumnValues(OperationResult<ColumnList<String>> columnList,Map<String,Object> key);
 
 	List<Map<String,Object>> getUserData(List<Map<String,Object>> requestData,String coreKey,Map<String,String> selectValue,String sortBy,String sortOrder,Integer limit);
 

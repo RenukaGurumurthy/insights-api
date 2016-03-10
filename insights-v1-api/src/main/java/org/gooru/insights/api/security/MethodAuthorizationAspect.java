@@ -38,7 +38,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.gooru.insights.api.constants.ApiConstants;
-import org.gooru.insights.api.constants.InsightsConstant.ColumnFamilySet;
 import org.gooru.insights.api.models.User;
 import org.gooru.insights.api.services.RedisService;
 import org.gooru.insights.api.utils.InsightsLogger;
@@ -57,9 +56,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.netflix.astyanax.connectionpool.OperationResult;
-import com.netflix.astyanax.model.ColumnList;
-
 
 @Aspect
 public class MethodAuthorizationAspect extends OperationAuthorizer {
@@ -70,9 +66,9 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	@Autowired
 	private RedisService redisService;
 		
-	private ColumnList<String> endPoint;
+	private String endPoint;
 	
-	private ColumnList<String> entityOperationsRole;
+	private Map<String, String> entityOperationsRole;
 	
 	private static final String GOORU_PREFIX = "authenticate_";
 		
@@ -190,9 +186,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			sessionToken = RequestUtils.getSessionToken(request);
 		}
 		if (sessionToken != null) {
-			String address = endPoint.getColumnByName(
-					ApiConstants.CONSTANT_VALUE).getStringValue()
-					+ "/v2/user/token/"
+			String address = endPoint+"/v2/user/token/"
 					+ sessionToken
 					+ "?sessionToken="
 					+ sessionToken;
@@ -263,7 +257,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			}
 			String operations =  authorizeOperations.operations();
 			for(String op : operations.split(",")){
-				String roles = entityOperationsRole.getColumnByName(op).getStringValue();
+				String roles = entityOperationsRole.get(op);
 				InsightsLogger.debug("role : " +roles + "roleAuthority > :"+userRole.contains(roles));
 				for(String role : roles.split(",")){
 					if((userRole.contains(role))){

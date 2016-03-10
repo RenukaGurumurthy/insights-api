@@ -43,11 +43,6 @@ public class CassandraConnectionProvider {
 
 	private static void initCassandraClient() {
 		try {
-			SocketOptions socketOptions = new SocketOptions();
-			socketOptions.setConnectTimeoutMillis(30000);
-			socketOptions.setReadTimeoutMillis(30000);
-			socketOptions.setKeepAlive(true);
-
 			cluster = Cluster
 					.builder()
 					.withClusterName(clusterName)
@@ -57,7 +52,7 @@ public class CassandraConnectionProvider {
 							new ExponentialReconnectionPolicy(1000, 30000))
 					.withLoadBalancingPolicy(
 							new TokenAwarePolicy(new DCAwareRoundRobinPolicy()))
-					.withPort(9042).withSocketOptions(socketOptions).build();
+					.build();
 			session = cluster.connect(logKeyspaceName);
 
 		} catch (Exception e) {

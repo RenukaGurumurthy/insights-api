@@ -6,6 +6,7 @@ import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.InsightsConstant;
 import org.springframework.stereotype.Repository;
 
+import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
@@ -36,7 +37,9 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 				.and(QueryBuilder.eq(ApiConstants._CLASS_UID, classUid))
 				.and(QueryBuilder.eq(ApiConstants._COURSE_UID, courseUid))
 				.and(QueryBuilder.eq(ApiConstants._UNIT_UID, unitUid))
-				.and(QueryBuilder.eq(ApiConstants._LESSON_UID, lessonUid));
+				.and(QueryBuilder.eq(ApiConstants._LESSON_UID, lessonUid))
+				.setSerialConsistencyLevel(ConsistencyLevel.QUORUM)
+				;
 		return getCassSession().execute(select);
 	}
 	
