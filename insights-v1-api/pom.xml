@@ -66,7 +66,7 @@
 			<artifactId>logback-classic</artifactId>
 			<version>1.1.2</version>
 		</dependency>
-<dependency>
+<!-- <dependency>
 	<groupId>com.google.guava</groupId>
 	<artifactId>guava</artifactId>
 	<version>18.0</version>
@@ -92,7 +92,7 @@
 	<artifactId>snappy-java</artifactId>
 	<version>1.0.5</version>
 </dependency>
-
+ -->
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
