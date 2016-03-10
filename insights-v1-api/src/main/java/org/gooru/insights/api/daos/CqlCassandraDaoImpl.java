@@ -10,17 +10,20 @@ import com.datastax.driver.core.ConsistencyLevel;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
-
 @Repository
 public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements CqlCassandraDao,InsightsConstant {
 
+	private ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.QUORUM;
+		
 	//public static final String GET_SESSION_ACTIVITY_TYPE = "SELECT event_type FROM user_session_activity WHERE session_id = ? AND gooru_oid = ?";
 	@Override
 	public ResultSet getSessionActivityType(String sessionId, String gooruOid) {
 		Statement select = QueryBuilder.select().all()
 				.from(getLogKeyspaceName(), ColumnFamilySet.USER_SESSION_ACTIVITY.getColumnFamily())
 				.where(QueryBuilder.eq(ApiConstants._SESSION_ID, sessionId))
-				.and(QueryBuilder.eq(ApiConstants._GOORU_OID, gooruOid));
+				.and(QueryBuilder.eq(ApiConstants._GOORU_OID, gooruOid))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
+				;
 		return getCassSession().execute(select);
 	}
 	
@@ -38,7 +41,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 				.and(QueryBuilder.eq(ApiConstants._COURSE_UID, courseUid))
 				.and(QueryBuilder.eq(ApiConstants._UNIT_UID, unitUid))
 				.and(QueryBuilder.eq(ApiConstants._LESSON_UID, lessonUid))
-				.setSerialConsistencyLevel(ConsistencyLevel.QUORUM)
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
 				;
 		return getCassSession().execute(select);
 	}
@@ -66,7 +69,8 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 	public ResultSet getUserSessionActivity(String sessionId) {
 		Statement select = QueryBuilder.select().all()
 				.from(getLogKeyspaceName(), ColumnFamilySet.USER_SESSION_ACTIVITY.getColumnFamily())
-				.where(QueryBuilder.eq(ApiConstants._SESSION_ID, sessionId));
+				.where(QueryBuilder.eq(ApiConstants._SESSION_ID, sessionId))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 		return getCassSession().execute(select);
 	}
 	
@@ -76,7 +80,8 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		Statement select = QueryBuilder.select().all()
 				.from(getLogKeyspaceName(), ColumnFamilySet.USER_SESSION_ACTIVITY.getColumnFamily())
 				.where(QueryBuilder.eq(ApiConstants._SESSION_ID, sessionId))
-				.and(QueryBuilder.eq(ApiConstants._GOORU_OID, gooruOid));
+				.and(QueryBuilder.eq(ApiConstants._GOORU_OID, gooruOid))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 		return getCassSession().execute(select);
 	}
 	
@@ -86,7 +91,8 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		Statement select = QueryBuilder.select().all()
 				.from(getLogKeyspaceName(), ColumnFamilySet.STUDENT_LOCATION.getColumnFamily())
 				.where(QueryBuilder.eq(ApiConstants._CLASS_UID, classUid))
-				.and(QueryBuilder.eq(ApiConstants._USER_UID, userUid));
+				.and(QueryBuilder.eq(ApiConstants._USER_UID, userUid))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 		return getCassSession().execute(select);
 	}
 	
@@ -96,6 +102,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		Statement select = QueryBuilder.select().all()
 				.from(getLogKeyspaceName(), ColumnFamilySet.STUDENT_LOCATION.getColumnFamily())
 				.where(QueryBuilder.eq(ApiConstants._CLASS_UID, classUid))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
 				;
 		return getCassSession().execute(select);
 	}
@@ -116,7 +123,8 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 				.and(QueryBuilder.eq(ApiConstants._UNIT_UID, unitUid))
 				.and(QueryBuilder.eq(ApiConstants._LESSON_UID, lessonUid))
 				.and(QueryBuilder.eq(ApiConstants._COLLECTION_UID, collectionUid))
-				.and(QueryBuilder.eq(ApiConstants._USER_UID, userUid));
+				.and(QueryBuilder.eq(ApiConstants._USER_UID, userUid))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 		return getCassSession().execute(select);
 	}
 	
@@ -134,7 +142,8 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 				.and(QueryBuilder.eq(ApiConstants._COURSE_UID, courseUid))
 				.and(QueryBuilder.eq(ApiConstants._UNIT_UID, unitUid))
 				.and(QueryBuilder.eq(ApiConstants._LESSON_UID, lessonUid))
-				.and(QueryBuilder.eq(ApiConstants._COLLECTION_UID, collectionUid));
+				.and(QueryBuilder.eq(ApiConstants._COLLECTION_UID, collectionUid))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 		return getCassSession().execute(select);
 	}
 
@@ -145,7 +154,8 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 				.from(getLogKeyspaceName(), ColumnFamilySet.CLASS_ACTIVITY_DATACUBE.getColumnFamily())
 				.where(QueryBuilder.eq(ApiConstants._ROW_KEY, rowKey))
 				.and(QueryBuilder.eq(ApiConstants._USER_UID, userUid))
-				.and(QueryBuilder.eq(ApiConstants._COLLECTION_TYPE, collectionType));
+				.and(QueryBuilder.eq(ApiConstants._COLLECTION_TYPE, collectionType))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 		return getCassSession().execute(select);
 	}
 	
@@ -155,7 +165,8 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		Statement select = QueryBuilder.select().all()
 				.from(getLogKeyspaceName(), ColumnFamilySet.CLASS_ACTIVITY_DATACUBE.getColumnFamily())
 				.where(QueryBuilder.eq(ApiConstants._ROW_KEY, sessionId))
-				.and(QueryBuilder.eq(ApiConstants._COLLECTION_TYPE, collectionType));
+				.and(QueryBuilder.eq(ApiConstants._COLLECTION_TYPE, collectionType))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 		return getCassSession().execute(select);
 	}
 	
@@ -165,6 +176,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		Statement select = QueryBuilder.select().all()
 				.from(getLogKeyspaceName(), ColumnFamilySet.CLASS_ACTIVITY_PEER_DETAIL.getColumnFamily())
 				.where(QueryBuilder.eq(ApiConstants._ROW_KEY, rowKey))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
 				;
 		return getCassSession().execute(select);
 	}
@@ -189,7 +201,8 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 				.from(getLogKeyspaceName(), ColumnFamilySet.CONTENT_TAXONOMY_ACTIVITY.getColumnFamily())
 				.where(QueryBuilder.eq(ApiConstants._USER_UID, rowKey))
 				.and(QueryBuilder.eq(ApiConstants._SUBJECT_ID, subjectId))
-				.and(QueryBuilder.eq(ApiConstants._COURSE_ID, courseId));
+				.and(QueryBuilder.eq(ApiConstants._COURSE_ID, courseId))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 		return getCassSession().execute(select);
 	}
 	
@@ -202,7 +215,8 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 				.where(QueryBuilder.eq(ApiConstants._USER_UID, rowKey))
 				.and(QueryBuilder.eq(ApiConstants._SUBJECT_ID, subjectId))
 				.and(QueryBuilder.eq(ApiConstants._COURSE_ID, courseId))
-				.and(QueryBuilder.eq(ApiConstants._DOMAIN_ID, courseId));
+				.and(QueryBuilder.eq(ApiConstants._DOMAIN_ID, courseId))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 		return getCassSession().execute(select);
 	}
 	
@@ -216,7 +230,8 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 				.and(QueryBuilder.eq(ApiConstants._SUBJECT_ID, subjectId))
 				.and(QueryBuilder.eq(ApiConstants._COURSE_ID, courseId))
 				.and(QueryBuilder.eq(ApiConstants._DOMAIN_ID, domainId))
-				.and(QueryBuilder.eq(ApiConstants._STANDARDS_ID, standardsId));
+				.and(QueryBuilder.eq(ApiConstants._STANDARDS_ID, standardsId))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 		return getCassSession().execute(select);
 	}
 	
@@ -228,7 +243,8 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 				.from(getLogKeyspaceName(),ColumnFamilySet.STUDENT_QUESTION_GRADE.getColumnFamily())
 				.where(QueryBuilder.eq(ApiConstants._TEACHER_UID, teacherUid))
 				.and(QueryBuilder.eq(ApiConstants._USER_UID, userUid))
-				.and(QueryBuilder.eq(ApiConstants._SESSION_ID, sessionId));
+				.and(QueryBuilder.eq(ApiConstants._SESSION_ID, sessionId))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 		return getCassSession().execute(select);
 	}
 	
@@ -245,6 +261,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 				.and(QueryBuilder.eq(ApiConstants._UNIT_UID, unitUid))
 				.and(QueryBuilder.eq(ApiConstants._LESSON_UID, lessonUid))
 				.and(QueryBuilder.eq(ApiConstants._EVENT_TYPE, eventType))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
 				;
 		return select;
 	}
@@ -261,6 +278,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 				.and(QueryBuilder.eq(ApiConstants._COURSE_UID, courseUid))
 				.and(QueryBuilder.eq(ApiConstants._UNIT_UID, unitUid))
 				.and(QueryBuilder.eq(ApiConstants._LESSON_UID, lessonUid))
+				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
 				;
 		return select;
 	}
