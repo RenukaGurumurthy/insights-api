@@ -191,7 +191,7 @@ public class ServiceUtils {
 	
 	public static Object castJSONToList(String data) {
 		if(StringUtils.isBlank(data) || ApiConstants.NA.equals(data)) {
-			return ApiConstants.NA;
+			return new ArrayList<Map<String, Object>>();
 		}
 		try {
 			return gson.fromJson(data, (new TypeToken<List<Map<String, Object>>>() {}).getType());
