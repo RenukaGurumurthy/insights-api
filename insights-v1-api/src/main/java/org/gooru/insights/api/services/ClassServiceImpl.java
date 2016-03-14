@@ -417,7 +417,7 @@ public class ClassServiceImpl implements ClassService {
 					sessionActivityMetrics.put(ApiConstants.ATTEMPTS, userSessionActivityRow.getLong(ApiConstants.VIEWS));
 				} else {
 					sessionActivityMetrics.put(ApiConstants.QUESTION_TYPE, userSessionActivityRow.getString(ApiConstants._QUESTION_TYPE));
-					//ssessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, ServiceUtils.castJSONToList(userSessionActivityRow.getString(ApiConstants._ANSWER_OBJECT)));
+					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, ServiceUtils.castJSONToList(userSessionActivityRow.getString(ApiConstants._ANSWER_OBJECT)));
 					sessionActivities.add(sessionActivityMetrics);
 				}
 			}
