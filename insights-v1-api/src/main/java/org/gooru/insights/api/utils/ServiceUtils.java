@@ -196,7 +196,7 @@ public class ServiceUtils {
 		try {
 			return gson.fromJson(data, (new TypeToken<List<Map<String, Object>>>() {}).getType());
 		}catch(JsonSyntaxException e) {
-			return ApiConstants.NA;
+			return new ArrayList<Map<String, Object>>();
 		}
 	}
 	
