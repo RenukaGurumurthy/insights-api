@@ -65,22 +65,6 @@ public class ApiConstants {
 	public static final String MAIL_TEXT = "Hi,This report will take some more time to get process,we will send you this report to insights@goorulearning.org, Thanks";
 	
 	/**
-	 * view constants
-	 */
-	public enum modelAttributes{
-		VIEW_NAME("content"),CONTENT("content"),RETURN_NAME("content"),MESSAGE("message"),PAGINATE("paginate"),TOTAL_ROWS("totalRows");
-		
-		private String attribute;
-		
-		private modelAttributes(String attribute){
-			this.attribute = attribute;
-		}
-		public String getAttribute(){
-			return attribute;
-		}
-	}
-	
-	/**
 	 * Exclude fields
 	 */
 	
@@ -247,7 +231,7 @@ public class ApiConstants {
 	public static final String COMPLETED = "completed";
 	public static final String START = "start";
 	public static final String STOP = "stop";
-	
+	public static final String EVENT_TIME = "eventTime";
 	public static final String SESSIONID = "sessionId";
 	
 	public static final String _SESSION_ID = "session_id";
@@ -399,44 +383,6 @@ public class ApiConstants {
 	public static final String _COLLECTION_COUNT = "collection_count";
 	public static final String _ASSESSMENT_COUNT = "assessment_count";
 	
-	public enum apiHeaders{
-		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
-		
-		private String header;
-		
-		private apiHeaders(String header){
-			this.header = header;
-		}
-		public String apiHeader(){
-			return header;
-		}
-	}
-	
-	public enum SessionAttributes{
-		CS("CS"),AS("AS"),FS("FS"),RS("RS");
-		
-		private String session;
-		
-		private SessionAttributes(String session){
-			this.session = session;
-		}
-		public String getSession(){
-			return session;
-		}
-	}
-	public enum fileAttributes{
-		XLS("xls"),CSV("csv"),JSON("json");
-		
-		private String attribute;
-		
-		private fileAttributes(String attribute){
-			this.attribute = attribute;
-		}
-		public String attribute(){
-			return attribute;
-		}
-	}
-
 	public static enum Numbers {
 		FOUR("4"), FIVE("5");
 
@@ -451,56 +397,48 @@ public class ApiConstants {
 		}
 	}
 	
-	public enum addQuestionType {
-		OE("OE"),FIB("FIB"),MC("MC"),MA("MA"),TF("TF");
-		
-		private String questionType;
-		
-		private addQuestionType(String questionType){
-			this.questionType = questionType;
+	public enum ColumnFamilySet {
+		RESOURCE("resource"), DIM_RESOURCE("dim_resource"), REAL_TIME_DASHBOARD(
+				"real_time_aggregator"), CUSTOM_FIELDS("custom_fields_data"), LIVE_DASHBOARD(
+				"live_dashboard"), COLLECTION("collection"), COLLECTION_ITEM(
+				"collection_item"),COLLECTION_ITEM_ASSOC("collection_item_assoc"), CLASSPAGE("classpage"), ASSESSMENT_ANSWER(
+				"assessment_answer"), MICRO_AGGREGATION("micro_aggregation"), FORMULA_DETAIL(
+				"formula_detail"), EVENT_TIMELINE("event_timeline"), EVENT_DETAIL(
+				"event_detail"), USERPROFILE("user_profile_settings"), USER_COLLECTION_ITEM_ASSOC(
+				"user_collection_item_assoc"), CONFIG_SETTING(
+				"job_config_settings"), USER("user"), SESSION("sessions"), SESSION_ACTIVITY("session_activity")
+				,CLASS_ACTIVITY("class_activity"), SESSION_ACTIVITY_COUNTER("session_activity_counter"), 
+				CLASS("class"),USER_GROUP_ASSOCIATION("user_group_association"),CONTENT_META("content_meta"),TABLE_DATATYPES("table_datatypes"),JOB_TRACKER("job_tracker"),CLASS_COLLECTION_SETTINGS("class_collection_settings")
+				,STUDENT_LOCATION("student_location"), USER_SESSIONS("user_sessions"),
+				USER_SESSION_ACTIVITY("user_session_activity"),CLASS_ACTIVITY_DATACUBE("class_activity_datacube"),
+				CONTENT_TAXONOMY_ACTIVITY("content_taxonomy_activity"), CLASS_ACTIVITY_PEER_DETAIL("class_activity_peer_detail"),
+				STUDENT_QUESTION_GRADE("student_question_grade"), USER_CLASS_COLLECTION_LAST_SESSIONS("user_class_collection_last_sessions"),CLASS_COLLECTION_COUNT("class_collection_count");
+
+		private String columnFamily;
+
+		private ColumnFamilySet(String value) {
+			columnFamily = value;
 		}
-		public String getQuestionType(){
-			return questionType;
-		}
-	}
-	
-	public enum options {
-		A("A"),B("B"),C("C"),D("D"),E("E"),F("F");
-		
-		private String option;
-		
-		private options(String option){
-			this.option = option;
-		}
-		public String option(){
-			return option;
-		}
-	}
-	
-	public enum reactions {
-		ONE("I need help"),TWO("I dont understand"),THREE("meh"),FOUR("I understand"),FIVE("I can explain"),TEN("-");
-		
-		private String reaction;
-		
-		private reactions(String reaction){
-			this.reaction = reaction;
-		}
-		public String reaction(){
-			return reaction;
+
+		public String getColumnFamily() {
+			return columnFamily;
 		}
 	}
-	
-	public enum dataTypes{
-		STRING("String"),TEXT("text"),INT("Integer"),LONG("Long"),DATE("Date");
-		private String dataType;
-		
-		private dataTypes(String dataType){
-			this.dataType = dataType;
+
+	public enum modelAttributes {
+		VIEW_NAME("content"), CONTENT("content"), RETURN_NAME("content"), MESSAGE("message"), PAGINATE(
+				"paginate"), TOTAL_ROWS("totalRows");
+		private String attribute;
+
+		private modelAttributes(String attribute) {
+			this.attribute = attribute;
 		}
-		public String dataType(){
-			return dataType;
+
+		public String getAttribute() {
+			return attribute;
 		}
 	}
+
 	
 	/**
 	 * Message constants

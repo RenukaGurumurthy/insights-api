@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.models.ContentTaxonomyActivity;
@@ -78,9 +77,6 @@ public class LambdaServiceImpl implements LambdaService{
 	
 	private Map<Object, List<ContentTaxonomyActivity>> aggregateActivity(List<ContentTaxonomyActivity> resultList, Integer depth) {
 	
-		for(ContentTaxonomyActivity contentTaxonomyActivity : resultList) {
-			System.out.println("aggregateActivity:"+contentTaxonomyActivity+" depth:"+depth+" course:"+contentTaxonomyActivity.getCourseId());	
-		}
 		return resultList.stream().collect(Collectors.groupingBy(object -> { return ContentTaxonomyActivity.taxonomyDepthField(object,depth); }));
 	}
 

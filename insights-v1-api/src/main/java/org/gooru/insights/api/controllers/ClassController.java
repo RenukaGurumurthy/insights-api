@@ -5,11 +5,10 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.models.ContentTaxonomyActivity;
 import org.gooru.insights.api.models.ResponseParamDTO;
-import org.gooru.insights.api.services.ClassV2Service;
+import org.gooru.insights.api.services.ClassService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,29 +18,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
-import org.springframework.web.servlet.ModelAndView;
-
-import rx.Observable;
 
 @RestController
 @RequestMapping(value="/v2/")
-public class ClassV2Controller extends BaseController {
+public class ClassController extends BaseController {
 	
 	@Autowired
-	private ClassV2Service classService;
+	private ClassService classService;
 
-	private ClassV2Service getClassService() {
+	private ClassService getClassService() {
 		return classService;
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/user/{userUid}/current/location", method = { RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	public ModelAndView getUserCurrentLocationInLesson(HttpServletRequest request, 
+	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getUserCurrentLocationInLesson(HttpServletRequest request, 
 			@PathVariable(value ="classGooruId") String classGooruId,
 			@PathVariable(value="userUid") String userUid,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getUserCurrentLocationInLesson(userUid, classGooruId));
+		return getDeferredResult(getClassService().getUserCurrentLocationInLesson(userUid, classGooruId));
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/peers", method = { RequestMethod.GET, RequestMethod.POST })
@@ -51,10 +47,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value="courseGooruId") String courseGooruId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<Map<String, Object>>> peersObserver = getClassService().getUserPeers(classGooruId, courseGooruId, null, ApiConstants.UNIT);
-		DeferredResult<ResponseParamDTO<Map<String, Object>>> defferedResponse = new DeferredResult<>();
-		peersObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
-		return defferedResponse;
+		return getDeferredResult(getClassService().getUserPeers(classGooruId, courseGooruId, null, ApiConstants.UNIT));
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/peers", method = { RequestMethod.GET, RequestMethod.POST })
@@ -65,10 +58,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value="unitGooruId") String unitGooruId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<Map<String, Object>>> peersObserver = getClassService().getUserPeers(classGooruId, courseGooruId, unitGooruId, ApiConstants.LESSON);
-		DeferredResult<ResponseParamDTO<Map<String, Object>>> defferedResponse = new DeferredResult<>();
-		peersObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
-		return defferedResponse;
+		return getDeferredResult(getClassService().getUserPeers(classGooruId, courseGooruId, unitGooruId, ApiConstants.LESSON));
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/peers", method = { RequestMethod.GET, RequestMethod.POST })
@@ -80,27 +70,24 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value="lessonGooruId") String lessonGooruId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<Map<String, Object>>> peersObserver = getClassService().getUserPeers(classGooruId, courseGooruId, unitGooruId, lessonGooruId, ApiConstants.CONTENT);
-		DeferredResult<ResponseParamDTO<Map<String, Object>>> defferedResponse = new DeferredResult<>();
-		peersObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
-		return defferedResponse;
+		return getDeferredResult(getClassService().getUserPeers(classGooruId, courseGooruId, unitGooruId, lessonGooruId, ApiConstants.CONTENT));
 	}
 	
 	@RequestMapping(value = "{collectionType}/{contentGooruId}/session/{sessionId}/status", method = {RequestMethod.GET, RequestMethod.POST })
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
-	public ModelAndView getSessionStatus(HttpServletRequest request,
+	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getSessionStatus(HttpServletRequest request,
 			@PathVariable(value = "sessionId") String sessionId,
 			@PathVariable(value = "contentGooruId") String contentGooruId,
 			@PathVariable(value = "collectionType") String collectionType, HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getSessionStatus(sessionId, contentGooruId));
+		return getDeferredResult(getClassService().getSessionStatus(sessionId, contentGooruId));
 	}
 	
 	@RequestMapping(value="/{collectionType}/{contentGooruId}/sessions",method ={ RequestMethod.GET,RequestMethod.POST})
 	//TODO @AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
-	public ModelAndView getUserSessions(HttpServletRequest request, 
+	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getUserSessions(HttpServletRequest request, 
 			@RequestParam(value="classGooruId", required = false, defaultValue = "NA") String classGooruId,
 			@RequestParam(value="courseGooruId", required = false, defaultValue = "NA") String courseGooruId, 
 			@RequestParam(value="unitGooruId", required = false, defaultValue = "NA") String unitGooruId, 
@@ -111,7 +98,7 @@ public class ClassV2Controller extends BaseController {
 			@RequestParam(value="openSession", required = false) boolean openSession,
 			HttpServletResponse response) throws Exception{
 		setAllowOrigin(response);
-		return getModel(getClassService().getUserSessions(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, collectionType, userUid, openSession));
+		return getDeferredResult(getClassService().getUserSessions(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, collectionType, userUid, openSession));
 	}
 	
 	@RequestMapping(value="/{collectionType}/{contentGooruId}/user/{userUid}",method ={ RequestMethod.GET,RequestMethod.POST})
@@ -124,10 +111,7 @@ public class ClassV2Controller extends BaseController {
 			@RequestParam(value="lessonGooruId", required = false) String lessonGooruId, @PathVariable(value="contentGooruId") String contentGooruId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<Map<String, Object>>> peersObserver = getClassService().getSummaryData(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, sessionId, userUid, collectionType);
-		DeferredResult<ResponseParamDTO<Map<String, Object>>> defferedResponse = new DeferredResult<>();
-		peersObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
-		return defferedResponse;
+		return getDeferredResult(getClassService().getSummaryData(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, sessionId, userUid, collectionType));
 	}
 
 	@RequestMapping(value = "/{collectionType}/{contentGooruId}/user/{userUid}/prior/usage", method = { RequestMethod.GET, RequestMethod.POST })
@@ -140,10 +124,7 @@ public class ClassV2Controller extends BaseController {
 			@RequestParam(value="openSession", defaultValue = "true", required = false) boolean openSession, 
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<Map<String, Object>>> peersObserver = getClassService().getPriorDetail(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, sessionId, userUid,collectionType, openSession);
-		DeferredResult<ResponseParamDTO<Map<String, Object>>> defferedResponse = new DeferredResult<>();
-		peersObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
-		return defferedResponse;
+		return getDeferredResult(getClassService().getPriorDetail(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, sessionId, userUid,collectionType, openSession));
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
@@ -155,10 +136,7 @@ public class ClassV2Controller extends BaseController {
 			@RequestParam(value = "collectionType", required = true) String collectionType,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<Map<String, Object>>> performanceObserver = getClassService().getPerformance(classGooruId, courseGooruId, null, null, userUid, collectionType, ApiConstants.UNIT);
-		DeferredResult<ResponseParamDTO<Map<String, Object>>> defferedResponse = new DeferredResult<>();
-		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
-		return defferedResponse;
+		return getDeferredResult(getClassService().getPerformance(classGooruId, courseGooruId, null, null, userUid, collectionType, ApiConstants.UNIT));
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
@@ -171,10 +149,7 @@ public class ClassV2Controller extends BaseController {
 			@RequestParam(value = "collectionType", required = true) String collectionType,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<Map<String, Object>>> performanceObserver = getClassService().getPerformance(classGooruId, courseGooruId, unitGooruId, null, userUid, collectionType, ApiConstants.LESSON);
-		DeferredResult<ResponseParamDTO<Map<String, Object>>> defferedResponse = new DeferredResult<>();
-		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
-		return defferedResponse;
+		return getDeferredResult(getClassService().getPerformance(classGooruId, courseGooruId, unitGooruId, null, userUid, collectionType, ApiConstants.LESSON));
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
@@ -188,10 +163,7 @@ public class ClassV2Controller extends BaseController {
 			@RequestParam(value = "collectionType", required = true) String collectionType, 
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<Map<String, Object>>> performanceObserver = getClassService().getPerformance(classGooruId, courseGooruId, unitGooruId, lessonGooruId, userUid, collectionType, ApiConstants.CONTENT);
-		DeferredResult<ResponseParamDTO<Map<String, Object>>> defferedResponse = new DeferredResult<>();
-		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
-		return defferedResponse;
+		return getDeferredResult(getClassService().getPerformance(classGooruId, courseGooruId, unitGooruId, lessonGooruId, userUid, collectionType, ApiConstants.CONTENT));
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/{collectionType}/{contentGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
@@ -206,10 +178,7 @@ public class ClassV2Controller extends BaseController {
 			@RequestParam(value = "userUid", required = false) String userUid,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<Map<String, Object>>> performanceObserver = getClassService().getAllStudentPerformance(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, collectionType, userUid);
-		DeferredResult<ResponseParamDTO<Map<String, Object>>> defferedResponse = new DeferredResult<>();
-		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
-		return defferedResponse;
+		return getDeferredResult(getClassService().getAllStudentPerformance(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, collectionType, userUid));
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
@@ -218,10 +187,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getTaxonomyActivity(1, userUid, subjectId);
-		DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> defferedResponse = new DeferredResult<>();
-		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
-		return defferedResponse;
+		return getDeferredResult(getClassService().getTaxonomyActivity(1, userUid, subjectId));
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/course/{courseId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
@@ -231,10 +197,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value = "courseId") String courseId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getTaxonomyActivity(2, userUid, subjectId, courseId);
-		DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> defferedResponse = new DeferredResult<>();
-		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
-		return defferedResponse;
+		return getDeferredResult(getClassService().getTaxonomyActivity(2, userUid, subjectId, courseId));
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/course/{courseId}/domain/{domainId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
@@ -244,10 +207,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value = "courseId") String courseId, @PathVariable(value = "domainId") String domainId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getTaxonomyActivity(3, userUid, subjectId, courseId, domainId);
-		DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> defferedResponse = new DeferredResult<>();
-		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
-		return defferedResponse;
+		return getDeferredResult(getClassService().getTaxonomyActivity(3, userUid, subjectId, courseId, domainId));
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/course/{courseId}/domain/{domainId}/standards/{standardsId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
@@ -258,10 +218,7 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value = "standardsId") String standardsId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getTaxonomyActivity(4, userUid, subjectId, courseId, domainId, standardsId);
-		DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> defferedResponse = new DeferredResult<>();
-		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
-		return defferedResponse;
+		return getDeferredResult(getClassService().getTaxonomyActivity(4, userUid, subjectId, courseId, domainId, standardsId));
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/courses/domain/{domainId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
@@ -270,41 +227,32 @@ public class ClassV2Controller extends BaseController {
 			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
 			 @PathVariable(value = "domainId") String domainId, @RequestParam(value = "courseIds", required = true) String courseIds,HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		Observable<ResponseParamDTO<ContentTaxonomyActivity>> performanceObserver = getClassService().getUserDomainParentMastery(userUid, subjectId, courseIds, domainId);
-		DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> defferedResponse = new DeferredResult<>();
-		performanceObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
-		return defferedResponse;
+		return getDeferredResult(getClassService().getUserDomainParentMastery(userUid, subjectId, courseIds, domainId));
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/grade", method = { RequestMethod.GET, RequestMethod.POST })
 	//@AuthorizeOperations(operations = InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	public ModelAndView getTeacherGrade(HttpServletRequest request, 
+	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getTeacherGrade(HttpServletRequest request, 
 			@PathVariable(value = "userUid") String userUid,
 			@RequestParam(value = "sessionId", required = true) String sessionId,
 			@RequestParam(value = "teacherId", required = false) String teacherId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		//TODO Infer teacherUid from sessionToken and save to request attribute when authorizing API Caller, after this logic is added remove teacherId request parameter.
-		String teacherUid = null;
 		if(request.getAttributeNames() != null) {
 			if(request.getAttributeNames().toString().contains(ApiConstants.GOORU_U_ID)) 
-				teacherUid = (String) request.getAttribute(ApiConstants.GOORU_U_ID);
-		} else if(teacherId != null){
-			teacherUid = teacherId;
+				teacherId = (String) request.getAttribute(ApiConstants.GOORU_U_ID);
 		}
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = null;
-		if(StringUtils.isNotBlank(teacherUid)) 
-			responseParamDTO = getClassService().fetchTeacherGrade(teacherUid, userUid, sessionId);
-		return getModel(responseParamDTO);
+		//TODO Infer teacherUid from sessionToken and save to request attribute when authorizing API Caller, after this logic is added remove teacherId request parameter.
+		return getDeferredResult(getClassService().getTeacherGrade(teacherId, userUid, sessionId));
 	}
 
 	@RequestMapping(value = "/{resourceType}/usage/session/{sessionId}", method = RequestMethod.POST)
 	//TODO @AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	public ModelAndView getResourceUsage(HttpServletRequest request, 
+	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getResourceUsage(HttpServletRequest request, 
 			@PathVariable(value = "resourceType") String resourceType, @PathVariable(value = "sessionId") String sessionId,
 			@RequestBody String resourceIds,HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getModel(getClassService().getResourceUsage(sessionId, resourceIds));
+		return getDeferredResult(getClassService().getResourceUsage(sessionId, resourceIds));
 	}
 	
 }

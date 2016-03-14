@@ -7,15 +7,15 @@ import org.gooru.insights.api.models.ResponseParamDTO;
 
 import rx.Observable;
 
-public interface ClassV2Service {
+public interface ClassService {
 
-	ResponseParamDTO<Map<String, Object>> getSessionStatus(String sessionId, String contentGooruId);
+	Observable<ResponseParamDTO<Map<String, Object>>> getSessionStatus(String sessionId, String contentGooruId);
 
-	ResponseParamDTO<Map<String, Object>> getUserSessions(String classId, String courseId, String unitId, String lessonId, String collectionId, String collectionType, String userUid, boolean openSession) throws Exception;
+	Observable<ResponseParamDTO<Map<String, Object>>> getUserSessions(String classId, String courseId, String unitId, String lessonId, String collectionId, String collectionType, String userUid, boolean openSession) throws Exception;
 	
 	Observable<ResponseParamDTO<Map<String, Object>>> getSummaryData(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid, String collectionType) throws Exception;
 
-	ResponseParamDTO<Map<String, Object>> getUserCurrentLocationInLesson(String userUid, String classId);
+	Observable<ResponseParamDTO<Map<String, Object>>> getUserCurrentLocationInLesson(String userUid, String classId);
 
 	Observable<ResponseParamDTO<Map<String, Object>>> getPerformance(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType,
 			String nextLevelType);
@@ -24,9 +24,9 @@ public interface ClassV2Service {
 
 	Observable<ResponseParamDTO<ContentTaxonomyActivity>> getUserDomainParentMastery(String studentId, String subjectId, String courseIds, String domainId);
 	
-	ResponseParamDTO<Map<String, Object>> fetchTeacherGrade(String teacherUid, String userUid, String sessionId);
+	Observable<ResponseParamDTO<Map<String, Object>>> getTeacherGrade(String teacherUid, String userUid, String sessionId);
 
-	ResponseParamDTO<Map<String, Object>> getResourceUsage(String sessionId, String resourceIds);
+	Observable<ResponseParamDTO<Map<String, Object>>> getResourceUsage(String sessionId, String resourceIds);
 
 	Observable<ResponseParamDTO<Map<String, Object>>> getPriorDetail(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid, String collectionType, boolean openSession);
 		

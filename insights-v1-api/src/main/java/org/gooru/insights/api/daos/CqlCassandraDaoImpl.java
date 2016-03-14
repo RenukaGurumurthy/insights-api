@@ -3,7 +3,7 @@ package org.gooru.insights.api.daos;
 
 
 import org.gooru.insights.api.constants.ApiConstants;
-import org.gooru.insights.api.constants.InsightsConstant;
+import org.gooru.insights.api.constants.ApiConstants.ColumnFamilySet;
 import org.springframework.stereotype.Repository;
 
 import com.datastax.driver.core.ConsistencyLevel;
@@ -11,7 +11,7 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
 @Repository
-public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements CqlCassandraDao,InsightsConstant {
+public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements CqlCassandraDao {
 
 	private ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.QUORUM;
 		

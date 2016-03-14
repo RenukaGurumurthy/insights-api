@@ -2,7 +2,7 @@ package org.gooru.insights.api.services;
 
 import com.datastax.driver.core.ResultSet;
 
-public interface CassandraV2Service {	
+public interface CassandraService {	
 
 	ResultSet getSessionActivityType(String sessionId, String gooruOid);
 
