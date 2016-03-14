@@ -14,7 +14,6 @@ import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.CqlQueries;
 import org.gooru.insights.api.constants.ErrorCodes;
-import org.gooru.insights.api.constants.InsightsConstant;
 import org.gooru.insights.api.models.ContentTaxonomyActivity;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.models.UserContentLocation;
@@ -25,37 +24,39 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import rx.Observable;
-import rx.schedulers.Schedulers;
-
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 
+import rx.Observable;
+import rx.schedulers.Schedulers;
+
 @Service
-public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
+public class ClassServiceImpl implements ClassService {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(ClassV2ServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ClassServiceImpl.class);
 
     private final ExecutorService observableExecutor = Executors.newFixedThreadPool(10);
     
 	@Autowired
-	private CassandraV2Service cassandraService;
+	private CassandraService cassandraService;
 	
 	@Autowired
 	private LambdaService lambdaService;
 
-	@Autowired
-	private BaseService baseService;
-
-	private BaseService getBaseService() {
-		return baseService;
-	}
-	
-	private CassandraV2Service getCassandraService() {
+	private CassandraService getCassandraService() {
 		return cassandraService;
 	}
 
-	public ResponseParamDTO<Map<String, Object>> getSessionStatus(String sessionId, String contentGooruId) {
+	public Observable<ResponseParamDTO<Map<String, Object>>> getSessionStatus(String sessionId, String contentGooruId) {
+		
+		Observable<ResponseParamDTO<Map<String, Object>>> sessionStatus = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+			s.onNext(fetchSessionStatus(sessionId, contentGooruId));
+			s.onCompleted();
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		return sessionStatus;
+	}
+	
+	private ResponseParamDTO<Map<String, Object>> fetchSessionStatus(String sessionId, String contentGooruId) {
 		
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		//CqlResult<String, String> sessionDetails = getCassandraService().readRows(ColumnFamilySet.USER_SESSION_ACTIVITY.getColumnFamily(), CqlQueries.GET_SESSION_ACTIVITY_TYPE, sessionId, contentGooruId);
@@ -66,7 +67,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 				String status = row.getString(ApiConstants._EVENT_TYPE);
 				sessionDataMap.put(ApiConstants.SESSIONID, sessionId);
 				status = status.equalsIgnoreCase(ApiConstants.STOP) ? ApiConstants.COMPLETED : ApiConstants.INPROGRESS;
-				sessionDataMap.put(InsightsConstant.STATUS, status);
+				sessionDataMap.put(ApiConstants.STATUS, status);
 				responseParamDTO.setMessage(sessionDataMap);
 			}
 		} else {
@@ -75,14 +76,29 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return responseParamDTO;
 	}
 
-	public ResponseParamDTO<Map<String, Object>> getUserSessions(String classId, String courseId, String unitId,
+	public Observable<ResponseParamDTO<Map<String, Object>>> getUserSessions(String classId, String courseId, String unitId,
+			String lessonId, String collectionId, String collectionType, String userUid, boolean fetchOpenSession) {
+		
+		Observable<ResponseParamDTO<Map<String, Object>>> userSessions = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+			try {
+				s.onNext(fetchUserSessions(classId, courseId, unitId,
+						lessonId, collectionId, collectionType, userUid, fetchOpenSession));
+			} catch (Exception e) {
+				s.onError(e);
+			}
+			s.onCompleted();
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		return userSessions;
+	}
+
+	private ResponseParamDTO<Map<String, Object>> fetchUserSessions(String classId, String courseId, String unitId,
 			String lessonId, String collectionId, String collectionType, String userUid, boolean fetchOpenSession) throws Exception {
 
 		// TODO Enabled for class verification
 		// isValidClass(classId);
 		List<Map<String, Object>> resultSet =  null;
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-			if(collectionType.equalsIgnoreCase(InsightsConstant.ASSESSMENT)) {
+			if(collectionType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) {
 				if(fetchOpenSession) {
 					resultSet = getSessionInfo(CqlQueries.GET_USER_ASSESSMENT_SESSIONS, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId, ApiConstants.START);
 				} else {
@@ -91,7 +107,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			} else {
 				resultSet = getSessionInfo(CqlQueries.GET_USER_COLLECTION_SESSIONS, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId,null);
 			}
-		resultSet = ServiceUtils.sortBy(resultSet, InsightsConstant.EVENT_TIME, ApiConstants.ASC);
+		resultSet = ServiceUtils.sortBy(resultSet, ApiConstants.EVENT_TIME, ApiConstants.ASC);
 		responseParamDTO.setContent(addSequence(resultSet));
 		return responseParamDTO;
 	}
@@ -104,8 +120,8 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		if( sessions != null) {
 			for(Row row : sessions) {
 					Map<String, Object> sessionMap = new HashMap<String,Object>();
-					sessionMap.put(InsightsConstant.SESSION_ID,row.getString(ApiConstants._SESSION_ID));
-					sessionMap.put(InsightsConstant.EVENT_TIME,row.getLong(ApiConstants._EVENT_TIME));
+					sessionMap.put(ApiConstants.SESSIONID,row.getString(ApiConstants._SESSION_ID));
+					sessionMap.put(ApiConstants.EVENT_TIME,row.getLong(ApiConstants._EVENT_TIME));
 					sessionList.add(sessionMap);
 			}
 		}
@@ -118,7 +134,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			int sequence = 1;
 			finalSet = new ArrayList<Map<String, Object>>();
 			for (Map<String, Object> resultMap : resultSet) {
-				resultMap.put(InsightsConstant.SEQUENCE, sequence++);
+				resultMap.put(ApiConstants.SEQUENCE, sequence++);
 				finalSet.add(resultMap);
 			}
 		}
@@ -126,13 +142,12 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	}
 	
 	@Override
-	public ResponseParamDTO<Map<String, Object>> getUserCurrentLocationInLesson(String userUid, String classId) {
+	public Observable<ResponseParamDTO<Map<String, Object>>> getUserCurrentLocationInLesson(String userUid, String classId) {
 		Observable<ResponseParamDTO<Map<String, Object>>> userLocationObservable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
 			s.onNext(getStudentCurrentLocation(userUid, classId));
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = userLocationObservable.toBlocking().first();
-		return responseParamDTO;
+		return userLocationObservable;
 	}
 	
 	@Override
@@ -179,7 +194,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	private ResponseParamDTO<Map<String, Object>> getUserPeersDetail(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
-		String rowKey = getBaseService().appendTilda(classId, courseId, unitId, lessonId);
+		String rowKey = ServiceUtils.appendTilda(classId, courseId, unitId, lessonId);
 		//CqlResult<String, String> result = getCassandraService().readRows(ColumnFamilySet.CLASS_ACTIVITY_PEER_DETAIL.getColumnFamily(), CqlQueries.GET_USER_PEER_DETAIL, rowKey);
 		ResultSet result = getCassandraService().getUserPeerDetail(rowKey);
 		if (result != null ) {
@@ -270,12 +285,12 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 			return sessionId;
 		} else if (StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) 
 				&& StringUtils.isNotBlank(unitId) && StringUtils.isNotBlank(lessonId)) {
-			ResponseParamDTO<Map<String, Object>> sessionObject = getUserSessions(classId, courseId, unitId,lessonId, assessmentId, collectionType, userUid, openSession);
+			ResponseParamDTO<Map<String, Object>> sessionObject = fetchUserSessions(classId, courseId, unitId,lessonId, assessmentId, collectionType, userUid, openSession);
 			List<Map<String,Object>> sessionList = sessionObject.getContent();
-			return  sessionList.size() > 0 ? sessionList.get(sessionList.size()-1).get(InsightsConstant.SESSION_ID).toString() : null;
+			return  sessionList.size() > 0 ? sessionList.get(sessionList.size()-1).get(ApiConstants.SESSIONID).toString() : null;
 		} else {
-			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, getBaseService().appendComma("CUL Heirarchy", InsightsConstant.SESSION_ID)
-					, getBaseService().appendComma("CUL Heirarchy", InsightsConstant.SESSION_ID));
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, ServiceUtils.appendComma("CUL Heirarchy", ApiConstants.SESSIONID)
+					, ServiceUtils.appendComma("CUL Heirarchy", ApiConstants.SESSIONID));
 		}
 		return null;
 	}
@@ -284,7 +299,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 	private ResponseParamDTO<Map<String, Object>> getPerformanceData(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType, String nextLevelType) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
-		String rowKey = getBaseService().appendTilda(classId, courseId, unitId, lessonId);
+		String rowKey = ServiceUtils.appendTilda(classId, courseId, unitId, lessonId);
 		ResultSet resultRows = null;
 		if (StringUtils.isNotBlank(userUid) && StringUtils.isNotBlank(collectionType)) {
 			//resultRows = getCassandraService().readRows(ColumnFamilySet.CLASS_ACTIVITY_DATACUBE.getColumnFamily(), CqlQueries.GET_USER_CLASS_ACTIVITY_DATACUBE, rowKey, userUid, collectionType);
@@ -336,7 +351,7 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		dataMapList.add(dataAsMap);
 	}
 	
-	public ResponseParamDTO<Map<String, Object>> getAllStudentsPerformance(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType, String userUid) throws Exception {
+	private ResponseParamDTO<Map<String, Object>> getAllStudentsPerformance(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType, String userUid) throws Exception {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> resultDataAsList = new ArrayList<Map<String, Object>>(); 
 		//Fetch student Latest session for the class
@@ -548,9 +563,20 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return responseParamDTO;
 	}
 	
-	@Override
-	public ResponseParamDTO<Map<String, Object>> fetchTeacherGrade(String teacherUid, String userUid, String sessionId) {
+	public Observable<ResponseParamDTO<Map<String, Object>>> getTeacherGrade(String teacherUid, String userUid, String sessionId) {
+		
+		Observable<ResponseParamDTO<Map<String, Object>>> teacherGrade = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+			s.onNext(fetchTeacherGrade(teacherUid, userUid, sessionId));
+			s.onCompleted();
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		return teacherGrade;
+	}
+	
+	private ResponseParamDTO<Map<String, Object>> fetchTeacherGrade(String teacherUid, String userUid, String sessionId) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		if(StringUtils.isBlank(teacherUid)) {
+			return responseParamDTO;
+		}
 		ResultSet result = getCassandraService().getStudentQuestionGrade(teacherUid, userUid, sessionId);
 		List<Map<String, Object>> teacherGradeAsList = new ArrayList<>();
 		if(result != null) {
@@ -565,7 +591,16 @@ public class ClassV2ServiceImpl implements ClassV2Service, InsightsConstant{
 		return responseParamDTO;
 	}
 
-	public ResponseParamDTO<Map<String, Object>> getResourceUsage(String sessionId, String resourceIds) {
+	public Observable<ResponseParamDTO<Map<String, Object>>> getResourceUsage(String sessionId, String resourceIds) {
+		
+		Observable<ResponseParamDTO<Map<String, Object>>> teacherGrade = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+			s.onNext(fetchResourceUsage(sessionId, resourceIds));
+			s.onCompleted();
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		return teacherGrade;
+	}
+
+	private ResponseParamDTO<Map<String, Object>> fetchResourceUsage(String sessionId, String resourceIds) {
 		
 		if(StringUtils.isBlank(resourceIds)) {
 			ValidationUtils.rejectInvalidRequest(ErrorCodes.E104, ApiConstants.RESOURCE_IDS);	

@@ -33,14 +33,6 @@
 		<property name="suffix" value=".jsp" />
 	</bean>
 
-
-	<mvc:interceptors>
-		<bean id="localeChangeInterceptor"
-			class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
-			<property name="paramName" value="lang" />
-		</bean>
-	</mvc:interceptors>
-
 	<bean
 		class="org.gooru.insights.api.spring.exception.InsightsExceptionResolver">
 		<property name="exceptionMappings">

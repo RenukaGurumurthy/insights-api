@@ -25,15 +25,12 @@ package org.gooru.insights.api.models;
 
 import java.io.Serializable;
 
-import org.codehaus.jackson.annotate.JsonBackReference;
-
 public class UserRoleAssoc implements Serializable{
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -3590396802387568306L;
-	@JsonBackReference
 	private User user;
 	private UserRole role;
 	

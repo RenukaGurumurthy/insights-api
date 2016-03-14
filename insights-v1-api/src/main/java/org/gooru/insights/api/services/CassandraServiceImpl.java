@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import com.datastax.driver.core.ResultSet;
 
 @Service
-public class CassandraV2ServiceImpl implements CassandraV2Service{
+public class CassandraServiceImpl implements CassandraService{
 
 	@Autowired
 	private CqlCassandraDao cqlDAO;

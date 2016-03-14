@@ -27,9 +27,6 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.codehaus.jackson.map.annotate.JsonFilter;
-
-@JsonFilter("userRole")
 public class UserRole implements Serializable{
 	
 	/**

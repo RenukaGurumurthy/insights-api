@@ -3,14 +3,8 @@
  */
 package org.gooru.insights.api.utils;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
-import org.gooru.insights.api.models.EventObject;
-import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +22,7 @@ public class JsonDeserializer {
 		try {
 			return new JSONDeserializer<T>().use(null, clazz).deserialize(json);
 		} catch (Exception e) {
-			logger.error("Exception in deserialize"+e);
+			logger.error("Exception in deserialize", e);
 			return null;
 		}
 	}
@@ -38,29 +32,8 @@ public class JsonDeserializer {
 		try {
 			return mapper.readValue(json, type);
 		} catch (Exception e) {
-			logger.error("Exception in deserialize"+e);
+			logger.error("Exception in deserialize", e);
 		}
 		return null;
 	}
-
-	public static <T> T deserializeEventObject(EventObject eventObject) throws JSONException {
-		
-		ObjectMapper mapper = new ObjectMapper();
-		Map<String,Object> map = new LinkedHashMap<String,Object>();
-		try {
-			map.put("eventName", eventObject.getEventName());
-			map.put("endTime", eventObject.getEndTime());
-			map.put("startTime", eventObject.getStartTime());
-			map.put("eventId", eventObject.getEventId());
-			map.putAll((Map<? extends String, ? extends String>) mapper.readValue(eventObject.getUser().toString(), new TypeReference<HashMap<String,String>>(){}));
-			map.putAll((Map<? extends String, ? extends String>) mapper.readValue(eventObject.getMetrics().toString(), new TypeReference<HashMap<String,String>>(){}));
-			map.putAll((Map<? extends String, ? extends String>) mapper.readValue(eventObject.getPayLoadObject().toString(), new TypeReference<HashMap<String,String>>(){}));
-			map.putAll((Map<? extends String, ? extends String>) mapper.readValue(eventObject.getContext().toString(), new TypeReference<HashMap<String,String>>(){}));
-			map.putAll((Map<? extends String, ? extends String>) mapper.readValue(eventObject.getSession().toString(), new TypeReference<HashMap<String,String>>(){}));
-		} catch (Exception e) {
-			logger.error("Exception in deserialize"+e);
-		}
-		return (T) map;
-	}
-	
 }

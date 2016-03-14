@@ -8,11 +8,9 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ErrorMessages;
-import org.gooru.insights.api.models.RequestParamsDTO;
 import org.gooru.insights.api.spring.exception.BadRequestException;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.web.context.ContextLoader;
 
 public class RequestUtils {
 
@@ -40,12 +38,9 @@ public class RequestUtils {
 			return requestBody;
 	}
 
-	public RequestParamsDTO deSerialize(String data) {
-		return data != null ? new JsonDeserializer().deserialize(data, RequestParamsDTO.class) : null;
-	}
-
 	public static void logRequest(HttpServletRequest request) {
-		Map<String, Object> requestParam = request.getParameterMap();
+		@SuppressWarnings("unchecked")
+		Map<String, Object> requestParam = (Map<String,Object>)request.getParameterMap();
 		JSONObject jsonObject = new JSONObject();
 		try {
 			for (Map.Entry<String, Object> entry : requestParam.entrySet()) {

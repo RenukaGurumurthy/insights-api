@@ -25,12 +25,8 @@ package org.gooru.insights.api.models;
 
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-
 import org.apache.commons.lang.StringUtils;
 
-@Entity(name="user")
 public class User {
 
 	/**
@@ -38,27 +34,18 @@ public class User {
 	 */
 	private static final long serialVersionUID = 8293909847220631830L;
 	
-	private static final String TYPE = "user";
-	
-	@Column
 	private Integer userId;
 	
-	@Column
 	private String gooruUId;
 	
-	@Column
 	private String firstName;
 	
-	@Column
 	private String lastName;
 	
-	@Column
 	private String username;
 	
-	@Column
 	private String emailId = "";
 	
-	@Column
 	private Integer confirmStatus;
 	private String registerToken;
 	private UserRole userRole;
