@@ -730,7 +730,7 @@ public class ClassServiceImpl implements ClassService {
 			contentTaxonomyActivity.setScore(taxonomyUsage.getLong(ApiConstants.SCORE));
 			contentTaxonomyActivity.setAttempts(taxonomyUsage.getLong(ApiConstants.VIEWS));
 		} else {
-			contentTaxonomyActivity.setTimespent(taxonomyUsage.getLong(ApiConstants.TIME_SPENT));
+			contentTaxonomyActivity.setTimespent(taxonomyUsage.getLong(ApiConstants._TIME_SPENT));
 		}
 		if(childKey != null) {
 			if(itemMap.containsKey(parentKey)) {

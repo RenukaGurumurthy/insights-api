@@ -215,7 +215,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 				.where(QueryBuilder.eq(ApiConstants._USER_UID, rowKey))
 				.and(QueryBuilder.eq(ApiConstants._SUBJECT_ID, subjectId))
 				.and(QueryBuilder.eq(ApiConstants._COURSE_ID, courseId))
-				.and(QueryBuilder.eq(ApiConstants._DOMAIN_ID, courseId))
+				.and(QueryBuilder.eq(ApiConstants._DOMAIN_ID, domainId))
 				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 		return getCassSession().execute(select);
 	}
