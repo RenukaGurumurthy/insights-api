@@ -495,7 +495,7 @@ public class ClassServiceImpl implements ClassService {
 			}
 		}
 		contentTaxonomyActivityList = lambdaService.aggregateTaxonomyActivityData(contentTaxonomyActivityList, 1);
-		includeActiveChildCount(contentTaxonomyActivityList, itemMap, 1);
+		includeAdditionalMetrics(contentTaxonomyActivityList, itemMap, 1);
 		responseParamDTO.setContent(contentTaxonomyActivityList);
 		return responseParamDTO;
 	}
@@ -517,7 +517,7 @@ public class ClassServiceImpl implements ClassService {
 			}
 		}
 		contentTaxonomyActivityList = lambdaService.aggregateTaxonomyActivityData(contentTaxonomyActivityList, 2);
-		includeActiveChildCount(contentTaxonomyActivityList, itemMap, 2);
+		includeAdditionalMetrics(contentTaxonomyActivityList, itemMap, 2);
 		responseParamDTO.setContent(contentTaxonomyActivityList);
 		return responseParamDTO;
 	}
@@ -539,7 +539,7 @@ public class ClassServiceImpl implements ClassService {
 			}
 		}
 		contentTaxonomyActivityList = lambdaService.aggregateTaxonomyActivityData(contentTaxonomyActivityList, 3);
-		includeActiveChildCount(contentTaxonomyActivityList, itemMap, 3);
+		includeAdditionalMetrics(contentTaxonomyActivityList, itemMap, 3);
 		responseParamDTO.setContent(contentTaxonomyActivityList);
 		return responseParamDTO;
 	}
@@ -559,6 +559,7 @@ public class ClassServiceImpl implements ClassService {
 			}
 		}
 		contentTaxonomyActivityList = lambdaService.aggregateTaxonomyActivityData(contentTaxonomyActivityList, 4);
+		includeAdditionalMetrics(contentTaxonomyActivityList, null, 3);
 		responseParamDTO.setContent(contentTaxonomyActivityList);
 		return responseParamDTO;
 	}
@@ -742,31 +743,44 @@ public class ClassServiceImpl implements ClassService {
 		}
 	}
 	
-	private void includeActiveChildCount(List<ContentTaxonomyActivity> taxonomyActivities, Map<String,Set<String>> itemMap, Integer depth) {
+	private void includeAdditionalMetrics(List<ContentTaxonomyActivity> taxonomyActivities, Map<String,Set<String>> itemMap, Integer depth) {
 		
 		for(ContentTaxonomyActivity contentTaxonomyActivity : taxonomyActivities) {
+			
+			calculateScoreInPercentage(contentTaxonomyActivity);
 			switch(depth) {
 			case 1:
-				contentTaxonomyActivity.setItemCount(getItemCount(contentTaxonomyActivity.getCourseId(), itemMap));
+				contentTaxonomyActivity.setAttemptedItemCount(getItemCount(contentTaxonomyActivity.getCourseId(), itemMap));
 				break;
 			case 2:
-				contentTaxonomyActivity.setItemCount(getItemCount(contentTaxonomyActivity.getDomainId(), itemMap));
+				contentTaxonomyActivity.setAttemptedItemCount(getItemCount(contentTaxonomyActivity.getDomainId(), itemMap));
 				break;
 			case 3:
-				contentTaxonomyActivity.setItemCount(getItemCount(contentTaxonomyActivity.getStandardsId(), itemMap));
+				contentTaxonomyActivity.setAttemptedItemCount(getItemCount(contentTaxonomyActivity.getStandardsId(), itemMap));
 				break;
 			case 4:
-				contentTaxonomyActivity.setItemCount(getItemCount(contentTaxonomyActivity.getLearningTargetsId(), itemMap));
+				contentTaxonomyActivity.setAttemptedItemCount(getItemCount(contentTaxonomyActivity.getLearningTargetsId(), itemMap));
 				break;
 			}
 		}
 	}
 	
-	private int getItemCount(String id, Map<String,Set<String>> itemMap) {
-		if(itemMap.containsKey(id)) {
+	private Integer getItemCount(String id, Map<String,Set<String>> itemMap) {
+		if(itemMap == null) {
+			return null;
+		} else if( itemMap.containsKey(id)) {
 			return itemMap.get(id).size();
 		} else {
 			return 0;
+		}
+	}
+	
+	private void calculateScoreInPercentage(ContentTaxonomyActivity contentTaxonomyActivity) {
+
+		if(contentTaxonomyActivity.getScore() != null && contentTaxonomyActivity.getAttempts() != null) {
+			contentTaxonomyActivity.setScoreInPercentage(Math.round((contentTaxonomyActivity.getScore()/contentTaxonomyActivity.getAttempts()))+0L);
+			//Avoiding score Field in response
+			contentTaxonomyActivity.setScore(null);
 		}
 	}
 	
