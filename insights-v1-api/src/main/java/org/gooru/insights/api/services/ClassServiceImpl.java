@@ -490,7 +490,7 @@ public class ClassServiceImpl implements ClassService {
 				String courseId =  row.getString(ApiConstants._COURSE_ID);
 				String domainId =  row.getString(ApiConstants._DOMAIN_ID);
 				contentTaxonomyActivity.setCourseId(courseId);
-				itemMap = childActivityMetrics(contentTaxonomyActivity, row, courseId, domainId);
+				childActivityMetrics(contentTaxonomyActivity, row, itemMap, courseId, domainId);
 				contentTaxonomyActivityList.add(contentTaxonomyActivity);
 			}
 		}
@@ -512,7 +512,7 @@ public class ClassServiceImpl implements ClassService {
 				String domainId = row.getString(ApiConstants._DOMAIN_ID);
 				String standardsId = row.getString(ApiConstants._STANDARDS_ID);
 				contentTaxonomyActivity.setDomainId(domainId);
-				itemMap = childActivityMetrics(contentTaxonomyActivity, row, domainId, standardsId);
+				childActivityMetrics(contentTaxonomyActivity, row, itemMap, domainId, standardsId);
 				contentTaxonomyActivityList.add(contentTaxonomyActivity);
 			}
 		}
@@ -534,7 +534,7 @@ public class ClassServiceImpl implements ClassService {
 				String standardsId = row.getString(ApiConstants._STANDARDS_ID);
 				String learningTargetId = row.getString(ApiConstants._LEARNING_TARGETS_ID);
 				contentTaxonomyActivity.setStandardsId(standardsId);
-				itemMap = childActivityMetrics(contentTaxonomyActivity, row, standardsId, learningTargetId);
+				childActivityMetrics(contentTaxonomyActivity, row, itemMap, standardsId, learningTargetId);
 				contentTaxonomyActivityList.add(contentTaxonomyActivity);
 			}
 		}
@@ -554,7 +554,7 @@ public class ClassServiceImpl implements ClassService {
 				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
 				String learningTargetId = row.getString(ApiConstants._LEARNING_TARGETS_ID);
 				contentTaxonomyActivity.setLearningTargetsId(learningTargetId);
-				childActivityMetrics(contentTaxonomyActivity, row, learningTargetId, null);
+				childActivityMetrics(contentTaxonomyActivity, row, null, learningTargetId, null);
 				contentTaxonomyActivityList.add(contentTaxonomyActivity);
 			}
 		}
@@ -722,9 +722,8 @@ public class ClassServiceImpl implements ClassService {
 		return userLocation.getUnitUid();
 	}
 	
-	private Map<String,Set<String>> childActivityMetrics(ContentTaxonomyActivity contentTaxonomyActivity, Row taxonomyUsage, String parentKey, String childKey) {
+	private void childActivityMetrics(ContentTaxonomyActivity contentTaxonomyActivity, Row taxonomyUsage, Map<String,Set<String>> itemMap, String parentKey, String childKey) {
 		
-		Map<String,Set<String>> itemMap = new HashMap<>();
 		contentTaxonomyActivity.setResourceType(taxonomyUsage.getString(ApiConstants._RESOURCE_TYPE));
 		if(ApiConstants.QUESTION.equalsIgnoreCase(contentTaxonomyActivity.getResourceType())) {
 			contentTaxonomyActivity.setScore(taxonomyUsage.getLong(ApiConstants.SCORE));
@@ -741,7 +740,6 @@ public class ClassServiceImpl implements ClassService {
 				itemMap.put(parentKey, childItems);
 			}
 		}
-		return itemMap;
 	}
 	
 	private void includeActiveChildCount(List<ContentTaxonomyActivity> taxonomyActivities, Map<String,Set<String>> itemMap, Integer depth) {
