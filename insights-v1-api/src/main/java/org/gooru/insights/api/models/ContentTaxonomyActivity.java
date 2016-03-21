@@ -149,7 +149,7 @@ public class ContentTaxonomyActivity {
 		
 		switch(depth) {
 		case 1:
-			this.setCourseId(taxonomyDepthField(contentTaxonomyActivity, depth));
+			this.setCourseId(contentTaxonomyActivity.getCourseId());
 			break;
 		case 2:
 			this.setDomainId(contentTaxonomyActivity.getDomainId());
