@@ -28,7 +28,9 @@ public class ContentTaxonomyActivity {
 	
 	private String userUid;
 
-	private Integer itemCount;
+	private Integer attemptedItemCount;
+	
+	private Long scoreInPercentage;
 
 	public String getSubjectId() {
 		return subjectId;
@@ -134,12 +136,12 @@ public class ContentTaxonomyActivity {
 		this.attempts = attempts;
 	}
 
-	public Integer getItemCount() {
-		return itemCount;
+	public Integer getAttemptedItemCount() {
+		return attemptedItemCount;
 	}
 
-	public void setItemCount(Integer itemCount) {
-		this.itemCount = itemCount;
+	public void setAttemptedItemCount(Integer itemCount) {
+		this.attemptedItemCount = itemCount;
 	}
 	
 	public ContentTaxonomyActivity() {
@@ -147,6 +149,7 @@ public class ContentTaxonomyActivity {
 	
 	public ContentTaxonomyActivity(ContentTaxonomyActivity contentTaxonomyActivity, Integer depth) {
 		
+		this.setScoreInPercentage(contentTaxonomyActivity.getScoreInPercentage());
 		switch(depth) {
 		case 1:
 			this.setCourseId(contentTaxonomyActivity.getCourseId());
@@ -176,5 +179,13 @@ public class ContentTaxonomyActivity {
 			return contentTaxonomyActivity.getLearningTargetsId();
 		}
 		return contentTaxonomyActivity.getCourseId();
+	}
+
+	public Long getScoreInPercentage() {
+		return scoreInPercentage;
+	}
+
+	public void setScoreInPercentage(Long scoreInPercentage) {
+		this.scoreInPercentage = scoreInPercentage;
 	}
 }
