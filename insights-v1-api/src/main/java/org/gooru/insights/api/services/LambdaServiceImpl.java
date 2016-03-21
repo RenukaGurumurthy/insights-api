@@ -56,18 +56,21 @@ public class LambdaServiceImpl implements LambdaService{
 		return questionList;
 	}
 	
-	private List<ContentTaxonomyActivity> aggregateTaxonomyQuestionActivity(List<ContentTaxonomyActivity> resultList, Integer depth) {
-	
+	private List<ContentTaxonomyActivity> aggregateTaxonomyQuestionActivity(List<ContentTaxonomyActivity> resultList,
+			Integer depth) {
+
 		Map<Object, List<ContentTaxonomyActivity>> groupedData = aggregateActivity(resultList, depth);
 		return groupedData.entrySet().stream()
-				.map(firstLevelObject -> firstLevelObject.getValue().stream().reduce((f1,f2) -> generateTaxonomyQuestionMetrics(f1,f2, depth))).map(f -> f.get()).collect(Collectors.toList());
+				.map(firstLevelObject -> firstLevelObject.getValue().stream()
+						.reduce((f1, f2) -> generateTaxonomyQuestionMetrics(f1, f2)))
+				.map(f -> new ContentTaxonomyActivity(f.get(), depth)).collect(Collectors.toList());
 	}
 	
 	private List<ContentTaxonomyActivity> aggregateTaxonomyResourceActivity(List<ContentTaxonomyActivity> resultList, Integer depth) {
 		
-		Map<Object, List<ContentTaxonomyActivity>> groupedData = aggregateActivity(resultList, depth);
-		return groupedData.entrySet().stream()
-				.map(firstLevelObject -> firstLevelObject.getValue().stream().reduce((f1,f2) -> generateTaxonomyResourceMetrics(f1,f2, depth))).map(f -> f.get()).collect(Collectors.toList());
+			Map<Object, List<ContentTaxonomyActivity>> groupedData = aggregateActivity(resultList, depth);
+			return groupedData.entrySet().stream()
+					.map(firstLevelObject -> firstLevelObject.getValue().stream().reduce((f1,f2) -> generateTaxonomyResourceMetrics(f1,f2))).map(f -> new ContentTaxonomyActivity(f.get(), depth)).collect(Collectors.toList());
 	}
 	
 	private List<ContentTaxonomyActivity> filterTaxonomyActivity(List<ContentTaxonomyActivity> resultList, String resourceType) {
@@ -80,19 +83,17 @@ public class LambdaServiceImpl implements LambdaService{
 		return resultList.stream().collect(Collectors.groupingBy(object -> { return ContentTaxonomyActivity.taxonomyDepthField(object,depth); }));
 	}
 
-	private ContentTaxonomyActivity generateTaxonomyQuestionMetrics(ContentTaxonomyActivity  object1, ContentTaxonomyActivity  object2, Integer depth) {
+	private ContentTaxonomyActivity generateTaxonomyQuestionMetrics(ContentTaxonomyActivity  object1, ContentTaxonomyActivity  object2) {
 
-		ContentTaxonomyActivity  contentTaxonomyActivity = new ContentTaxonomyActivity(object1,depth);
-		contentTaxonomyActivity.setScore(object1.getScore()+object2.getScore());
-		contentTaxonomyActivity.setAttempts(object1.getAttempts()+object2.getAttempts());
-		return contentTaxonomyActivity;
+		object1.setScore(object1.getScore()+object2.getScore());
+		object1.setAttempts(object1.getAttempts()+object2.getAttempts());
+		return object1;
 	}
 	
-	private ContentTaxonomyActivity generateTaxonomyResourceMetrics(ContentTaxonomyActivity  object1, ContentTaxonomyActivity  object2, Integer depth) {
+	private ContentTaxonomyActivity generateTaxonomyResourceMetrics(ContentTaxonomyActivity  object1, ContentTaxonomyActivity  object2) {
 
-		ContentTaxonomyActivity  contentTaxonomyActivity = new ContentTaxonomyActivity(object1,depth);
-		contentTaxonomyActivity.setTimespent(object1.getTimespent()+object2.getTimespent());
-		return contentTaxonomyActivity;
+		object1.setTimespent(object1.getTimespent()+object2.getTimespent());
+		return object1;
 	}
 	
 	private ContentTaxonomyActivity getContentTaxonomyActivity(ContentTaxonomyActivity  object1, ContentTaxonomyActivity  object2, Integer depth) {
