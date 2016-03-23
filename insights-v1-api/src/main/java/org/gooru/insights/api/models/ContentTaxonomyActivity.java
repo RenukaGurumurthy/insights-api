@@ -148,13 +148,7 @@ public class ContentTaxonomyActivity {
 	}
 	
 	public ContentTaxonomyActivity(ContentTaxonomyActivity contentTaxonomyActivity, Integer depth) {
-		
-		this.setScoreInPercentage(contentTaxonomyActivity.getScoreInPercentage());
-		this.setScore(contentTaxonomyActivity.getScore());
-		this.setAttempts(contentTaxonomyActivity.getAttempts());
-		this.setViews(contentTaxonomyActivity.getViews());
-		this.setTimespent(contentTaxonomyActivity.getTimespent());
-		this.setAttemptedItemCount(contentTaxonomyActivity.getAttemptedItemCount());
+
 		switch(depth) {
 		case 1:
 			this.setCourseId(contentTaxonomyActivity.getCourseId());

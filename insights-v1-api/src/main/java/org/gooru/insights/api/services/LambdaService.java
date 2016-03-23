@@ -6,7 +6,5 @@ import org.gooru.insights.api.models.ContentTaxonomyActivity;
 
 public interface LambdaService {
 
-	void aggregateTaxonomyActivityData(List<ContentTaxonomyActivity> resultList, Integer depth1, Integer depth2);
-
 	List<ContentTaxonomyActivity> aggregateTaxonomyActivityData(List<ContentTaxonomyActivity> resultList, Integer depth);
 }
