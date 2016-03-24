@@ -725,8 +725,7 @@ public class ClassServiceImpl implements ClassService {
 	
 	private void childActivityMetrics(ContentTaxonomyActivity contentTaxonomyActivity, Row taxonomyUsage, Map<String,Set<String>> itemMap, String parentKey, String childKey) {
 		
-		contentTaxonomyActivity.setResourceType(taxonomyUsage.getString(ApiConstants._RESOURCE_TYPE));
-		if(ApiConstants.QUESTION.equalsIgnoreCase(contentTaxonomyActivity.getResourceType())) {
+		if(ApiConstants.QUESTION.equalsIgnoreCase(taxonomyUsage.getString(ApiConstants._RESOURCE_TYPE))) {
 			contentTaxonomyActivity.setScore(taxonomyUsage.getLong(ApiConstants.SCORE));
 			contentTaxonomyActivity.setAttempts(taxonomyUsage.getLong(ApiConstants.VIEWS));
 		} else {
@@ -779,9 +778,8 @@ public class ClassServiceImpl implements ClassService {
 
 		if(contentTaxonomyActivity.getScore() != null && contentTaxonomyActivity.getAttempts() != null) {
 			contentTaxonomyActivity.setScoreInPercentage(Math.round((contentTaxonomyActivity.getScore()/contentTaxonomyActivity.getAttempts()))+0L);
-			//Avoiding score and resourceType Field in response
+			//Avoiding score in response
 			contentTaxonomyActivity.setScore(null);
-			contentTaxonomyActivity.setResourceType(null);
 		}
 	}
 	
