@@ -125,4 +125,6 @@
 	
 	<bean id="requestTracer" class="org.gooru.insights.api.utils.RequestUtils" scope="request"/>
 	
+	<bean name="cassandraConnectionProvider" class="org.gooru.insights.api.daos.CassandraConnectionProvider" />
+	
 </beans>
