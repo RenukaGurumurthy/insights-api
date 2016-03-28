@@ -2,22 +2,18 @@ package org.gooru.insights.api.daos;
 
 import java.util.Properties;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
 import com.datastax.driver.core.policies.DefaultRetryPolicy;
-import com.datastax.driver.core.policies.ExponentialReconnectionPolicy;
 import com.datastax.driver.core.policies.TokenAwarePolicy;
 
-@Component
 public class CassandraConnectionProvider {
 
     private static String hosts;
@@ -32,15 +28,13 @@ public class CassandraConnectionProvider {
     @Resource(name = "cassandra")
 	private Properties cassandra;
 
-    @PostConstruct
-    private void initConnection(){
+    public void initConnection(){
         logger.info("Loading cassandra properties");
         hosts = this.getCassandraConstant().getProperty("cluster.hosts");
         clusterName = this.getCassandraConstant().getProperty("cluster.name");
         logKeyspaceName = this.getCassandraConstant().getProperty("log.keyspace");
         logDataCeter = this.getCassandraConstant().getProperty("log.datacentre");
         initCassandraClient();
-        
     }
     
     @PreDestroy
@@ -48,7 +42,7 @@ public class CassandraConnectionProvider {
     	session.close();
     }
     
-	private static void initCassandraClient() {
+	private  static void initCassandraClient() {
 		try {
 			cluster = Cluster
 					.builder()
