@@ -55,6 +55,11 @@ public class ApiConstants {
 	
 	public static final String USER = "user";
 	
+	public static final String REPORT = "Report";
+	
+	public static final String VIEW = "View";
+	
+	
 	/**
 	 * Mail Constants
 	 */
