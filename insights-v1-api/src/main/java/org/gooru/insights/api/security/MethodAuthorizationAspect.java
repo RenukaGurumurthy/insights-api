@@ -23,6 +23,7 @@
  ******************************************************************************/
 package org.gooru.insights.api.security;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -56,7 +57,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	@Autowired
 	private RedisService redisService;
 			
-	private Map<String, String> entityOperationsRole;
+	private Map<String, String> entityOperationsRole = new HashMap<String, String>();
 	
 	private static final String GOORU_PREFIX = "authenticate_";
 		
