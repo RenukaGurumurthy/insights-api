@@ -30,10 +30,10 @@ public class CassandraConnectionProvider {
 
     public void initConnection(){
         logger.info("Loading cassandra properties");
-        hosts = this.getCassandraConstant().getProperty("cluster.hosts");
-        clusterName = this.getCassandraConstant().getProperty("cluster.name");
-        logKeyspaceName = this.getCassandraConstant().getProperty("log.keyspace");
-        logDataCeter = this.getCassandraConstant().getProperty("log.datacentre");
+        hosts = this.getCassandraConstant().getProperty("analytics.cassandra.seeds");
+        clusterName = this.getCassandraConstant().getProperty("analytics.cassandra.cluster");
+        logKeyspaceName = this.getCassandraConstant().getProperty("analytics.cassandra.keyspace");
+        logDataCeter = this.getCassandraConstant().getProperty("analytics.cassandra.datacenter");
         initCassandraClient();
     }
     

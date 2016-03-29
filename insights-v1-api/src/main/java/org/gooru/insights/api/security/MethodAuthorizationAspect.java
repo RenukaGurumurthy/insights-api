@@ -25,10 +25,8 @@ package org.gooru.insights.api.security;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -59,9 +57,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 @Aspect
 public class MethodAuthorizationAspect extends OperationAuthorizer {
-
-	@Resource(name = "gooruConstants")
-	private Properties gooruConstants;
 
 	@Autowired
 	private RedisService redisService;
