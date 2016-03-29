@@ -29,16 +29,16 @@ public class MessageBuilder {
 
 	private static ResourceBundle resourceBundle = null;
 
-	@Resource(name = "gooruConstants")
-	private Properties gooruConstants;
+	@Resource(name = "constants")
+	private Properties constants;
 
 	@PostConstruct
 	private void init() {
 
-		Locale locale = new Locale((!gooruConstants.getProperty(LOCALE_LANG).startsWith("$") ? gooruConstants.get(LOCALE_LANG).toString() : DEFAULT_LOCALE_LANG),
-				!gooruConstants.getProperty(LOCALE_COUNTRY).startsWith("$") ? gooruConstants.get(LOCALE_COUNTRY).toString() : DEFAULT_LOCALE_COUNTRY);
+		Locale locale = new Locale((!constants.getProperty(LOCALE_LANG).startsWith("$") ? constants.get(LOCALE_LANG).toString() : DEFAULT_LOCALE_LANG),
+				!constants.getProperty(LOCALE_COUNTRY).startsWith("$") ? constants.get(LOCALE_COUNTRY).toString() : DEFAULT_LOCALE_COUNTRY);
 		
-		resourceBundle = ResourceBundle.getBundle(!gooruConstants.getProperty(MESSAGE_FILE_PATH).startsWith("$") ? gooruConstants.get(MESSAGE_FILE_PATH).toString() : DEFAULT_MESSAGE_FILE_PATH, locale);
+		resourceBundle = ResourceBundle.getBundle(!constants.getProperty(MESSAGE_FILE_PATH).startsWith("$") ? constants.get(MESSAGE_FILE_PATH).toString() : DEFAULT_MESSAGE_FILE_PATH, locale);
 	}
 
 	/**

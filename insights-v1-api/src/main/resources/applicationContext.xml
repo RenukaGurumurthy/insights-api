@@ -23,27 +23,13 @@
 
 	<context:annotation-config />
 
-	<bean id="gooruConstants"
+	<bean id="constants"
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="properties">
 			<props>
-				<prop key="gooruConfigStyleBuild">${buildNumber}</prop>
-				<prop key="insights.api.rest.endpoint">${insights.api.rest.endpoint}</prop>
 				<prop key="message.file.path">${message.file.path}</prop>
 				<prop key="locale.lang">${locale.lang}</prop>
 				<prop key="locale.country">${locale.country}</prop>
-			</props>
-		</property>
-	</bean>
- <bean id="filePath"
-		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-		<property name="properties">
-			<props>
-				<prop key="insights.file.app.path">${insights.file.app.path}</prop>
-				<prop key="insights.s3.bucket.path">${insights.s3.bucket.path}</prop>
-				<prop key="insights.nfs.bucket.path">${insights.nfs.bucket.path}</prop>
-				<prop key="insights.profile.url.path">${profile-url}</prop>
-				<prop key="insights.file.real.path">${insights.file.real.path}</prop>
 			</props>
 		</property>
 	</bean>
@@ -51,10 +37,10 @@
 		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="properties">
 			<props>
-				<prop key="cluster.name">${cluster.name}</prop>
-				<prop key="cluster.hosts">${cluster.hosts}</prop>
-				<prop key="log.keyspace">${log.keyspace}</prop>
-				<prop key="log.datacentre">${log.datacentre}</prop>
+				<prop key="analytics.cassandra.cluster">${analytics.cassandra.cluster}</prop>
+				<prop key="analytics.cassandra.seeds">${analytics.cassandra.seeds}</prop>
+				<prop key="analytics.cassandra.keyspace">${analytics.cassandra.keyspace}</prop>
+				<prop key="analytics.cassandra.datacenter">${analytics.cassandra.datacenter}</prop>
 
 			</props>
 		</property>
@@ -117,7 +103,7 @@
 		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
 		<property name="locations">
 			<list>
-				<value>file:${configSettings}</value>
+				<value>file:${v2ReadApiConfigSettings}</value>
 			</list>
 		</property>
 		<property name="ignoreUnresolvablePlaceholders" value="true" />
