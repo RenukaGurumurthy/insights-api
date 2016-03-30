@@ -134,7 +134,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			String userUidFromSession = jsonObject.getString(ApiConstants.PARTY_UId);
 			String userIdFromRequest = RequestUtils.getUserIdFromRequestParam(request);
 			String classId = RequestUtils.getClassIdFromRequestParam(request);
-			if (StringUtils.isNotBlank(classId) || StringUtils.isNotBlank(userIdFromRequest)) {
+			if (StringUtils.isBlank(classId) || StringUtils.isBlank(userIdFromRequest)) {
 				String pathInfo = request.getPathInfo();
 				int i = 0;
 				String[] path = pathInfo.split("/");
