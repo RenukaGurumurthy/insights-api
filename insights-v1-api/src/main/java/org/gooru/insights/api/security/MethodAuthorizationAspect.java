@@ -36,11 +36,9 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.gooru.insights.api.constants.ApiConstants;
-import org.gooru.insights.api.models.User;
 import org.gooru.insights.api.services.RedisService;
 import org.gooru.insights.api.utils.InsightsLogger;
 import org.gooru.insights.api.utils.RequestUtils;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +59,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	
 	private static final String GOORU_PREFIX = "authenticate_";
 		
-	private static final Logger logger = LoggerFactory.getLogger(MethodAuthorizationAspect.class);
+	private static final Logger LOG = LoggerFactory.getLogger(MethodAuthorizationAspect.class);
 
 	
 	@PostConstruct
@@ -113,21 +111,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 						jsonObject.getString(ApiConstants.USER_TOKEN));
 				jsonObject = new JSONObject(
 						jsonObject.getString(ApiConstants.USER));
-				User user = new User();
-				user.setFirstName(jsonObject.getString(ApiConstants.FIRST_NAME));
-				user.setLastName(jsonObject.getString(ApiConstants.LAST_NAME));
-				user.setEmailId(jsonObject.getString(ApiConstants.EMAIL_ID));
-				user.setGooruUId(jsonObject.getString(ApiConstants.PARTY_UId));
-				if (hasGooruAdminAuthority(authorizeOperations, jsonObject)) {
-					session.setAttribute(ApiConstants.SESSION_TOKEN,
-							sessionToken);
-					return true;
-				}
-				if (hasAuthority(authorizeOperations, jsonObject,request)) {
-					session.setAttribute(ApiConstants.SESSION_TOKEN,
-							sessionToken);
-					return true;
-				}
+				return isValidUser(jsonObject, request);
 			} catch (Exception e) {
 				InsightsLogger.error("Exception from redis:"+GOORU_PREFIX+sessionToken, e);
 				return false;
@@ -135,65 +119,29 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 		} else {
 			throw new AccessDeniedException("sessionToken can not be NULL!");
 		}
-		return false;
 	}
 	
-	
-	private boolean hasGooruAdminAuthority(AuthorizeOperations authorizeOperations,JSONObject jsonObj){
-		boolean roleAuthority = false;
-		try {
-			String userRole = jsonObj.getString(ApiConstants.USER_ROLE_SETSTRING);
-			String operations =  authorizeOperations.operations();
-			for(String op :operations.split(ApiConstants.COMMA)){
-				if(userRole.contains(ApiConstants.ROLE_GOORU_ADMIN) || userRole.contains(ApiConstants.CONTENT_ADMIN) || userRole.contains(ApiConstants.ORGANIZATION_ADMIN)){
-					roleAuthority = true;
-				}
-			}
-		} catch (JSONException e) {
-			InsightsLogger.debug("user doesn't have authorization to access:",e);
-		}
-		return roleAuthority;
-		
-	}
-	
-	private boolean hasAuthority(AuthorizeOperations authorizeOperations,JSONObject jsonObj,HttpServletRequest request){
-			String userRole = null;
-			try {
-				userRole = jsonObj.getString(ApiConstants.USER_ROLE_SETSTRING);
-			} catch (JSONException e) {
-				InsightsLogger.error("unable to fetch the userRoleSetString:", e);
-				return  false;
-			}
-			String operations =  authorizeOperations.operations();
-			for(String op : operations.split(",")){
-				String roles = entityOperationsRole.get(op);
-				InsightsLogger.debug("role : " +roles + "roleAuthority > :"+userRole.contains(roles));
-				for(String role : roles.split(",")){
-					if((userRole.contains(role))){
-						if(operations.equalsIgnoreCase("Class~View")){
-							return isValidUser(jsonObj, request);
-						}else{
-							return true;
-						}
-					}
-				}
-			}
-		return false;
-	}
 	
 	private boolean isValidUser(JSONObject jsonObject, HttpServletRequest request) {
 		try {
 			String userUidFromSession = jsonObject.getString(ApiConstants.PARTY_UId);
 			String userIdFromRequest = RequestUtils.getUserIdFromRequestParam(request);
-			String classId = null;
-			String pathInfo = request.getPathInfo();
-			if (pathInfo.startsWith("/class/")) {
-				String[] pathParts = pathInfo.split("/");
-				classId = pathParts[2];
-			} else {
-				classId = RequestUtils.getClassIdFromRequestParam(request);
+			String classId = RequestUtils.getClassIdFromRequestParam(request);
+			if (StringUtils.isNotBlank(classId) || StringUtils.isNotBlank(userIdFromRequest)) {
+				String pathInfo = request.getPathInfo();
+				int i = 0;
+				String[] path = pathInfo.split("/");
+				for (String pathVar : path) {
+					if (pathVar.equalsIgnoreCase("user")) {
+						userIdFromRequest = path[(i + 1)];
+					}
+					if (pathVar.equalsIgnoreCase("class")) {
+						classId = path[(i + 1)];
+					}
+					i++;
+				}
 			}
-			logger.info("userUidFromSession : {} - userIdFromRequest {} - classId : {}",userUidFromSession,userIdFromRequest,classId);
+			LOG.info("userUidFromSession : {} - userIdFromRequest {} - classId : {}",userUidFromSession,userIdFromRequest,classId);
 			if (StringUtils.isBlank(userIdFromRequest) && "ANONYMOUS".equalsIgnoreCase(userUidFromSession)) {
 				InsightsLogger.info("ANONYMOUS user can't be a teacher class creator");
 				return false;
@@ -226,4 +174,5 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 		*/}
 		return teacherUid;
 	}
+
 }
