@@ -114,4 +114,8 @@ public class CassandraServiceImpl implements CassandraService{
 	public ResultSet getClassCollectionCount(String classUid, String collectionUid) {
 		return cqlDAO.getClassCollectionCount(classUid, collectionUid);
 	}
+	@Override
+	public ResultSet getAuthorizedUsers(String gooruOid) {
+		return cqlDAO.getAuthorizedUsers(gooruOid);
+	}
 }

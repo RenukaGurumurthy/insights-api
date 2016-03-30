@@ -52,4 +52,6 @@ public interface CqlCassandraDao {
 
 	ResultSet getClassCollectionCount(String classUid, String collectionUid);
 
+	ResultSet getAuthorizedUsers(String gooruOid);
+
 }
