@@ -328,6 +328,7 @@ public class ApiConstants {
 	public static final String CSV_EXT = ".csv";
 	public static final String _ITEM_COUNT = "item_count";
 	public static final String _CREATOR_UID = "creator_uid";
+	public static final String COLLABORATORS = "collaborators";
 	public static final String CLASS_GOORU_ID = "classGooruId";
 	public static final String BEAN_INIT = "Bean-init";
 	public static final String _ASSESSMENT_UNIQUE_VIEWS = "assessment_unique_views";
@@ -417,7 +418,7 @@ public class ApiConstants {
 				,STUDENT_LOCATION("student_location"), USER_SESSIONS("user_sessions"),
 				USER_SESSION_ACTIVITY("user_session_activity"),CLASS_ACTIVITY_DATACUBE("class_activity_datacube"),
 				CONTENT_TAXONOMY_ACTIVITY("content_taxonomy_activity"), CLASS_ACTIVITY_PEER_DETAIL("class_activity_peer_detail"),
-				STUDENT_QUESTION_GRADE("student_question_grade"), USER_CLASS_COLLECTION_LAST_SESSIONS("user_class_collection_last_sessions"),CLASS_COLLECTION_COUNT("class_collection_count");
+				STUDENT_QUESTION_GRADE("student_question_grade"), USER_CLASS_COLLECTION_LAST_SESSIONS("user_class_collection_last_sessions"),CLASS_COLLECTION_COUNT("class_collection_count"),CONTENT_AUTHORIZED_USERS_COUNT("content_authorized_users");
 
 		private String columnFamily;
 

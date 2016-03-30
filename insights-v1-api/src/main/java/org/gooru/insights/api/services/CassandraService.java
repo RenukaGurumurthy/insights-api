@@ -51,4 +51,6 @@ public interface CassandraService {
 			String sessionId);
 
 	ResultSet getClassCollectionCount(String classUid, String collectionUid);
+
+	ResultSet getAuthorizedUsers(String gooruOid);
 }
