@@ -1,5 +1,7 @@
 package org.gooru.insights.api.services;
 
+import java.util.List;
+
 import org.gooru.insights.api.daos.CqlCassandraDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -117,5 +119,9 @@ public class CassandraServiceImpl implements CassandraService{
 	@Override
 	public ResultSet getAuthorizedUsers(String gooruOid) {
 		return cqlDAO.getAuthorizedUsers(gooruOid);
+	}
+	@Override
+	public ResultSet getStatisticalMetrics(List<String> gooruOids) {
+		return cqlDAO.getStatMetrics(gooruOids);
 	}
 }
