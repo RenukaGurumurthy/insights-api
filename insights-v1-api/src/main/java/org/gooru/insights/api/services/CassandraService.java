@@ -1,5 +1,7 @@
 package org.gooru.insights.api.services;
 
+import java.util.List;
+
 import com.datastax.driver.core.ResultSet;
 
 public interface CassandraService {	
@@ -53,4 +55,6 @@ public interface CassandraService {
 	ResultSet getClassCollectionCount(String classUid, String collectionUid);
 
 	ResultSet getAuthorizedUsers(String gooruOid);
+
+	ResultSet getStatisticalMetrics(List<String> gooruOids);
 }

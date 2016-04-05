@@ -1,4 +1,6 @@
 package org.gooru.insights.api.daos;
+import java.util.List;
+
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.ColumnFamilySet;
 import org.slf4j.Logger;
@@ -430,5 +432,20 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
 				;
 		return select;
+	}
+	@Override
+	public ResultSet getStatMetrics(List<String> gooruOids) {
+		ResultSet result = null;
+		try {
+			Statement select = QueryBuilder.select().all()
+					.from(getLogKeyspaceName(), ColumnFamilySet.STATISTICAL_DATA.getColumnFamily())
+					.where(QueryBuilder.in(ApiConstants._CLUSTERING_KEY, gooruOids))
+					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
+			result = resultSetFuture.get();
+		} catch (Exception e) {
+			LOG.error("Exception:", e);
+		}
+		return result;
 	}
 }

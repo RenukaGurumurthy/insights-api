@@ -388,7 +388,9 @@ public class ApiConstants {
 	public static final String PARENT_EVENT_ID = "parentEventId";
 	public static final String _COLLECTION_COUNT = "collection_count";
 	public static final String _ASSESSMENT_COUNT = "assessment_count";
-	
+	public static final String _CLUSTERING_KEY = "clustering_key";
+	public static final String _METRICS_NAME = "metrics_value";
+	public static final String _METRICS_VALUE = "metrics_name";
 	public static enum Numbers {
 		FOUR("4"), FIVE("5");
 
@@ -418,7 +420,7 @@ public class ApiConstants {
 				,STUDENT_LOCATION("student_location"), USER_SESSIONS("user_sessions"),
 				USER_SESSION_ACTIVITY("user_session_activity"),CLASS_ACTIVITY_DATACUBE("class_activity_datacube"),
 				CONTENT_TAXONOMY_ACTIVITY("content_taxonomy_activity"), CLASS_ACTIVITY_PEER_DETAIL("class_activity_peer_detail"),
-				STUDENT_QUESTION_GRADE("student_question_grade"), USER_CLASS_COLLECTION_LAST_SESSIONS("user_class_collection_last_sessions"),CLASS_COLLECTION_COUNT("class_collection_count"),CONTENT_AUTHORIZED_USERS_COUNT("content_authorized_users");
+				STUDENT_QUESTION_GRADE("student_question_grade"), USER_CLASS_COLLECTION_LAST_SESSIONS("user_class_collection_last_sessions"),CLASS_COLLECTION_COUNT("class_collection_count"),CONTENT_AUTHORIZED_USERS_COUNT("content_authorized_users"),STATISTICAL_DATA("statistical_data");
 
 		private String columnFamily;
 

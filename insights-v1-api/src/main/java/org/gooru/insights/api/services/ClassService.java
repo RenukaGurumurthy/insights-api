@@ -35,6 +35,8 @@ public interface ClassService {
 	Observable<ResponseParamDTO<Map<String, Object>>> getUserPeers(String classId, String courseId, String unitId, String lessonId, String nextLevelType);
 	
 	Observable<ResponseParamDTO<ContentTaxonomyActivity>> getTaxonomyActivity(Integer depth, String... taxonomyLevelIds);
+
+	Observable<ResponseParamDTO<Map<String, Object>>> getStatisticalMetrics(String gooruOids);
 }
 
 
