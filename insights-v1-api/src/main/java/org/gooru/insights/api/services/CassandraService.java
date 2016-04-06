@@ -56,5 +56,5 @@ public interface CassandraService {
 
 	ResultSet getAuthorizedUsers(String gooruOid);
 
-	ResultSet getStatisticalMetrics(List<String> gooruOids);
+	ResultSet getStatisticalMetrics(String gooruOids);
 }

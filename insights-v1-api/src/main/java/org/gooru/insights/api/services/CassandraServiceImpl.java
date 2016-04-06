@@ -121,7 +121,7 @@ public class CassandraServiceImpl implements CassandraService{
 		return cqlDAO.getAuthorizedUsers(gooruOid);
 	}
 	@Override
-	public ResultSet getStatisticalMetrics(List<String> gooruOids) {
+	public ResultSet getStatisticalMetrics(String gooruOids) {
 		return cqlDAO.getStatMetrics(gooruOids);
 	}
 }

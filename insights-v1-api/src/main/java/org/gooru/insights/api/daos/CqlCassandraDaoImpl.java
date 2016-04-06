@@ -434,12 +434,12 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		return select;
 	}
 	@Override
-	public ResultSet getStatMetrics(List<String> gooruOids) {
+	public ResultSet getStatMetrics(String gooruOids) {
 		ResultSet result = null;
 		try {
 			Statement select = QueryBuilder.select().all()
 					.from(getLogKeyspaceName(), ColumnFamilySet.STATISTICAL_DATA.getColumnFamily())
-					.where(QueryBuilder.in(ApiConstants._CLUSTERING_KEY, gooruOids))
+					.where(QueryBuilder.eq(ApiConstants._CLUSTERING_KEY, gooruOids))
 					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
 			result = resultSetFuture.get();

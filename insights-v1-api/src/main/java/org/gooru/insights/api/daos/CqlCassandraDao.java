@@ -56,6 +56,6 @@ public interface CqlCassandraDao {
 
 	ResultSet getAuthorizedUsers(String gooruOid);
 
-	ResultSet getStatMetrics(List<String> gooruOids);
+	ResultSet getStatMetrics(String gooruOids);
 
 }
