@@ -389,8 +389,8 @@ public class ApiConstants {
 	public static final String _COLLECTION_COUNT = "collection_count";
 	public static final String _ASSESSMENT_COUNT = "assessment_count";
 	public static final String _CLUSTERING_KEY = "clustering_key";
-	public static final String _METRICS_NAME = "metrics_value";
-	public static final String _METRICS_VALUE = "metrics_name";
+	public static final String _METRICS_NAME = "metrics_name";
+	public static final String _METRICS_VALUE = "metrics_value";
 	public static enum Numbers {
 		FOUR("4"), FIVE("5");
 
