@@ -636,10 +636,10 @@ public class ClassServiceImpl implements ClassService {
 					resourceUsage.put(ApiConstants.GOORUOID, gooruOid);
 					resourceUsage.put(statMetricsRow.getString(ApiConstants._METRICS_NAME), statMetricsRow.getLong(ApiConstants._METRICS_VALUE));
 					clusterKey = gooruOid;
+				}
 					if(resourceUsage!= null && !resourceUsage.isEmpty()) {
 						resourceUsageList.add(resourceUsage);		
 					}
-				}
 			}
 		}
 		resourceUsageObject.setContent(resourceUsageList);	
