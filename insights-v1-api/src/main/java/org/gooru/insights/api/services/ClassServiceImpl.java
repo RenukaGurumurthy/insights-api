@@ -624,13 +624,18 @@ public class ClassServiceImpl implements ClassService {
 			ResultSet statMetricsResult = getCassandraService().getStatisticalMetrics(resourceId); 
 			System.out.println("statMetricsResult"+statMetricsResult);
 			if(statMetricsResult != null) {
+				String clusterKey = null;
+				Map<String, Object> resourceUsage = null;
 				System.out.println("..........................................");
 				for(Row statMetricsRow : statMetricsResult.all()) {
 					String gooruOid = statMetricsRow.getString(ApiConstants._CLUSTERING_KEY);
 					System.out.println("gooruOid"+gooruOid);
-						Map<String, Object> resourceUsage = new HashMap<String,Object>();
+					if(clusterKey == null || (clusterKey != null && !clusterKey.equalsIgnoreCase(gooruOid))){ 
+							resourceUsage = new HashMap<String,Object>();
+					}
 					resourceUsage.put(ApiConstants.GOORUOID, gooruOid);
 					resourceUsage.put(statMetricsRow.getString(ApiConstants._METRICS_NAME), statMetricsRow.getLong(ApiConstants._METRICS_VALUE));
+					clusterKey = gooruOid;
 					if(resourceUsage!= null && !resourceUsage.isEmpty()) {
 						resourceUsageList.add(resourceUsage);		
 					}
