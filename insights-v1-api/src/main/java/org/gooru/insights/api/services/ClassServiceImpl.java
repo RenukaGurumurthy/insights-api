@@ -611,39 +611,34 @@ public class ClassServiceImpl implements ClassService {
 		return teacherGrade;
 	}
 
-	private ResponseParamDTO<Map<String, Object>> getStatMetrics(String gooruOids){
-		if(StringUtils.isBlank(gooruOids)) {
-			ValidationUtils.rejectInvalidRequest(ErrorCodes.E104, ApiConstants.RESOURCE_IDS);	
+	private ResponseParamDTO<Map<String, Object>> getStatMetrics(String gooruOids) {
+		if (StringUtils.isBlank(gooruOids)) {
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E104, ApiConstants.RESOURCE_IDS);
 		}
 		ResponseParamDTO<Map<String, Object>> resourceUsageObject = new ResponseParamDTO<Map<String, Object>>();
-		List<String> resourceIdsList = new ArrayList<String>();
-		List<Map<String,Object>> resourceUsageList = new ArrayList<Map<String,Object>>();
-		for(String resourceId : gooruOids.split(ApiConstants.COMMA)) {
-			//resourceIdsList.add(resourceId.t);
-		System.out.println("resourceIdsList"+resourceIdsList);
-			ResultSet statMetricsResult = getCassandraService().getStatisticalMetrics(resourceId); 
-			System.out.println("statMetricsResult"+statMetricsResult);
-			if(statMetricsResult != null) {
+		List<Map<String, Object>> resourceUsageList = new ArrayList<Map<String, Object>>();
+		for (String resourceId : gooruOids.split(ApiConstants.COMMA)) {
+			ResultSet statMetricsResult = getCassandraService().getStatisticalMetrics(resourceId);
+			if (statMetricsResult != null) {
 				String clusterKey = null;
 				Map<String, Object> resourceUsage = null;
-				System.out.println("..........................................");
-				for(Row statMetricsRow : statMetricsResult.all()) {
+				for (Row statMetricsRow : statMetricsResult.all()) {
 					String gooruOid = statMetricsRow.getString(ApiConstants._CLUSTERING_KEY);
-					System.out.println("gooruOid"+gooruOid);
-					if(clusterKey == null || (clusterKey != null && !clusterKey.equalsIgnoreCase(gooruOid))){ 
-							resourceUsage = new HashMap<String,Object>();
+					if (clusterKey == null || (clusterKey != null && !clusterKey.equalsIgnoreCase(gooruOid))) {
+						resourceUsage = new HashMap<String, Object>();
 					}
 					resourceUsage.put(ApiConstants.GOORUOID, gooruOid);
-					resourceUsage.put(statMetricsRow.getString(ApiConstants._METRICS_NAME), statMetricsRow.getLong(ApiConstants._METRICS_VALUE));
+					resourceUsage.put(statMetricsRow.getString(ApiConstants._METRICS_NAME),
+							statMetricsRow.getLong(ApiConstants._METRICS_VALUE));
 					clusterKey = gooruOid;
 				}
-					if(resourceUsage!= null && !resourceUsage.isEmpty()) {
-						resourceUsageList.add(resourceUsage);		
-					}
+				if (resourceUsage != null && !resourceUsage.isEmpty()) {
+					resourceUsageList.add(resourceUsage);
+				}
 			}
 		}
-		resourceUsageObject.setContent(resourceUsageList);	
-		return resourceUsageObject;	
+		resourceUsageObject.setContent(resourceUsageList);
+		return resourceUsageObject;
 	}
 	
 	private ResponseParamDTO<Map<String, Object>> fetchResourceUsage(String sessionId, String resourceIds) {
