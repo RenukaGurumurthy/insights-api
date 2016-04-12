@@ -1,5 +1,7 @@
 package org.gooru.insights.api.services;
 
+import java.util.Set;
+
 import com.datastax.driver.core.ResultSet;
 
 public interface CassandraService {	
@@ -51,4 +53,6 @@ public interface CassandraService {
 			String sessionId);
 
 	ResultSet getClassCollectionCount(String classUid, String collectionUid);
+	
+	ResultSet getTaxonomyItemCount(Set<String> ids);
 }
