@@ -256,5 +256,14 @@ public class ClassController extends BaseController {
 		setAllowOrigin(response);
 		return getDeferredResult(getClassService().getResourceUsage(sessionId, resourceIds));
 	}
-	
+
+	@RequestMapping(value="/{collectionType}/stat/metrics",method ={ RequestMethod.GET,RequestMethod.POST})
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@ResponseBody
+	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getStatisticalMetrics(HttpServletRequest request, 
+			@PathVariable(value="collectionType") String collectionType,@RequestBody String contentGooruIds,
+			HttpServletResponse response) throws Exception {
+		setAllowOrigin(response);
+		return getDeferredResult(getClassService().getStatisticalMetrics(contentGooruIds));
+	}
 }

@@ -601,6 +601,46 @@ public class ClassServiceImpl implements ClassService {
 		return teacherGrade;
 	}
 
+	@Override
+	public Observable<ResponseParamDTO<Map<String, Object>>> getStatisticalMetrics(String gooruOids) {
+		
+		Observable<ResponseParamDTO<Map<String, Object>>> teacherGrade = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+			s.onNext(getStatMetrics(gooruOids));
+			s.onCompleted();
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		return teacherGrade;
+	}
+
+	private ResponseParamDTO<Map<String, Object>> getStatMetrics(String gooruOids) {
+		if (StringUtils.isBlank(gooruOids)) {
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E104, ApiConstants.RESOURCE_IDS);
+		}
+		ResponseParamDTO<Map<String, Object>> resourceUsageObject = new ResponseParamDTO<Map<String, Object>>();
+		List<Map<String, Object>> resourceUsageList = new ArrayList<Map<String, Object>>();
+		for (String resourceId : gooruOids.split(ApiConstants.COMMA)) {
+			ResultSet statMetricsResult = getCassandraService().getStatisticalMetrics(resourceId);
+			if (statMetricsResult != null) {
+				String clusterKey = null;
+				Map<String, Object> resourceUsage = null;
+				for (Row statMetricsRow : statMetricsResult.all()) {
+					String gooruOid = statMetricsRow.getString(ApiConstants._CLUSTERING_KEY);
+					if (clusterKey == null || (clusterKey != null && !clusterKey.equalsIgnoreCase(gooruOid))) {
+						resourceUsage = new HashMap<String, Object>();
+					}
+					resourceUsage.put(ApiConstants.GOORUOID, gooruOid);
+					resourceUsage.put(statMetricsRow.getString(ApiConstants._METRICS_NAME),
+							statMetricsRow.getLong(ApiConstants._METRICS_VALUE));
+					clusterKey = gooruOid;
+				}
+				if (resourceUsage != null && !resourceUsage.isEmpty()) {
+					resourceUsageList.add(resourceUsage);
+				}
+			}
+		}
+		resourceUsageObject.setContent(resourceUsageList);
+		return resourceUsageObject;
+	}
+	
 	private ResponseParamDTO<Map<String, Object>> fetchResourceUsage(String sessionId, String resourceIds) {
 		
 		if(StringUtils.isBlank(resourceIds)) {
@@ -632,7 +672,7 @@ public class ClassServiceImpl implements ClassService {
 		resourceUsageObject.setContent(resourceUsageList);	
 		return resourceUsageObject;
 	}
-	
+
 	private ResponseParamDTO<Map<String, Object>> getStudentCurrentLocation(String userUid, String classId) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
 		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();

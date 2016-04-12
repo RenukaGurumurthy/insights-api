@@ -1,4 +1,6 @@
 package org.gooru.insights.api.daos;
+import java.util.List;
+
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.ColumnFamilySet;
 import org.slf4j.Logger;
@@ -365,7 +367,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 	}
 	
 	//public static final String GET_CLASS_COLLECTION_COUNT = "SELECT assessment_count,collection_count FROM class_collection_count WHERE class_uid=? AND collection_uid=?";
-		@Override
+	@Override
 	public ResultSet getClassCollectionCount(String classUid,
 			String collectionUid) {
 		ResultSet result = null;
@@ -382,7 +384,21 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		}
 		return result;
 	}
-		
+	@Override
+	public ResultSet getAuthorizedUsers(String gooruOid) {
+		ResultSet result = null;
+		try {
+			Statement select = QueryBuilder.select().all()
+					.from(getLogKeyspaceName(), ColumnFamilySet.CONTENT_AUTHORIZED_USERS_COUNT.getColumnFamily())
+					.where(QueryBuilder.eq(ApiConstants._GOORU_OID, gooruOid))
+					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
+			result = resultSetFuture.get();
+		} catch (Exception e) {
+			LOG.error("Exception:", e);
+		}
+		return result;
+	}
 	private Statement getUserSessionStatmentForAssessment(String userUid,
 			String collectionUid, String collectionType, String classUid,
 			String courseUid, String unitUid, String lessonUid, String eventType){
@@ -416,5 +432,20 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 				.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL)
 				;
 		return select;
+	}
+	@Override
+	public ResultSet getStatMetrics(String gooruOids) {
+		ResultSet result = null;
+		try {
+			Statement select = QueryBuilder.select().all()
+					.from(getLogKeyspaceName(), ColumnFamilySet.STATISTICAL_DATA.getColumnFamily())
+					.where(QueryBuilder.eq(ApiConstants._CLUSTERING_KEY, gooruOids))
+					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
+			result = resultSetFuture.get();
+		} catch (Exception e) {
+			LOG.error("Exception:", e);
+		}
+		return result;
 	}
 }

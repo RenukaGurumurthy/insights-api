@@ -25,6 +25,7 @@ package org.gooru.insights.api.security;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -36,6 +37,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.gooru.insights.api.constants.ApiConstants;
+import org.gooru.insights.api.services.CassandraService;
 import org.gooru.insights.api.services.RedisService;
 import org.gooru.insights.api.utils.InsightsLogger;
 import org.gooru.insights.api.utils.RequestUtils;
@@ -48,6 +50,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.datastax.driver.core.ResultSet;
+
 
 @Aspect
 public class MethodAuthorizationAspect extends OperationAuthorizer {
@@ -55,6 +59,9 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	@Autowired
 	private RedisService redisService;
 			
+	@Autowired
+	private CassandraService cassandraService;
+	
 	private Map<String, String> entityOperationsRole = new HashMap<String, String>();
 	
 	private static final String GOORU_PREFIX = "authenticate_";
@@ -127,7 +134,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			String userUidFromSession = jsonObject.getString(ApiConstants.PARTY_UId);
 			String userIdFromRequest = RequestUtils.getUserIdFromRequestParam(request);
 			String classId = RequestUtils.getClassIdFromRequestParam(request);
-			if (StringUtils.isNotBlank(classId) || StringUtils.isNotBlank(userIdFromRequest)) {
+			if (StringUtils.isBlank(classId) || StringUtils.isBlank(userIdFromRequest)) {
 				String pathInfo = request.getPathInfo();
 				int i = 0;
 				String[] path = pathInfo.split("/");
@@ -147,8 +154,8 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 				return false;
 			} else if (StringUtils.isNotBlank(userIdFromRequest) && userIdFromRequest.equalsIgnoreCase(userUidFromSession)) {
 				return true;
-			} else if (StringUtils.isNotBlank(classId) && userUidFromSession.equalsIgnoreCase(getTeacherUid(classId))) {
-				return true;
+			} else if (StringUtils.isNotBlank(classId)) {
+				return isAuthorizedUser(classId, userUidFromSession);
 			}
 
 		} catch (Exception e) {
@@ -157,22 +164,18 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 		return false;
 	}
 
-	private String getTeacherUid(String classGooruId) {
-		String teacherUid = null;
+	private boolean isAuthorizedUser(String classGooruId, String userUidFromSession) {
 		if (StringUtils.isNotBlank(classGooruId)) {
-			/**
-			 * Re-look at this area
-			 * 
-			try {
-				OperationResult<ColumnList<String>> classData = cassandraService.read(ColumnFamilySet.CLASS.getColumnFamily(), classGooruId);
-				if (!classData.getResult().isEmpty() && classData.getResult().size() > 0) {
-					teacherUid = classData.getResult().getStringValue(ApiConstants._CREATOR_UID, null);
-				}
-			} catch (Exception e) {
-				InsightsLogger.error("Exception", e);
+			ResultSet authorizedUsers =  cassandraService.getAuthorizedUsers(classGooruId);
+			if(userUidFromSession.equalsIgnoreCase(authorizedUsers.one().getString(ApiConstants._CREATOR_UID))){
+				return true;
 			}
-		*/}
-		return teacherUid;
+			if(authorizedUsers.one().getSet(ApiConstants.COLLABORATORS, Set.class).contains(userUidFromSession)){
+				return true;
+			}
+		}
+		//It should return false here. Re-look at this value once event sync implementation completed
+		return true;
 	}
 
 }
