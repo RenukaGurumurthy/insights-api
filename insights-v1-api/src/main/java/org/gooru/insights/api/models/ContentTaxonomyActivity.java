@@ -31,8 +31,6 @@ public class ContentTaxonomyActivity {
 	private Integer attemptedItemCount;
 	
 	private Long scoreInPercentage;
-	
-	private Long itemCount;
 
 	public String getSubjectId() {
 		return subjectId;
@@ -188,13 +186,5 @@ public class ContentTaxonomyActivity {
 
 	public void setScoreInPercentage(Long scoreInPercentage) {
 		this.scoreInPercentage = scoreInPercentage;
-	}
-
-	public Long getItemCount() {
-		return itemCount;
-	}
-
-	public void setItemCount(Long itemCount) {
-		this.itemCount = itemCount;
 	}
 }

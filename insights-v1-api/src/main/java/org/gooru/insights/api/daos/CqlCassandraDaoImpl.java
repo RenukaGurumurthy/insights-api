@@ -1,6 +1,4 @@
 package org.gooru.insights.api.daos;
-import java.util.Set;
-
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.ColumnFamilySet;
 import org.slf4j.Logger;
@@ -384,21 +382,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		}
 		return result;
 	}
-	
-		public ResultSet getTaxonomyItemCount(Set<String> ids) {
-			ResultSet result = null;
-			try {
-				Statement select = QueryBuilder.select().all()
-						.from(getLogKeyspaceName(), ColumnFamilySet.TAXONOMY_PARENT_NODE.getColumnFamily())
-						.where(QueryBuilder.in(ApiConstants._ROW_KEY, ids.toArray()))
-						.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
-				ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
-				result = resultSetFuture.get();
-			} catch (Exception e) {
-				LOG.error("Exception:", e);
-			}
-			return result;
-		}
+		
 	private Statement getUserSessionStatmentForAssessment(String userUid,
 			String collectionUid, String collectionType, String classUid,
 			String courseUid, String unitUid, String lessonUid, String eventType){

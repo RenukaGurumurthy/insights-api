@@ -742,47 +742,33 @@ public class ClassServiceImpl implements ClassService {
 		}
 	}
 	
-	private void includeAdditionalMetrics(List<ContentTaxonomyActivity> taxonomyActivities, Map<String,Set<String>> attemptedItemMap, Integer depth) {
+	private void includeAdditionalMetrics(List<ContentTaxonomyActivity> taxonomyActivities, Map<String,Set<String>> itemMap, Integer depth) {
 		
-		Map<String, Long> itemCount = new HashMap<String,Long>();
-		if(attemptedItemMap != null ){
-			Set<String> childIds = attemptedItemMap.keySet();
-			ResultSet childItemsCount = getCassandraService().getTaxonomyItemCount(childIds);
-			if(childItemsCount != null) {
-				for(Row row : childItemsCount) {
-					itemCount.put(row.getString("row_key"), row.getLong("item_count"));
-				}
-			}
-		}
 		for(ContentTaxonomyActivity contentTaxonomyActivity : taxonomyActivities) {
 			
 			calculateScoreInPercentage(contentTaxonomyActivity);
 			switch(depth) {
 			case 1:
-				contentTaxonomyActivity.setAttemptedItemCount(getAttemptedItemCount(contentTaxonomyActivity.getCourseId(), attemptedItemMap));
-				contentTaxonomyActivity.setItemCount(itemCount.get(contentTaxonomyActivity.getCourseId()));
+				contentTaxonomyActivity.setAttemptedItemCount(getItemCount(contentTaxonomyActivity.getCourseId(), itemMap));
 				break;
 			case 2:
-				contentTaxonomyActivity.setAttemptedItemCount(getAttemptedItemCount(contentTaxonomyActivity.getDomainId(), attemptedItemMap));
-				contentTaxonomyActivity.setItemCount(itemCount.get(contentTaxonomyActivity.getDomainId()));
+				contentTaxonomyActivity.setAttemptedItemCount(getItemCount(contentTaxonomyActivity.getDomainId(), itemMap));
 				break;
 			case 3:
-				contentTaxonomyActivity.setAttemptedItemCount(getAttemptedItemCount(contentTaxonomyActivity.getStandardsId(), attemptedItemMap));
-				contentTaxonomyActivity.setItemCount(itemCount.get(contentTaxonomyActivity.getStandardsId()));
+				contentTaxonomyActivity.setAttemptedItemCount(getItemCount(contentTaxonomyActivity.getStandardsId(), itemMap));
 				break;
 			case 4:
-				contentTaxonomyActivity.setAttemptedItemCount(getAttemptedItemCount(contentTaxonomyActivity.getLearningTargetsId(), attemptedItemMap));
-				contentTaxonomyActivity.setItemCount(itemCount.get(contentTaxonomyActivity.getLearningTargetsId()));
+				contentTaxonomyActivity.setAttemptedItemCount(getItemCount(contentTaxonomyActivity.getLearningTargetsId(), itemMap));
 				break;
 			}
 		}
 	}
 	
-	private Integer getAttemptedItemCount(String id, Map<String,Set<String>> attemptedItemMap) {
-		if(attemptedItemMap == null) {
+	private Integer getItemCount(String id, Map<String,Set<String>> itemMap) {
+		if(itemMap == null) {
 			return null;
-		} else if( attemptedItemMap.containsKey(id)) {
-			return attemptedItemMap.get(id).size();
+		} else if( itemMap.containsKey(id)) {
+			return itemMap.get(id).size();
 		} else {
 			return 0;
 		}
