@@ -1,6 +1,5 @@
 package org.gooru.insights.api.services;
 
-import java.util.List;
 import java.util.Set;
 
 import org.gooru.insights.api.daos.CqlCassandraDao;
@@ -127,7 +126,10 @@ public class CassandraServiceImpl implements CassandraService{
 	public ResultSet getStatisticalMetrics(String gooruOids) {
 		return cqlDAO.getStatMetrics(gooruOids);
 	}
-	
+	@Override
+	public ResultSet getStudentsClassActivity(String classId, String courseId, String unitId, String lessonId, String collectionId) {
+		return cqlDAO.getStudentsClassActivity(classId, courseId, unitId, lessonId, collectionId);
+	}	
 	@Override
 	public ResultSet getTaxonomyItemCount(Set<String> ids) {
 		return cqlDAO.getTaxonomyItemCount(ids);

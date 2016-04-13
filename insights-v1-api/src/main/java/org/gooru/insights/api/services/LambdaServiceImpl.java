@@ -5,14 +5,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.models.ContentTaxonomyActivity;
+import org.gooru.insights.api.models.StudentsClassActivity;
 import org.gooru.insights.api.utils.InsightsLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 
 @Component
 public class LambdaServiceImpl implements LambdaService{
 
+	private static final Logger LOG = LoggerFactory.getLogger(LambdaServiceImpl.class);
+	
+	@Override
 	public List<ContentTaxonomyActivity> aggregateTaxonomyActivityData(List<ContentTaxonomyActivity> resultList,  Integer depth) {
 		
 		long startTime =  System.currentTimeMillis();
@@ -23,6 +30,29 @@ public class LambdaServiceImpl implements LambdaService{
 		return resultList;
 	}
 	
+	@Override
+	public List<List<StudentsClassActivity>> aggregateStudentsClassActivityData(List<StudentsClassActivity> resultList,  String aggregateLevel) {
+		
+		Map<Object, Map<Object, List<StudentsClassActivity>>> groupResultList = resultList.stream()
+				.collect(Collectors.groupingBy(o -> o.getUserUid(), Collectors.groupingBy(o -> StudentsClassActivity.aggregateDepth(o, aggregateLevel))));
+
+		List<List<StudentsClassActivity>> aggregatedResultList = groupResultList.entrySet().stream()
+				.map(fo -> fo.getValue().entrySet().stream()
+						.map(sob -> sob.getValue().stream().reduce((o1, o2) -> getStudentsClassActivity(o1, o2,aggregateLevel)).get())
+						.collect(Collectors.toList()))
+				.collect(Collectors.toList());
+
+		return aggregatedResultList;
+	}
+	
+	@Override
+	public List<StudentsClassActivity> applyFiltersInStudentsClassActivity(List<StudentsClassActivity> resultList,  String collectionType) {
+		String collectionTypeDuplicate = collectionType.equalsIgnoreCase("both") ? "collection|assessment" : collectionType;
+		List<StudentsClassActivity> filteredList = resultList.stream()
+				.filter(object -> object.getCollectionType().matches(collectionType))
+				.collect(Collectors.toList());
+		return filteredList;
+	}
 	
 	private void aggregateTaxonomyActivityData(List<ContentTaxonomyActivity> resultList,  Integer depth1, Integer depth2) {
 	    long startTime =  System.currentTimeMillis();
@@ -45,6 +75,30 @@ public class LambdaServiceImpl implements LambdaService{
 			contentTaxonomyActivity.setViews(sum(object1.getViews(), object2.getViews()));
 			contentTaxonomyActivity.setTimespent(sum(object1.getTimespent(), object2.getTimespent()));
 		return contentTaxonomyActivity;
+	}
+	
+	private StudentsClassActivity getStudentsClassActivity(StudentsClassActivity object1, StudentsClassActivity object2,
+			String level) {
+		StudentsClassActivity studentsClassActivity = new StudentsClassActivity();
+		switch (level) {
+		case ApiConstants.UNIT:
+			studentsClassActivity.setUnitUid(object1.getUnitUid());
+			studentsClassActivity.setLessonUid(object1.getLessonUid());
+			break;
+		case ApiConstants.LESSON:
+			studentsClassActivity.setLessonUid(object1.getLessonUid());
+			break;
+		default:
+			LOG.debug("Do nothing in collection/assessment level");
+			break;
+		}
+		studentsClassActivity.setCollectionUid(object1.getCollectionUid());
+		studentsClassActivity.setCollectionType(object1.getCollectionType());
+		studentsClassActivity.setScore(sum(object1.getScore(), object2.getScore()));
+		studentsClassActivity.setReaction(sum(object1.getReaction(), object2.getReaction()));
+		studentsClassActivity.setViews(sum(object1.getViews(), object2.getViews()));
+		studentsClassActivity.setTimeSpent(sum(object1.getTimeSpent(), object2.getTimeSpent()));
+		return studentsClassActivity;
 	}
 	
 	private Long sum(Long obj1, Long obj2) {
