@@ -58,4 +58,7 @@ public interface CqlCassandraDao {
 
 	ResultSet getStatMetrics(String gooruOids);
 
+	ResultSet getStudentsClassActivity(String classId, String courseId, String unitId, String lessonId,
+			String collectionId);
+
 }

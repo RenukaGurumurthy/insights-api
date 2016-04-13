@@ -12,6 +12,9 @@ import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Statement;
 import com.datastax.driver.core.querybuilder.QueryBuilder;
+import com.datastax.driver.core.querybuilder.Select;
+import com.datastax.driver.core.querybuilder.Select.Builder;
+import com.datastax.driver.core.querybuilder.Select.Where;
 @Repository
 public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements CqlCassandraDao {
 
@@ -441,6 +444,36 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 					.from(getLogKeyspaceName(), ColumnFamilySet.STATISTICAL_DATA.getColumnFamily())
 					.where(QueryBuilder.eq(ApiConstants._CLUSTERING_KEY, gooruOids))
 					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
+			result = resultSetFuture.get();
+		} catch (Exception e) {
+			LOG.error("Exception:", e);
+		}
+		return result;
+	}
+	@Override
+	public ResultSet getStudentsClassActivity(String classId, String courseId, String unitId, String lessonId,
+			String collectionId) {
+		ResultSet result = null;
+		try {
+			Builder builder = QueryBuilder.select().all();
+
+			Select select = builder.from(getLogKeyspaceName(), ColumnFamilySet.STUDENTS_CLASS_ACTIVITY.getColumnFamily());
+
+			Where where = select.where(QueryBuilder.eq(ApiConstants._CLASS_UID, classId));
+			if (courseId != null) {
+				where.and(QueryBuilder.eq(ApiConstants._COURSE_UID, courseId));
+			}
+			if (unitId != null) {
+				where.and(QueryBuilder.eq(ApiConstants._UNIT_UID, unitId));
+			}
+			if (lessonId != null) {
+				where.and(QueryBuilder.eq(ApiConstants._LESSON_UID, lessonId));
+			}
+			if (collectionId != null) {
+				where.and(QueryBuilder.eq(ApiConstants._COLLECTION_UID, lessonId));
+			}
+			where.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
 			result = resultSetFuture.get();
 		} catch (Exception e) {

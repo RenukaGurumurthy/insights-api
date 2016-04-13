@@ -124,4 +124,8 @@ public class CassandraServiceImpl implements CassandraService{
 	public ResultSet getStatisticalMetrics(String gooruOids) {
 		return cqlDAO.getStatMetrics(gooruOids);
 	}
+	@Override
+	public ResultSet getStudentsClassActivity(String classId, String courseId, String unitId, String lessonId, String collectionId) {
+		return cqlDAO.getStudentsClassActivity(classId, courseId, unitId, lessonId, collectionId);
+	}
 }

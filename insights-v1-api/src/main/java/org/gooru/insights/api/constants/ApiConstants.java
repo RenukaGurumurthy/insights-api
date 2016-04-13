@@ -289,6 +289,7 @@ public class ApiConstants {
 	public static final String VIEWS = "views";
 	public static final String TIMESPENT = "timeSpent";
 	public static final String _TIME_SPENT = "time_spent";
+	public static final String _ATTEMPT_STATUS = "attempt_status";
 	public static final String TOTAL_STUDY_TIME = "totalStudyTime";
 	public static final String TOTAL_SCORE = "totalScore";
 	public static final String AVG_SCORE = "avgScore";
@@ -420,7 +421,7 @@ public class ApiConstants {
 				,STUDENT_LOCATION("student_location"), USER_SESSIONS("user_sessions"),
 				USER_SESSION_ACTIVITY("user_session_activity"),CLASS_ACTIVITY_DATACUBE("class_activity_datacube"),
 				CONTENT_TAXONOMY_ACTIVITY("content_taxonomy_activity"), CLASS_ACTIVITY_PEER_DETAIL("class_activity_peer_detail"),
-				STUDENT_QUESTION_GRADE("student_question_grade"), USER_CLASS_COLLECTION_LAST_SESSIONS("user_class_collection_last_sessions"),CLASS_COLLECTION_COUNT("class_collection_count"),CONTENT_AUTHORIZED_USERS_COUNT("content_authorized_users"),STATISTICAL_DATA("statistical_data");
+				STUDENT_QUESTION_GRADE("student_question_grade"), USER_CLASS_COLLECTION_LAST_SESSIONS("user_class_collection_last_sessions"),CLASS_COLLECTION_COUNT("class_collection_count"),CONTENT_AUTHORIZED_USERS_COUNT("content_authorized_users"),STATISTICAL_DATA("statistical_data"),STUDENTS_CLASS_ACTIVITY("students_class_activity"),;
 
 		private String columnFamily;
 
