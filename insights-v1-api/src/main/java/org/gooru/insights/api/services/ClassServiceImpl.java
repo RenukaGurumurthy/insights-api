@@ -452,7 +452,7 @@ public class ClassServiceImpl implements ClassService {
 				String courseId = row.getString("course_id");
 				String domainId = row.getString("domain_id");
 				if(StringUtils.isNotBlank(subjectId) && StringUtils.isNotBlank(courseId) && StringUtils.isNotBlank(domainId)) {
-				responseParamDTO.setContent(getDomainActivity(studentId, subjectId, courseId, domainId).getContent());
+				responseParamDTO.setContent(getDomainParentActivity(studentId, subjectId, courseId, domainId).getContent());
 				}
 			}
 		}
@@ -552,6 +552,26 @@ public class ClassServiceImpl implements ClassService {
 		return responseParamDTO;
 	}
 	
+	private ResponseParamDTO<ContentTaxonomyActivity> getDomainParentActivity(String studentId, String subjectId, String courseId, String domainId) {
+		
+		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
+		List<ContentTaxonomyActivity> contentTaxonomyActivityList = new ArrayList<>();
+		ResultSet userDomainActivityResult = getCassandraService().getDomainActivity(studentId, subjectId, courseId, domainId);
+		Map<String, Set<String>> itemMap = new HashMap<String, Set<String>>();
+		if (userDomainActivityResult != null) {
+			for (Row row : userDomainActivityResult) {
+				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
+				String standardsId = row.getString(ApiConstants._STANDARDS_ID);
+				contentTaxonomyActivity.setDomainId(domainId);
+				childActivityMetrics(contentTaxonomyActivity, row, itemMap, domainId, standardsId);
+				contentTaxonomyActivityList.add(contentTaxonomyActivity);
+			}
+		}
+		contentTaxonomyActivityList = lambdaService.aggregateTaxonomyActivityData(contentTaxonomyActivityList, 2);
+		includeAdditionalMetrics(contentTaxonomyActivityList, itemMap, 2);
+		responseParamDTO.setContent(contentTaxonomyActivityList);
+		return responseParamDTO;
+	}
 	private ResponseParamDTO<ContentTaxonomyActivity> getStandardActivity(String studentId, String subjectId, String courseId, String domainId, String standardsId) {
 
 		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
