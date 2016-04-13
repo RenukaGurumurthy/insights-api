@@ -477,7 +477,8 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		try {
 			Builder builder = QueryBuilder.select().all();
 
-			Select select = builder.from(getLogKeyspaceName(), ColumnFamilySet.STUDENTS_CLASS_ACTIVITY.getColumnFamily());
+			Select select = builder.from(getLogKeyspaceName(),
+					ColumnFamilySet.STUDENTS_CLASS_ACTIVITY.getColumnFamily());
 
 			Where where = select.where(QueryBuilder.eq(ApiConstants._CLASS_UID, classId));
 			if (courseId != null) {
@@ -493,6 +494,22 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 				where.and(QueryBuilder.eq(ApiConstants._COLLECTION_UID, lessonId));
 			}
 			where.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
+			result = resultSetFuture.get();
+		} catch (Exception e) {
+			LOG.error("Exception:", e);
+		}
+		return result;
+	}
+	
+	@Override
+	public ResultSet getTaxonomyParents(String taxonomyIds) {
+		ResultSet result = null;
+		try {
+			Statement select = QueryBuilder.select().all()
+					.from(getLogKeyspaceName(), ColumnFamilySet.TAXONOMY_PARENT_NODE.getColumnFamily())
+					.where(QueryBuilder.in(ApiConstants._ROW_KEY, (Object[]) taxonomyIds.split(",")))
+					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
 			result = resultSetFuture.get();
 		} catch (Exception e) {

@@ -60,6 +60,8 @@ public interface CqlCassandraDao {
 	ResultSet getAuthorizedUsers(String gooruOid);
 
 	ResultSet getStatMetrics(String gooruOids);
+	
+	ResultSet getTaxonomyParents(String taxonomyIds);
 
 	ResultSet getStudentsClassActivity(String classId, String courseId, String unitId, String lessonId,
 			String collectionId);

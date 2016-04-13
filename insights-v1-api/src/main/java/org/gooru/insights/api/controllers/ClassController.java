@@ -226,10 +226,9 @@ public class ClassController extends BaseController {
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/courses/domain/{domainId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
 //	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> getUserDomainParentMastery(HttpServletRequest request, 
-			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
-			 @PathVariable(value = "domainId") String domainId, @RequestParam(value = "courseIds", required = true) String courseIds,HttpServletResponse response) throws Exception {
+			@PathVariable(value = "userUid") String userUid, @RequestParam(value = "domainIds", required = true) String domainIds,HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getDeferredResult(getClassService().getUserDomainParentMastery(userUid, subjectId, courseIds, domainId));
+		return getDeferredResult(getClassService().getUserDomainParentMastery(userUid, domainIds));
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/grade", method = { RequestMethod.GET, RequestMethod.POST })

@@ -61,4 +61,6 @@ public interface CassandraService {
 	ResultSet getStudentsClassActivity(String classId, String courseId, String unitId, String lessonId,
 			String collectionId);	
 	ResultSet getTaxonomyItemCount(Set<String> ids);
+	
+	ResultSet getTaxonomyParents(String taxonomyId);
 }

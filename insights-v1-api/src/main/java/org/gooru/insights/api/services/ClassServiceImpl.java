@@ -487,11 +487,11 @@ public class ClassServiceImpl implements ClassService {
 		}
 	}
 
-	public Observable<ResponseParamDTO<ContentTaxonomyActivity>> getUserDomainParentMastery(String studentId, String subjectId, String courseIds, String domainId) {
+	public Observable<ResponseParamDTO<ContentTaxonomyActivity>> getUserDomainParentMastery(String studentId, String domainIds) {
 	
 		Observable<ResponseParamDTO<ContentTaxonomyActivity>> observable = Observable.<ResponseParamDTO<ContentTaxonomyActivity>> create(s -> {
 			try {
-					s.onNext(getUserDomainParentMasteryUsage(studentId, subjectId, courseIds, domainId));		
+					s.onNext(getUserDomainParentMasteryUsage(studentId, domainIds));		
 			} catch (Throwable t) {
 				s.onError(t);
 			}
@@ -500,15 +500,23 @@ public class ClassServiceImpl implements ClassService {
 		return observable;
 	}
 	
-	private ResponseParamDTO<ContentTaxonomyActivity> getUserDomainParentMasteryUsage(String studentId, String subjectId, String courseIds, String domainId) {
+	private ResponseParamDTO<ContentTaxonomyActivity> getUserDomainParentMasteryUsage(String studentId, String domainIds) {
 		
 		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
-		if(StringUtils.isEmpty(courseIds)) {
+		
+		if(StringUtils.isEmpty(domainIds)) {
 			ValidationUtils.rejectInvalidRequest(ErrorCodes.E104, ApiConstants.COURSE_IDS);
-			
 		}
-		for(String courseId : courseIds.split(ApiConstants.COMMA)) {
-			responseParamDTO.setContent(getDomainActivity(studentId, subjectId, courseId, domainId).getContent());
+		ResultSet taxonomyParents = getCassandraService().getTaxonomyParents(domainIds);
+		if(taxonomyParents != null) {
+			for(Row row : taxonomyParents) {
+				String subjectId = row.getString("subject_id");
+				String courseId = row.getString("course_id");
+				String domainId = row.getString("domain_id");
+				if(StringUtils.isNotBlank(subjectId) && StringUtils.isNotBlank(courseId) && StringUtils.isNotBlank(domainId)) {
+				responseParamDTO.setContent(getDomainActivity(studentId, subjectId, courseId, domainId).getContent());
+				}
+			}
 		}
 		return responseParamDTO;
 	}
@@ -880,13 +888,13 @@ public class ClassServiceImpl implements ClassService {
 		}
 	}
 	
-	private Integer getAttemptedItemCount(String id, Map<String,Set<String>> attemptedItemMap) {
+	private Long getAttemptedItemCount(String id, Map<String,Set<String>> attemptedItemMap) {
 		if(attemptedItemMap == null) {
 			return null;
 		} else if( attemptedItemMap.containsKey(id)) {
-			return attemptedItemMap.get(id).size();
+			return attemptedItemMap.get(id).size()+0L;
 		} else {
-			return 0;
+			return 0L;
 		}
 	}
 	

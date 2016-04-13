@@ -134,4 +134,9 @@ public class CassandraServiceImpl implements CassandraService{
 	public ResultSet getTaxonomyItemCount(Set<String> ids) {
 		return cqlDAO.getTaxonomyItemCount(ids);
 	}
+	
+	public 	ResultSet getTaxonomyParents(String taxonomyIds) {
+		return cqlDAO.getTaxonomyParents(taxonomyIds);
+	}
+
 }
