@@ -28,7 +28,7 @@ public class ContentTaxonomyActivity {
 	
 	private String userUid;
 
-	private Integer attemptedItemCount;
+	private Long attemptedItemCount;
 	
 	private Long scoreInPercentage;
 	
@@ -138,11 +138,11 @@ public class ContentTaxonomyActivity {
 		this.attempts = attempts;
 	}
 
-	public Integer getAttemptedItemCount() {
+	public Long getAttemptedItemCount() {
 		return attemptedItemCount;
 	}
 
-	public void setAttemptedItemCount(Integer itemCount) {
+	public void setAttemptedItemCount(Long itemCount) {
 		this.attemptedItemCount = itemCount;
 	}
 	

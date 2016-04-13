@@ -467,4 +467,20 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		}
 		return result;
 	}
+	
+	@Override
+	public ResultSet getTaxonomyParents(String taxonomyIds) {
+		ResultSet result = null;
+		try {
+			Statement select = QueryBuilder.select().all()
+					.from(getLogKeyspaceName(), ColumnFamilySet.TAXONOMY_PARENT_NODE.getColumnFamily())
+					.where(QueryBuilder.in(ApiConstants._ROW_KEY, (Object[])taxonomyIds.split(",")))
+					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
+			result = resultSetFuture.get();
+		} catch (Exception e) {
+			LOG.error("Exception:", e);
+		}
+		return result;
+	}
 }
