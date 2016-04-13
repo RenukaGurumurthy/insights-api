@@ -1,6 +1,7 @@
 package org.gooru.insights.api.services;
 
 import java.util.List;
+import java.util.Set;
 
 import org.gooru.insights.api.daos.CqlCassandraDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,12 +117,19 @@ public class CassandraServiceImpl implements CassandraService{
 	public ResultSet getClassCollectionCount(String classUid, String collectionUid) {
 		return cqlDAO.getClassCollectionCount(classUid, collectionUid);
 	}
+
 	@Override
 	public ResultSet getAuthorizedUsers(String gooruOid) {
 		return cqlDAO.getAuthorizedUsers(gooruOid);
 	}
+	
 	@Override
 	public ResultSet getStatisticalMetrics(String gooruOids) {
 		return cqlDAO.getStatMetrics(gooruOids);
+	}
+	
+	@Override
+	public ResultSet getTaxonomyItemCount(Set<String> ids) {
+		return cqlDAO.getTaxonomyItemCount(ids);
 	}
 }
