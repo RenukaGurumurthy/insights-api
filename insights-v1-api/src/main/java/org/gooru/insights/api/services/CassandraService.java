@@ -1,6 +1,6 @@
 package org.gooru.insights.api.services;
 
-import java.util.List;
+import java.util.Set;
 
 import com.datastax.driver.core.ResultSet;
 
@@ -59,5 +59,6 @@ public interface CassandraService {
 	ResultSet getStatisticalMetrics(String gooruOids);
 
 	ResultSet getStudentsClassActivity(String classId, String courseId, String unitId, String lessonId,
-			String collectionId);
+			String collectionId);	
+	ResultSet getTaxonomyItemCount(Set<String> ids);
 }

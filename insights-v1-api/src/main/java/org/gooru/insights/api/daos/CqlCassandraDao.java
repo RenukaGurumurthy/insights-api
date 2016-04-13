@@ -1,6 +1,7 @@
 package org.gooru.insights.api.daos;
 
 import java.util.List;
+import java.util.Set;
 
 import com.datastax.driver.core.ResultSet;
 
@@ -53,6 +54,8 @@ public interface CqlCassandraDao {
 	ResultSet getSessionActivityType(String sessionId, String gooruOid);
 
 	ResultSet getClassCollectionCount(String classUid, String collectionUid);
+	
+	ResultSet getTaxonomyItemCount(Set<String> ids);
 
 	ResultSet getAuthorizedUsers(String gooruOid);
 
