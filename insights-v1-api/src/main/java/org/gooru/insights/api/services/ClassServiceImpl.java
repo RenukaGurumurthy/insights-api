@@ -154,7 +154,7 @@ public class ClassServiceImpl implements ClassService {
 	@Override
 	public Observable<ResponseParamDTO<Map<String, Object>>> getPerformance(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType, String nextLevelType) {
 		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
-			s.onNext(getPerformanceDataByLambda(classId, courseId, unitId, lessonId, userUid, collectionType));
+			s.onNext(getPerformanceData(classId, courseId, unitId, lessonId, userUid, collectionType, nextLevelType));
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
 		return observable;
