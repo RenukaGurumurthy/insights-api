@@ -1,5 +1,6 @@
 package org.gooru.insights.api.services;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import org.gooru.insights.api.models.StudentsClassActivity;
 import org.gooru.insights.api.utils.InsightsLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
@@ -18,6 +20,9 @@ import org.springframework.stereotype.Component;
 public class LambdaServiceImpl implements LambdaService{
 
 	private static final Logger LOG = LoggerFactory.getLogger(LambdaServiceImpl.class);
+	
+	@Autowired
+	private ClassService classService;
 	
 	@Override
 	public List<ContentTaxonomyActivity> aggregateTaxonomyActivityData(List<ContentTaxonomyActivity> resultList,  Integer depth) {
@@ -31,17 +36,13 @@ public class LambdaServiceImpl implements LambdaService{
 	}
 	
 	@Override
-	public List<List<StudentsClassActivity>> aggregateStudentsClassActivityData(List<StudentsClassActivity> resultList,  String aggregateLevel) {
+	public List<Map<String, List<StudentsClassActivity>>> aggregateStudentsClassActivityData(List<StudentsClassActivity> resultList, String collectionType, String aggregateLevel) {
 		
 		Map<Object, Map<Object, List<StudentsClassActivity>>> groupResultList = resultList.stream()
 				.collect(Collectors.groupingBy(o -> o.getUserUid(), Collectors.groupingBy(o -> StudentsClassActivity.aggregateDepth(o, aggregateLevel))));
 
-		List<List<StudentsClassActivity>> aggregatedResultList = groupResultList.entrySet().stream()
-				.map(fo -> fo.getValue().entrySet().stream()
-						.map(sob -> sob.getValue().stream().reduce((o1, o2) -> getStudentsClassActivity(o1, o2,aggregateLevel)).get())
-						.collect(Collectors.toList()))
-				.collect(Collectors.toList());
-
+		List<Map<String, List<StudentsClassActivity>>> aggregatedResultList = groupResultList.entrySet().stream()
+				.map(fo -> aggregateStudentClassActivity(fo, collectionType, aggregateLevel)).collect(Collectors.toList());
 		return aggregatedResultList;
 	}
 	
@@ -79,26 +80,56 @@ public class LambdaServiceImpl implements LambdaService{
 	
 	private StudentsClassActivity getStudentsClassActivity(StudentsClassActivity object1, StudentsClassActivity object2,
 			String level) {
-		StudentsClassActivity studentsClassActivity = new StudentsClassActivity();
-		switch (level) {
-		case ApiConstants.UNIT:
-			studentsClassActivity.setUnitUid(object1.getUnitUid());
-			studentsClassActivity.setLessonUid(object1.getLessonUid());
-			break;
-		case ApiConstants.LESSON:
-			studentsClassActivity.setLessonUid(object1.getLessonUid());
-			break;
-		default:
-			LOG.debug("Do nothing in collection/assessment level");
-			break;
-		}
-		studentsClassActivity.setCollectionUid(object1.getCollectionUid());
+		StudentsClassActivity studentsClassActivity = object1;
+		studentsClassActivity.setCollectionId(object1.getCollectionId());
 		studentsClassActivity.setCollectionType(object1.getCollectionType());
 		studentsClassActivity.setScore(sum(object1.getScore(), object2.getScore()));
 		studentsClassActivity.setReaction(sum(object1.getReaction(), object2.getReaction()));
 		studentsClassActivity.setViews(sum(object1.getViews(), object2.getViews()));
 		studentsClassActivity.setTimeSpent(sum(object1.getTimeSpent(), object2.getTimeSpent()));
+		studentsClassActivity.setCompletedCount(1L);
 		return studentsClassActivity;
+	}
+	
+	private StudentsClassActivity customizeFieldsInStudentClassActivity(StudentsClassActivity object1, String collectionType, String level) {
+		switch(level) {
+			case ApiConstants.UNIT:
+				object1.setLessonId(null);
+				object1.setCollectionId(null);
+				break;
+			case ApiConstants.LESSON:
+				object1.setUnitId(null);
+				object1.setCollectionId(null);
+				break;
+			case ApiConstants.CONTENT:
+				object1.setLessonId(null);
+				object1.setUnitId(null);
+				if(ApiConstants.ASSESSMENT.equalsIgnoreCase(collectionType)) {
+					object1.setAssessmentId(object1.getCollectionId());
+					object1.setCollectionId(null);
+				}
+				break;
+				
+		}
+		object1.setTotalCount(classService.getCulCollectionCount(object1.getClassId(), StudentsClassActivity.aggregateDepth(object1, level), object1.getCollectionType()));
+		object1.setScoreInPercentage(object1.getScore(), object1.getCompletedCount());
+		object1.setReaction((object1 != null ? object1.getReaction() : 0) / object1.getCompletedCount());
+		object1.setScore(null);
+		object1.setClassId(null);
+		object1.setCollectionType(null);
+		object1.setUserUid(null);
+		return object1;
+	}
+	
+	private Map<String,List<StudentsClassActivity>> aggregateStudentClassActivity(Map.Entry<Object, Map<Object, List<StudentsClassActivity>>> fo, String collectionType, String aggregateLevel) {
+		Map<String, List<StudentsClassActivity>> studentActivity = new HashMap<>();
+		List<StudentsClassActivity> studentClassActivity = fo.getValue().entrySet().stream()
+				.map(sob -> sob.getValue().stream().map(defaultValueForAggregation -> {defaultValueForAggregation.setCompletedCount(1L);  return defaultValueForAggregation;})
+						.reduce((o1, o2) -> getStudentsClassActivity(o1, o2,aggregateLevel))
+						.map(additionalCalculation -> customizeFieldsInStudentClassActivity(additionalCalculation, collectionType, aggregateLevel)).get())
+				.collect(Collectors.toList());
+		studentActivity.put((String)fo.getKey(), studentClassActivity);
+		return studentActivity;
 	}
 	
 	private Long sum(Long obj1, Long obj2) {
