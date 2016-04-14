@@ -2,6 +2,8 @@ package org.gooru.insights.api.models;
 
 import java.io.Serializable;
 
+import org.gooru.insights.api.constants.ApiConstants;
+
 public class StudentsClassActivity implements Serializable {
 
 	/**
@@ -9,15 +11,15 @@ public class StudentsClassActivity implements Serializable {
 	 */
 	private static final long serialVersionUID = -8407967292421744242L;
 
-	private String classUid;
+	private String classId;
 
-	private String courseUid;
+	private String courseId;
 	
-	private String unitUid;
+	private String unitId;
 
-	private String lessonUid;
+	private String lessonId;
 	
-	private String collectionUid;
+	private String collectionId;
 	
 	private String userUid;
 
@@ -25,52 +27,62 @@ public class StudentsClassActivity implements Serializable {
 	
 	private String attemptStatus;
 
-	private long views;
+	private Long views;
 
-	private long timeSpent;
+	private Long timeSpent;
 
-	private long score;
+	private Long score;
 
-	private long reaction;
+	private Long reaction;
 
-	public String getClassUid() {
-		return classUid;
+	private Long scoreInPercentage;
+	
+	private Long totalCount;
+	
+	private Long completedCount;
+	
+	private Long attempts;
+	
+	private String assessmentId;
+	
+	public String getClassId() {
+		return classId;
 	}
 
-	public void setClassUid(String classUid) {
-		this.classUid = classUid;
+	public void setClassId(String classId) {
+		this.classId = classId;
 	}
 
-	public String getCourseUid() {
-		return courseUid;
+	public String getCourseId() {
+		return courseId;
 	}
 
-	public void setCourseUid(String courseUid) {
-		this.courseUid = courseUid;
+	public void setCourseId(String courseId) {
+		this.courseId = courseId;
 	}
 
-	public String getUnitUid() {
-		return unitUid;
+	public String getUnitId() {
+		return unitId;
 	}
 
-	public void setUnitUid(String unitUid) {
-		this.unitUid = unitUid;
+	public void setUnitId(String unitId) {
+		this.unitId = unitId;
 	}
 
-	public String getLessonUid() {
-		return lessonUid;
+	public String getLessonId() {
+		return lessonId;
 	}
 
-	public void setLessonUid(String lessonUid) {
-		this.lessonUid = lessonUid;
+	public void setLessonId(String lessonId) {
+		this.lessonId = lessonId;
 	}
 
-	public String getCollectionUid() {
-		return collectionUid;
+	public String getCollectionId() {
+		return collectionId;
 	}
 
-	public void setCollectionUid(String collectionUid) {
-		this.collectionUid = collectionUid;
+	public void setCollectionId(String collectionId) {
+		this.collectionId = collectionId;
 	}
 
 	public String getUserUid() {
@@ -101,7 +113,7 @@ public class StudentsClassActivity implements Serializable {
 		return views;
 	}
 
-	public void setViews(long views) {
+	public void setViews(Long views) {
 		this.views = views;
 	}
 
@@ -109,7 +121,7 @@ public class StudentsClassActivity implements Serializable {
 		return timeSpent;
 	}
 
-	public void setTimeSpent(long timeSpent) {
+	public void setTimeSpent(Long timeSpent) {
 		this.timeSpent = timeSpent;
 	}
 
@@ -117,7 +129,7 @@ public class StudentsClassActivity implements Serializable {
 		return score;
 	}
 
-	public void setScore(long score) {
+	public void setScore(Long score) {
 		this.score = score;
 	}
 
@@ -125,21 +137,61 @@ public class StudentsClassActivity implements Serializable {
 		return reaction;
 	}
 
-	public void setReaction(long reaction) {
+	public void setReaction(Long reaction) {
 		this.reaction = reaction;
 	}
 
 	public static String aggregateDepth(StudentsClassActivity sca, String level) {
 		switch (level) {
-		case "unit":
-			return sca.unitUid;
-		case "lesson":
-			return sca.lessonUid;
-		case "collection":
-			return sca.collectionUid;
+		case ApiConstants.UNIT:
+			return sca.unitId;
+		case ApiConstants.LESSON:
+			return sca.lessonId;
+		case ApiConstants.CONTENT:
+			return sca.collectionId;
 		default:
 			break;
 		}
-		return sca.courseUid;
+		return sca.courseId;
+	}
+
+	public Long getScoreInPercentage() {
+		return scoreInPercentage;
+	}
+
+	public void setScoreInPercentage(Long score, Long totalCount) {
+		this.scoreInPercentage = (totalCount == null || totalCount == 0 || score == null) ? 0 : score /totalCount;
+	}
+
+	public Long getTotalCount() {
+		return totalCount;
+	}
+
+	public void setTotalCount(Long totalCount) {
+		this.totalCount = totalCount;
+	}
+
+	public Long getCompletedCount() {
+		return completedCount;
+	}
+
+	public void setCompletedCount(Long completedCount) {
+		this.completedCount = (this.completedCount == null) ? completedCount : this.completedCount + completedCount;
+	}
+
+	public Long getAttempts() {
+		return attempts;
+	}
+
+	public void setAttempts(Long attempts) {
+		this.attempts = attempts;
+	}
+
+	public String getAssessmentId() {
+		return assessmentId;
+	}
+
+	public void setAssessmentId(String assessmentId) {
+		this.assessmentId = assessmentId;
 	}
 }

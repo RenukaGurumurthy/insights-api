@@ -37,6 +37,9 @@ public interface ClassService {
 	Observable<ResponseParamDTO<ContentTaxonomyActivity>> getTaxonomyActivity(Integer depth, String... taxonomyLevelIds);
 
 	Observable<ResponseParamDTO<Map<String, Object>>> getStatisticalMetrics(String gooruOids);
+	
+	long getCulCollectionCount(String classId, String leafNodeId,
+			String collectionType);
 }
 
 

@@ -154,8 +154,12 @@ public class ClassServiceImpl implements ClassService {
 	@Override
 	public Observable<ResponseParamDTO<Map<String, Object>>> getPerformance(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType, String nextLevelType) {
 		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
-			s.onNext(getPerformanceDataByLambda(classId, courseId, unitId, lessonId, userUid, collectionType));
+			try {
+			s.onNext(getPerformanceDataByLambda(classId, courseId, unitId, lessonId, userUid, collectionType, nextLevelType));
 			s.onCompleted();
+			}catch(Exception e) {
+				s.onError(e);
+			}
 		}).subscribeOn(Schedulers.from(observableExecutor));
 		return observable;
 	}
@@ -332,61 +336,46 @@ public class ClassServiceImpl implements ClassService {
 	}
 
 	private ResponseParamDTO<Map<String, Object>> getPerformanceDataByLambda(String classId, String courseId,
-			String unitId, String lessonId, String userUid, String collectionType) {
+			String unitId, String lessonId, String userUid, String collectionType, String nextLevelType) {
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		String nextLevel = null;
-		if (courseId != null && unitId == null) {
-			nextLevel = ApiConstants.UNIT;
-		} else if (unitId != null && lessonId == null) {
-			nextLevel = ApiConstants.LESSON;
-		} else if (unitId != null && lessonId != null) {
-			nextLevel = ApiConstants.COLLECTION;
-		} else {
-			nextLevel = ApiConstants.COLLECTION;
-		}
 		List<StudentsClassActivity> classActivityResultSetList = new ArrayList<StudentsClassActivity>();
 		ResultSet classActivityResultSet = getCassandraService().getStudentsClassActivity(classId, courseId, unitId,
 				lessonId, null);
-
 		for (Row classActivityRow : classActivityResultSet) {
 			StudentsClassActivity studentsClassActivity = new StudentsClassActivity();
-			switch (nextLevel) {
-			case ApiConstants.UNIT:
-				studentsClassActivity.setUnitUid(classActivityRow.getString(ApiConstants._UNIT_UID));
-				studentsClassActivity.setLessonUid(classActivityRow.getString(ApiConstants._LESSON_UID));
-				break;
-			case ApiConstants.LESSON:
-				studentsClassActivity.setLessonUid(classActivityRow.getString(ApiConstants._LESSON_UID));
-				break;
-			default:
-				LOG.debug("Do nothing in collection/assessment level");
-				break;
-			}
+			studentsClassActivity.setUnitId(classActivityRow.getString(ApiConstants._UNIT_UID));
+			studentsClassActivity.setLessonId(classActivityRow.getString(ApiConstants._LESSON_UID));
 			studentsClassActivity.setUserUid(classActivityRow.getString(ApiConstants._USER_UID));
-			studentsClassActivity.setCollectionUid(classActivityRow.getString(ApiConstants._COLLECTION_UID));
 			studentsClassActivity.setCollectionType(classActivityRow.getString(ApiConstants._COLLECTION_TYPE));
 			studentsClassActivity.setScore(classActivityRow.getLong(ApiConstants.SCORE));
 			studentsClassActivity.setReaction(classActivityRow.getLong(ApiConstants.REACTION));
-			studentsClassActivity.setViews(classActivityRow.getLong(ApiConstants.VIEWS));
+			studentsClassActivity.setCollectionId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
+			if(ApiConstants.COLLECTION.equals(collectionType)) {
+				studentsClassActivity.setViews(classActivityRow.getLong(ApiConstants.VIEWS));
+			} else {
+				studentsClassActivity.setAttempts(classActivityRow.getLong(ApiConstants.VIEWS));
+			}
 			studentsClassActivity.setTimeSpent(classActivityRow.getLong(ApiConstants._TIME_SPENT));
 			studentsClassActivity.setAttemptStatus(classActivityRow.getString(ApiConstants._ATTEMPT_STATUS));
+			studentsClassActivity.setClassId(classActivityRow.getString(ApiConstants._CLASS_UID));
 			classActivityResultSetList.add(studentsClassActivity);
 		}
 		List<StudentsClassActivity> filteredList = lambdaService
 				.applyFiltersInStudentsClassActivity(classActivityResultSetList, collectionType);
-		List<List<StudentsClassActivity>> aggregatedList = lambdaService
-				.aggregateStudentsClassActivityData(filteredList, nextLevel);
-
+		List<Map<String, List<StudentsClassActivity>>> aggregatedList = lambdaService
+				.aggregateStudentsClassActivityData(filteredList, collectionType, nextLevelType);
 		List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-		for (List<StudentsClassActivity> aggregatedSubList : aggregatedList) {
-			Map<String, Object> resultMap = new HashMap<String, Object>();
-			List<StudentsClassActivity> orderedList = new ArrayList<StudentsClassActivity>();
-			for (StudentsClassActivity subObject : aggregatedSubList) {
-				orderedList.add(subObject);
-				resultMap.put("userUId", subObject.getUserUid());
+		for (Map<String, List<StudentsClassActivity>> aggregatedSubList : aggregatedList) {
+			for(Map.Entry<String, List<StudentsClassActivity>> data : aggregatedSubList.entrySet()) {
+				
+				Map<String, Object> resultMap = new HashMap<String, Object>();
+				if(data.getValue().size() == 0) {
+					continue;
+				}
+				resultMap.put("userUid",data.getKey());
+				resultMap.put("usageData", data.getValue());
+				result.add(resultMap);
 			}
-			resultMap.put("usageData", orderedList);
-			result.add(resultMap);
 		}
 		responseParamDTO.setContent(result);
 		return responseParamDTO;
@@ -942,7 +931,7 @@ public class ClassServiceImpl implements ClassService {
 		return usersSession;
 	}
 
-	private long getCulCollectionCount(String classId, String leafNodeId,
+	public long getCulCollectionCount(String classId, String leafNodeId,
 			String collectionType) {
 		long totalCount = 0L;
 		String columnName = ApiConstants.COLLECTION.equals(collectionType) ? ApiConstants._COLLECTION_COUNT
