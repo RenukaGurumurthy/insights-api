@@ -165,7 +165,8 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 				LOG.error("API consumer is not a teacher or collaborator...");
 				return false;
 			}
-			if(userUidFromSession.equalsIgnoreCase(authorizedUsers.one().getString(ApiConstants._CREATOR_UID))){
+			String creatorUid = authorizedUsers.one().getString(ApiConstants._CREATOR_UID);
+			if(creatorUid != null && userUidFromSession.equalsIgnoreCase(creatorUid)){
 				return true;
 			}
 			 Set<Set> collaborators = authorizedUsers.one().getSet(ApiConstants.COLLABORATORS, Set.class);
