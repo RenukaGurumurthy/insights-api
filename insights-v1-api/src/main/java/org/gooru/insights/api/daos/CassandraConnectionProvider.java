@@ -50,9 +50,9 @@ public class CassandraConnectionProvider {
 					.addContactPoint(hosts)
 					.withRetryPolicy(DefaultRetryPolicy.INSTANCE)
 					/*.withReconnectionPolicy(
-							new ExponentialReconnectionPolicy(1000, 30000))*/
+							new ExponentialReconnectionPolicy(1000, 30000))
 					.withLoadBalancingPolicy(
-							new TokenAwarePolicy(new DCAwareRoundRobinPolicy(logDataCeter)))
+							new TokenAwarePolicy(new DCAwareRoundRobinPolicy(logDataCeter)))*/
 					.build();
 			session = cluster.connect(logKeyspaceName);
 
