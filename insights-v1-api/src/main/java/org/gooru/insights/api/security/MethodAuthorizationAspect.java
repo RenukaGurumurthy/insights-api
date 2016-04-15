@@ -169,7 +169,8 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			if(userUidFromSession.equalsIgnoreCase(authorizedUsers.one().getString(ApiConstants._CREATOR_UID))){
 				return true;
 			}
-			if(authorizedUsers.one().getSet(ApiConstants.COLLABORATORS, Set.class).contains(userUidFromSession)){
+			 Set<Set> collaborators = authorizedUsers.one().getSet(ApiConstants.COLLABORATORS, Set.class);
+			if(collaborators != null && collaborators.contains(userUidFromSession)){
 				return true;
 			}
 		}
