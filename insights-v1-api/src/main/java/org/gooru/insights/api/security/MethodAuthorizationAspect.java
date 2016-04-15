@@ -108,14 +108,13 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			try {
 				result = redisService.getDirectValue(sessionToken);
 				if (result == null || result.isEmpty()) {
-					InsightsLogger.error("null value in redis data for " + GOORU_PREFIX
-									+ sessionToken);
+					InsightsLogger.error("null value in redis data for " + sessionToken);
 					return false;
 				}
 				JSONObject jsonObject = new JSONObject(result);
 				return isValidUser(jsonObject, request);
 			} catch (Exception e) {
-				InsightsLogger.error("Exception from redis:"+GOORU_PREFIX+sessionToken, e);
+				InsightsLogger.error("Exception from redis:"+sessionToken, e);
 				return false;
 			}
 		} else {
