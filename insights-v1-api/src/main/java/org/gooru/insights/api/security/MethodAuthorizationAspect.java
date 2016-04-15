@@ -162,6 +162,10 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	private boolean isAuthorizedUser(String classGooruId, String userUidFromSession) {
 		if (StringUtils.isNotBlank(classGooruId)) {
 			ResultSet authorizedUsers =  cassandraService.getAuthorizedUsers(classGooruId);
+			if(authorizedUsers == null){
+				LOG.error("API consumer is not a teacher or collaborator...");
+				return false;
+			}
 			if(userUidFromSession.equalsIgnoreCase(authorizedUsers.one().getString(ApiConstants._CREATOR_UID))){
 				return true;
 			}
