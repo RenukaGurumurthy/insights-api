@@ -222,6 +222,8 @@ public class ApiConstants {
 	
 	public static final String PARTY_UId = "partyUid";
 	
+	public static final String _USER_ID = "user_id";
+	
 	public static final String ID = "id";
 
 	public static final String KEY = "key";
