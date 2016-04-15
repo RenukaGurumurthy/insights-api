@@ -66,4 +66,5 @@ public interface CqlCassandraDao {
 	ResultSet getStudentsClassActivity(String classId, String courseId, String unitId, String lessonId,
 			String collectionId);
 
+	ResultSet getSessionResourceTaxonomyActivity(String sessionId, String gooruOid);
 }

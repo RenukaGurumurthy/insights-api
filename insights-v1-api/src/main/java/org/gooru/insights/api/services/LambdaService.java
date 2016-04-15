@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.gooru.insights.api.models.ContentTaxonomyActivity;
+import org.gooru.insights.api.models.SessionTaxonomyActivity;
 import org.gooru.insights.api.models.StudentsClassActivity;
 
 public interface LambdaService {
@@ -15,4 +16,6 @@ public interface LambdaService {
 
 	List<StudentsClassActivity> applyFiltersInStudentsClassActivity(List<StudentsClassActivity> resultList,
 			String collectionType);
+	
+	List<SessionTaxonomyActivity> aggregateSessionTaxonomyActivity(List<SessionTaxonomyActivity> sessionTaxonomyActivity, String levelType);
 }

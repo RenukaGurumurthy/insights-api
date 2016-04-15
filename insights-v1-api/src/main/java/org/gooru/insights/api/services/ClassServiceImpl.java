@@ -16,6 +16,7 @@ import org.gooru.insights.api.constants.CqlQueries;
 import org.gooru.insights.api.constants.ErrorCodes;
 import org.gooru.insights.api.models.ContentTaxonomyActivity;
 import org.gooru.insights.api.models.ResponseParamDTO;
+import org.gooru.insights.api.models.SessionTaxonomyActivity;
 import org.gooru.insights.api.models.StudentsClassActivity;
 import org.gooru.insights.api.models.UserContentLocation;
 import org.gooru.insights.api.utils.ServiceUtils;
@@ -671,13 +672,13 @@ public class ClassServiceImpl implements ClassService {
 		return responseParamDTO;
 	}
 
-	public Observable<ResponseParamDTO<Map<String, Object>>> getResourceUsage(String sessionId, String resourceIds) {
+	public Observable<ResponseParamDTO<SessionTaxonomyActivity>> getResourceUsage(String sessionId, String resourceIds) {
 		
-		Observable<ResponseParamDTO<Map<String, Object>>> teacherGrade = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+		Observable<ResponseParamDTO<SessionTaxonomyActivity>> resourceUsage = Observable.<ResponseParamDTO<SessionTaxonomyActivity>> create(s -> {
 			s.onNext(fetchResourceUsage(sessionId, resourceIds));
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return teacherGrade;
+		return resourceUsage;
 	}
 
 	@Override
@@ -720,35 +721,31 @@ public class ClassServiceImpl implements ClassService {
 		return resourceUsageObject;
 	}
 	
-	private ResponseParamDTO<Map<String, Object>> fetchResourceUsage(String sessionId, String resourceIds) {
+	private ResponseParamDTO<SessionTaxonomyActivity> fetchResourceUsage(String userUid, String resourceIds) {
 		
 		if(StringUtils.isBlank(resourceIds)) {
 			ValidationUtils.rejectInvalidRequest(ErrorCodes.E104, ApiConstants.RESOURCE_IDS);	
 		}
-		ResponseParamDTO<Map<String, Object>> resourceUsageObject = new ResponseParamDTO<Map<String, Object>>();
-		List<Map<String,Object>> resourceUsageList = new ArrayList<Map<String,Object>>();
+		ResponseParamDTO<SessionTaxonomyActivity> resourceUsageObject = new ResponseParamDTO<SessionTaxonomyActivity>();
+		List<SessionTaxonomyActivity> sessionTaxonomyActivities = new ArrayList<SessionTaxonomyActivity>();
 		for(String resourceId : resourceIds.split(ApiConstants.COMMA)) {
-			ResultSet userSessionActivityResult = getCassandraService().getUserSessionContentActivity(sessionId, resourceId.trim()); 
-			if(userSessionActivityResult != null) {
-				for(Row userSessionColumn : userSessionActivityResult) {
-					Map<String, Object> resourceUsage = new HashMap<String,Object>();
-					resourceUsage.put(ApiConstants.GOORUOID, userSessionColumn.getString(ApiConstants._GOORU_OID));
-					resourceUsage.put(ApiConstants.RESOURCE_TYPE, userSessionColumn.getString(ApiConstants._RESOURCE_TYPE));
-					resourceUsage.put(ApiConstants.QUESTION_TYPE, userSessionColumn.getString(ApiConstants._QUESTION_TYPE));
-					resourceUsage.put(ApiConstants.ANSWER_OBJECT, userSessionColumn.getString(ApiConstants._ANSWER_OBJECT));
-					resourceUsage.put(ApiConstants.STATUS, userSessionColumn.getString(ApiConstants.ANSWER_STATUS));
-					resourceUsage.put(ApiConstants.VIEWS, userSessionColumn.getLong(ApiConstants.VIEWS));
-					resourceUsage.put(ApiConstants.TIMESPENT, userSessionColumn.getLong(ApiConstants._TIME_SPENT));
-					resourceUsage.put(ApiConstants.SCORE, userSessionColumn.getLong(ApiConstants.SCORE));
-					resourceUsage.put(ApiConstants.ATTEMPTS, userSessionColumn.getLong(ApiConstants.ATTEMPTS));
-					resourceUsage.put(ApiConstants.REACTION, userSessionColumn.getLong(ApiConstants.REACTION));
-					if(!resourceUsage.isEmpty()) {
-						resourceUsageList.add(resourceUsage);		
-					}
+			ResultSet sessionResourceActivityResult = getCassandraService().getSessionResourceTaxonomyActivity(ApiConstants.AS_TILDA+userUid, resourceId.trim());
+			if(sessionResourceActivityResult != null) {
+				for(Row userSessionColumn : sessionResourceActivityResult) {
+					SessionTaxonomyActivity sessionTaxonomyActivity = new SessionTaxonomyActivity();
+					sessionTaxonomyActivity.setResourceId(userSessionColumn.getString(ApiConstants._GOORU_OID));
+					sessionTaxonomyActivity.setViews(userSessionColumn.getLong(ApiConstants.VIEWS));
+					sessionTaxonomyActivity.setTimespent(userSessionColumn.getLong(ApiConstants._TIME_SPENT));
+					sessionTaxonomyActivity.setSubjectId(userSessionColumn.getString(ApiConstants._SUBJECT_ID));
+					sessionTaxonomyActivity.setCourseId(userSessionColumn.getString(ApiConstants._COURSE_ID));
+					sessionTaxonomyActivity.setDomainId(userSessionColumn.getString(ApiConstants._DOMAIN_ID));
+					sessionTaxonomyActivity.setStandardsId(userSessionColumn.getString(ApiConstants._STANDARDS_ID));
+					sessionTaxonomyActivity.setLearningTargetsId(userSessionColumn.getString(ApiConstants._LEARNING_TARGETS_ID));
+					sessionTaxonomyActivities.add(sessionTaxonomyActivity);
 				}
 			}
 		}
-		resourceUsageObject.setContent(resourceUsageList);	
+		resourceUsageObject.setContent(sessionTaxonomyActivities);	
 		return resourceUsageObject;
 	}
 
@@ -944,5 +941,49 @@ public class ClassServiceImpl implements ClassService {
 			}
 		}
 		return totalCount;
+	}
+	
+	@Override
+	public Observable<ResponseParamDTO<SessionTaxonomyActivity>> getSessionTaxonomyActivity(String sessionId, String levelType) {
+		
+		Observable<ResponseParamDTO<SessionTaxonomyActivity>> sessionTaxonomyActivity = Observable.<ResponseParamDTO<SessionTaxonomyActivity>> create(s -> {
+			try {
+			s.onNext(fetchSessionTaxonomyActivity(sessionId, levelType));
+			s.onCompleted();
+			}catch(Exception e) {
+				s.onError(e);
+			}
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		return sessionTaxonomyActivity;
+	}
+	
+	private ResponseParamDTO<SessionTaxonomyActivity> fetchSessionTaxonomyActivity(String sessionId, String levelType) {
+	
+		ResultSet result = getCassandraService().getSessionResourceTaxonomyActivity(sessionId, null);
+		ResponseParamDTO<SessionTaxonomyActivity> responseParamDTO = new ResponseParamDTO<SessionTaxonomyActivity>();
+		List<SessionTaxonomyActivity> sessionTaxonomyActivities = new ArrayList<SessionTaxonomyActivity>();
+		if(result != null) {
+			for(Row row : result) {
+				SessionTaxonomyActivity sessionTaxonomyActivity = new SessionTaxonomyActivity();
+				if(!ApiConstants.QUESTION.equalsIgnoreCase(row.getString(ApiConstants._RESOURCE_TYPE))) {
+					continue;
+				}
+				sessionTaxonomyActivity.setQuestionId(row.getString(ApiConstants._GOORU_OID));
+				sessionTaxonomyActivity.setSubjectId(row.getString(ApiConstants._SUBJECT_ID));
+				sessionTaxonomyActivity.setCourseId(row.getString(ApiConstants._COURSE_ID));
+				sessionTaxonomyActivity.setDomainId(row.getString(ApiConstants._DOMAIN_ID));
+				sessionTaxonomyActivity.setStandardsId(row.getString(ApiConstants._STANDARDS_ID));
+				sessionTaxonomyActivity.setLearningTargetsId(row.getString(ApiConstants._LEARNING_TARGETS_ID));
+				sessionTaxonomyActivity.setAnswerStatus(row.getString(ApiConstants.ANSWER_STATUS));
+				sessionTaxonomyActivity.setQuestionType(row.getString(ApiConstants._QUESTION_TYPE));
+				sessionTaxonomyActivity.setReaction(row.getLong(ApiConstants.REACTION));
+				sessionTaxonomyActivity.setScore(row.getLong(ApiConstants.SCORE));
+				sessionTaxonomyActivity.setAttempts(row.getLong(ApiConstants.VIEWS));
+				sessionTaxonomyActivity.setTimespent(row.getLong(ApiConstants._TIME_SPENT));
+				sessionTaxonomyActivities.add(sessionTaxonomyActivity);
+			}
+		}
+		responseParamDTO.setContent(lambdaService.aggregateSessionTaxonomyActivity(sessionTaxonomyActivities, levelType));
+		return responseParamDTO;
 	}
 } 

@@ -135,8 +135,13 @@ public class CassandraServiceImpl implements CassandraService{
 		return cqlDAO.getTaxonomyItemCount(ids);
 	}
 	
+	@Override
 	public 	ResultSet getTaxonomyParents(String taxonomyIds) {
 		return cqlDAO.getTaxonomyParents(taxonomyIds);
 	}
 
+	@Override
+	public ResultSet getSessionResourceTaxonomyActivity(String sessionId, String gooruOid) {
+		return cqlDAO.getSessionResourceTaxonomyActivity(sessionId, gooruOid);
+	}
 }

@@ -19,6 +19,8 @@ public class ApiConstants {
 	
 	public static final String TILDA = "~";
 	
+	public static final String AS_TILDA = "AS"+TILDA;
+	
 	public static final String QUESTION_MARK = "?";
 	
 	public static final String FORWARD_SLASH = "/";
@@ -229,7 +231,11 @@ public class ApiConstants {
 	public static final String PROFILE_URL = "profileUrl";
 
 	public static final String LESSON = "lesson";
+	public static final String SUBJECT = "subject";
 	public static final String COURSE = "course";
+	public static final String DOMAIN = "domain";
+	public static final String STANDARDS = "standards";
+	public static final String LEARNING_TARGETS = "learningTargets";
 	public static final String UNIT = "unit";
 	public static final String CLASS = "class";
 	public static final String INPROGRESS = "in-progress";
@@ -422,7 +428,7 @@ public class ApiConstants {
 				USER_SESSION_ACTIVITY("user_session_activity"),CLASS_ACTIVITY_DATACUBE("class_activity_datacube"),
 				CONTENT_TAXONOMY_ACTIVITY("content_taxonomy_activity"), CLASS_ACTIVITY_PEER_DETAIL("class_activity_peer_detail"),
 				STUDENT_QUESTION_GRADE("student_question_grade"), USER_CLASS_COLLECTION_LAST_SESSIONS("user_class_collection_last_sessions"),CLASS_COLLECTION_COUNT("class_collection_count"),CONTENT_AUTHORIZED_USERS_COUNT("content_authorized_users"),STATISTICAL_DATA("statistical_data"),STUDENTS_CLASS_ACTIVITY("students_class_activity"),
-				TAXONOMY_PARENT_NODE("taxonomy_parent_node");
+				TAXONOMY_PARENT_NODE("taxonomy_parent_node"),USER_SESSION_TAXONOMY_ACTIVITY("user_session_taxonomy_activity");
 
 		private String columnFamily;
 

@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.models.ContentTaxonomyActivity;
+import org.gooru.insights.api.models.SessionTaxonomyActivity;
 import org.gooru.insights.api.models.StudentsClassActivity;
 import org.gooru.insights.api.utils.InsightsLogger;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ public class LambdaServiceImpl implements LambdaService{
 	
 	@Autowired
 	private ClassService classService;
-	
+
 	@Override
 	public List<ContentTaxonomyActivity> aggregateTaxonomyActivityData(List<ContentTaxonomyActivity> resultList,  Integer depth) {
 		
@@ -132,6 +133,14 @@ public class LambdaServiceImpl implements LambdaService{
 		return studentActivity;
 	}
 	
+	@Override
+	public List<SessionTaxonomyActivity> aggregateSessionTaxonomyActivity(List<SessionTaxonomyActivity> sessionTaxonomyActivity, String levelType) {
+		
+		Map<String, List<SessionTaxonomyActivity>> groupedData = sessionTaxonomyActivity.parallelStream().collect(Collectors.groupingBy(object -> SessionTaxonomyActivity.getGroupByField(object, levelType)));
+		List<SessionTaxonomyActivity> sessionTaxonomyActivityMetrics = groupedData.entrySet().parallelStream().map( data -> data.getValue().stream().reduce((obj1,obj2) -> getSessionTaxonomyActivity(obj1, obj2)).map(obj1 -> { obj1.setQuestions(data.getValue()); removeUnwantedFields(obj1, levelType); return obj1; }).get()).collect(Collectors.toList());
+		return sessionTaxonomyActivityMetrics;
+	}
+	
 	private Long sum(Long obj1, Long obj2) {
 		if(obj1 != null) {
 			if(obj2 != null)
@@ -142,5 +151,47 @@ public class LambdaServiceImpl implements LambdaService{
 			return obj2;
 		
 		return null;
+	}
+	
+	private SessionTaxonomyActivity getSessionTaxonomyActivity(SessionTaxonomyActivity obj1, SessionTaxonomyActivity obj2) {
+		
+		obj1.setScore(obj1.getScore()+ obj2.getScore());
+		obj1.setAttempts(obj1.getAttempts() + obj2.getAttempts());
+		obj1.setTimespent(obj1.getTimespent() + obj2.getTimespent());
+		obj1.setReaction(obj1.getReaction() + obj2.getReaction());
+		return obj1;
+	}
+	
+	private SessionTaxonomyActivity removeUnwantedFields(SessionTaxonomyActivity obj1, String depthLevel) {
+		switch(depthLevel) {
+		case ApiConstants.SUBJECT:
+			obj1.setSubjectId(null);
+			obj1.setDomainId(null);
+			obj1.setStandardsId(null);
+			obj1.setLearningTargetsId(null);
+			break;
+		case ApiConstants.COURSE:
+			obj1.setSubjectId(null);
+			obj1.setCourseId(null);
+			obj1.setStandardsId(null);
+			obj1.setLearningTargetsId(null);
+			break;
+		case ApiConstants.DOMAIN:
+			obj1.setSubjectId(null);
+			obj1.setCourseId(null);
+			obj1.setDomainId(null);
+			obj1.setLearningTargetsId(null);
+			break;
+		case ApiConstants.STANDARDS:
+			obj1.setSubjectId(null);
+			obj1.setCourseId(null);
+			obj1.setDomainId(null);
+			obj1.setStandardsId(null);
+			break;
+		}
+		obj1.setQuestionId(null);
+		obj1.setQuestionType(null);
+		obj1.setAnswerStatus(null);
+		return obj1;
 	}
 }
