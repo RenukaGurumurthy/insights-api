@@ -36,7 +36,7 @@
 				<version>2.6</version>
 				<configuration>
 					<webappDirectory>${CATALINA_HOME}/webapps/api</webappDirectory>
-					<warName>insights-api-v1</warName>
+					<warName>api</warName>
 					<dependentWarExcludes>
 						**/jdbc.properties,**/hibernate.cfg.xml,**/sql-map-config.xml,**/web.xml,WEB-INF/classes/META-INF/**
 					</dependentWarExcludes>
@@ -320,7 +320,7 @@
 		<dependency>
 			<groupId>com.datastax.cassandra</groupId>
 			<artifactId>cassandra-driver-core</artifactId>
-			<version>2.1.4</version>
+			<version>3.0.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.codahale.metrics</groupId>

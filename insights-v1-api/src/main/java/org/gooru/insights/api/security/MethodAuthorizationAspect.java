@@ -106,21 +106,15 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 		if (sessionToken != null) {
 			String result;
 			try {
-				result = redisService.getDirectValue(GOORU_PREFIX
-						+ sessionToken);
+				result = redisService.getDirectValue(sessionToken);
 				if (result == null || result.isEmpty()) {
-					InsightsLogger.error("null value in redis data for " + GOORU_PREFIX
-									+ sessionToken);
+					InsightsLogger.error("null value in redis data for " + sessionToken);
 					return false;
 				}
 				JSONObject jsonObject = new JSONObject(result);
-				jsonObject = new JSONObject(
-						jsonObject.getString(ApiConstants.USER_TOKEN));
-				jsonObject = new JSONObject(
-						jsonObject.getString(ApiConstants.USER));
 				return isValidUser(jsonObject, request);
 			} catch (Exception e) {
-				InsightsLogger.error("Exception from redis:"+GOORU_PREFIX+sessionToken, e);
+				InsightsLogger.error("Exception from redis:"+sessionToken, e);
 				return false;
 			}
 		} else {
@@ -131,7 +125,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	
 	private boolean isValidUser(JSONObject jsonObject, HttpServletRequest request) {
 		try {
-			String userUidFromSession = jsonObject.getString(ApiConstants.PARTY_UId);
+			String userUidFromSession = jsonObject.getString(ApiConstants._USER_ID);
 			String userIdFromRequest = RequestUtils.getUserIdFromRequestParam(request);
 			String classId = RequestUtils.getClassIdFromRequestParam(request);
 			if (StringUtils.isBlank(classId) || StringUtils.isBlank(userIdFromRequest)) {
@@ -167,10 +161,16 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	private boolean isAuthorizedUser(String classGooruId, String userUidFromSession) {
 		if (StringUtils.isNotBlank(classGooruId)) {
 			ResultSet authorizedUsers =  cassandraService.getAuthorizedUsers(classGooruId);
-			if(userUidFromSession.equalsIgnoreCase(authorizedUsers.one().getString(ApiConstants._CREATOR_UID))){
+			if(authorizedUsers == null || authorizedUsers.one() == null){
+				LOG.error("API consumer is not a teacher or collaborator...");
+				return false;
+			}
+			String creatorUid = authorizedUsers.one().getString(ApiConstants._CREATOR_UID);
+			if(creatorUid != null && userUidFromSession.equalsIgnoreCase(creatorUid)){
 				return true;
 			}
-			if(authorizedUsers.one().getSet(ApiConstants.COLLABORATORS, Set.class).contains(userUidFromSession)){
+			 Set<Set> collaborators = authorizedUsers.one().getSet(ApiConstants.COLLABORATORS, Set.class);
+			if(collaborators != null && collaborators.contains(userUidFromSession)){
 				return true;
 			}
 		}

@@ -34,7 +34,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/user/{userUid}/current/location", method = { RequestMethod.GET, RequestMethod.POST })
-//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getUserCurrentLocationInLesson(HttpServletRequest request, 
 			@PathVariable(value ="classGooruId") String classGooruId,
 			@PathVariable(value="userUid") String userUid,
@@ -44,7 +44,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/peers", method = { RequestMethod.GET, RequestMethod.POST })
-//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getCoursePeers(HttpServletRequest request, 
 			@PathVariable(value ="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId,
@@ -54,7 +54,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/peers", method = { RequestMethod.GET, RequestMethod.POST })
-//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getUnitPeers(HttpServletRequest request, 
 			@PathVariable(value ="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId,
@@ -65,7 +65,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/peers", method = { RequestMethod.GET, RequestMethod.POST })
-//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getLessonPeers(HttpServletRequest request, 
 			@PathVariable(value ="classGooruId") String classGooruId,
 			@PathVariable(value="courseGooruId") String courseGooruId,
@@ -77,7 +77,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value = "{collectionType}/{contentGooruId}/session/{sessionId}/status", method = {RequestMethod.GET, RequestMethod.POST })
-//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getSessionStatus(HttpServletRequest request,
 			@PathVariable(value = "sessionId") String sessionId,
@@ -88,7 +88,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value="/{collectionType}/{contentGooruId}/sessions",method ={ RequestMethod.GET,RequestMethod.POST})
-//	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getUserSessions(HttpServletRequest request, 
 			@RequestParam(value="classGooruId", required = false, defaultValue = "NA") String classGooruId,
@@ -105,7 +105,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value="/{collectionType}/{contentGooruId}/user/{userUid}",method ={ RequestMethod.GET,RequestMethod.POST})
-//	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getSummaryData(HttpServletRequest request, 
 			@PathVariable(value="collectionType") String collectionType, @PathVariable(value="userUid") String userUid, 
@@ -118,7 +118,7 @@ public class ClassController extends BaseController {
 	}
 
 	@RequestMapping(value = "/{collectionType}/{contentGooruId}/user/{userUid}/prior/usage", method = { RequestMethod.GET, RequestMethod.POST })
-//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getPriorUsage(HttpServletRequest request, 
 			@PathVariable(value="collectionType") String collectionType, @PathVariable(value="userUid") String userUid, 
 			@RequestParam(value="sessionId", required = false) String sessionId, @RequestParam(value="classGooruId", required = false) String classGooruId,
@@ -131,7 +131,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
-//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getCoursePerformance(HttpServletRequest request, 
 			@PathVariable(value ="classGooruId") String classGooruId,
 			@PathVariable(value = "courseGooruId") String courseGooruId,
@@ -143,7 +143,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
-//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getUnitPerformance(HttpServletRequest request, 
 			@PathVariable(value ="classGooruId") String classGooruId,
 			@PathVariable(value = "courseGooruId") String courseGooruId,
@@ -156,7 +156,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
-//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getLessonPerformance(HttpServletRequest request, 
 			@PathVariable(value = "classGooruId") String classGooruId,
 			@PathVariable(value = "courseGooruId") String courseGooruId,
@@ -170,7 +170,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/class/{classGooruId}/course/{courseGooruId}/unit/{unitGooruId}/lesson/{lessonGooruId}/{collectionType}/{contentGooruId}/performance", method = { RequestMethod.GET, RequestMethod.POST })
-//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getAllStudentContentPerformance(HttpServletRequest request, 
 			@PathVariable(value = "classGooruId") String classGooruId,
 			@PathVariable(value = "courseGooruId") String courseGooruId,
@@ -185,7 +185,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
-//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> getUserSubjectMastery(HttpServletRequest request, 
 			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
 			HttpServletResponse response) throws Exception {
@@ -194,7 +194,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/course/{courseId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
-//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> getUserCourseMastery(HttpServletRequest request, 
 			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
 			@PathVariable(value = "courseId") String courseId,
@@ -204,7 +204,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/course/{courseId}/domain/{domainId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
-//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> getUserDomainMastery(HttpServletRequest request, 
 			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
 			@PathVariable(value = "courseId") String courseId, @PathVariable(value = "domainId") String domainId,
@@ -214,7 +214,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/course/{courseId}/domain/{domainId}/standards/{standardsId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
-//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> getUserStandardsMastery(HttpServletRequest request, 
 			@PathVariable(value = "userUid") String userUid, @PathVariable(value = "subjectId") String subjectId,
 			@PathVariable(value = "courseId") String courseId, @PathVariable(value = "domainId") String domainId,
@@ -225,7 +225,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/taxonomy/subject/{subjectId}/courses/domain/{domainId}/mastery", method = { RequestMethod.GET, RequestMethod.POST })
-//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<ContentTaxonomyActivity>> getUserDomainParentMastery(HttpServletRequest request, 
 			@PathVariable(value = "userUid") String userUid, @RequestParam(value = "domainIds", required = true) String domainIds,HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
@@ -233,7 +233,7 @@ public class ClassController extends BaseController {
 	}
 	
 	@RequestMapping(value = "/user/{userUid}/grade", method = { RequestMethod.GET, RequestMethod.POST })
-//	@AuthorizeOperations(operations = InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations = InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getTeacherGrade(HttpServletRequest request, 
 			@PathVariable(value = "userUid") String userUid,
 			@RequestParam(value = "sessionId", required = true) String sessionId,
@@ -249,7 +249,7 @@ public class ClassController extends BaseController {
 	}
 
 	@RequestMapping(value = "/user/{userUid}/resource/usage", method = RequestMethod.POST)
-//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<SessionTaxonomyActivity>> getResourceUsage(HttpServletRequest request, 
 			@PathVariable(value = "userUid") String userUid,
 			@RequestBody String resourceIds,HttpServletResponse response) throws Exception {
@@ -258,7 +258,7 @@ public class ClassController extends BaseController {
 	}
 
 	@RequestMapping(value="/{collectionType}/stat/metrics",method ={ RequestMethod.GET,RequestMethod.POST})
-//	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getStatisticalMetrics(HttpServletRequest request, 
 			@PathVariable(value="collectionType") String collectionType,@RequestBody String contentGooruIds,
@@ -268,7 +268,7 @@ public class ClassController extends BaseController {
 	}
 
 	@RequestMapping(value="/session/{sessionId}/taxonomy/usage",method ={ RequestMethod.GET,RequestMethod.POST})
-//	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public DeferredResult<ResponseParamDTO<SessionTaxonomyActivity>> getSessionTaxonomyActivity(HttpServletRequest request, 
 			@PathVariable(value="sessionId") String sessionId,

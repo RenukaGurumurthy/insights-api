@@ -342,43 +342,45 @@ public class ClassServiceImpl implements ClassService {
 		List<StudentsClassActivity> classActivityResultSetList = new ArrayList<StudentsClassActivity>();
 		ResultSet classActivityResultSet = getCassandraService().getStudentsClassActivity(classId, courseId, unitId,
 				lessonId, null);
-		for (Row classActivityRow : classActivityResultSet) {
-			StudentsClassActivity studentsClassActivity = new StudentsClassActivity();
-			studentsClassActivity.setUnitId(classActivityRow.getString(ApiConstants._UNIT_UID));
-			studentsClassActivity.setLessonId(classActivityRow.getString(ApiConstants._LESSON_UID));
-			studentsClassActivity.setUserUid(classActivityRow.getString(ApiConstants._USER_UID));
-			studentsClassActivity.setCollectionType(classActivityRow.getString(ApiConstants._COLLECTION_TYPE));
-			studentsClassActivity.setScore(classActivityRow.getLong(ApiConstants.SCORE));
-			studentsClassActivity.setReaction(classActivityRow.getLong(ApiConstants.REACTION));
-			studentsClassActivity.setCollectionId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
-			if(ApiConstants.COLLECTION.equals(collectionType)) {
-				studentsClassActivity.setViews(classActivityRow.getLong(ApiConstants.VIEWS));
-			} else {
-				studentsClassActivity.setAttempts(classActivityRow.getLong(ApiConstants.VIEWS));
-			}
-			studentsClassActivity.setTimeSpent(classActivityRow.getLong(ApiConstants._TIME_SPENT));
-			studentsClassActivity.setAttemptStatus(classActivityRow.getString(ApiConstants._ATTEMPT_STATUS));
-			studentsClassActivity.setClassId(classActivityRow.getString(ApiConstants._CLASS_UID));
-			classActivityResultSetList.add(studentsClassActivity);
-		}
-		List<StudentsClassActivity> filteredList = lambdaService
-				.applyFiltersInStudentsClassActivity(classActivityResultSetList, collectionType);
-		List<Map<String, List<StudentsClassActivity>>> aggregatedList = lambdaService
-				.aggregateStudentsClassActivityData(filteredList, collectionType, nextLevelType);
-		List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-		for (Map<String, List<StudentsClassActivity>> aggregatedSubList : aggregatedList) {
-			for(Map.Entry<String, List<StudentsClassActivity>> data : aggregatedSubList.entrySet()) {
-				
-				Map<String, Object> resultMap = new HashMap<String, Object>();
-				if(data.getValue().size() == 0) {
-					continue;
+		if (classActivityResultSet != null) {
+			for (Row classActivityRow : classActivityResultSet) {
+				StudentsClassActivity studentsClassActivity = new StudentsClassActivity();
+				studentsClassActivity.setUnitId(classActivityRow.getString(ApiConstants._UNIT_UID));
+				studentsClassActivity.setLessonId(classActivityRow.getString(ApiConstants._LESSON_UID));
+				studentsClassActivity.setUserUid(classActivityRow.getString(ApiConstants._USER_UID));
+				studentsClassActivity.setCollectionType(classActivityRow.getString(ApiConstants._COLLECTION_TYPE));
+				studentsClassActivity.setScore(classActivityRow.getLong(ApiConstants.SCORE));
+				studentsClassActivity.setReaction(classActivityRow.getLong(ApiConstants.REACTION));
+				studentsClassActivity.setCollectionId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
+				if (ApiConstants.COLLECTION.equals(collectionType)) {
+					studentsClassActivity.setViews(classActivityRow.getLong(ApiConstants.VIEWS));
+				} else {
+					studentsClassActivity.setAttempts(classActivityRow.getLong(ApiConstants.VIEWS));
 				}
-				resultMap.put("userUid",data.getKey());
-				resultMap.put("usageData", data.getValue());
-				result.add(resultMap);
+				studentsClassActivity.setTimeSpent(classActivityRow.getLong(ApiConstants._TIME_SPENT));
+				studentsClassActivity.setAttemptStatus(classActivityRow.getString(ApiConstants._ATTEMPT_STATUS));
+				studentsClassActivity.setClassId(classActivityRow.getString(ApiConstants._CLASS_UID));
+				classActivityResultSetList.add(studentsClassActivity);
 			}
+			List<StudentsClassActivity> filteredList = lambdaService
+					.applyFiltersInStudentsClassActivity(classActivityResultSetList, collectionType);
+			List<Map<String, List<StudentsClassActivity>>> aggregatedList = lambdaService
+					.aggregateStudentsClassActivityData(filteredList, collectionType, nextLevelType);
+			List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+			for (Map<String, List<StudentsClassActivity>> aggregatedSubList : aggregatedList) {
+				for (Map.Entry<String, List<StudentsClassActivity>> data : aggregatedSubList.entrySet()) {
+
+					Map<String, Object> resultMap = new HashMap<String, Object>();
+					if (data.getValue().size() == 0) {
+						continue;
+					}
+					resultMap.put("userUid", data.getKey());
+					resultMap.put("usageData", data.getValue());
+					result.add(resultMap);
+				}
+			}
+			responseParamDTO.setContent(result);
 		}
-		responseParamDTO.setContent(result);
 		return responseParamDTO;
 	}
 
