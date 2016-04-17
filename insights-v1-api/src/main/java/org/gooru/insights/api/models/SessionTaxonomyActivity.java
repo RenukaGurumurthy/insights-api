@@ -1,0 +1,213 @@
+package org.gooru.insights.api.models;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.gooru.insights.api.constants.ApiConstants;
+
+public class SessionTaxonomyActivity {
+
+	private String sessionId;
+	
+	private String subjectId;
+	
+	private String courseId;
+	
+	private String domainId;
+	
+	private String standardsId;
+	
+	private String learningTargetsId;
+	
+	private Long views;
+	
+	private Long timespent;
+	
+	private Long attempts;
+	
+	private Long score;
+	
+	private String questionType;
+	
+	private String resourceType;
+	
+	private String answerStatus;
+
+	private String resourceId;
+	
+	private String questionId;
+	
+	private Long reaction;
+	
+	private List<Object> questions;
+	
+	public String getSessionId() {
+		return sessionId;
+	}
+
+	public void setSessionId(String sessionId) {
+		this.sessionId = sessionId;
+	}
+
+	public String getSubjectId() {
+		return subjectId;
+	}
+
+	public void setSubjectId(String subjectId) {
+		this.subjectId = subjectId;
+	}
+
+	public String getCourseId() {
+		return courseId;
+	}
+
+	public void setCourseId(String courseId) {
+		this.courseId = courseId;
+	}
+
+	public String getDomainId() {
+		return domainId;
+	}
+
+	public void setDomainId(String domainId) {
+		this.domainId = domainId;
+	}
+
+	public String getStandardsId() {
+		return standardsId;
+	}
+
+	public void setStandardsId(String standardsId) {
+		this.standardsId = standardsId;
+	}
+
+	public String getLearningTargetsId() {
+		return learningTargetsId;
+	}
+
+	public void setLearningTargetsId(String learningTargetsId) {
+		this.learningTargetsId = learningTargetsId;
+	}
+
+	public Long getViews() {
+		return views;
+	}
+
+	public void setViews(Long views) {
+		this.views = views;
+	}
+
+	public Long getTimespent() {
+		return timespent;
+	}
+
+	public void setTimespent(Long timespent) {
+		this.timespent = timespent;
+	}
+
+	public Long getAttempts() {
+		return attempts;
+	}
+
+	public void setAttempts(Long attempts) {
+		this.attempts = attempts;
+	}
+
+	public Long getScore() {
+		return score;
+	}
+
+	public void setScore(Long score) {
+		this.score = score;
+	}
+
+	public String getQuestionType() {
+		return questionType;
+	}
+
+	public void setQuestionType(String questionType) {
+		this.questionType = questionType;
+	}
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
+	public String getAnswerStatus() {
+		return answerStatus;
+	}
+
+	public void setAnswerStatus(String answerStatus) {
+		this.answerStatus = answerStatus;
+	}
+
+	public String getResourceId() {
+		return resourceId;
+	}
+
+	public void setResourceId(String resourceId) {
+		this.resourceId = resourceId;
+	}
+
+	public String getQuestionId() {
+		return questionId;
+	}
+
+	public void setQuestionId(String questionId) {
+		this.questionId = questionId;
+	}
+
+	public Long getReaction() {
+		return reaction;
+	}
+
+	public void setReaction(Long reaction) {
+		this.reaction = reaction;
+	}
+
+	public List<Object> getQuestions() {
+		return questions;
+	}
+
+	public void setQuestions(List<SessionTaxonomyActivity> questionDatas) {
+		if(this.questions == null) {
+			this.questions = new ArrayList<Object>();
+			for(SessionTaxonomyActivity questionData : questionDatas) {
+				questions.add(reAllocateObjects(questionData));
+			}
+		}
+	}
+	
+	public SessionTaxonomyActivity() {}
+	
+	private SessionTaxonomyActivity(SessionTaxonomyActivity obj) {
+		this.timespent = obj.getTimespent();
+		this.attempts = obj.getAttempts();
+		this.score = obj.getScore();
+		this.questionType = obj.getQuestionType();
+		this.questionId = obj.getQuestionId();
+		this.answerStatus = obj.getAnswerStatus();
+		this.reaction = obj.getReaction();
+	}
+	
+	public static String getGroupByField(SessionTaxonomyActivity obj1, String levelType) {
+		switch(levelType) {
+		case ApiConstants.SUBJECT:
+			return obj1.getCourseId();
+		case ApiConstants.COURSE:
+			return obj1.getDomainId();
+		case ApiConstants.DOMAIN:
+			return obj1.getStandardsId();
+		case ApiConstants.STANDARDS:
+			return obj1.getLearningTargetsId();
+		}
+		return obj1.getDomainId();
+	}
+	private SessionTaxonomyActivity reAllocateObjects(SessionTaxonomyActivity questionData) {
+			return new SessionTaxonomyActivity(questionData);
+	}
+}

@@ -3,6 +3,7 @@ package org.gooru.insights.api.daos;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.ApiConstants.ColumnFamilySet;
 import org.slf4j.Logger;
@@ -510,6 +511,27 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 					.from(getLogKeyspaceName(), ColumnFamilySet.TAXONOMY_PARENT_NODE.getColumnFamily())
 					.where(QueryBuilder.in(ApiConstants._ROW_KEY, (Object[]) taxonomyIds.split(",")))
 					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
+			result = resultSetFuture.get();
+		} catch (Exception e) {
+			LOG.error("Exception:", e);
+		}
+		return result;
+	}
+	
+	@Override
+	public ResultSet getSessionResourceTaxonomyActivity(String sessionId, String gooruOid) {
+		
+		ResultSet result = null;
+		try {
+			Select select = QueryBuilder.select().all()
+					.from(getLogKeyspaceName(), ColumnFamilySet.USER_SESSION_TAXONOMY_ACTIVITY.getColumnFamily());
+			Where where = select.where(QueryBuilder.eq(ApiConstants._SESSION_ID, sessionId));
+			
+			if(StringUtils.isNotBlank(gooruOid)) {
+				where.and(QueryBuilder.eq(ApiConstants._GOORU_OID, gooruOid));
+			}
+			where.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
 			result = resultSetFuture.get();
 		} catch (Exception e) {

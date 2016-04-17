@@ -9,6 +9,7 @@ import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.constants.InsightsOperationConstants;
 import org.gooru.insights.api.models.ContentTaxonomyActivity;
 import org.gooru.insights.api.models.ResponseParamDTO;
+import org.gooru.insights.api.models.SessionTaxonomyActivity;
 import org.gooru.insights.api.security.AuthorizeOperations;
 import org.gooru.insights.api.services.ClassService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -247,13 +248,13 @@ public class ClassController extends BaseController {
 		return getDeferredResult(getClassService().getTeacherGrade(teacherId, userUid, sessionId));
 	}
 
-	@RequestMapping(value = "/{resourceType}/usage/session/{sessionId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/user/{userUid}/resource/usage", method = RequestMethod.POST)
 	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
-	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getResourceUsage(HttpServletRequest request, 
-			@PathVariable(value = "resourceType") String resourceType, @PathVariable(value = "sessionId") String sessionId,
+	public DeferredResult<ResponseParamDTO<SessionTaxonomyActivity>> getResourceUsage(HttpServletRequest request, 
+			@PathVariable(value = "userUid") String userUid,
 			@RequestBody String resourceIds,HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
-		return getDeferredResult(getClassService().getResourceUsage(sessionId, resourceIds));
+		return getDeferredResult(getClassService().getResourceUsage(userUid, resourceIds));
 	}
 
 	@RequestMapping(value="/{collectionType}/stat/metrics",method ={ RequestMethod.GET,RequestMethod.POST})
@@ -265,4 +266,15 @@ public class ClassController extends BaseController {
 		setAllowOrigin(response);
 		return getDeferredResult(getClassService().getStatisticalMetrics(contentGooruIds));
 	}
+
+	@RequestMapping(value="/session/{sessionId}/taxonomy/usage",method ={ RequestMethod.GET,RequestMethod.POST})
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@ResponseBody
+	public DeferredResult<ResponseParamDTO<SessionTaxonomyActivity>> getSessionTaxonomyActivity(HttpServletRequest request, 
+			@PathVariable(value="sessionId") String sessionId,
+			HttpServletResponse response) throws Exception {
+		setAllowOrigin(response);
+		return getDeferredResult(getClassService().getSessionTaxonomyActivity(sessionId, ApiConstants.DOMAIN));
+	}
+	
 }
