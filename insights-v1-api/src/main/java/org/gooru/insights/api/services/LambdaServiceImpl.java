@@ -155,14 +155,25 @@ public class LambdaServiceImpl implements LambdaService{
 	
 	private SessionTaxonomyActivity getSessionTaxonomyActivity(SessionTaxonomyActivity obj1, SessionTaxonomyActivity obj2) {
 		
-		obj1.setScore(obj1.getScore()+ obj2.getScore());
-		obj1.setAttempts(obj1.getAttempts() + obj2.getAttempts());
-		obj1.setTimespent(obj1.getTimespent() + obj2.getTimespent());
-		obj1.setReaction(obj1.getReaction() + obj2.getReaction());
-		return obj1;
+		SessionTaxonomyActivity data = new SessionTaxonomyActivity();
+		data.setScore(obj1.getScore()+ obj2.getScore());
+		data.setAttempts(obj1.getAttempts() + obj2.getAttempts());
+		data.setTimespent(obj1.getTimespent() + obj2.getTimespent());
+		data.setReaction(obj1.getReaction() + obj2.getReaction());
+		data.setTotalAttemptedQuestions(obj1.getTotalAttemptedQuestions() + obj2.getTotalAttemptedQuestions());
+		data.setSubjectId(obj1.getSubjectId());
+		data.setCourseId(obj1.getCourseId());
+		data.setDomainId(obj1.getDomainId());
+		data.setStandardsId(obj1.getStandardsId());
+		data.setLearningTargetsId(obj1.getLearningTargetsId());
+		return data;
 	}
 	
 	private SessionTaxonomyActivity removeUnwantedFields(SessionTaxonomyActivity obj1, String depthLevel) {
+		
+		obj1.setScoreInPercentage(obj1.getScore()/obj1.getTotalAttemptedQuestions());
+		obj1.setScore(null);
+		obj1.setTotalAttemptedQuestions(null);
 		switch(depthLevel) {
 		case ApiConstants.SUBJECT:
 			obj1.setSubjectId(null);
