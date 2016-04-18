@@ -966,10 +966,10 @@ public class ClassServiceImpl implements ClassService {
 		List<SessionTaxonomyActivity> sessionTaxonomyActivities = new ArrayList<SessionTaxonomyActivity>();
 		if(result != null) {
 			for(Row row : result) {
-				SessionTaxonomyActivity sessionTaxonomyActivity = new SessionTaxonomyActivity();
 				if(!ApiConstants.QUESTION.equalsIgnoreCase(row.getString(ApiConstants._RESOURCE_TYPE))) {
 					continue;
 				}
+				SessionTaxonomyActivity sessionTaxonomyActivity = new SessionTaxonomyActivity();
 				sessionTaxonomyActivity.setQuestionId(row.getString(ApiConstants._GOORU_OID));
 				sessionTaxonomyActivity.setSubjectId(row.getString(ApiConstants._SUBJECT_ID));
 				sessionTaxonomyActivity.setCourseId(row.getString(ApiConstants._COURSE_ID));

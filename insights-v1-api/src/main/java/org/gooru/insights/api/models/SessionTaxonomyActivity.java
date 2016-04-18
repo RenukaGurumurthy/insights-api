@@ -43,15 +43,6 @@ public class SessionTaxonomyActivity {
 	
 	private Long totalAttemptedQuestions;
 	
-	private Long scoreInPercentage;
-	
-	public Long getScoreInPercentage() {
-		return scoreInPercentage;
-	}
-
-	public void setScoreInPercentage(Long scoreInPercentage) {
-		this.scoreInPercentage = scoreInPercentage;
-	}
 
 	public Long getTotalAttemptedQuestions() {
 		return totalAttemptedQuestions;

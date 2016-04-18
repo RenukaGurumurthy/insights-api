@@ -137,7 +137,7 @@ public class LambdaServiceImpl implements LambdaService{
 	public List<SessionTaxonomyActivity> aggregateSessionTaxonomyActivity(List<SessionTaxonomyActivity> sessionTaxonomyActivity, String levelType) {
 		
 		Map<String, List<SessionTaxonomyActivity>> groupedData = sessionTaxonomyActivity.parallelStream().collect(Collectors.groupingBy(object -> SessionTaxonomyActivity.getGroupByField(object, levelType)));
-		List<SessionTaxonomyActivity> sessionTaxonomyActivityMetrics = groupedData.entrySet().parallelStream().map( data -> data.getValue().stream().reduce((obj1,obj2) -> getSessionTaxonomyActivity(obj1, obj2)).map(obj1 -> { obj1.setQuestions(data.getValue()); removeUnwantedFields(obj1, levelType); return obj1; }).get()).collect(Collectors.toList());
+		List<SessionTaxonomyActivity> sessionTaxonomyActivityMetrics = groupedData.entrySet().parallelStream().map( data -> data.getValue().stream().reduce((obj1,obj2) -> getSessionTaxonomyActivity(obj1, obj2)).map(obj1 -> { removeUnwantedFields(obj1, levelType);obj1.setQuestions(data.getValue()); return obj1; }).get()).collect(Collectors.toList());
 		return sessionTaxonomyActivityMetrics;
 	}
 	
@@ -171,8 +171,7 @@ public class LambdaServiceImpl implements LambdaService{
 	
 	private SessionTaxonomyActivity removeUnwantedFields(SessionTaxonomyActivity obj1, String depthLevel) {
 		
-		obj1.setScoreInPercentage(obj1.getScore()/obj1.getTotalAttemptedQuestions());
-		obj1.setScore(null);
+		obj1.setScore(obj1.getScore()/obj1.getTotalAttemptedQuestions());
 		obj1.setTotalAttemptedQuestions(null);
 		switch(depthLevel) {
 		case ApiConstants.SUBJECT:
