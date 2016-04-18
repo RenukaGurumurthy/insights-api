@@ -39,8 +39,28 @@ public class SessionTaxonomyActivity {
 	
 	private Long reaction;
 	
-	private List<Object> questions;
+	private List<SessionTaxonomyActivity> questions;
 	
+	private Long totalAttemptedQuestions;
+	
+	private Long scoreInPercentage;
+	
+	public Long getScoreInPercentage() {
+		return scoreInPercentage;
+	}
+
+	public void setScoreInPercentage(Long scoreInPercentage) {
+		this.scoreInPercentage = scoreInPercentage;
+	}
+
+	public Long getTotalAttemptedQuestions() {
+		return totalAttemptedQuestions;
+	}
+
+	public void setTotalAttemptedQuestions(Long totalAttemptedQuestions) {
+		this.totalAttemptedQuestions = totalAttemptedQuestions;
+	}
+
 	public String getSessionId() {
 		return sessionId;
 	}
@@ -169,20 +189,22 @@ public class SessionTaxonomyActivity {
 		this.reaction = reaction;
 	}
 
-	public List<Object> getQuestions() {
+	public List<SessionTaxonomyActivity> getQuestions() {
 		return questions;
 	}
 
-	public void setQuestions(List<SessionTaxonomyActivity> questionDatas) {
+	public void setQuestions(List<SessionTaxonomyActivity> questionsData) {
 		if(this.questions == null) {
-			this.questions = new ArrayList<Object>();
-			for(SessionTaxonomyActivity questionData : questionDatas) {
+			this.questions = new ArrayList<SessionTaxonomyActivity>();
+			for(SessionTaxonomyActivity questionData : questionsData) {
 				questions.add(reAllocateObjects(questionData));
 			}
 		}
 	}
 	
-	public SessionTaxonomyActivity() {}
+	public SessionTaxonomyActivity() {
+		this.totalAttemptedQuestions = 1L;
+	}
 	
 	private SessionTaxonomyActivity(SessionTaxonomyActivity obj) {
 		this.timespent = obj.getTimespent();
@@ -192,6 +214,7 @@ public class SessionTaxonomyActivity {
 		this.questionId = obj.getQuestionId();
 		this.answerStatus = obj.getAnswerStatus();
 		this.reaction = obj.getReaction();
+		this.learningTargetsId = obj.getLearningTargetsId();
 	}
 	
 	public static String getGroupByField(SessionTaxonomyActivity obj1, String levelType) {
