@@ -738,16 +738,17 @@ public class ClassServiceImpl implements ClassService {
 					sessionTaxonomyActivity.setResourceId(userSessionColumn.getString(ApiConstants._GOORU_OID));
 					sessionTaxonomyActivity.setViews(userSessionColumn.getLong(ApiConstants.VIEWS));
 					sessionTaxonomyActivity.setTimespent(userSessionColumn.getLong(ApiConstants._TIME_SPENT));
-					sessionTaxonomyActivity.setSubjectId(userSessionColumn.getString(ApiConstants._SUBJECT_ID));
-					sessionTaxonomyActivity.setCourseId(userSessionColumn.getString(ApiConstants._COURSE_ID));
-					sessionTaxonomyActivity.setDomainId(userSessionColumn.getString(ApiConstants._DOMAIN_ID));
-					sessionTaxonomyActivity.setStandardsId(userSessionColumn.getString(ApiConstants._STANDARDS_ID));
-					sessionTaxonomyActivity.setLearningTargetsId(userSessionColumn.getString(ApiConstants._LEARNING_TARGETS_ID));
+					sessionTaxonomyActivity.setSubjectIds(userSessionColumn.getString(ApiConstants._SUBJECT_ID));
+					sessionTaxonomyActivity.setCourseIds(userSessionColumn.getString(ApiConstants._COURSE_ID));
+					sessionTaxonomyActivity.setDomainIds(userSessionColumn.getString(ApiConstants._DOMAIN_ID));
+					sessionTaxonomyActivity.setStandardsIds(userSessionColumn.getString(ApiConstants._STANDARDS_ID));
+					sessionTaxonomyActivity.setLearningTargetsIds(userSessionColumn.getString(ApiConstants._LEARNING_TARGETS_ID));
 					sessionTaxonomyActivities.add(sessionTaxonomyActivity);
 				}
 			}
 		}
-		resourceUsageObject.setContent(sessionTaxonomyActivities);	
+		List<SessionTaxonomyActivity> result = lambdaService.aggregateSessionTaxonomyActivityByGooruOid(sessionTaxonomyActivities);
+		resourceUsageObject.setContent(result);	
 		return resourceUsageObject;
 	}
 

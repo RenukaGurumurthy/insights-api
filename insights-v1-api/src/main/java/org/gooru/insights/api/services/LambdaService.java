@@ -18,4 +18,7 @@ public interface LambdaService {
 			String collectionType);
 	
 	List<SessionTaxonomyActivity> aggregateSessionTaxonomyActivity(List<SessionTaxonomyActivity> sessionTaxonomyActivity, String levelType);
+
+	List<SessionTaxonomyActivity> aggregateSessionTaxonomyActivityByGooruOid(
+			List<SessionTaxonomyActivity> sessionTaxonomyActivity);
 }
