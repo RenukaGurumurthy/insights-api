@@ -738,10 +738,10 @@ public class ClassServiceImpl implements ClassService {
 					sessionTaxonomyActivity.setResourceId(userSessionColumn.getString(ApiConstants._GOORU_OID));
 					sessionTaxonomyActivity.setViews(userSessionColumn.getLong(ApiConstants.VIEWS));
 					sessionTaxonomyActivity.setTimespent(userSessionColumn.getLong(ApiConstants._TIME_SPENT));
-					sessionTaxonomyActivity.setSubjectIds(userSessionColumn.getString(ApiConstants._SUBJECT_ID));
+/*					sessionTaxonomyActivity.setSubjectIds(userSessionColumn.getString(ApiConstants._SUBJECT_ID));
 					sessionTaxonomyActivity.setCourseIds(userSessionColumn.getString(ApiConstants._COURSE_ID));
 					sessionTaxonomyActivity.setDomainIds(userSessionColumn.getString(ApiConstants._DOMAIN_ID));
-					sessionTaxonomyActivity.setStandardsIds(userSessionColumn.getString(ApiConstants._STANDARDS_ID));
+					sessionTaxonomyActivity.setStandardsIds(userSessionColumn.getString(ApiConstants._STANDARDS_ID));*/
 					sessionTaxonomyActivity.setLearningTargetsIds(userSessionColumn.getString(ApiConstants._LEARNING_TARGETS_ID));
 					sessionTaxonomyActivities.add(sessionTaxonomyActivity);
 				}
