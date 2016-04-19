@@ -355,6 +355,7 @@ public class ApiConstants {
 	public static final String _UNIT_UID = "unit_uid";
 	public static final String _LESSON_UID = "lesson_uid";
 	public static final String _EVENT_TIME = "event_time";
+	public static final String _EVENT_ID = "event_id";
 	public static final String ACTIVE_PEER_COUNT = "activePeerCount";
 	public static final String LEFT_PEER_COUNT = "leftPeerCount";
 	public static final String _LEAF_GOORU_OID = "leaf_gooru_oid";
@@ -430,7 +431,7 @@ public class ApiConstants {
 				USER_SESSION_ACTIVITY("user_session_activity"),CLASS_ACTIVITY_DATACUBE("class_activity_datacube"),
 				CONTENT_TAXONOMY_ACTIVITY("content_taxonomy_activity"), CLASS_ACTIVITY_PEER_DETAIL("class_activity_peer_detail"),
 				STUDENT_QUESTION_GRADE("student_question_grade"), USER_CLASS_COLLECTION_LAST_SESSIONS("user_class_collection_last_sessions"),CLASS_COLLECTION_COUNT("class_collection_count"),CONTENT_AUTHORIZED_USERS_COUNT("content_authorized_users"),STATISTICAL_DATA("statistical_data"),STUDENTS_CLASS_ACTIVITY("students_class_activity"),
-				TAXONOMY_PARENT_NODE("taxonomy_parent_node"),USER_SESSION_TAXONOMY_ACTIVITY("user_session_taxonomy_activity");
+				TAXONOMY_PARENT_NODE("taxonomy_parent_node"),USER_SESSION_TAXONOMY_ACTIVITY("user_session_taxonomy_activity"),EVENTS("events");
 
 		private String columnFamily;
 

@@ -65,4 +65,6 @@ public interface CassandraService {
 	ResultSet getTaxonomyParents(String taxonomyId);
 	
 	ResultSet getSessionResourceTaxonomyActivity(String sessionId, String gooruOid);
+
+	ResultSet getEvent(String eventId);
 }

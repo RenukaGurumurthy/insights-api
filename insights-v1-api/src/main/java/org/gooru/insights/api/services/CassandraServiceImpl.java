@@ -144,4 +144,8 @@ public class CassandraServiceImpl implements CassandraService{
 	public ResultSet getSessionResourceTaxonomyActivity(String sessionId, String gooruOid) {
 		return cqlDAO.getSessionResourceTaxonomyActivity(sessionId, gooruOid);
 	}
+	@Override
+	public ResultSet getEvent(String eventId) {
+		return cqlDAO.getEvent(eventId);
+	}
 }

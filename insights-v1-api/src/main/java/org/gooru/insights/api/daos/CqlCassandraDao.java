@@ -67,4 +67,6 @@ public interface CqlCassandraDao {
 			String collectionId);
 
 	ResultSet getSessionResourceTaxonomyActivity(String sessionId, String gooruOid);
+
+	ResultSet getEvent(String eventId);
 }

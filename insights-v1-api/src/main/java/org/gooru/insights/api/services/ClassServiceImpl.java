@@ -960,6 +960,33 @@ public class ClassServiceImpl implements ClassService {
 		return sessionTaxonomyActivity;
 	}
 	
+	@Override
+	public Observable<ResponseParamDTO<Map<String,Object>>> getEvent(String eventId) {
+		Observable<ResponseParamDTO<Map<String,Object>>> eventObject = Observable.<ResponseParamDTO<Map<String,Object>>> create(s -> {
+			try {
+			s.onNext(fetchEvent(eventId));
+			s.onCompleted();
+			}catch(Exception e) {
+				s.onError(e);
+			}
+		}).subscribeOn(Schedulers.from(observableExecutor));
+		return eventObject;
+	}
+	private ResponseParamDTO<Map<String,Object>> fetchEvent(String eventId){
+		ResponseParamDTO<Map<String,Object>> responseParamDTO = new ResponseParamDTO<Map<String,Object>>();
+		ResultSet result = getCassandraService().getEvent(eventId);
+		List<Map<String,Object>> content = new ArrayList<Map<String,Object>>();
+		if(result != null) {			
+			for(Row row : result) {
+				Map<String,Object> eventMap = new HashMap<String, Object>();
+				eventMap.put(ApiConstants._EVENT_ID, row.getString(ApiConstants._EVENT_ID));
+				eventMap.put("fields", row.getString("fields"));
+				content.add(eventMap);
+			}
+			responseParamDTO.setContent(content);
+		}
+		return responseParamDTO;
+	}
 	private ResponseParamDTO<SessionTaxonomyActivity> fetchSessionTaxonomyActivity(String sessionId, String levelType) {
 	
 		ResultSet result = getCassandraService().getSessionResourceTaxonomyActivity(sessionId, null);

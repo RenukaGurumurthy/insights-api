@@ -276,5 +276,14 @@ public class ClassController extends BaseController {
 		setAllowOrigin(response);
 		return getDeferredResult(getClassService().getSessionTaxonomyActivity(sessionId, ApiConstants.DOMAIN));
 	}
+	@RequestMapping(value="/event/{eventId}/info",method ={ RequestMethod.GET,RequestMethod.POST})
+	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@ResponseBody
+	public DeferredResult<ResponseParamDTO<Map<String,Object>>> getEventToCheck(HttpServletRequest request, 
+			@PathVariable(value="eventId") String eventId,
+			HttpServletResponse response) throws Exception {
+		setAllowOrigin(response);
+		return getDeferredResult(getClassService().getEvent(eventId));
+	}
 	
 }

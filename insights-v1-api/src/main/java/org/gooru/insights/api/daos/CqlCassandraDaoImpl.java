@@ -539,4 +539,19 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		}
 		return result;
 	}
+	@Override
+	public ResultSet getEvent(String eventId) {
+		ResultSet result = null;
+		try {
+			Select select = QueryBuilder.select().all().from(getLogKeyspaceName(),
+					ColumnFamilySet.EVENTS.getColumnFamily());
+			Where where = select.where(QueryBuilder.eq(ApiConstants._EVENT_ID, eventId));
+			where.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
+			result = resultSetFuture.get();
+		} catch (Exception e) {
+			LOG.error("Exception:", e);
+		}
+		return result;
+	}
 }

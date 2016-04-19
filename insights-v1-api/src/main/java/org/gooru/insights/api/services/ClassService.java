@@ -43,6 +43,8 @@ public interface ClassService {
 			String collectionType);
 	
 	Observable<ResponseParamDTO<SessionTaxonomyActivity>> getSessionTaxonomyActivity(String sessionId, String levelType);
+
+	Observable<ResponseParamDTO<Map<String, Object>>> getEvent(String eventId);
 }
 
 
