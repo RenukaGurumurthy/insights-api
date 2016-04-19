@@ -1,7 +1,9 @@
 package org.gooru.insights.api.models;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.gooru.insights.api.constants.ApiConstants;
 
@@ -18,6 +20,16 @@ public class SessionTaxonomyActivity {
 	private String standardsId;
 	
 	private String learningTargetsId;
+	
+	private Set<String> subjectIds;
+	
+	private Set<String> courseIds;
+	
+	private Set<String> domainIds;
+	
+	private Set<String> standardsIds;
+	
+	private Set<String> learningTargetsIds;
 	
 	private Long views;
 	
@@ -223,5 +235,60 @@ public class SessionTaxonomyActivity {
 	}
 	private SessionTaxonomyActivity reAllocateObjects(SessionTaxonomyActivity questionData) {
 			return new SessionTaxonomyActivity(questionData);
+	}
+
+	public Set<String> getSubjectIds() {
+		return subjectIds;
+	}
+
+	public void setSubjectIds(String subjectIds) {
+		if(this.subjectIds  == null){
+			this.subjectIds = new HashSet<String>();	
+		}
+		this.subjectIds.add(subjectIds);
+	}
+
+	public Set<String> getCourseIds() {
+		return courseIds;
+	}
+
+	public void setCourseIds(String courseIds) {
+		if(this.courseIds  == null){
+			this.courseIds = new HashSet<String>();	
+		}
+		this.courseIds.add(courseIds);
+	}
+
+	public Set<String> getDomainIds() {
+		return domainIds;
+	}
+
+	public void setDomainIds(String domainIds) {
+		if(this.domainIds  == null){
+			this.domainIds = new HashSet<String>();	
+		}
+		this.domainIds.add(domainIds);
+	}
+
+	public Set<String> getStandardsIds() {
+		return standardsIds;
+	}
+
+	public void setStandardsIds(String standardsIds) {
+		if(this.standardsIds  == null){
+			this.standardsIds = new HashSet<String>();	
+		}
+		this.standardsIds.add(standardsIds);
+	}
+
+	public Set<String> getLearningTargetsIds() {
+		return learningTargetsIds;
+	}
+
+	public void setLearningTargetsIds(String learningTargetsIds) {
+		if(this.learningTargetsIds  == null){
+			this.learningTargetsIds = new HashSet<String>();	
+		}
+		this.learningTargetsIds.add(learningTargetsIds);
 	}
 }

@@ -1,6 +1,7 @@
 package org.gooru.insights.api.services;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -141,6 +142,16 @@ public class LambdaServiceImpl implements LambdaService{
 		return sessionTaxonomyActivityMetrics;
 	}
 	
+	@Override
+	public List<SessionTaxonomyActivity> aggregateSessionTaxonomyActivityByGooruOid(List<SessionTaxonomyActivity> sessionTaxonomyActivity) {
+
+		Map<String, List<SessionTaxonomyActivity>> groupedData = sessionTaxonomyActivity.parallelStream().collect(Collectors.groupingBy(object -> object.getResourceId()));		
+		
+		sessionTaxonomyActivity = groupedData.entrySet().parallelStream().map(taxonomy -> taxonomy.getValue().parallelStream().reduce((f1,f2) -> getSessionTaxonomyActivityByTax(f1,f2)).get()).map(f1 -> {removeUnwantedFields(f1);return f1;}).collect(Collectors.toList());
+		
+		return sessionTaxonomyActivity;
+	}
+	
 	private Long sum(Long obj1, Long obj2) {
 		if(obj1 != null) {
 			if(obj2 != null)
@@ -169,6 +180,25 @@ public class LambdaServiceImpl implements LambdaService{
 		return data;
 	}
 	
+	private SessionTaxonomyActivity getSessionTaxonomyActivityByTax(SessionTaxonomyActivity obj1,
+			SessionTaxonomyActivity obj2) {
+		obj1.getSubjectIds().addAll(obj2.getSubjectIds());
+		obj1.getCourseIds().addAll(obj2.getCourseIds());
+		obj1.getDomainIds().addAll(obj2.getDomainIds());
+		obj1.getStandardsIds().addAll(obj2.getStandardsIds());
+		obj1.getLearningTargetsIds().addAll(obj2.getLearningTargetsIds());
+		
+		return obj1;
+	}
+	private SessionTaxonomyActivity removeUnwantedFields(SessionTaxonomyActivity obj1) {
+		obj1.setSubjectId(null);
+		obj1.setCourseId(null);
+		obj1.setDomainId(null);
+		obj1.setStandardsId(null);
+		obj1.setLearningTargetsId(null);
+		obj1.setTotalAttemptedQuestions(null);
+		return obj1;
+	}
 	private SessionTaxonomyActivity removeUnwantedFields(SessionTaxonomyActivity obj1, String depthLevel) {
 		
 		obj1.setScore(obj1.getScore()/obj1.getTotalAttemptedQuestions());
