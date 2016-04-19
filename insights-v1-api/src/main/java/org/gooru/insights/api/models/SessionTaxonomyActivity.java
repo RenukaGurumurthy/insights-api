@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.gooru.insights.api.constants.ApiConstants;
 
-public class SessionTaxonomyActivity {
+public class SessionTaxonomyActivity implements Cloneable {
 
 	private String sessionId;
 	
@@ -55,7 +55,10 @@ public class SessionTaxonomyActivity {
 	
 	private Long totalAttemptedQuestions;
 	
-
+	public Object clone()throws CloneNotSupportedException{  
+		return super.clone();  	
+	}  
+	
 	public Long getTotalAttemptedQuestions() {
 		return totalAttemptedQuestions;
 	}
@@ -217,7 +220,6 @@ public class SessionTaxonomyActivity {
 		this.questionId = obj.getQuestionId();
 		this.answerStatus = obj.getAnswerStatus();
 		this.reaction = obj.getReaction();
-		this.learningTargetsId = obj.getLearningTargetsId();
 	}
 	
 	public static String getGroupByField(SessionTaxonomyActivity obj1, String levelType) {
