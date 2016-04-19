@@ -249,7 +249,7 @@ public class ClassController extends BaseController {
 	}
 
 	@RequestMapping(value = "/user/{userUid}/resource/usage", method = RequestMethod.POST)
-	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+//	@AuthorizeOperations(operations =InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	public DeferredResult<ResponseParamDTO<SessionTaxonomyActivity>> getResourceUsage(HttpServletRequest request, 
 			@PathVariable(value = "userUid") String userUid,
 			@RequestBody String resourceIds,HttpServletResponse response) throws Exception {
@@ -268,7 +268,7 @@ public class ClassController extends BaseController {
 	}
 
 	@RequestMapping(value="/session/{sessionId}/taxonomy/usage",method ={ RequestMethod.GET,RequestMethod.POST})
-	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+//	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public DeferredResult<ResponseParamDTO<SessionTaxonomyActivity>> getSessionTaxonomyActivity(HttpServletRequest request, 
 			@PathVariable(value="sessionId") String sessionId,

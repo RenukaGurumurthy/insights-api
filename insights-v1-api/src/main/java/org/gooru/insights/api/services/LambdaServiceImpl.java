@@ -1,7 +1,7 @@
 package org.gooru.insights.api.services;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -137,11 +137,34 @@ public class LambdaServiceImpl implements LambdaService{
 	@Override
 	public List<SessionTaxonomyActivity> aggregateSessionTaxonomyActivity(List<SessionTaxonomyActivity> sessionTaxonomyActivity, String levelType) {
 		
-		Map<String, List<SessionTaxonomyActivity>> groupedData = sessionTaxonomyActivity.parallelStream().collect(Collectors.groupingBy(object -> SessionTaxonomyActivity.getGroupByField(object, levelType)));
-		List<SessionTaxonomyActivity> sessionTaxonomyActivityMetrics = groupedData.entrySet().parallelStream().map( data -> data.getValue().stream().reduce((obj1,obj2) -> getSessionTaxonomyActivity(obj1, obj2)).map(obj1 -> { removeUnwantedFields(obj1, levelType);obj1.setQuestions(data.getValue()); return obj1; }).get()).collect(Collectors.toList());
-		return sessionTaxonomyActivityMetrics;
+		List<SessionTaxonomyActivity> resultSet = new ArrayList<SessionTaxonomyActivity>();
+		
+		Map<Object, Map<Object, List<SessionTaxonomyActivity>>> groupedData = sessionTaxonomyActivity.parallelStream().collect(Collectors.groupingBy(object -> object.getStandardsId(),Collectors.groupingBy(object -> object.getLearningTargetsId())));
+		
+		List<List<SessionTaxonomyActivity>>  standardsObj = groupedData.entrySet().parallelStream().map(data -> aggregateLearningTargetsObj(data.getValue())).collect(Collectors.toList());		
+		
+		standardsObj.forEach(o -> resultSet.addAll(o));
+		
+		return resultSet;
 	}
 	
+	private List<SessionTaxonomyActivity> aggregateLearningTargetsObj(Map<Object, List<SessionTaxonomyActivity>> obj){
+			return obj.entrySet().parallelStream().map(ob -> generateStandardsMetrics(ob.getValue())).collect(Collectors.toList());
+	}
+	
+	private SessionTaxonomyActivity generateStandardsMetrics(List<SessionTaxonomyActivity> obj){
+		SessionTaxonomyActivity standardsObj = obj.parallelStream().map(o -> generateQuestionObj(o)).reduce((o1,o2) -> getSessionTaxonomyActivity(o1, o2)).map(ob -> removeUnwantedFields(ob, ApiConstants.DOMAIN)).get();
+		standardsObj.setQuestions(obj);
+		return standardsObj;
+	}
+	private SessionTaxonomyActivity generateQuestionObj(SessionTaxonomyActivity sessionTaxonomyActivity){
+		try {
+			return (SessionTaxonomyActivity) sessionTaxonomyActivity.clone();
+		} catch (CloneNotSupportedException e) {
+			LOG.error("Error while cloning SessionTaxonomyActivity {}", e);
+		}
+		return null;
+	}
 	@Override
 	public List<SessionTaxonomyActivity> aggregateSessionTaxonomyActivityByGooruOid(List<SessionTaxonomyActivity> sessionTaxonomyActivity) {
 
@@ -165,19 +188,12 @@ public class LambdaServiceImpl implements LambdaService{
 	}
 	
 	private SessionTaxonomyActivity getSessionTaxonomyActivity(SessionTaxonomyActivity obj1, SessionTaxonomyActivity obj2) {
-		
-		SessionTaxonomyActivity data = new SessionTaxonomyActivity();
-		data.setScore(obj1.getScore()+ obj2.getScore());
-		data.setAttempts(obj1.getAttempts() + obj2.getAttempts());
-		data.setTimespent(obj1.getTimespent() + obj2.getTimespent());
-		data.setReaction(obj1.getReaction() + obj2.getReaction());
-		data.setTotalAttemptedQuestions(obj1.getTotalAttemptedQuestions() + obj2.getTotalAttemptedQuestions());
-		data.setSubjectId(obj1.getSubjectId());
-		data.setCourseId(obj1.getCourseId());
-		data.setDomainId(obj1.getDomainId());
-		data.setStandardsId(obj1.getStandardsId());
-		data.setLearningTargetsId(obj1.getLearningTargetsId());
-		return data;
+		obj1.setScore(obj1.getScore()+ obj2.getScore());
+		obj1.setAttempts(obj1.getAttempts() + obj2.getAttempts());
+		obj1.setTimespent(obj1.getTimespent() + obj2.getTimespent());
+		obj1.setReaction(obj1.getReaction() + obj2.getReaction());
+		obj1.setTotalAttemptedQuestions(obj1.getTotalAttemptedQuestions() + obj2.getTotalAttemptedQuestions());
+		return obj1;
 	}
 	
 	private SessionTaxonomyActivity getSessionTaxonomyActivityByTax(SessionTaxonomyActivity obj1,
@@ -220,7 +236,6 @@ public class LambdaServiceImpl implements LambdaService{
 			obj1.setSubjectId(null);
 			obj1.setCourseId(null);
 			obj1.setDomainId(null);
-			obj1.setLearningTargetsId(null);
 			break;
 		case ApiConstants.STANDARDS:
 			obj1.setSubjectId(null);
