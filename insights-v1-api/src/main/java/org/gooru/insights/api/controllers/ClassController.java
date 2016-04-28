@@ -109,9 +109,9 @@ public class ClassController extends BaseController {
 	@ResponseBody
 	public DeferredResult<ResponseParamDTO<Map<String, Object>>> getSummaryData(HttpServletRequest request, 
 			@PathVariable(value="collectionType") String collectionType, @PathVariable(value="userUid") String userUid, 
-			@RequestParam(value="sessionId", required = false) String sessionId, @RequestParam(value="classGooruId", required = false) String classGooruId,
-			@RequestParam(value="courseGooruId", required = false) String courseGooruId, @RequestParam(value="unitGooruId", required = false) String unitGooruId, 
-			@RequestParam(value="lessonGooruId", required = false) String lessonGooruId, @PathVariable(value="contentGooruId") String contentGooruId,
+			@RequestParam(value="sessionId", required = false,defaultValue = "NA") String sessionId, @RequestParam(value="classGooruId", required = false,defaultValue = "NA") String classGooruId,
+			@RequestParam(value="courseGooruId", required = false,defaultValue = "NA") String courseGooruId, @RequestParam(value="unitGooruId", required = false,defaultValue = "NA") String unitGooruId, 
+			@RequestParam(value="lessonGooruId", required = false,defaultValue = "NA") String lessonGooruId, @PathVariable(value="contentGooruId") String contentGooruId,
 			HttpServletResponse response) throws Exception {
 		setAllowOrigin(response);
 		return getDeferredResult(getClassService().getSummaryData(classGooruId, courseGooruId, unitGooruId, lessonGooruId, contentGooruId, sessionId, userUid, collectionType));
