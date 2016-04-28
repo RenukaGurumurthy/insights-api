@@ -276,7 +276,13 @@ public class ClassServiceImpl implements ClassService {
 		List<Map<String,Object>> sessionActivities = new ArrayList<Map<String,Object>>();
 		List<Map<String, Object>> summaryData = new ArrayList<Map<String, Object>>();
 		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		String sessionKey = getSession(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid, collectionType, false);
+		String sessionKey = null;
+		if (collectionType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) {
+			sessionKey = getSession(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid,
+					collectionType, false);
+		}else if(collectionType.equalsIgnoreCase(ApiConstants.COLLECTION)){
+			sessionKey = ServiceUtils.appendTilda("AS",classId,assessmentId,userUid);
+		}
 		if (StringUtils.isNotBlank(sessionKey)) {
 			//Fetch Usage Data
 			getResourceMetricsBySession(sessionActivities, sessionKey, usageData);		
@@ -286,17 +292,23 @@ public class ClassServiceImpl implements ClassService {
 		return responseParamDTO;
 	}
 	
-	private String getSession(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid, String collectionType, boolean openSession) throws Exception {
-		if (StringUtils.isNotBlank(sessionId)) {
+	private String getSession(String classId, String courseId, String unitId, String lessonId, String assessmentId,
+			String sessionId, String userUid, String collectionType, boolean openSession) throws Exception {
+		if (StringUtils.isNotBlank(sessionId) && !ApiConstants.NA.equalsIgnoreCase(sessionId)) {
 			return sessionId;
-		} else if (StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) 
-				&& StringUtils.isNotBlank(unitId) && StringUtils.isNotBlank(lessonId)) {
-			ResponseParamDTO<Map<String, Object>> sessionObject = fetchUserSessions(classId, courseId, unitId,lessonId, assessmentId, collectionType, userUid, openSession);
-			List<Map<String,Object>> sessionList = sessionObject.getContent();
-			return  sessionList.size() > 0 ? sessionList.get(sessionList.size()-1).get(ApiConstants.SESSIONID).toString() : null;
+		} else if (StringUtils.isNotBlank(classId) && StringUtils.isNotBlank(courseId) && StringUtils.isNotBlank(unitId)
+				&& StringUtils.isNotBlank(lessonId) && !ApiConstants.NA.equalsIgnoreCase(classId)
+				&& !ApiConstants.NA.equalsIgnoreCase(courseId) && !ApiConstants.NA.equalsIgnoreCase(unitId)
+				&& !ApiConstants.NA.equalsIgnoreCase(lessonId)) {
+			ResponseParamDTO<Map<String, Object>> sessionObject = fetchUserSessions(classId, courseId, unitId, lessonId,
+					assessmentId, collectionType, userUid, openSession);
+			List<Map<String, Object>> sessionList = sessionObject.getContent();
+			return sessionList.size() > 0
+					? sessionList.get(sessionList.size() - 1).get(ApiConstants.SESSIONID).toString() : null;
 		} else {
-			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111, ServiceUtils.appendComma("CUL Heirarchy", ApiConstants.SESSIONID)
-					, ServiceUtils.appendComma("CUL Heirarchy", ApiConstants.SESSIONID));
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E111,
+					ServiceUtils.appendComma("CUL Heirarchy", ApiConstants.SESSIONID),
+					ServiceUtils.appendComma("CUL Heirarchy", ApiConstants.SESSIONID));
 		}
 		return null;
 	}
