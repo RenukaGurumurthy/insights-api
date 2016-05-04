@@ -212,6 +212,10 @@ public class LambdaServiceImpl implements LambdaService{
 		obj1.setDomainId(null);
 		obj1.setStandardsId(null);
 		obj1.setLearningTargetsId(null);
+		obj1.setSubjectIds(null);
+		obj1.setCourseIds(null);
+		obj1.setDomainIds(null);
+		obj1.setLearningTargetsIds(null);
 		obj1.setTotalAttemptedQuestions(null);
 		return obj1;
 	}
