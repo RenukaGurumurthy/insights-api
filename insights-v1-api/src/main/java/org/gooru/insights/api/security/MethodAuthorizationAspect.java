@@ -55,30 +55,30 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 
-
 @Aspect
 public class MethodAuthorizationAspect extends OperationAuthorizer {
 
 	@Autowired
 	private RedisService redisService;
-			
+
 	@Autowired
 	private CassandraService cassandraService;
-	
+
 	private Map<String, String> entityOperationsRole = new HashMap<String, String>();
-	
+
 	private static final String GOORU_PREFIX = "authenticate_";
-		
+
 	private static final Logger LOG = LoggerFactory.getLogger(MethodAuthorizationAspect.class);
 
-	
 	@PostConstruct
-	private void init(){
-		 entityOperationsRole.put(ApiConstants.REPORT + ApiConstants.TILDA + ApiConstants.VIEW, "ROLE_GOORU_ADMIN,superadmin,Organization_Admin,Content_Admin,User,user");
+	private void init() {
+		entityOperationsRole.put(ApiConstants.REPORT + ApiConstants.TILDA + ApiConstants.VIEW,
+				"ROLE_GOORU_ADMIN,superadmin,Organization_Admin,Content_Admin,User,user");
 	}
-	
+
 	@Around("accessCheckPointcut() && @annotation(authorizeOperations) && @annotation(requestMapping)")
-	public Object operationsAuthorization(ProceedingJoinPoint pjp, AuthorizeOperations authorizeOperations, RequestMapping requestMapping) throws Throwable {
+	public Object operationsAuthorization(ProceedingJoinPoint pjp, AuthorizeOperations authorizeOperations,
+			RequestMapping requestMapping) throws Throwable {
 		// Check method access
 		boolean permitted = hasRedisOperations(authorizeOperations, pjp);
 		if (permitted) {
@@ -91,17 +91,14 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	@Pointcut("execution(* org.gooru.insights.api.controllers.*.*(..))")
 	public void accessCheckPointcut() {
 	}
-	
-	
-	private boolean hasRedisOperations(
-			AuthorizeOperations authorizeOperations, ProceedingJoinPoint pjp) {
+
+	private boolean hasRedisOperations(AuthorizeOperations authorizeOperations, ProceedingJoinPoint pjp) {
 
 		HttpServletRequest request = null;
 		HttpSession session = null;
 		String sessionToken = null;
 		if (RequestContextHolder.getRequestAttributes() != null) {
-			request = ((ServletRequestAttributes) RequestContextHolder
-					.getRequestAttributes()).getRequest();
+			request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 			session = request.getSession(true);
 			sessionToken = RequestUtils.getSessionToken(request);
 			RequestUtils.logRequest(request);
@@ -117,22 +114,22 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 				JSONObject jsonObject = new JSONObject(result);
 				return isValidUser(jsonObject, request);
 			} catch (Exception e) {
-				InsightsLogger.error("Exception from redis:"+sessionToken, e);
+				InsightsLogger.error("Exception from redis:" + sessionToken, e);
 				return false;
 			}
 		} else {
 			throw new AccessDeniedException("sessionToken can not be NULL!");
 		}
 	}
-	
-	
+
 	private boolean isValidUser(JSONObject jsonObject, HttpServletRequest request) {
 		try {
 			String userUidFromSession = jsonObject.getString(ApiConstants._USER_ID);
 			String userIdFromRequest = RequestUtils.getUserIdFromRequestParam(request);
 			String classId = RequestUtils.getClassIdFromRequestParam(request);
 			String sessionId = RequestUtils.getClassIdFromRequestParam(request);
-			if (StringUtils.isBlank(classId) || StringUtils.isBlank(userIdFromRequest) || StringUtils.isBlank(sessionId)) {
+			if (StringUtils.isBlank(classId) || StringUtils.isBlank(userIdFromRequest)
+					|| StringUtils.isBlank(sessionId)) {
 				String pathInfo = request.getPathInfo();
 				int i = 0;
 				String[] path = pathInfo.split("/");
@@ -149,17 +146,20 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 					i++;
 				}
 			}
-			LOG.info("userUidFromSession : {} - userIdFromRequest {} - classId : {} - sessionId : {} ",userUidFromSession,userIdFromRequest,classId,sessionId);
+			LOG.info("userUidFromSession : {} - userIdFromRequest {} - classId : {} - sessionId : {} ",
+					userUidFromSession, userIdFromRequest, classId, sessionId);
 			if (StringUtils.isBlank(userIdFromRequest) && "ANONYMOUS".equalsIgnoreCase(userUidFromSession)) {
 				InsightsLogger.info("ANONYMOUS user can't be a teacher class creator");
 				return false;
-			} else if (StringUtils.isNotBlank(userIdFromRequest) && userIdFromRequest.equalsIgnoreCase(userUidFromSession)) {
+			} else if (StringUtils.isNotBlank(userIdFromRequest)
+					&& userIdFromRequest.equalsIgnoreCase(userUidFromSession)) {
 				return true;
 			} else if (StringUtils.isNotBlank(classId)) {
 				return isAuthorizedUser(classId, userUidFromSession);
-			}else if(StringUtils.isNotBlank(sessionId)){
-				
-			}else{
+			} else if (StringUtils.isNotBlank(sessionId)) {
+				return isAuthorizedUserSession(sessionId, userUidFromSession);
+			} else {
+				LOG.info("Please doucle check if we meet all the security check");
 				return true;
 			}
 
@@ -171,37 +171,40 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 
 	private boolean isAuthorizedUser(String classGooruId, String userUidFromSession) {
 		if (StringUtils.isNotBlank(classGooruId)) {
-			ResultSet authorizedUsers =  cassandraService.getAuthorizedUsers(classGooruId);
-			if(authorizedUsers == null || authorizedUsers.one() == null){
+			ResultSet authorizedUsers = cassandraService.getAuthorizedUsers(classGooruId);
+			if (authorizedUsers == null || authorizedUsers.one() == null) {
 				LOG.error("API consumer is not a teacher or collaborator...");
 				return false;
 			}
 			String creatorUid = authorizedUsers.one().getString(ApiConstants._CREATOR_UID);
-			if(creatorUid != null && userUidFromSession.equalsIgnoreCase(creatorUid)){
+			if (creatorUid != null && userUidFromSession.equalsIgnoreCase(creatorUid)) {
 				return true;
 			}
-			 Set<Set> collaborators = authorizedUsers.one().getSet(ApiConstants.COLLABORATORS, Set.class);
-			if(collaborators != null && collaborators.contains(userUidFromSession)){
+			Set<Set> collaborators = authorizedUsers.one().getSet(ApiConstants.COLLABORATORS, Set.class);
+			if (collaborators != null && collaborators.contains(userUidFromSession)) {
 				return true;
 			}
 		}
-		//It should return false here. Re-look at this value once event sync implementation completed
+		// It should return false here. Re-look at this value once event sync
+		// implementation completed
 		return true;
 	}
+
 	private boolean isAuthorizedUserSession(String sessionId, String userUidFromSession) {
 		if (StringUtils.isNotBlank(sessionId)) {
-			ResultSet userSessions =  cassandraService.getSesstionIdsByUserId(userUidFromSession);
+			ResultSet userSessions = cassandraService.getSesstionIdsByUserId(userUidFromSession);
 			List<String> sessionIds = new ArrayList<String>();
-			for(Row sessionRow : userSessions){
+			for (Row sessionRow : userSessions) {
 				sessionIds.add(sessionRow.getString(ApiConstants._SESSION_ID));
 			}
-			if(sessionIds.contains(userUidFromSession)){
+			if (sessionIds.contains(sessionId)) {
 				return true;
-			}else{
+			} else {
 				return false;
 			}
 		}
-		//It should return false here. Re-look at this value once event sync implementation completed
-				return true;
+		// It should return false here. Re-look at this value once event sync
+		// implementation completed
+		return true;
 	}
 }
