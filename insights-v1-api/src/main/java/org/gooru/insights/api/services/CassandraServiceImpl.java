@@ -148,4 +148,8 @@ public class CassandraServiceImpl implements CassandraService{
 	public ResultSet getEvent(String eventId) {
 		return cqlDAO.getEvent(eventId);
 	}
+	@Override
+	public ResultSet getSesstionIdsByUserId(String userUid) {
+		return cqlDAO.getSesstionIdsByUserId(userUid);
+	}
 }

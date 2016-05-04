@@ -65,5 +65,7 @@ public class RequestUtils {
 	public static String getClassIdFromRequestParam(HttpServletRequest request) {
 		return request.getParameter(ApiConstants.CLASS_GOORU_ID);
 	}
-
+	public static String getSessionIdFromRequestParam(HttpServletRequest request) {
+		return request.getParameter(ApiConstants.SESSIONID);
+	}
 }

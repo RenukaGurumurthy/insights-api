@@ -23,7 +23,9 @@
  ******************************************************************************/
 package org.gooru.insights.api.security;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,6 +53,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
 
 
 @Aspect
@@ -128,7 +131,8 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			String userUidFromSession = jsonObject.getString(ApiConstants._USER_ID);
 			String userIdFromRequest = RequestUtils.getUserIdFromRequestParam(request);
 			String classId = RequestUtils.getClassIdFromRequestParam(request);
-			if (StringUtils.isBlank(classId) || StringUtils.isBlank(userIdFromRequest)) {
+			String sessionId = RequestUtils.getClassIdFromRequestParam(request);
+			if (StringUtils.isBlank(classId) || StringUtils.isBlank(userIdFromRequest) || StringUtils.isBlank(sessionId)) {
 				String pathInfo = request.getPathInfo();
 				int i = 0;
 				String[] path = pathInfo.split("/");
@@ -139,10 +143,13 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 					if (pathVar.equalsIgnoreCase("class")) {
 						classId = path[(i + 1)];
 					}
+					if (pathVar.equalsIgnoreCase("session")) {
+						sessionId = path[(i + 1)];
+					}
 					i++;
 				}
 			}
-			LOG.info("userUidFromSession : {} - userIdFromRequest {} - classId : {}",userUidFromSession,userIdFromRequest,classId);
+			LOG.info("userUidFromSession : {} - userIdFromRequest {} - classId : {} - sessionId : {} ",userUidFromSession,userIdFromRequest,classId,sessionId);
 			if (StringUtils.isBlank(userIdFromRequest) && "ANONYMOUS".equalsIgnoreCase(userUidFromSession)) {
 				InsightsLogger.info("ANONYMOUS user can't be a teacher class creator");
 				return false;
@@ -150,6 +157,10 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 				return true;
 			} else if (StringUtils.isNotBlank(classId)) {
 				return isAuthorizedUser(classId, userUidFromSession);
+			}else if(StringUtils.isNotBlank(sessionId)){
+				
+			}else{
+				return true;
 			}
 
 		} catch (Exception e) {
@@ -177,5 +188,20 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 		//It should return false here. Re-look at this value once event sync implementation completed
 		return true;
 	}
-
+	private boolean isAuthorizedUserSession(String sessionId, String userUidFromSession) {
+		if (StringUtils.isNotBlank(sessionId)) {
+			ResultSet userSessions =  cassandraService.getSesstionIdsByUserId(userUidFromSession);
+			List<String> sessionIds = new ArrayList<String>();
+			for(Row sessionRow : userSessions){
+				sessionIds.add(sessionRow.getString(ApiConstants._SESSION_ID));
+			}
+			if(sessionIds.contains(userUidFromSession)){
+				return true;
+			}else{
+				return false;
+			}
+		}
+		//It should return false here. Re-look at this value once event sync implementation completed
+				return true;
+	}
 }

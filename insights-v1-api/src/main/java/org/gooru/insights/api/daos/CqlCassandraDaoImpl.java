@@ -407,6 +407,21 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		return result;
 	}
 	
+	@Override
+	public ResultSet getSesstionIdsByUserId(String userUid) {
+		ResultSet result = null;
+		try {
+			Statement select = QueryBuilder.select().column(ApiConstants._SESSION_ID)
+					.from(getLogKeyspaceName(), ColumnFamilySet.USER_SESSIONS.getColumnFamily())
+					.where(QueryBuilder.eq(ApiConstants._USER_UID, userUid))
+					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
+			result = resultSetFuture.get();
+		} catch (Exception e) {
+			LOG.error("Exception:", e);
+		}
+		return result;
+	}
 		public ResultSet getTaxonomyItemCount(Set<String> ids) {
 			ResultSet result = null;
 			try {
