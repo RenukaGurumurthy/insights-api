@@ -178,10 +178,10 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 				return false;
 			}
 			String creatorUid = null;
-			Set<Set> collaborators = null;
+			Set<String> collaborators = null;
 			for(Row user : authorizedUsers){
 				creatorUid = user.getString(ApiConstants._CREATOR_UID);
-				collaborators = user.getSet(ApiConstants.COLLABORATORS, Set.class);
+				collaborators = user.getSet(ApiConstants.COLLABORATORS, String.class);
 			}
 			if (creatorUid != null && userUidFromSession.equalsIgnoreCase(creatorUid)) {
 				return true;
