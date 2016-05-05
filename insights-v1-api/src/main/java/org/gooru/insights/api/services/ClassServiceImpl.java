@@ -946,15 +946,25 @@ public class ClassServiceImpl implements ClassService {
 	public long getCulCollectionCount(String classId, String leafNodeId,
 			String collectionType) {
 		long totalCount = 0L;
-		String columnName = ApiConstants.COLLECTION.equals(collectionType) ? ApiConstants._COLLECTION_COUNT
-				: ApiConstants._ASSESSMENT_COUNT;
-		ResultSet columnList = cassandraService.getClassCollectionCount(
-				classId, leafNodeId);
+		long collectionCount = 0L;
+		long externalAssCount = 0L;
+		long assessmentCount = 0L;
+		ResultSet columnList = cassandraService.getClassCollectionCount(classId, leafNodeId);
 		if (columnList != null) {
 			for (Row columns : columnList) {
-				totalCount = columns.getLong(columnName);
+				String contentType = columns.getString("content_type");
+				long count = columns.getLong("total_count");
+				if (contentType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
+					collectionCount = count;
+				} else if (contentType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) {
+					assessmentCount = count;
+				} else {
+					externalAssCount = count;
+				}
 			}
 		}
+		totalCount = ApiConstants.COLLECTION.equals(collectionType) ? collectionCount
+				: (assessmentCount + externalAssCount);
 		return totalCount;
 	}
 	
