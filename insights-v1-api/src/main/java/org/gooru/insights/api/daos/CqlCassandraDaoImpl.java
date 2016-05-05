@@ -379,7 +379,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 		ResultSet result = null;
 		try {
 			Statement select = QueryBuilder.select().all()
-					.from(getLogKeyspaceName(), ColumnFamilySet.CLASS_COLLECTION_COUNT.getColumnFamily())
+					.from(getLogKeyspaceName(), ColumnFamilySet.CLASS_CONTENT_COUNT.getColumnFamily())
 					.where(QueryBuilder.eq(ApiConstants._CLASS_UID, classUid))
 					.and(QueryBuilder.eq(ApiConstants._COLLECTION_UID, collectionUid))
 					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
