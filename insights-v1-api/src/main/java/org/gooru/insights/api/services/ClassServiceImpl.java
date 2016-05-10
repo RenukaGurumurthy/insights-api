@@ -363,10 +363,11 @@ public class ClassServiceImpl implements ClassService {
 				studentsClassActivity.setCollectionType(classActivityRow.getString(ApiConstants._COLLECTION_TYPE));
 				studentsClassActivity.setScore(classActivityRow.getLong(ApiConstants.SCORE));
 				studentsClassActivity.setReaction(classActivityRow.getLong(ApiConstants.REACTION));
-				studentsClassActivity.setCollectionId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
 				if (ApiConstants.COLLECTION.equals(collectionType)) {
+					studentsClassActivity.setCollectionId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
 					studentsClassActivity.setViews(classActivityRow.getLong(ApiConstants.VIEWS));
 				} else {
+					studentsClassActivity.setAssessmentId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
 					studentsClassActivity.setAttempts(classActivityRow.getLong(ApiConstants.VIEWS));
 				}
 				studentsClassActivity.setTimeSpent(classActivityRow.getLong(ApiConstants._TIME_SPENT));

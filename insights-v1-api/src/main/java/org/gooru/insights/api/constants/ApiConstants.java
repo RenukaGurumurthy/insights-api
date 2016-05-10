@@ -349,6 +349,7 @@ public class ApiConstants {
 	
 	public static final String _EVENT_TYPE = "event_type";
 	public static final String _COLLECTION_UID = "collection_uid";
+	public static final String _CONTENT_UID = "content_uid";
 	public static final String _USER_UID = "user_uid";
 	public static final String _CLASS_UID = "class_uid";
 	public static final String _COURSE_UID = "course_uid";

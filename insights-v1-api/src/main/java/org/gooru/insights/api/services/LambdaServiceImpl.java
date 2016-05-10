@@ -83,13 +83,14 @@ public class LambdaServiceImpl implements LambdaService{
 	private StudentsClassActivity getStudentsClassActivity(StudentsClassActivity object1, StudentsClassActivity object2,
 			String level) {
 		StudentsClassActivity studentsClassActivity = object1;
-		studentsClassActivity.setCollectionId(object1.getCollectionId());
 		studentsClassActivity.setCollectionType(object1.getCollectionType());
 		studentsClassActivity.setScore(sum(object1.getScore(), object2.getScore()));
 		studentsClassActivity.setReaction(sum(object1.getReaction(), object2.getReaction()));
 		if (ApiConstants.COLLECTION.equals(object1.getCollectionType())) {			
+			studentsClassActivity.setCollectionId(object1.getCollectionId());
 			studentsClassActivity.setViews(sum(object1.getViews(), object2.getViews()));
 		}else{
+			studentsClassActivity.setAssessmentId(object1.getAssessmentId());
 			studentsClassActivity.setAttempts(sum(object1.getAttempts(), object2.getAttempts()));
 		}
 		studentsClassActivity.setTimeSpent(sum(object1.getTimeSpent(), object2.getTimeSpent()));
@@ -111,8 +112,9 @@ public class LambdaServiceImpl implements LambdaService{
 				object1.setLessonId(null);
 				object1.setUnitId(null);
 				if(ApiConstants.ASSESSMENT.equalsIgnoreCase(collectionType)) {
-					object1.setAssessmentId(object1.getCollectionId());
 					object1.setCollectionId(null);
+				}else{
+					object1.setAssessmentId(null);
 				}
 				break;
 				

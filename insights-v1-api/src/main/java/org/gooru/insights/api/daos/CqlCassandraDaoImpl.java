@@ -381,7 +381,7 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 			Statement select = QueryBuilder.select().all()
 					.from(getLogKeyspaceName(), ColumnFamilySet.CLASS_CONTENT_COUNT.getColumnFamily())
 					.where(QueryBuilder.eq(ApiConstants._CLASS_UID, classUid))
-					.and(QueryBuilder.eq(ApiConstants._COLLECTION_UID, collectionUid))
+					.and(QueryBuilder.eq(ApiConstants._CONTENT_UID, collectionUid))
 					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
 			result = resultSetFuture.get();
