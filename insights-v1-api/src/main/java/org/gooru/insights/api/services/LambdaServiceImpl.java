@@ -87,7 +87,11 @@ public class LambdaServiceImpl implements LambdaService{
 		studentsClassActivity.setCollectionType(object1.getCollectionType());
 		studentsClassActivity.setScore(sum(object1.getScore(), object2.getScore()));
 		studentsClassActivity.setReaction(sum(object1.getReaction(), object2.getReaction()));
-		studentsClassActivity.setViews(sum(object1.getViews(), object2.getViews()));
+		if (ApiConstants.COLLECTION.equals(object1.getCollectionType())) {			
+			studentsClassActivity.setViews(sum(object1.getViews(), object2.getViews()));
+		}else{
+			studentsClassActivity.setAttempts(sum(object1.getAttempts(), object2.getAttempts()));
+		}
 		studentsClassActivity.setTimeSpent(sum(object1.getTimeSpent(), object2.getTimeSpent()));
 		studentsClassActivity.setCompletedCount(1L);
 		return studentsClassActivity;
