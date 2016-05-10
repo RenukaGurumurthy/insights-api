@@ -376,7 +376,7 @@ public class ClassServiceImpl implements ClassService {
 				classActivityResultSetList.add(studentsClassActivity);
 			}
 			List<StudentsClassActivity> filteredList = lambdaService
-					.applyFiltersInStudentsClassActivity(classActivityResultSetList, collectionType);
+					.applyFiltersInStudentsClassActivity(classActivityResultSetList, collectionType,userUid);
 			List<Map<String, List<StudentsClassActivity>>> aggregatedList = lambdaService
 					.aggregateStudentsClassActivityData(filteredList, collectionType, nextLevelType);
 			List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();

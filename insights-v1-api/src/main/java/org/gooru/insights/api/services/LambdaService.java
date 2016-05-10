@@ -13,12 +13,12 @@ public interface LambdaService {
 
 	List<Map<String, List<StudentsClassActivity>>> aggregateStudentsClassActivityData(List<StudentsClassActivity> resultList,
 			String collectionType, String aggregateLevel);
-
-	List<StudentsClassActivity> applyFiltersInStudentsClassActivity(List<StudentsClassActivity> resultList,
-			String collectionType);
 	
 	List<SessionTaxonomyActivity> aggregateSessionTaxonomyActivity(List<SessionTaxonomyActivity> sessionTaxonomyActivity, String levelType);
 
 	List<SessionTaxonomyActivity> aggregateSessionTaxonomyActivityByGooruOid(
 			List<SessionTaxonomyActivity> sessionTaxonomyActivity);
+
+	List<StudentsClassActivity> applyFiltersInStudentsClassActivity(List<StudentsClassActivity> resultList,
+			String collectionType, String userUid);
 }

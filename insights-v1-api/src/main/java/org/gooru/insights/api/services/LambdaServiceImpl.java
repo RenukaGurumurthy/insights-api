@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.models.ContentTaxonomyActivity;
 import org.gooru.insights.api.models.SessionTaxonomyActivity;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
+@SuppressWarnings({ "unused", "unused" })
 @Component
 public class LambdaServiceImpl implements LambdaService{
 
@@ -49,11 +51,22 @@ public class LambdaServiceImpl implements LambdaService{
 	}
 	
 	@Override
-	public List<StudentsClassActivity> applyFiltersInStudentsClassActivity(List<StudentsClassActivity> resultList,  String collectionType) {
-		String collectionTypeDuplicate = collectionType.equalsIgnoreCase("both") ? "collection|assessment" : collectionType;
-		List<StudentsClassActivity> filteredList = resultList.stream()
-				.filter(object -> object.getCollectionType().matches(collectionType))
-				.collect(Collectors.toList());
+	public List<StudentsClassActivity> applyFiltersInStudentsClassActivity(List<StudentsClassActivity> resultList,
+			String collectionType, String userUid) {
+		List<StudentsClassActivity> filteredList = null;
+		if (!collectionType.equalsIgnoreCase("both") && StringUtils.isNotBlank(userUid)) {
+			filteredList = resultList.stream().filter(object -> object.getCollectionType().matches(collectionType) && object.getUserUid().equalsIgnoreCase(userUid))
+					.collect(Collectors.toList());
+		}else if (collectionType.equalsIgnoreCase("both") && StringUtils.isNotBlank(userUid)) {
+			filteredList = resultList.stream().filter(object -> object.getUserUid().equalsIgnoreCase(userUid))
+					.collect(Collectors.toList());
+		}else if(!collectionType.equalsIgnoreCase("both") && StringUtils.isBlank(userUid)){
+			filteredList = resultList.stream().filter(object -> object.getCollectionType().matches(collectionType))
+					.collect(Collectors.toList());
+		}else{
+			filteredList = resultList;
+		}
+
 		return filteredList;
 	}
 	
