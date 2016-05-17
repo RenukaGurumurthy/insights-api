@@ -66,8 +66,6 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 
 	private Map<String, String> entityOperationsRole = new HashMap<String, String>();
 
-	private static final String GOORU_PREFIX = "authenticate_";
-
 	private static final Logger LOG = LoggerFactory.getLogger(MethodAuthorizationAspect.class);
 
 	@PostConstruct
@@ -128,6 +126,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			String userIdFromRequest = RequestUtils.getUserIdFromRequestParam(request);
 			String classId = RequestUtils.getClassIdFromRequestParam(request);
 			String sessionId = RequestUtils.getClassIdFromRequestParam(request);
+			boolean isStressApi = false;
 			if (StringUtils.isBlank(classId) || StringUtils.isBlank(userIdFromRequest)
 					|| StringUtils.isBlank(sessionId)) {
 				String pathInfo = request.getPathInfo();
@@ -142,6 +141,9 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 					}
 					if (pathVar.equalsIgnoreCase("session")) {
 						sessionId = path[(i + 1)];
+					}
+					if (pathVar.equalsIgnoreCase("activity")) {
+						isStressApi = true;
 					}
 					i++;
 				}
@@ -158,9 +160,11 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 				return isAuthorizedUser(classId, userUidFromSession);
 			} else if (StringUtils.isNotBlank(sessionId)) {
 				return isAuthorizedUserSession(sessionId, userUidFromSession);
-			} else {
-				LOG.info("Please doucle check if we meet all the security check");
+			} else if(isStressApi){
 				return true;
+			}else {
+				LOG.info("Please doucle check if we meet all the security check");
+				return false;
 			}
 
 		} catch (Exception e) {

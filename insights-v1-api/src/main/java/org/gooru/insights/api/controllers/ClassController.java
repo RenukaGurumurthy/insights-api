@@ -277,7 +277,7 @@ public class ClassController extends BaseController {
 		return getDeferredResult(getClassService().getSessionTaxonomyActivity(sessionId, ApiConstants.DOMAIN));
 	}
 	@RequestMapping(value="/activity/{eventId}/info",method ={ RequestMethod.GET,RequestMethod.POST})
-	//@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
+	@AuthorizeOperations(operations =  InsightsOperationConstants.OPERATION_INSIHGHTS_REPORTS_VIEWS)
 	@ResponseBody
 	public DeferredResult<ResponseParamDTO<Map<String,Object>>> getEventToCheck(HttpServletRequest request, 
 			@PathVariable(value="eventId") String eventId,
