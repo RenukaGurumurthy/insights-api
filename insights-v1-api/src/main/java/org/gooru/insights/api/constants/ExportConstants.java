@@ -19,6 +19,8 @@ public class ExportConstants {
 	
 	public static final String ASSESSMENT_TS = "Assessment Timespent";
 	
+	public static final String SCORE_IN_PERCENTAGE = "Score In %";
+	
 	public static final String SCORE = "Score";
 	
 	public static final String STUDNETS_NAME = "Students Name";
@@ -33,12 +35,15 @@ public class ExportConstants {
 	
 	public static final String LAST_NAME = "Last Name";
 	
+	public static final String ANSWER_STATUS = "Answer Status";
 	
 	static {
 		csvHeaders = new HashMap<String, String>();
-		csvHeaders.put("score_in_percentage", SCORE);
+		csvHeaders.put("score_in_percentage", SCORE_IN_PERCENTAGE);
+		csvHeaders.put("score", SCORE);
 		csvHeaders.put("time_spent", TIME_SPENT);
 		csvHeaders.put("views", VIEWS);
+		csvHeaders.put("question_status", ANSWER_STATUS);
 	}
 	public static String csvHeaders(String eventName) {
 		return StringUtils.defaultIfEmpty(csvHeaders.get(eventName), eventName);

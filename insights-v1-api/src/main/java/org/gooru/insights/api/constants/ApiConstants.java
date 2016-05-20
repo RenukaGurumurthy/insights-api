@@ -21,6 +21,8 @@ public class ApiConstants {
 	
 	public static final String AS_TILDA = "AS"+TILDA;
 	
+	public static final String RS = "RS";
+	
 	public static final String QUESTION_MARK = "?";
 	
 	public static final String FORWARD_SLASH = "/";
@@ -66,6 +68,8 @@ public class ApiConstants {
 	public static final String COLUMN1 = "column1";
 
 	public static final  String COLUMNS_TO_EXPORT = "score_in_percentage|time_spent|views";
+	
+	public static final  String RESOURCE_COLUMNS_TO_EXPORT = ".*question_status.*|.*score_in_percentage.*|.*time_spent.*|.*views.*";
 	
 	public static final  String STRING_COLUMNS = ".*collection_type.*";
 	

@@ -1,6 +1,5 @@
 package org.gooru.insights.api.daos;
 
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -641,6 +640,36 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 			Statement select = QueryBuilder.select().all()
 					.from(getLogKeyspaceName(), ColumnFamilySet.COLLECTION_ITEM_ASSOC.getColumnFamily())
 					.where(QueryBuilder.eq(ApiConstants.KEY, contentId))
+					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
+			result = resultSetFuture.get();
+		} catch (Exception e) {
+			LOG.error("Exception:", e);
+		}
+		return result;
+	}
+	@Override
+	public ResultSet getArchievedCollectionRecentSessionId(String rowKey) {
+		ResultSet result = null;
+		try {
+			Statement select = QueryBuilder.select().all()
+					.from(getLogKeyspaceName(), ColumnFamilySet.SESSION.getColumnFamily())
+					.where(QueryBuilder.eq(ApiConstants.KEY, rowKey))
+					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
+			result = resultSetFuture.get();
+		} catch (Exception e) {
+			LOG.error("Exception:", e);
+		}
+		return result;
+	}
+	@Override
+	public ResultSet getArchievedSessionData(String sessionId) {
+		ResultSet result = null;
+		try {
+			Statement select = QueryBuilder.select().all()
+					.from(getLogKeyspaceName(), ColumnFamilySet.SESSION_ACTIVITY.getColumnFamily())
+					.where(QueryBuilder.eq(ApiConstants.KEY, sessionId))
 					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
 			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
 			result = resultSetFuture.get();

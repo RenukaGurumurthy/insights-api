@@ -84,4 +84,8 @@ public interface CqlCassandraDao {
 	ResultSet getArchievedUserDetails(String userId);
 
 	ResultSet getArchievedCollectionItem(String contentId);
+
+	ResultSet getArchievedCollectionRecentSessionId(String rowKey);
+	
+	ResultSet getArchievedSessionData(String sessionId);
 }

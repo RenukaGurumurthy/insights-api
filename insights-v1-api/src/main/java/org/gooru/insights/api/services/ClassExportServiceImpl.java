@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
@@ -34,9 +32,11 @@ public class ClassExportServiceImpl implements ClassExportService {
 
 	protected final Logger LOG = LoggerFactory.getLogger(ClassExportServiceImpl.class);
 
-	public File exportCsv(String classId, String courseId, String unitId, String lessonId, String type, String userId) {
-
+	@Override
+	public File exportCsv(String classId, String courseId, String unitId, String lessonId, String collectionId,
+			String type, String userId) {
 		try {
+
 			List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
 			List<String> classMembersList = getClassMembersList(classId, userId);
 			List<String> collectionItemsList = getCollectionItems(getLeastId(courseId, unitId, lessonId, type));
@@ -46,17 +46,31 @@ public class ClassExportServiceImpl implements ClassExportService {
 				setUserDetails(dataMap, studentId);
 				for (String collectionItemId : collectionItemsList) {
 					String title = getContentTitle(collectionItemId);
-					String usageRowKey = ServiceUtils.appendTilda(classId, courseId, unitId, lessonId, collectionItemId,
-							studentId);
-					setDefaultUsage(title, dataMap);
-					setUsageData(dataMap, title, usageRowKey, ApiConstants.COLLECTION);
-					setUsageData(dataMap, title, usageRowKey, ApiConstants.ASSESSMENT);
+					String usageRowKey = null;
+					if (type.equalsIgnoreCase(ApiConstants.COLLECTION)) {
+						System.out.println("rowKey : "+ServiceUtils.appendTilda(ApiConstants.RS, classId, courseId, unitId,
+								lessonId, collectionId, studentId));
+						usageRowKey = getSessionId(ServiceUtils.appendTilda(ApiConstants.RS, classId, courseId, unitId,
+								lessonId, collectionId, studentId));
+						System.out.println("sessionId : " + usageRowKey);
+						setDefaultResourceUsage(title, dataMap);
+						if(StringUtils.isNotBlank(usageRowKey)){
+							setUsageData(dataMap, title, usageRowKey, null);
+						}
+					} else {
+						usageRowKey = ServiceUtils.appendTilda(classId, courseId, unitId, lessonId, collectionItemId,
+								studentId);
+						setDefaultUsage(title, dataMap);
+						setUsageData(dataMap, title, usageRowKey, ApiConstants.COLLECTION);
+						setUsageData(dataMap, title, usageRowKey, ApiConstants.ASSESSMENT);
+					}
 				}
 				dataList.add(dataMap);
 			}
 
 			return csvFileGenerator.generateCSVReport(true, ServiceUtils.appendHyphen(type, ApiConstants.DATA),
 					dataList);
+
 		} catch (Exception e) {
 			LOG.error("Exception while generating CSV", e);
 		}
@@ -121,21 +135,41 @@ public class ClassExportServiceImpl implements ClassExportService {
 		return title;
 	}
 
+	private String getSessionId(String rowKey) {
+		String sessionId = null;
+		ResultSet sessionIdSet = cqlDAO.getArchievedCollectionRecentSessionId(rowKey);
+		for (Row sessionIdRow : sessionIdSet) {
+			sessionId = TypeCodec.varchar().deserialize(sessionIdRow.getBytes(ApiConstants.VALUE),
+					cqlDAO.getClusterProtocolVersion());
+		}
+		return sessionId;
+	}
+
 	private void setUsageData(Map<String, Object> dataMap, String title, String rowKey, String collectionType) {
-		ResultSet classDataSet = cqlDAO.getArchievedClassData(ServiceUtils.appendTilda(rowKey, collectionType));
-		for (Row classDataRow : classDataSet) {
-			String columnName = classDataRow.getString(ApiConstants.COLUMN1);
-			if (columnName.matches(ApiConstants.COLUMNS_TO_EXPORT)) {
-				Object value;
-				if (columnName.matches(ApiConstants.BIGINT_COLUMNS)) {
-					value = TypeCodec.bigint().deserialize(classDataRow.getBytes(ApiConstants.VALUE),
-							cqlDAO.getClusterProtocolVersion());
-				} else {
-					value = TypeCodec.varchar().deserialize(classDataRow.getBytes(ApiConstants.VALUE),
+		ResultSet usageDataSet = null;
+		String columnNames = null;
+		boolean splitColumnName = false;
+		if (collectionType == null) {
+			columnNames = ApiConstants.RESOURCE_COLUMNS_TO_EXPORT;
+			splitColumnName = true;
+			usageDataSet = cqlDAO.getArchievedSessionData(rowKey);
+		} else {
+			columnNames = ApiConstants.COLUMNS_TO_EXPORT;
+			usageDataSet = cqlDAO.getArchievedClassData(ServiceUtils.appendTilda(rowKey, collectionType));
+		}
+		for (Row usageDataRow : usageDataSet) {
+			String dbColumnName = usageDataRow.getString(ApiConstants.COLUMN1);
+			if (dbColumnName.matches(columnNames)) {
+			String columnName = splitColumnName ? dbColumnName.split(ApiConstants.TILDA)[1] : dbColumnName;
+				Object value ;
+				if(columnName.matches(ApiConstants.BIGINT_COLUMNS)){
+				value = TypeCodec.bigint().deserialize(usageDataRow.getBytes(ApiConstants.VALUE),
+						cqlDAO.getClusterProtocolVersion());
+				}else{
+					value = TypeCodec.varchar().deserialize(usageDataRow.getBytes(ApiConstants.VALUE),
 							cqlDAO.getClusterProtocolVersion());
 				}
-				dataMap.put(ServiceUtils.appendHyphen(title, collectionType, ExportConstants.csvHeaders(columnName)),
-						value);
+				dataMap.put(ServiceUtils.appendHyphen(title, collectionType, ExportConstants.csvHeaders(columnName)), value);
 			}
 		}
 	}
@@ -152,7 +186,14 @@ public class ClassExportServiceImpl implements ClassExportService {
 		dataMap.put(ServiceUtils.appendHyphen(title, ApiConstants.ASSESSMENT, ExportConstants.VIEWS), 0);
 		dataMap.put(ServiceUtils.appendHyphen(title, ApiConstants.COLLECTION, ExportConstants.TIME_SPENT), 0);
 		dataMap.put(ServiceUtils.appendHyphen(title, ApiConstants.ASSESSMENT, ExportConstants.TIME_SPENT), 0);
-		dataMap.put(ServiceUtils.appendHyphen(title, ApiConstants.COLLECTION, ExportConstants.SCORE), 0);
-		dataMap.put(ServiceUtils.appendHyphen(title, ApiConstants.ASSESSMENT, ExportConstants.SCORE), 0);
+		dataMap.put(ServiceUtils.appendHyphen(title, ApiConstants.COLLECTION, ExportConstants.SCORE_IN_PERCENTAGE), 0);
+		dataMap.put(ServiceUtils.appendHyphen(title, ApiConstants.ASSESSMENT, ExportConstants.SCORE_IN_PERCENTAGE), 0);
+	}
+
+	private void setDefaultResourceUsage(String title, Map<String, Object> dataMap) {
+		dataMap.put(ServiceUtils.appendHyphen(title, ExportConstants.VIEWS), 0);
+		dataMap.put(ServiceUtils.appendHyphen(title, ExportConstants.TIME_SPENT), 0);
+		dataMap.put(ServiceUtils.appendHyphen(title, ExportConstants.SCORE_IN_PERCENTAGE), 0);
+		dataMap.put(ServiceUtils.appendHyphen(title, ExportConstants.ANSWER_STATUS), ApiConstants.NA);
 	}
 }
