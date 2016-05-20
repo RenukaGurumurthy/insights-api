@@ -46,6 +46,18 @@
 		</property>
 	</bean>
  
+ <bean id="filePath"
+		class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="properties">
+			<props>
+				<prop key="insights.file.app.path">${insights.file.app.path}</prop>
+				<prop key="insights.s3.bucket.path">${insights.s3.bucket.path}</prop>
+				<prop key="insights.nfs.bucket.path">${insights.nfs.bucket.path}</prop>
+				<prop key="insights.profile.url.path">${profile-url}</prop>
+				<prop key="insights.file.real.path">${insights.file.real.path}</prop>
+			</props>
+		</property>
+	</bean>
 	<!-- Redis configuration -->
 	<bean id="redisLongTemplate" class="org.springframework.data.redis.core.RedisTemplate">
 		<property name="connectionFactory" ref="redisConnectionFactory" />

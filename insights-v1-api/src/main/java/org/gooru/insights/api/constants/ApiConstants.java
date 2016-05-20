@@ -61,6 +61,16 @@ public class ApiConstants {
 	
 	public static final String VIEW = "View";
 	
+	public static final String VALUE = "value";
+	
+	public static final String COLUMN1 = "column1";
+
+	public static final  String COLUMNS_TO_EXPORT = "score_in_percentage|time_spent|views";
+	
+	public static final  String STRING_COLUMNS = ".*collection_type.*";
+	
+	public static final  String BIGINT_COLUMNS = ".*score_in_percentage.*|.*time_spent.*|.*views.*";
+	
 	
 	/**
 	 * Mail Constants
@@ -425,7 +435,7 @@ public class ApiConstants {
 				"formula_detail"), EVENT_TIMELINE("event_timeline"), EVENT_DETAIL(
 				"event_detail"), USERPROFILE("user_profile_settings"), USER_COLLECTION_ITEM_ASSOC(
 				"user_collection_item_assoc"), CONFIG_SETTING(
-				"job_config_settings"), USER("user"), SESSION("sessions"), SESSION_ACTIVITY("session_activity")
+				"job_config_settings"), USER("user"),DIM_USER("dim_user"), SESSION("sessions"), SESSION_ACTIVITY("session_activity")
 				,CLASS_ACTIVITY("class_activity"), SESSION_ACTIVITY_COUNTER("session_activity_counter"), 
 				CLASS("class"),USER_GROUP_ASSOCIATION("user_group_association"),CONTENT_META("content_meta"),TABLE_DATATYPES("table_datatypes"),JOB_TRACKER("job_tracker"),CLASS_COLLECTION_SETTINGS("class_collection_settings")
 				,STUDENT_LOCATION("student_location"), USER_SESSIONS("user_sessions"),
@@ -483,4 +493,17 @@ public class ApiConstants {
 		return StringUtils.defaultIfEmpty(classHierarchyIdNameAsMap.get(type), type);
 	}
 
+	public enum apiHeaders{
+		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
+		
+		private String header;
+		
+		private apiHeaders(String header){
+			this.header = header;
+		}
+		public String apiHeader(){
+			return header;
+		}
+	}
+	
 }
