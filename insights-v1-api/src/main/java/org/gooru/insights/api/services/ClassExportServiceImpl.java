@@ -48,11 +48,8 @@ public class ClassExportServiceImpl implements ClassExportService {
 					String title = getContentTitle(collectionItemId);
 					String usageRowKey = null;
 					if (type.equalsIgnoreCase(ApiConstants.COLLECTION)) {
-						System.out.println("rowKey : "+ServiceUtils.appendTilda(ApiConstants.RS, classId, courseId, unitId,
-								lessonId, collectionId, studentId));
 						usageRowKey = getSessionId(ServiceUtils.appendTilda(ApiConstants.RS, classId, courseId, unitId,
 								lessonId, collectionId, studentId));
-						System.out.println("sessionId : " + usageRowKey);
 						setDefaultResourceUsage(title, dataMap);
 						if(StringUtils.isNotBlank(usageRowKey)){
 							setUsageData(dataMap, title, usageRowKey, null);
