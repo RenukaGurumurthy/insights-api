@@ -3,6 +3,7 @@ package org.gooru.insights.api.daos;
 import java.util.List;
 import java.util.Set;
 
+import com.datastax.driver.core.ProtocolVersion;
 import com.datastax.driver.core.ResultSet;
 
 public interface CqlCassandraDao {
@@ -71,4 +72,16 @@ public interface CqlCassandraDao {
 	ResultSet getEvent(String eventId);
 
 	ResultSet getSesstionIdsByUserId(String userUid);
+
+	ResultSet getArchievedClassMembers(String classId);
+
+	ResultSet getArchievedClassData(String rowKey);
+
+	ResultSet getArchievedContentTitle(String contentId);
+
+	ProtocolVersion getClusterProtocolVersion();
+
+	ResultSet getArchievedUserDetails(String userId);
+
+	ResultSet getArchievedCollectionItem(String contentId);
 }

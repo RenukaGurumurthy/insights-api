@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ProtocolVersion;
 import com.datastax.driver.core.Session;
 import com.datastax.driver.core.policies.DCAwareRoundRobinPolicy;
 import com.datastax.driver.core.policies.DefaultRetryPolicy;
@@ -60,7 +61,10 @@ public class CassandraConnectionProvider {
 			logger.error("Error while initializing cassandra : {}", e);
 		}
 	} 
-    
+	public ProtocolVersion getProtocolVersion(){
+		return cluster.getConfiguration().getProtocolOptions().getProtocolVersion();
+	}
+	
 	public static String getLogKeyspaceName() {
 		return logKeyspaceName;
 	}

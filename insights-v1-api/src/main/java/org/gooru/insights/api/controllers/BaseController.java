@@ -1,8 +1,15 @@
 package org.gooru.insights.api.controllers;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.poi.util.IOUtils;
 import org.gooru.insights.api.constants.ApiConstants;
+import org.gooru.insights.api.constants.ApiConstants.apiHeaders;
 import org.gooru.insights.api.constants.ApiConstants.modelAttributes;
 import org.gooru.insights.api.models.ResponseParamDTO;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -35,4 +42,13 @@ public class BaseController {
 		return response;
 	}
 	
+	public void generateCSVOutput(HttpServletResponse response, File csvFile) throws IOException {
+		InputStream sheet = new FileInputStream(csvFile);
+		response.setContentType(apiHeaders.CSV_RESPONSE.apiHeader());
+		response.setHeader("Content-Disposition", "attachment; filename=\""+csvFile.getName()+"\"");
+		IOUtils.copy(sheet, response.getOutputStream());
+		response.getOutputStream().flush();
+		csvFile.delete();
+		response.getOutputStream().close();
+	}
 }

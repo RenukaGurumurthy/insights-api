@@ -43,6 +43,19 @@ public class ServiceUtils {
 		return sb.toString();
 	}
 	
+	public static String appendHyphen(String... texts) {
+		StringBuffer sb = new StringBuffer();
+		for (String text : texts) {
+			if (StringUtils.isNotBlank(text)) {
+				if (sb.length() > 0) {
+					sb.append(ApiConstants.HYPHEN);
+				}
+				sb.append(text);
+			}
+		}
+		return sb.toString();
+	}
+	
 	public static Object castJSONToList(String data) {
 		if(StringUtils.isBlank(data) || ApiConstants.NA.equals(data)) {
 			return new ArrayList<Map<String, Object>>();

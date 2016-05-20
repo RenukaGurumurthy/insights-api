@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.ProtocolVersion;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.ResultSetFuture;
 import com.datastax.driver.core.Statement;
@@ -568,5 +569,88 @@ public class CqlCassandraDaoImpl extends CassandraConnectionProvider implements 
 			LOG.error("Exception:", e);
 		}
 		return result;
+	}
+	
+	@Override
+	public ResultSet getArchievedClassMembers(String classId) {
+		ResultSet result = null;
+		try {
+			Statement select = QueryBuilder.select().all()
+					.from(getLogKeyspaceName(), ColumnFamilySet.USER_GROUP_ASSOCIATION.getColumnFamily())
+					.where(QueryBuilder.eq(ApiConstants.KEY, classId))
+					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
+			result = resultSetFuture.get();
+		} catch (Exception e) {
+			LOG.error("Exception:", e);
+		}
+		return result;
+	}
+	
+	@Override
+	public ResultSet getArchievedClassData(String rowKey) {
+		ResultSet result = null;
+		try {
+			Statement select = QueryBuilder.select().all()
+					.from(getLogKeyspaceName(), ColumnFamilySet.CLASS_ACTIVITY.getColumnFamily())
+					.where(QueryBuilder.eq(ApiConstants.KEY, rowKey))
+					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
+			result = resultSetFuture.get();
+		} catch (Exception e) {
+			LOG.error("Exception:", e);
+		}
+		return result;
+	}
+	
+	@Override
+	public ResultSet getArchievedContentTitle(String contentId) {
+		ResultSet result = null;
+		try {
+			Statement select = QueryBuilder.select().all()
+					.from(getLogKeyspaceName(), ColumnFamilySet.DIM_RESOURCE.getColumnFamily())
+					.where(QueryBuilder.eq(ApiConstants.KEY, "GLP~"+contentId))
+					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
+			result = resultSetFuture.get();
+		} catch (Exception e) {
+			LOG.error("Exception:", e);
+		}
+		return result;
+	}
+
+	@Override
+	public ResultSet getArchievedUserDetails(String userId) {
+		ResultSet result = null;
+		try {
+			Statement select = QueryBuilder.select().all()
+					.from(getLogKeyspaceName(), ColumnFamilySet.DIM_USER.getColumnFamily())
+					.where(QueryBuilder.eq(ApiConstants.KEY, userId))
+					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
+			result = resultSetFuture.get();
+		} catch (Exception e) {
+			LOG.error("Exception:", e);
+		}
+		return result;
+	}
+	@Override
+	public ResultSet getArchievedCollectionItem(String contentId) {
+		ResultSet result = null;
+		try {
+			Statement select = QueryBuilder.select().all()
+					.from(getLogKeyspaceName(), ColumnFamilySet.COLLECTION_ITEM_ASSOC.getColumnFamily())
+					.where(QueryBuilder.eq(ApiConstants.KEY, contentId))
+					.setConsistencyLevel(DEFAULT_CONSISTENCY_LEVEL);
+			ResultSetFuture resultSetFuture = getCassSession().executeAsync(select);
+			result = resultSetFuture.get();
+		} catch (Exception e) {
+			LOG.error("Exception:", e);
+		}
+		return result;
+	}
+	@Override
+	public ProtocolVersion getClusterProtocolVersion(){
+		return getProtocolVersion();
 	}
 }
