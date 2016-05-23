@@ -39,24 +39,29 @@ public class ClassExportServiceImpl implements ClassExportService {
 
 			List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
 			List<String> classMembersList = getClassMembersList(classId, userId);
-			List<String> collectionItemsList = getCollectionItems(getLeastId(courseId, unitId, lessonId, type));
+			List<String> collectionItemsList = getCollectionItems(getLeastId(courseId, unitId, lessonId, collectionId, type));
 
 			for (String studentId : classMembersList) {
 				Map<String, Object> dataMap = getDataMap();
 				setUserDetails(dataMap, studentId);
+				ResultSet usageDataSet = null;
+				if (type.equalsIgnoreCase(ApiConstants.COLLECTION)) {
+					String rowKey = getSessionId(ServiceUtils.appendTilda(ApiConstants.RS, classId, courseId, unitId,
+							lessonId, collectionId, studentId));
+					usageDataSet = cqlDAO.getArchievedSessionData(rowKey);
+					LOG.info("rowKey: " + rowKey);
+				}
 				for (String collectionItemId : collectionItemsList) {
 					String title = getContentTitle(collectionItemId);
-					String usageRowKey = null;
 					if (type.equalsIgnoreCase(ApiConstants.COLLECTION)) {
-						usageRowKey = getSessionId(ServiceUtils.appendTilda(ApiConstants.RS, classId, courseId, unitId,
-								lessonId, collectionId, studentId));
 						setDefaultResourceUsage(title, dataMap);
-						if(StringUtils.isNotBlank(usageRowKey)){
-							setUsageData(dataMap, title, usageRowKey, null);
+						if(usageDataSet != null){
+							processResultSet(usageDataSet, true, ApiConstants.RESOURCE_COLUMNS_TO_EXPORT, dataMap, title, null);
 						}
 					} else {
-						usageRowKey = ServiceUtils.appendTilda(classId, courseId, unitId, lessonId, collectionItemId,
+						String usageRowKey = ServiceUtils.appendTilda(classId, courseId, unitId, lessonId, collectionItemId,
 								studentId);
+						LOG.info("usageRowKey: " + usageRowKey);
 						setDefaultUsage(title, dataMap);
 						setUsageData(dataMap, title, usageRowKey, ApiConstants.COLLECTION);
 						setUsageData(dataMap, title, usageRowKey, ApiConstants.ASSESSMENT);
@@ -74,7 +79,7 @@ public class ClassExportServiceImpl implements ClassExportService {
 		return null;
 	}
 
-	private String getLeastId(String courseId, String unitId, String lessonId, String type) {
+	private String getLeastId(String courseId, String unitId, String lessonId, String collectionId, String type) {
 		String leastId = courseId;
 		if (type.equalsIgnoreCase(ApiConstants.COURSE)) {
 			leastId = courseId;
@@ -82,6 +87,8 @@ public class ClassExportServiceImpl implements ClassExportService {
 			leastId = unitId;
 		} else if (type.equalsIgnoreCase(ApiConstants.LESSON)) {
 			leastId = lessonId;
+		} else if (type.equalsIgnoreCase(ApiConstants.COLLECTION)) {
+			leastId = collectionId;
 		}
 		return leastId;
 	}
@@ -143,17 +150,13 @@ public class ClassExportServiceImpl implements ClassExportService {
 	}
 
 	private void setUsageData(Map<String, Object> dataMap, String title, String rowKey, String collectionType) {
-		ResultSet usageDataSet = null;
-		String columnNames = null;
+		String columnNames = ApiConstants.COLUMNS_TO_EXPORT;;
 		boolean splitColumnName = false;
-		if (collectionType == null) {
-			columnNames = ApiConstants.RESOURCE_COLUMNS_TO_EXPORT;
-			splitColumnName = true;
-			usageDataSet = cqlDAO.getArchievedSessionData(rowKey);
-		} else {
-			columnNames = ApiConstants.COLUMNS_TO_EXPORT;
-			usageDataSet = cqlDAO.getArchievedClassData(ServiceUtils.appendTilda(rowKey, collectionType));
-		}
+		ResultSet usageDataSet = cqlDAO.getArchievedClassData(ServiceUtils.appendTilda(rowKey, collectionType));
+		processResultSet(usageDataSet, splitColumnName, columnNames, dataMap, title, collectionType);
+	}
+
+	private void processResultSet(ResultSet usageDataSet, boolean splitColumnName, String columnNames,Map<String, Object> dataMap, String title, String collectionType){
 		for (Row usageDataRow : usageDataSet) {
 			String dbColumnName = usageDataRow.getString(ApiConstants.COLUMN1);
 			if (dbColumnName.matches(columnNames)) {
@@ -170,7 +173,6 @@ public class ClassExportServiceImpl implements ClassExportService {
 			}
 		}
 	}
-
 	private Map<String, Object> getDataMap() {
 		Map<String, Object> dataMap = new LinkedHashMap<String, Object>();
 		dataMap.put(ExportConstants.FIRST_NAME, "");
