@@ -21,15 +21,15 @@ public class SessionTaxonomyActivity implements Cloneable {
 	
 	private String learningTargetsId;
 	
-	/*private Set<String> subjectIds;
+	private Set<String> subjectIds;
 	
 	private Set<String> courseIds;
 	
 	private Set<String> domainIds;
-	*/
+	
 	private Set<String> standardsIds;
 	
-	//private Set<String> learningTargetsIds;
+	private Set<String> learningTargetsIds;
 	
 	private Long views;
 	
@@ -54,6 +54,8 @@ public class SessionTaxonomyActivity implements Cloneable {
 	private List<SessionTaxonomyActivity> questions;
 	
 	private Long totalAttemptedQuestions;
+	
+	private String displayCode;
 	
 	public Object clone()throws CloneNotSupportedException{  
 		return super.clone();  	
@@ -239,7 +241,7 @@ public class SessionTaxonomyActivity implements Cloneable {
 			return new SessionTaxonomyActivity(questionData);
 	}
 
-	/*public Set<String> getSubjectIds() {
+	public Set<String> getSubjectIds() {
 		return subjectIds;
 	}
 
@@ -272,7 +274,7 @@ public class SessionTaxonomyActivity implements Cloneable {
 		this.domainIds.add(domainIds);
 	}
 
-*/	public Set<String> getStandardsIds() {
+	public Set<String> getStandardsIds() {
 		return standardsIds;
 	}
 
@@ -283,7 +285,15 @@ public class SessionTaxonomyActivity implements Cloneable {
 		this.standardsIds.add(standardsIds);
 	}
 
-/*	public Set<String> getLearningTargetsIds() {
+	public String getDisplayCode() {
+		return displayCode;
+	}
+
+	public void setDisplayCode(String disPlayCode) {
+		this.displayCode = disPlayCode;
+	}
+
+	public Set<String> getLearningTargetsIds() {
 		return learningTargetsIds;
 	}
 
@@ -292,5 +302,5 @@ public class SessionTaxonomyActivity implements Cloneable {
 			this.learningTargetsIds = new HashSet<String>();	
 		}
 		this.learningTargetsIds.add(learningTargetsIds);
-	}*/
+	}
 }

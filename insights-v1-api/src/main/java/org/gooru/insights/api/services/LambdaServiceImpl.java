@@ -217,11 +217,11 @@ public class LambdaServiceImpl implements LambdaService{
 	
 	private SessionTaxonomyActivity getSessionTaxonomyActivityByTax(SessionTaxonomyActivity obj1,
 			SessionTaxonomyActivity obj2) {
-		/*obj1.getSubjectIds().addAll(obj2.getSubjectIds());
+		obj1.getSubjectIds().addAll(obj2.getSubjectIds());
 		obj1.getCourseIds().addAll(obj2.getCourseIds());
-		obj1.getDomainIds().addAll(obj2.getDomainIds());*/
+		obj1.getDomainIds().addAll(obj2.getDomainIds());
 		obj1.getStandardsIds().addAll(obj2.getStandardsIds());
-		//obj1.getLearningTargetsIds().addAll(obj2.getLearningTargetsIds());
+		obj1.getLearningTargetsIds().addAll(obj2.getLearningTargetsIds());
 		
 		return obj1;
 	}
@@ -231,6 +231,10 @@ public class LambdaServiceImpl implements LambdaService{
 		obj1.setDomainId(null);
 		obj1.setStandardsId(null);
 		obj1.setLearningTargetsId(null);
+		obj1.setSubjectIds(null);
+		obj1.setCourseIds(null);
+		obj1.setDomainIds(null);
+		obj1.setLearningTargetsIds(null);
 		obj1.setTotalAttemptedQuestions(null);
 		return obj1;
 	}

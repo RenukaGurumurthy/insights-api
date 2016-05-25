@@ -751,11 +751,12 @@ public class ClassServiceImpl implements ClassService {
 					sessionTaxonomyActivity.setResourceId(userSessionColumn.getString(ApiConstants._GOORU_OID));
 					sessionTaxonomyActivity.setViews(userSessionColumn.getLong(ApiConstants.VIEWS));
 					sessionTaxonomyActivity.setTimespent(userSessionColumn.getLong(ApiConstants._TIME_SPENT));
-					/*sessionTaxonomyActivity.setSubjectIds(userSessionColumn.getString(ApiConstants._SUBJECT_ID));
+					sessionTaxonomyActivity.setSubjectIds(userSessionColumn.getString(ApiConstants._SUBJECT_ID));
 					sessionTaxonomyActivity.setCourseIds(userSessionColumn.getString(ApiConstants._COURSE_ID));
-					sessionTaxonomyActivity.setDomainIds(userSessionColumn.getString(ApiConstants._DOMAIN_ID));*/
+					sessionTaxonomyActivity.setDomainIds(userSessionColumn.getString(ApiConstants._DOMAIN_ID));
 					sessionTaxonomyActivity.setStandardsIds(userSessionColumn.getString(ApiConstants._STANDARDS_ID));
-					//sessionTaxonomyActivity.setLearningTargetsIds(userSessionColumn.getString(ApiConstants._LEARNING_TARGETS_ID));
+					sessionTaxonomyActivity.setDisplayCode(userSessionColumn.getString(ApiConstants._DISPLAY_CODE));
+					sessionTaxonomyActivity.setLearningTargetsIds(userSessionColumn.getString(ApiConstants._LEARNING_TARGETS_ID));
 					sessionTaxonomyActivities.add(sessionTaxonomyActivity);
 				}
 			}
@@ -1029,6 +1030,7 @@ public class ClassServiceImpl implements ClassService {
 				sessionTaxonomyActivity.setLearningTargetsId(row.getString(ApiConstants._LEARNING_TARGETS_ID));
 				sessionTaxonomyActivity.setAnswerStatus(row.getString(ApiConstants.ANSWER_STATUS));
 				sessionTaxonomyActivity.setQuestionType(row.getString(ApiConstants._QUESTION_TYPE));
+				sessionTaxonomyActivity.setDisplayCode(row.getString(ApiConstants._DISPLAY_CODE));
 				sessionTaxonomyActivity.setReaction(row.getLong(ApiConstants.REACTION));
 				sessionTaxonomyActivity.setScore(row.getLong(ApiConstants.SCORE));
 				sessionTaxonomyActivity.setAttempts(row.getLong(ApiConstants.VIEWS));

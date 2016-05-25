@@ -228,6 +228,10 @@ public class ApiConstants {
 	
 	public static final String _QUESTION_TYPE = "question_type";
 	
+	public static final String _DISPLAY_CODE = "display_code";
+	
+	public static final String DISPLAY_CODE = "displayCode";
+	
 	public static final String FIRST_NAME = "firstName";
 	
 	public static final String LAST_NAME = "lastName";

@@ -34,6 +34,8 @@ public class ContentTaxonomyActivity {
 	
 	private Long itemCount;
 
+	private String displayCode;
+	
 	public String getSubjectId() {
 		return subjectId;
 	}
@@ -196,5 +198,13 @@ public class ContentTaxonomyActivity {
 
 	public void setItemCount(Long itemCount) {
 		this.itemCount = itemCount;
+	}
+
+	public String getDisplayCode() {
+		return displayCode;
+	}
+
+	public void setDisplayCode(String displayCode) {
+		this.displayCode = displayCode;
 	}
 }
