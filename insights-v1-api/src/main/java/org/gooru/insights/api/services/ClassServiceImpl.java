@@ -475,6 +475,7 @@ public class ClassServiceImpl implements ClassService {
 				sessionActivityMetrics.put(ApiConstants.TIMESPENT, userSessionActivityRow.getLong(ApiConstants._TIME_SPENT));
 				sessionActivityMetrics.put(ApiConstants.VIEWS, userSessionActivityRow.getLong(ApiConstants.VIEWS));
 				sessionActivityMetrics.put(ApiConstants.REACTION, userSessionActivityRow.getLong(ApiConstants.REACTION));
+				sessionActivityMetrics.put(ApiConstants.EVENT_TIME, userSessionActivityRow.getLong(ApiConstants._EVENT_TIME));
 				if (contentType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
 					usageData.put(ApiConstants.COLLECTION, sessionActivityMetrics);
 				} else if (contentType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) {
