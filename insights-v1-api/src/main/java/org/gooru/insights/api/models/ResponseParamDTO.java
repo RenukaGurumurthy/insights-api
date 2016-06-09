@@ -6,16 +6,16 @@ import java.util.Map;
 
 public class ResponseParamDTO<M> {
 
-	private List<M> content;
+	private final List<M> content;
 
 	private M message;
 
 	private Map<String, Object> paginate;
 
 	public ResponseParamDTO() {
-		 content = new ArrayList<M>();
+		 content = new ArrayList<>();
 	}
-	
+
 	public List<M> getContent() {
 		return content;
 	}

@@ -28,24 +28,24 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class UserRole implements Serializable{
-	
+
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -5564110791867719163L;
 	private Short roleId;
 	private String name;
 	private String description;
 	private Set<RoleEntityOperation> roleOperations;
-	
+
 	public static final Short ROLE_TEACHER = 1;
 	public static final Short ROLE_STUDENT = 2;
 	public static final Short ROLE_CONTENT_ADMIN = 3;
 	public static final Short ROLE_ANONYMOUS = 4;
 	public static final Short ROLE_AUTHENTICATED = 5;
 	public static final Short ROLE_PUBLISHER = 6;
-	
-	public static enum UserRoleType{
+
+	public enum UserRoleType{
 		TEACHER("Teacher"),
 		STUDENT("Student"),
 		CONTENT_ADMIN("Content_Admin"),
@@ -53,8 +53,8 @@ public class UserRole implements Serializable{
 		AUTHENTICATED_USER("User"),
 		OTHER("other"),
 		PUBLISHER("Publisher");
-		
-		private String type;
+
+		private final String type;
 		UserRoleType(String type){
 			this.type=type;
 		}
@@ -62,13 +62,13 @@ public class UserRole implements Serializable{
 		public String getType() {
 			return type;
 		}
-		
+
 	}
-	
+
 	public UserRole() {
-		this.roleOperations = new HashSet<RoleEntityOperation>();
+		this.roleOperations = new HashSet<>();
 	}
-		
+
 
 	public Short getRoleId() {
 		return roleId;

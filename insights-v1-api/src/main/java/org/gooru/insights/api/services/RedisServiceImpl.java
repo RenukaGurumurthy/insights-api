@@ -18,7 +18,7 @@ public class RedisServiceImpl implements RedisService {
 	private static final LongSerializer LONG_SERIALIZER = LongSerializer.INSTANCE;
 
 	@Autowired(required = false)
-	private RedisTemplate<String, Long> redisLongTemplate = new RedisTemplate<String, Long>();
+	private final RedisTemplate<String, Long> redisLongTemplate = new RedisTemplate<>();
 
 	@Autowired(required = false)
 	private RedisTemplate<String, String> redisStringTemplate;

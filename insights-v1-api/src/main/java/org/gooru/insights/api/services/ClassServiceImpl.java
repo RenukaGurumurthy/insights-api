@@ -34,14 +34,14 @@ import rx.schedulers.Schedulers;
 
 @Service
 public class ClassServiceImpl implements ClassService {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(ClassServiceImpl.class);
 
     private final ExecutorService observableExecutor = Executors.newFixedThreadPool(10);
-    
+
 	@Autowired
 	private CassandraService cassandraService;
-	
+
 	@Autowired
 	private LambdaService lambdaService;
 
@@ -50,22 +50,23 @@ public class ClassServiceImpl implements ClassService {
 	}
 
 	public Observable<ResponseParamDTO<Map<String, Object>>> getSessionStatus(String sessionId, String contentGooruId) {
-		
-		Observable<ResponseParamDTO<Map<String, Object>>> sessionStatus = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+
+
+		return Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
 			s.onNext(fetchSessionStatus(sessionId, contentGooruId));
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return sessionStatus;
 	}
-	
+
 	private ResponseParamDTO<Map<String, Object>> fetchSessionStatus(String sessionId, String contentGooruId) {
-		
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<>();
 		//CqlResult<String, String> sessionDetails = getCassandraService().readRows(ColumnFamilySet.USER_SESSION_ACTIVITY.getColumnFamily(), CqlQueries.GET_SESSION_ACTIVITY_TYPE, sessionId, contentGooruId);
-		ResultSet sessionDetails = getCassandraService().getSessionActivityType(sessionId, contentGooruId);
+
+		ResultSet sessionDetails = cassandraService.getSessionActivityType(sessionId, contentGooruId);
 		if (sessionDetails != null) {
 			for(Row row : sessionDetails) {
-				Map<String, Object> sessionDataMap = new HashMap<String, Object>();
+				Map<String, Object> sessionDataMap = new HashMap<>();
 				String status = row.getString(ApiConstants._EVENT_TYPE);
 				sessionDataMap.put(ApiConstants.SESSIONID, sessionId);
 				status = status.equalsIgnoreCase(ApiConstants.STOP) ? ApiConstants.COMPLETED : ApiConstants.INPROGRESS;
@@ -80,8 +81,8 @@ public class ClassServiceImpl implements ClassService {
 
 	public Observable<ResponseParamDTO<Map<String, Object>>> getUserSessions(String classId, String courseId, String unitId,
 			String lessonId, String collectionId, String collectionType, String userUid, boolean fetchOpenSession) {
-		
-		Observable<ResponseParamDTO<Map<String, Object>>> userSessions = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+
+		return Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
 			try {
 				s.onNext(fetchUserSessions(classId, courseId, unitId,
 						lessonId, collectionId, collectionType, userUid, fetchOpenSession));
@@ -90,16 +91,15 @@ public class ClassServiceImpl implements ClassService {
 			}
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return userSessions;
 	}
 
 	private ResponseParamDTO<Map<String, Object>> fetchUserSessions(String classId, String courseId, String unitId,
-			String lessonId, String collectionId, String collectionType, String userUid, boolean fetchOpenSession) throws Exception {
+			String lessonId, String collectionId, String collectionType, String userUid, boolean fetchOpenSession) {
 
 		// TODO Enabled for class verification
 		// isValidClass(classId);
-		List<Map<String, Object>> resultSet =  null;
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		List<Map<String, Object>> resultSet;
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<>();
 			if(collectionType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) {
 				if(fetchOpenSession) {
 					resultSet = getSessionInfo(CqlQueries.GET_USER_ASSESSMENT_SESSIONS, userUid, collectionId, collectionType, classId, courseId, unitId, lessonId, ApiConstants.START);
@@ -113,15 +113,17 @@ public class ClassServiceImpl implements ClassService {
 		responseParamDTO.setContent(addSequence(resultSet));
 		return responseParamDTO;
 	}
-	
+
 	private List<Map<String, Object>> getSessionInfo(String query, String userUid, String collectionUid, String collectionType, String classUid, String courseUid, String unitUid, String lessonUid, String eventType) {
-		
+
 		//CqlResult<String, String> sessions = getCassandraService().readRows(ColumnFamilySet.USER_SESSIONS.getColumnFamily(), query, parameters);
-		ResultSet sessions = getCassandraService().getUserAssessmentSessions(userUid, collectionUid, collectionType, classUid, courseUid, unitUid, lessonUid, eventType);
-		List<Map<String,Object>> sessionList = new ArrayList<Map<String,Object>>();
+
+		ResultSet sessions = cassandraService
+			.getUserAssessmentSessions(userUid, collectionUid, collectionType, classUid, courseUid, unitUid, lessonUid, eventType);
+		List<Map<String,Object>> sessionList = new ArrayList<>();
 		if( sessions != null) {
 			for(Row row : sessions) {
-					Map<String, Object> sessionMap = new HashMap<String,Object>();
+					Map<String, Object> sessionMap = new HashMap<>();
 					sessionMap.put(ApiConstants.SESSIONID,row.getString(ApiConstants._SESSION_ID));
 					sessionMap.put(ApiConstants.EVENT_TIME,row.getLong(ApiConstants._EVENT_TIME));
 					sessionList.add(sessionMap);
@@ -129,12 +131,12 @@ public class ClassServiceImpl implements ClassService {
 		}
 		return sessionList;
 	}
-	
+
 	private List<Map<String, Object>> addSequence(List<Map<String, Object>> resultSet) {
 		List<Map<String, Object>> finalSet = null;
 		if (resultSet != null) {
 			int sequence = 1;
-			finalSet = new ArrayList<Map<String, Object>>();
+			finalSet = new ArrayList<>();
 			for (Map<String, Object> resultMap : resultSet) {
 				resultMap.put(ApiConstants.SEQUENCE, sequence++);
 				finalSet.add(resultMap);
@@ -142,19 +144,20 @@ public class ClassServiceImpl implements ClassService {
 		}
 		return finalSet;
 	}
-	
+
 	@Override
 	public Observable<ResponseParamDTO<Map<String, Object>>> getUserCurrentLocationInLesson(String userUid, String classId) {
-		Observable<ResponseParamDTO<Map<String, Object>>> userLocationObservable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+
+		return Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
 			s.onNext(getStudentCurrentLocation(userUid, classId));
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return userLocationObservable;
 	}
-	
+
 	@Override
 	public Observable<ResponseParamDTO<Map<String, Object>>> getPerformance(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType, String nextLevelType) {
-		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+
+		return Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
 			try {
 			s.onNext(getPerformanceDataByLambda(classId, courseId, unitId, lessonId, userUid, collectionType, nextLevelType));
 			s.onCompleted();
@@ -162,30 +165,30 @@ public class ClassServiceImpl implements ClassService {
 				s.onError(e);
 			}
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return observable;
 	}
-	
+
 	@Override
 	public Observable<ResponseParamDTO<Map<String, Object>>> getUserPeers(String classId, String courseId, String unitId, String nextLevelType) {
-		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+
+		return Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
 			s.onNext(getUserPeerData(classId, courseId, unitId, nextLevelType));
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return observable;
 	}
-	
+
 	@Override
 	public Observable<ResponseParamDTO<Map<String, Object>>> getUserPeers(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
-		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+
+		return Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
 			s.onNext(getUserPeerData(classId, courseId, unitId, lessonId, nextLevelType));
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return observable;
 	}
-	
+
 	@Override
 	public Observable<ResponseParamDTO<Map<String, Object>>> getAllStudentPerformance(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType, String userUid) {
-		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+
+		return Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
 			try {
 				s.onNext(getAllStudentsPerformance(classId, courseId, unitId, lessonId, gooruOid, collectionType, userUid));
 			} catch (Exception e) {
@@ -193,25 +196,25 @@ public class ClassServiceImpl implements ClassService {
 			}
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return observable;
 	}
-	
+
 	@Deprecated
 	private ResponseParamDTO<Map<String, Object>> getUserPeersDetail(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<>();
+		List<Map<String, Object>> dataMapAsList = new ArrayList<>();
 		String rowKey = ServiceUtils.appendTilda(classId, courseId, unitId, lessonId);
 		//CqlResult<String, String> result = getCassandraService().readRows(ColumnFamilySet.CLASS_ACTIVITY_PEER_DETAIL.getColumnFamily(), CqlQueries.GET_USER_PEER_DETAIL, rowKey);
-		ResultSet result = getCassandraService().getUserPeerDetail(rowKey);
+
+		ResultSet result = cassandraService.getUserPeerDetail(rowKey);
 		if (result != null ) {
 			for(Row resultRow : result) {
-				Map<String, Object> dataAsMap = new HashMap<String, Object>(5);
+				Map<String, Object> dataAsMap = new HashMap<>(5);
 				Set<String> activePeers = resultRow.getSet(ApiConstants._ACTIVE_PEERS, String.class);
 				Set<String> leftPeers = resultRow.getSet(ApiConstants._LEFT_PEERS, String.class);
 				dataAsMap.put(ApiConstants.ACTIVE_PEER_COUNT, leftPeers.size());
 				dataAsMap.put(ApiConstants.LEFT_PEER_COUNT, activePeers.size());
 				nextLevelType = resultRow.getString(ApiConstants._COLLECTION_TYPE);
-				if(nextLevelType.matches(ApiConstants.COLLECTION_OR_ASSESSMENT)) {
+				if(ApiConstants.COLLECTION_OR_ASSESSMENT_PATTERN.matcher(nextLevelType).matches()) {
 					dataAsMap.put(ApiConstants.ACTIVE_PEER_UIDS, leftPeers);
 					dataAsMap.put(ApiConstants.LEFT_PEER_UIDS, activePeers);
 				}
@@ -225,7 +228,8 @@ public class ClassServiceImpl implements ClassService {
 
 	@Override
 	public Observable<ResponseParamDTO<Map<String, Object>>> getPriorDetail(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,String collectionType, boolean openSession) {
-		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+
+		return Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
 					try {
 						s.onNext(getPriorUsage(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid,
 								collectionType, openSession));
@@ -234,13 +238,12 @@ public class ClassServiceImpl implements ClassService {
 					}
 					s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return observable;
 	}
-	
+
 	private ResponseParamDTO<Map<String, Object>> getPriorUsage(String classId, String courseId, String unitId,
 			String lessonId, String assessmentId, String sessionId, String userUid, String collectionType, boolean openSession) throws Exception {
 
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<>();
 		if(openSession && ApiConstants.COLLECTION.equalsIgnoreCase(collectionType)) {
 			openSession = false;
 		}
@@ -251,11 +254,11 @@ public class ClassServiceImpl implements ClassService {
 		}
 		return responseParamDTO;
 	}
-	
+
 	public Observable<ResponseParamDTO<Map<String, Object>>> getSummaryData(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,
-			String collectionType) throws Exception {
-		
-		Observable<ResponseParamDTO<Map<String, Object>>> observable = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+			String collectionType) {
+
+		return Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
 			try {
 				s.onNext(fetchSummaryData(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid,
 						collectionType));
@@ -264,18 +267,17 @@ public class ClassServiceImpl implements ClassService {
 			}
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return observable;
 	}
-	
+
 	private ResponseParamDTO<Map<String, Object>> fetchSummaryData(String classId, String courseId, String unitId, String lessonId, String assessmentId, String sessionId, String userUid,
 			String collectionType) throws Exception {
-		
+
 		//TODO validate ClassId
 		//isValidClass(classId);
-		Map<String,Object> usageData = new HashMap<String,Object>();
-		List<Map<String,Object>> sessionActivities = new ArrayList<Map<String,Object>>();
-		List<Map<String, Object>> summaryData = new ArrayList<Map<String, Object>>();
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		Map<String,Object> usageData = new HashMap<>();
+		List<Map<String,Object>> sessionActivities = new ArrayList<>();
+		List<Map<String, Object>> summaryData = new ArrayList<>();
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<>();
 		String sessionKey = null;
 		if (collectionType.equalsIgnoreCase(ApiConstants.ASSESSMENT)) {
 			sessionKey = getSession(classId, courseId, unitId, lessonId, assessmentId, sessionId, userUid,
@@ -285,13 +287,13 @@ public class ClassServiceImpl implements ClassService {
 		}
 		if (StringUtils.isNotBlank(sessionKey)) {
 			//Fetch Usage Data
-			getResourceMetricsBySession(sessionActivities, sessionKey, usageData);		
+			getResourceMetricsBySession(sessionActivities, sessionKey, usageData);
 			summaryData.add(usageData);
 		}
-		responseParamDTO.setContent(summaryData);  
+		responseParamDTO.setContent(summaryData);
 		return responseParamDTO;
 	}
-	
+
 	private String getSession(String classId, String courseId, String unitId, String lessonId, String assessmentId,
 			String sessionId, String userUid, String collectionType, boolean openSession) throws Exception {
 		if (StringUtils.isNotBlank(sessionId) && !ApiConstants.NA.equalsIgnoreCase(sessionId)) {
@@ -312,24 +314,26 @@ public class ClassServiceImpl implements ClassService {
 		}
 		return null;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private ResponseParamDTO<Map<String, Object>> getPerformanceData(String classId, String courseId, String unitId, String lessonId, String userUid, String collectionType, String nextLevelType) {
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<>();
+		List<Map<String, Object>> dataMapAsList = new ArrayList<>();
 		String rowKey = ServiceUtils.appendTilda(classId, courseId, unitId, lessonId);
 		ResultSet resultRows = null;
 		if (StringUtils.isNotBlank(userUid) && StringUtils.isNotBlank(collectionType)) {
 			//resultRows = getCassandraService().readRows(ColumnFamilySet.CLASS_ACTIVITY_DATACUBE.getColumnFamily(), CqlQueries.GET_USER_CLASS_ACTIVITY_DATACUBE, rowKey, userUid, collectionType);
-			resultRows = getCassandraService().getUserClassActivityDatacube(rowKey, userUid, collectionType);
+
+			resultRows = cassandraService.getUserClassActivityDatacube(rowKey, userUid, collectionType);
 		} else if (StringUtils.isNotBlank(collectionType)) {
 			//resultRows = getCassandraService().readRows(ColumnFamilySet.CLASS_ACTIVITY_DATACUBE.getColumnFamily(), CqlQueries.GET_CLASS_ACTIVITY_DATACUBE, rowKey, collectionType);
-			resultRows = getCassandraService().getClassActivityDatacube(rowKey, collectionType);
+
+			resultRows = cassandraService.getClassActivityDatacube(rowKey, collectionType);
 		}
 		if (resultRows != null) {
-			Map<String, Object> userUsageAsMap = new HashMap<String, Object>();
+			Map<String, Object> userUsageAsMap = new HashMap<>();
 			for (Row resultRow : resultRows) {
-				List<Map<String, Object>> dataMapList = new ArrayList<Map<String, Object>>();
+				List<Map<String, Object>> dataMapList = new ArrayList<>();
 				String userId = resultRow.getString(ApiConstants._USER_UID);
 				if (userUsageAsMap.containsKey(userId) && userUsageAsMap.get(userId) != null) {
 					dataMapList = (List<Map<String, Object>>) userUsageAsMap.get(userId);
@@ -338,7 +342,7 @@ public class ClassServiceImpl implements ClassService {
 				userUsageAsMap.put(userId, dataMapList);
 			}
 			for (Map.Entry<String, Object> userUsageAsMapEntry : userUsageAsMap.entrySet()) {
-				Map<String, Object> resultAsMap = new HashMap<String, Object>(2);
+				Map<String, Object> resultAsMap = new HashMap<>(2);
 				resultAsMap.put(ApiConstants.USERUID, userUsageAsMapEntry.getKey());
 				resultAsMap.put(ApiConstants.USAGE_DATA, userUsageAsMapEntry.getValue());
 				dataMapAsList.add(resultAsMap);
@@ -350,9 +354,9 @@ public class ClassServiceImpl implements ClassService {
 
 	private ResponseParamDTO<Map<String, Object>> getPerformanceDataByLambda(String classId, String courseId,
 			String unitId, String lessonId, String userUid, String collectionType, String nextLevelType) {
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		List<StudentsClassActivity> classActivityResultSetList = new ArrayList<StudentsClassActivity>();
-		ResultSet classActivityResultSet = getCassandraService().getStudentsClassActivity(classId, courseId, unitId,
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<>();
+		List<StudentsClassActivity> classActivityResultSetList = new ArrayList<>();
+		ResultSet classActivityResultSet = cassandraService.getStudentsClassActivity(classId, courseId, unitId,
 				lessonId, null);
 		if (classActivityResultSet != null) {
 			for (Row classActivityRow : classActivityResultSet) {
@@ -379,11 +383,11 @@ public class ClassServiceImpl implements ClassService {
 					.applyFiltersInStudentsClassActivity(classActivityResultSetList, collectionType,userUid);
 			List<Map<String, List<StudentsClassActivity>>> aggregatedList = lambdaService
 					.aggregateStudentsClassActivityData(filteredList, collectionType, nextLevelType);
-			List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
+			List<Map<String, Object>> result = new ArrayList<>();
 			for (Map<String, List<StudentsClassActivity>> aggregatedSubList : aggregatedList) {
 				for (Map.Entry<String, List<StudentsClassActivity>> data : aggregatedSubList.entrySet()) {
 
-					Map<String, Object> resultMap = new HashMap<String, Object>();
+					Map<String, Object> resultMap = new HashMap<>();
 					if (data.getValue().size() == 0) {
 						continue;
 					}
@@ -399,7 +403,7 @@ public class ClassServiceImpl implements ClassService {
 
 	//TODO nextLevelType is hard coded temporarily. In future, store and get nextLevelType from CF
 	private void addPerformanceMetrics(String classId, String lessonId, List<Map<String, Object>> dataMapList, Row resultRow, String collectionType, String nextLevelType) {
-		Map<String, Object> dataAsMap = new HashMap<String, Object>(8);
+		Map<String, Object> dataAsMap = new HashMap<>(8);
 		String responseNameForViews = ApiConstants.VIEWS;
 		if(nextLevelType.equalsIgnoreCase(ApiConstants.CONTENT)) {
 			nextLevelType = collectionType;
@@ -417,20 +421,20 @@ public class ClassServiceImpl implements ClassService {
 		dataAsMap.put(ApiConstants.TOTAL_COUNT, getCulCollectionCount(classId, leafNodeId, collectionType));
 		dataMapList.add(dataAsMap);
 	}
-	
-	private ResponseParamDTO<Map<String, Object>> getAllStudentsPerformance(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType, String userUid) throws Exception {
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		List<Map<String, Object>> resultDataAsList = new ArrayList<Map<String, Object>>(); 
+
+	private ResponseParamDTO<Map<String, Object>> getAllStudentsPerformance(String classId, String courseId, String unitId, String lessonId, String gooruOid, String collectionType, String userUid) {
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<>();
+		List<Map<String, Object>> resultDataAsList = new ArrayList<>();
 		//Fetch student Latest session for the class
 		Map<String, String> userSessions = getUsersLatestSessionId(classId, courseId, unitId, lessonId, gooruOid, userUid);
-		for (String sessionId : userSessions.keySet()) {
-			Map<String, Object> usageData = new HashMap<String, Object>(2);
-			List<Map<String, Object>> sessionActivities = new ArrayList<Map<String, Object>>();
-			usageData.put(ApiConstants.USER_UID, userSessions.get(sessionId));
+		for (Map.Entry<String, String> stringStringEntry : userSessions.entrySet()) {
+			Map<String, Object> usageData = new HashMap<>(2);
+			List<Map<String, Object>> sessionActivities = new ArrayList<>();
+			usageData.put(ApiConstants.USER_UID, stringStringEntry.getValue());
 			usageData.put(ApiConstants.USAGE_DATA, sessionActivities);
 			// Fetch Usage Data
-			if (StringUtils.isNotBlank(sessionId)) {
-				getResourceMetricsBySession(sessionActivities, sessionId, new HashMap<String, Object>(2));
+			if (StringUtils.isNotBlank(stringStringEntry.getKey())) {
+				getResourceMetricsBySession(sessionActivities, stringStringEntry.getKey(), new HashMap<>(2));
 			}
 			resultDataAsList.add(usageData);
 		}
@@ -439,16 +443,14 @@ public class ClassServiceImpl implements ClassService {
 	}
 
 	private List<Map<String, Object>> getPriorUsage(String sessionKey) {
-	
-		List<Map<String, Object>> sessionActivities = new ArrayList<Map<String,Object>>();
-		ResultSet userSessionActivityResult = getCassandraService().getUserSessionActivity(sessionKey);
+
+		List<Map<String, Object>> sessionActivities = new ArrayList<>();
+		ResultSet userSessionActivityResult = cassandraService.getUserSessionActivity(sessionKey);
 		if (userSessionActivityResult != null) {
 			for (Row userSessionActivityRow : userSessionActivityResult) {
-				Map<String, Object> sessionActivityMetrics = new HashMap<String, Object>();
+				Map<String, Object> sessionActivityMetrics = new HashMap<>();
 				String contentType = userSessionActivityRow.getString(ApiConstants._RESOURCE_TYPE);
-				if(contentType.matches(ApiConstants.COLLECTION_OR_ASSESSMENT)) {
-					continue;
-				} else {
+				if(!ApiConstants.COLLECTION_OR_ASSESSMENT_PATTERN.matcher(contentType).matches()) {
 					sessionActivityMetrics.put(ApiConstants.PARENT_EVENT_ID, userSessionActivityRow.getString(ApiConstants._PARENT_EVENT_ID));
 					sessionActivityMetrics.put(ApiConstants.GOORUOID, userSessionActivityRow.getString(ApiConstants._GOORU_OID));
 					sessionActivityMetrics.put(ApiConstants.ANSWER_OBJECT, ServiceUtils.castJSONToList(userSessionActivityRow.getString(ApiConstants._ANSWER_OBJECT)));
@@ -461,12 +463,13 @@ public class ClassServiceImpl implements ClassService {
 		return sessionActivities;
 	}
 	private void getResourceMetricsBySession(List<Map<String, Object>> sessionActivities, String sessionKey, Map<String, Object> usageData) {
-		
-		ResultSet userSessionActivityResult = getCassandraService().getUserSessionActivity(sessionKey);
+
+
+		ResultSet userSessionActivityResult = cassandraService.getUserSessionActivity(sessionKey);
 		if (userSessionActivityResult != null) {
 			String itemName = ApiConstants.RESOURCES;
 			for (Row userSessionActivityRow : userSessionActivityResult) {
-				Map<String, Object> sessionActivityMetrics = new HashMap<String, Object>();
+				Map<String, Object> sessionActivityMetrics = new HashMap<>();
 				String contentType = userSessionActivityRow.getString(ApiConstants._RESOURCE_TYPE);
 				sessionActivityMetrics.put(ApiConstants.SESSIONID, userSessionActivityRow.getString(ApiConstants._SESSION_ID));
 				sessionActivityMetrics.put(ApiConstants.GOORUOID, userSessionActivityRow.getString(ApiConstants._GOORU_OID));
@@ -494,26 +497,26 @@ public class ClassServiceImpl implements ClassService {
 	}
 
 	public Observable<ResponseParamDTO<ContentTaxonomyActivity>> getUserDomainParentMastery(String studentId, String domainIds) {
-	
-		Observable<ResponseParamDTO<ContentTaxonomyActivity>> observable = Observable.<ResponseParamDTO<ContentTaxonomyActivity>> create(s -> {
+
+
+		return Observable.<ResponseParamDTO<ContentTaxonomyActivity>> create(s -> {
 			try {
-					s.onNext(getUserDomainParentMasteryUsage(studentId, domainIds));		
+					s.onNext(getUserDomainParentMasteryUsage(studentId, domainIds));
 			} catch (Throwable t) {
 				s.onError(t);
 			}
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return observable;
 	}
-	
+
 	private ResponseParamDTO<ContentTaxonomyActivity> getUserDomainParentMasteryUsage(String studentId, String domainIds) {
-		
-		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
-		
+
+		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<>();
+
 		if(StringUtils.isEmpty(domainIds)) {
 			ValidationUtils.rejectInvalidRequest(ErrorCodes.E104, ApiConstants.COURSE_IDS);
 		}
-		ResultSet taxonomyParents = getCassandraService().getTaxonomyParents(domainIds);
+		ResultSet taxonomyParents = cassandraService.getTaxonomyParents(domainIds);
 		if(taxonomyParents != null) {
 			for(Row row : taxonomyParents) {
 				String subjectId = row.getString("subject_id");
@@ -526,14 +529,15 @@ public class ClassServiceImpl implements ClassService {
 		}
 		return responseParamDTO;
 	}
-	
-	
+
+
 	public Observable<ResponseParamDTO<ContentTaxonomyActivity>> getTaxonomyActivity(Integer depth, String... taxonomyLevelId) {
 
-		Observable<ResponseParamDTO<ContentTaxonomyActivity>> observable = Observable.<ResponseParamDTO<ContentTaxonomyActivity>> create(s -> {
+
+		return Observable.<ResponseParamDTO<ContentTaxonomyActivity>> create(s -> {
 			try {
 				switch(depth) {
-				case 1: 
+				case 1:
 					s.onNext(getSubjectActivity(taxonomyLevelId[0], taxonomyLevelId[1]));
 					break;
 				case 2:
@@ -551,15 +555,14 @@ public class ClassServiceImpl implements ClassService {
 			}
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return observable;
 	}
-	
+
 	private ResponseParamDTO<ContentTaxonomyActivity> getSubjectActivity(String studentId, String subjectId) {
 
-		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
+		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<>();
 		List<ContentTaxonomyActivity> contentTaxonomyActivityList = new ArrayList<>();
-		ResultSet userSubjectActivityResult = getCassandraService().getSubjectActivity(studentId, subjectId);
-		Map<String, Set<String>> itemMap = new HashMap<String, Set<String>>();
+		ResultSet userSubjectActivityResult = cassandraService.getSubjectActivity(studentId, subjectId);
+		Map<String, Set<String>> itemMap = new HashMap<>();
 		if (userSubjectActivityResult != null) {
 			for (Row row : userSubjectActivityResult) {
 				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
@@ -575,13 +578,13 @@ public class ClassServiceImpl implements ClassService {
 		responseParamDTO.setContent(contentTaxonomyActivityList);
 		return responseParamDTO;
 	}
-	
+
 	private ResponseParamDTO<ContentTaxonomyActivity> getCourseActivity(String studentId, String subjectId, String courseId) {
-		
-		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
+
+		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<>();
 		List<ContentTaxonomyActivity> contentTaxonomyActivityList = new ArrayList<>();
-		ResultSet userCourseActivityResult = getCassandraService().getCourseActivity(studentId, subjectId, courseId);
-		Map<String, Set<String>> itemMap = new HashMap<String, Set<String>>();
+		ResultSet userCourseActivityResult = cassandraService.getCourseActivity(studentId, subjectId, courseId);
+		Map<String, Set<String>> itemMap = new HashMap<>();
 		if (userCourseActivityResult != null) {
 			for (Row row : userCourseActivityResult) {
 				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
@@ -597,13 +600,13 @@ public class ClassServiceImpl implements ClassService {
 		responseParamDTO.setContent(contentTaxonomyActivityList);
 		return responseParamDTO;
 	}
-	
+
 	private ResponseParamDTO<ContentTaxonomyActivity> getDomainActivity(String studentId, String subjectId, String courseId, String domainId) {
-		
-		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
+
+		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<>();
 		List<ContentTaxonomyActivity> contentTaxonomyActivityList = new ArrayList<>();
-		ResultSet userDomainActivityResult = getCassandraService().getDomainActivity(studentId, subjectId, courseId, domainId);
-		Map<String, Set<String>> itemMap = new HashMap<String, Set<String>>();
+		ResultSet userDomainActivityResult = cassandraService.getDomainActivity(studentId, subjectId, courseId, domainId);
+		Map<String, Set<String>> itemMap = new HashMap<>();
 		if (userDomainActivityResult != null) {
 			for (Row row : userDomainActivityResult) {
 				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
@@ -619,13 +622,13 @@ public class ClassServiceImpl implements ClassService {
 		responseParamDTO.setContent(contentTaxonomyActivityList);
 		return responseParamDTO;
 	}
-	
+
 	private ResponseParamDTO<ContentTaxonomyActivity> getDomainParentActivity(String studentId, String subjectId, String courseId, String domainId) {
-		
-		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
+
+		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<>();
 		List<ContentTaxonomyActivity> contentTaxonomyActivityList = new ArrayList<>();
-		ResultSet userDomainActivityResult = getCassandraService().getDomainActivity(studentId, subjectId, courseId, domainId);
-		Map<String, Set<String>> itemMap = new HashMap<String, Set<String>>();
+		ResultSet userDomainActivityResult = cassandraService.getDomainActivity(studentId, subjectId, courseId, domainId);
+		Map<String, Set<String>> itemMap = new HashMap<>();
 		if (userDomainActivityResult != null) {
 			for (Row row : userDomainActivityResult) {
 				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
@@ -642,9 +645,10 @@ public class ClassServiceImpl implements ClassService {
 	}
 	private ResponseParamDTO<ContentTaxonomyActivity> getStandardActivity(String studentId, String subjectId, String courseId, String domainId, String standardsId) {
 
-		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<ContentTaxonomyActivity>();
+		ResponseParamDTO<ContentTaxonomyActivity> responseParamDTO = new ResponseParamDTO<>();
 		List<ContentTaxonomyActivity> contentTaxonomyActivityList = new ArrayList<>();
-		ResultSet userStandardActivityResult = getCassandraService().getStandardsActivity(studentId, subjectId, courseId, domainId, standardsId);
+		ResultSet userStandardActivityResult = cassandraService
+			.getStandardsActivity(studentId, subjectId, courseId, domainId, standardsId);
 		if (userStandardActivityResult != null) {
 			for (Row row : userStandardActivityResult) {
 				ContentTaxonomyActivity contentTaxonomyActivity = new ContentTaxonomyActivity();
@@ -659,26 +663,26 @@ public class ClassServiceImpl implements ClassService {
 		responseParamDTO.setContent(contentTaxonomyActivityList);
 		return responseParamDTO;
 	}
-	
+
 	public Observable<ResponseParamDTO<Map<String, Object>>> getTeacherGrade(String teacherUid, String userUid, String sessionId) {
-		
-		Observable<ResponseParamDTO<Map<String, Object>>> teacherGrade = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+
+
+		return Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
 			s.onNext(fetchTeacherGrade(teacherUid, userUid, sessionId));
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return teacherGrade;
 	}
-	
+
 	private ResponseParamDTO<Map<String, Object>> fetchTeacherGrade(String teacherUid, String userUid, String sessionId) {
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<>();
 		if(StringUtils.isBlank(teacherUid)) {
 			return responseParamDTO;
 		}
-		ResultSet result = getCassandraService().getStudentQuestionGrade(teacherUid, userUid, sessionId);
+		ResultSet result = cassandraService.getStudentQuestionGrade(teacherUid, userUid, sessionId);
 		List<Map<String, Object>> teacherGradeAsList = new ArrayList<>();
 		if(result != null) {
 			for(Row row : result) {
-				Map<String, Object> teacherGradeAsMap = new HashMap<String, Object>();
+				Map<String, Object> teacherGradeAsMap = new HashMap<>();
 				teacherGradeAsMap.put(ApiConstants.QUESTION_ID, row.getString(ApiConstants._QUESTION_ID));
 				teacherGradeAsMap.put(ApiConstants.SCORE, row.getLong(ApiConstants.SCORE));
 				teacherGradeAsList.add(teacherGradeAsMap);
@@ -689,39 +693,38 @@ public class ClassServiceImpl implements ClassService {
 	}
 
 	public Observable<ResponseParamDTO<SessionTaxonomyActivity>> getResourceUsage(String sessionId, String resourceIds) {
-		
-		Observable<ResponseParamDTO<SessionTaxonomyActivity>> resourceUsage = Observable.<ResponseParamDTO<SessionTaxonomyActivity>> create(s -> {
+
+
+		return Observable.<ResponseParamDTO<SessionTaxonomyActivity>> create(s -> {
 			s.onNext(fetchResourceUsage(sessionId, resourceIds));
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return resourceUsage;
 	}
 
 	@Override
 	public Observable<ResponseParamDTO<Map<String, Object>>> getStatisticalMetrics(String gooruOids) {
-		
-		Observable<ResponseParamDTO<Map<String, Object>>> teacherGrade = Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
+
+		return Observable.<ResponseParamDTO<Map<String, Object>>> create(s -> {
 			s.onNext(getStatMetrics(gooruOids));
 			s.onCompleted();
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return teacherGrade;
 	}
 
 	private ResponseParamDTO<Map<String, Object>> getStatMetrics(String gooruOids) {
 		if (StringUtils.isBlank(gooruOids)) {
 			ValidationUtils.rejectInvalidRequest(ErrorCodes.E104, ApiConstants.RESOURCE_IDS);
 		}
-		ResponseParamDTO<Map<String, Object>> resourceUsageObject = new ResponseParamDTO<Map<String, Object>>();
-		List<Map<String, Object>> resourceUsageList = new ArrayList<Map<String, Object>>();
+		ResponseParamDTO<Map<String, Object>> resourceUsageObject = new ResponseParamDTO<>();
+		List<Map<String, Object>> resourceUsageList = new ArrayList<>();
 		for (String resourceId : gooruOids.split(ApiConstants.COMMA)) {
-			ResultSet statMetricsResult = getCassandraService().getStatisticalMetrics(resourceId);
+			ResultSet statMetricsResult = cassandraService.getStatisticalMetrics(resourceId);
 			if (statMetricsResult != null) {
 				String clusterKey = null;
 				Map<String, Object> resourceUsage = null;
 				for (Row statMetricsRow : statMetricsResult.all()) {
 					String gooruOid = statMetricsRow.getString(ApiConstants._CLUSTERING_KEY);
 					if (clusterKey == null || (clusterKey != null && !clusterKey.equalsIgnoreCase(gooruOid))) {
-						resourceUsage = new HashMap<String, Object>();
+						resourceUsage = new HashMap<>();
 					}
 					resourceUsage.put(ApiConstants.GOORUOID, gooruOid);
 					resourceUsage.put(statMetricsRow.getString(ApiConstants._METRICS_NAME),
@@ -736,16 +739,17 @@ public class ClassServiceImpl implements ClassService {
 		resourceUsageObject.setContent(resourceUsageList);
 		return resourceUsageObject;
 	}
-	
+
 	private ResponseParamDTO<SessionTaxonomyActivity> fetchResourceUsage(String userUid, String resourceIds) {
-		
+
 		if(StringUtils.isBlank(resourceIds)) {
-			ValidationUtils.rejectInvalidRequest(ErrorCodes.E104, ApiConstants.RESOURCE_IDS);	
+			ValidationUtils.rejectInvalidRequest(ErrorCodes.E104, ApiConstants.RESOURCE_IDS);
 		}
-		ResponseParamDTO<SessionTaxonomyActivity> resourceUsageObject = new ResponseParamDTO<SessionTaxonomyActivity>();
-		List<SessionTaxonomyActivity> sessionTaxonomyActivities = new ArrayList<SessionTaxonomyActivity>();
+		ResponseParamDTO<SessionTaxonomyActivity> resourceUsageObject = new ResponseParamDTO<>();
+		List<SessionTaxonomyActivity> sessionTaxonomyActivities = new ArrayList<>();
 		for(String resourceId : resourceIds.split(ApiConstants.COMMA)) {
-			ResultSet sessionResourceActivityResult = getCassandraService().getSessionResourceTaxonomyActivity(ApiConstants.AS_TILDA+userUid, resourceId.trim());
+			ResultSet sessionResourceActivityResult = cassandraService
+				.getSessionResourceTaxonomyActivity(ApiConstants.AS_TILDA+userUid, resourceId.trim());
 			if(sessionResourceActivityResult != null) {
 				for(Row userSessionColumn : sessionResourceActivityResult) {
 					SessionTaxonomyActivity sessionTaxonomyActivity = new SessionTaxonomyActivity();
@@ -763,17 +767,17 @@ public class ClassServiceImpl implements ClassService {
 			}
 		}
 		List<SessionTaxonomyActivity> result = lambdaService.aggregateSessionTaxonomyActivityByGooruOid(sessionTaxonomyActivities);
-		resourceUsageObject.setContent(result);	
+		resourceUsageObject.setContent(result);
 		return resourceUsageObject;
 	}
 
 	private ResponseParamDTO<Map<String, Object>> getStudentCurrentLocation(String userUid, String classId) {
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
-		ResultSet resultRows = getCassandraService().getUserCurrentLocationInClass(classId, userUid);
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<>();
+		List<Map<String, Object>> dataMapAsList = new ArrayList<>();
+		ResultSet resultRows = cassandraService.getUserCurrentLocationInClass(classId, userUid);
 		if (resultRows != null) {
-			for(Row resultColumns : resultRows){	
-			Map<String, Object> dataAsMap = new HashMap<String, Object>();
+			for(Row resultColumns : resultRows){
+			Map<String, Object> dataAsMap = new HashMap<>();
 			dataAsMap.put(ApiConstants.getResponseNameByType(ApiConstants.CLASS), resultColumns.getString(ApiConstants._CLASS_UID));
 			dataAsMap.put(ApiConstants.getResponseNameByType(ApiConstants.COURSE), resultColumns.getString(ApiConstants._COURSE_UID));
 			dataAsMap.put(ApiConstants.getResponseNameByType(ApiConstants.UNIT), resultColumns.getString(ApiConstants._UNIT_UID));
@@ -785,12 +789,12 @@ public class ClassServiceImpl implements ClassService {
 		responseParamDTO.setContent(dataMapAsList);
 		return responseParamDTO;
 	}
-	
+
 	private ResponseParamDTO<Map<String, Object>> getUserPeerData(String classId, String courseId, String unitId, String nextLevelType) {
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<>();
+		List<Map<String, Object>> dataMapAsList = new ArrayList<>();
 		List<UserContentLocation> userContentLocationObject = new ArrayList<>();
-		ResultSet resultRows = getCassandraService().getAllUserCurrentLocationInClass(classId);
+		ResultSet resultRows = cassandraService.getAllUserCurrentLocationInClass(classId);
 		if (resultRows != null) {
 			for (Row columnList : resultRows) {
 				String courseUId = columnList.getString(ApiConstants._COURSE_UID);
@@ -802,9 +806,9 @@ public class ClassServiceImpl implements ClassService {
 					generateUserLocationObject(classId, nextLevelType, userContentLocationObject, columnList, courseUId, unitUId, lessonUId);
 				}
 			}
-			Map<String, Long> peers = userContentLocationObject.stream().collect(Collectors.groupingBy(object -> {return getGroupByField(object, nextLevelType);}, Collectors.counting()));
+			Map<String, Long> peers = userContentLocationObject.stream().collect(Collectors.groupingBy(object -> getGroupByField(object, nextLevelType), Collectors.counting()));
 			for (Map.Entry<String, Long> peer : peers.entrySet()) {
-				Map<String, Object> dataAsMap = new HashMap<String, Object>();
+				Map<String, Object> dataAsMap = new HashMap<>();
 				dataAsMap.put(ApiConstants.getResponseNameByType(nextLevelType), peer.getKey());
 				dataAsMap.put(ApiConstants.PEER_COUNT, peer.getValue());
 				dataMapAsList.add(dataAsMap);
@@ -815,9 +819,9 @@ public class ClassServiceImpl implements ClassService {
 	}
 
 	private ResponseParamDTO<Map<String, Object>> getUserPeerData(String classId, String courseId, String unitId, String lessonId, String nextLevelType) {
-		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<Map<String, Object>>();
-		List<Map<String, Object>> dataMapAsList = new ArrayList<Map<String, Object>>();
-		ResultSet resultRows = getCassandraService().getAllUserCurrentLocationInClass(classId);
+		ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<>();
+		List<Map<String, Object>> dataMapAsList = new ArrayList<>();
+		ResultSet resultRows = cassandraService.getAllUserCurrentLocationInClass(classId);
 		if (resultRows != null) {
 			for (Row columnList : resultRows) {
 				String courseUId = columnList.getString(ApiConstants._COURSE_UID); String unitUId = columnList.getString(ApiConstants._UNIT_UID);
@@ -829,7 +833,7 @@ public class ClassServiceImpl implements ClassService {
 					if (sessionTime >= (System.currentTimeMillis() - 900000)) {
 						status = ApiConstants.ACTIVE;
 					}
-					Map<String, Object> dataAsMap = new HashMap<String, Object>(3);
+					Map<String, Object> dataAsMap = new HashMap<>(3);
 					dataAsMap.put(ApiConstants.USER_UID, userId);
 					dataAsMap.put(ApiConstants.STATUS, status);
 					dataAsMap.put(ApiConstants.getResponseNameByType(nextLevelType), collectionUId);
@@ -840,25 +844,25 @@ public class ClassServiceImpl implements ClassService {
 		responseParamDTO.setContent(dataMapAsList);
 		return responseParamDTO;
 	}
-	
+
 	private void generateUserLocationObject(String classId, String nextLevelType, List<UserContentLocation> userContentLocationObject, Row columnList, String courseUId, String unitUId,
 			String lessonUId) {
 		String userId = columnList.getString(ApiConstants._USER_UID);
 		UserContentLocation userLocation = new UserContentLocation(classId, courseUId, unitUId, lessonUId, null, userId, nextLevelType);
 		userContentLocationObject.add(userLocation);
 	}
-	
+
 	private String getGroupByField(UserContentLocation userLocation, String nextLevelType) {
-		if(nextLevelType.equalsIgnoreCase(ApiConstants.UNIT)) { 
+		if(nextLevelType.equalsIgnoreCase(ApiConstants.UNIT)) {
 			return userLocation.getUnitUid();
 		} else if (nextLevelType.equalsIgnoreCase(ApiConstants.LESSON))  {
 			return userLocation.getLessonUid();
 		}
 		return userLocation.getUnitUid();
 	}
-	
+
 	private void childActivityMetrics(ContentTaxonomyActivity contentTaxonomyActivity, Row taxonomyUsage, Map<String,Set<String>> itemMap, String parentKey, String childKey) {
-		
+
 		if(ApiConstants.QUESTION.equalsIgnoreCase(taxonomyUsage.getString(ApiConstants._RESOURCE_TYPE))) {
 			contentTaxonomyActivity.setScore(taxonomyUsage.getLong(ApiConstants.SCORE));
 			contentTaxonomyActivity.setAttempts(taxonomyUsage.getLong(ApiConstants.VIEWS));
@@ -869,19 +873,19 @@ public class ClassServiceImpl implements ClassService {
 			if(itemMap.containsKey(parentKey)) {
 				itemMap.get(parentKey).add(childKey);
 			} else {
-				Set<String> childItems = new HashSet<String>();
+				Set<String> childItems = new HashSet<>();
 				childItems.add(childKey);
 				itemMap.put(parentKey, childItems);
 			}
 		}
 	}
-	
+
 	private void includeAdditionalMetrics(List<ContentTaxonomyActivity> taxonomyActivities, Map<String,Set<String>> attemptedItemMap, Integer depth) {
-		
-		Map<String, Long> itemCount = new HashMap<String,Long>();
+
+		Map<String, Long> itemCount = new HashMap<>();
 		if(attemptedItemMap != null ){
 			Set<String> childIds = attemptedItemMap.keySet();
-			ResultSet childItemsCount = getCassandraService().getTaxonomyItemCount(childIds);
+			ResultSet childItemsCount = cassandraService.getTaxonomyItemCount(childIds);
 			if(childItemsCount != null) {
 				for(Row row : childItemsCount) {
 					itemCount.put(row.getString("row_key"), row.getLong("item_count"));
@@ -889,7 +893,7 @@ public class ClassServiceImpl implements ClassService {
 			}
 		}
 		for(ContentTaxonomyActivity contentTaxonomyActivity : taxonomyActivities) {
-			
+
 			calculateScoreInPercentage(contentTaxonomyActivity);
 			switch(depth) {
 			case 1:
@@ -911,30 +915,31 @@ public class ClassServiceImpl implements ClassService {
 			}
 		}
 	}
-	
+
 	private Long getAttemptedItemCount(String id, Map<String,Set<String>> attemptedItemMap) {
 		if(attemptedItemMap == null) {
 			return null;
 		} else if( attemptedItemMap.containsKey(id)) {
-			return attemptedItemMap.get(id).size()+0L;
+			return (long) attemptedItemMap.get(id).size();
 		} else {
 			return 0L;
 		}
 	}
-	
+
 	private void calculateScoreInPercentage(ContentTaxonomyActivity contentTaxonomyActivity) {
 
 		if(contentTaxonomyActivity.getScore() != null && contentTaxonomyActivity.getAttempts() != null) {
-			contentTaxonomyActivity.setScoreInPercentage(Math.round((contentTaxonomyActivity.getScore()/contentTaxonomyActivity.getAttempts()))+0L);
+			contentTaxonomyActivity.setScoreInPercentage(
+				(long) Math.round((contentTaxonomyActivity.getScore() / contentTaxonomyActivity.getAttempts())));
 			//Avoiding score in response
 			contentTaxonomyActivity.setScore(null);
 		}
 	}
-	
+
 	private Map<String, String> getUsersLatestSessionId(String classId, String courseId, String unitId, String lessonId, String collectionId, String userId) {
-		
-		Map<String,String> usersSession = new HashMap<String,String>();
-		ResultSet  usersLatestSession = null;
+
+		Map<String,String> usersSession = new HashMap<>();
+		ResultSet  usersLatestSession;
 		if(StringUtils.isNotBlank(userId)) {
 			usersLatestSession = cassandraService.getUserClassContentLatestSession(classId, courseId, unitId, lessonId, collectionId, userId);
 		} else {
@@ -948,7 +953,7 @@ public class ClassServiceImpl implements ClassService {
 
 	public long getCulCollectionCount(String classId, String leafNodeId,
 			String collectionType) {
-		long totalCount = 0L;
+		long totalCount;
 		long collectionCount = 0L;
 		long externalAssCount = 0L;
 		long assessmentCount = 0L;
@@ -970,11 +975,12 @@ public class ClassServiceImpl implements ClassService {
 				: (assessmentCount + externalAssCount);
 		return totalCount;
 	}
-	
+
 	@Override
 	public Observable<ResponseParamDTO<SessionTaxonomyActivity>> getSessionTaxonomyActivity(String sessionId, String levelType) {
-		
-		Observable<ResponseParamDTO<SessionTaxonomyActivity>> sessionTaxonomyActivity = Observable.<ResponseParamDTO<SessionTaxonomyActivity>> create(s -> {
+
+
+		return Observable.<ResponseParamDTO<SessionTaxonomyActivity>> create(s -> {
 			try {
 			s.onNext(fetchSessionTaxonomyActivity(sessionId, levelType));
 			s.onCompleted();
@@ -982,12 +988,11 @@ public class ClassServiceImpl implements ClassService {
 				s.onError(e);
 			}
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return sessionTaxonomyActivity;
 	}
-	
+
 	@Override
 	public Observable<ResponseParamDTO<Map<String,Object>>> getEvent(String eventId) {
-		Observable<ResponseParamDTO<Map<String,Object>>> eventObject = Observable.<ResponseParamDTO<Map<String,Object>>> create(s -> {
+		return Observable.<ResponseParamDTO<Map<String,Object>>> create(s -> {
 			try {
 			s.onNext(fetchEvent(eventId));
 			s.onCompleted();
@@ -995,15 +1000,14 @@ public class ClassServiceImpl implements ClassService {
 				s.onError(e);
 			}
 		}).subscribeOn(Schedulers.from(observableExecutor));
-		return eventObject;
 	}
 	private ResponseParamDTO<Map<String,Object>> fetchEvent(String eventId){
-		ResponseParamDTO<Map<String,Object>> responseParamDTO = new ResponseParamDTO<Map<String,Object>>();
-		ResultSet result = getCassandraService().getEvent(eventId);
-		List<Map<String,Object>> content = new ArrayList<Map<String,Object>>();
-		if(result != null) {			
+		ResponseParamDTO<Map<String,Object>> responseParamDTO = new ResponseParamDTO<>();
+		ResultSet result = cassandraService.getEvent(eventId);
+		List<Map<String,Object>> content = new ArrayList<>();
+		if(result != null) {
 			for(Row row : result) {
-				Map<String,Object> eventMap = new HashMap<String, Object>();
+				Map<String,Object> eventMap = new HashMap<>();
 				eventMap.put(ApiConstants._EVENT_ID, row.getString(ApiConstants._EVENT_ID));
 				eventMap.put("fields", row.getString("fields"));
 				content.add(eventMap);
@@ -1013,10 +1017,11 @@ public class ClassServiceImpl implements ClassService {
 		return responseParamDTO;
 	}
 	private ResponseParamDTO<SessionTaxonomyActivity> fetchSessionTaxonomyActivity(String sessionId, String levelType) {
-	
-		ResultSet result = getCassandraService().getSessionResourceTaxonomyActivity(sessionId, null);
-		ResponseParamDTO<SessionTaxonomyActivity> responseParamDTO = new ResponseParamDTO<SessionTaxonomyActivity>();
-		List<SessionTaxonomyActivity> sessionTaxonomyActivities = new ArrayList<SessionTaxonomyActivity>();
+
+
+		ResultSet result = cassandraService.getSessionResourceTaxonomyActivity(sessionId, null);
+		ResponseParamDTO<SessionTaxonomyActivity> responseParamDTO = new ResponseParamDTO<>();
+		List<SessionTaxonomyActivity> sessionTaxonomyActivities = new ArrayList<>();
 		if(result != null) {
 			for(Row row : result) {
 				if(!ApiConstants.QUESTION.equalsIgnoreCase(row.getString(ApiConstants._RESOURCE_TYPE))) {
@@ -1042,4 +1047,4 @@ public class ClassServiceImpl implements ClassService {
 		responseParamDTO.setContent(lambdaService.aggregateSessionTaxonomyActivity(sessionTaxonomyActivities, levelType));
 		return responseParamDTO;
 	}
-} 
+}

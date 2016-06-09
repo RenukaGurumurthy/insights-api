@@ -8,7 +8,6 @@
 		<groupId>org.gooru.insights.api</groupId>
 		<version>0.1</version>
 	</parent>
-	<groupId>org.gooru.insights.api</groupId>
 	<artifactId>insights-v1-api</artifactId>
 	<version>1.0</version>
 	<name>insights-v1-api</name>
@@ -327,7 +326,7 @@
 			<artifactId>metrics-core</artifactId>
 			<version>3.0.2</version>
 		</dependency>
-				
+
 		<!-- cassandra dependency ends -->
 
 		<!-- Java Mailer API Dependency -->
