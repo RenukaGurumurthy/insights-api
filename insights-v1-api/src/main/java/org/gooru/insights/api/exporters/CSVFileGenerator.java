@@ -87,7 +87,6 @@ public class CSVFileGenerator {
 
 	private PrintStream generatePrintStream(boolean isNewFile,File file) throws FileNotFoundException{
 		PrintStream stream;
-		// FIXME: Where are we closing these stream???
 		if(isNewFile){
 			stream = new PrintStream(new BufferedOutputStream(new FileOutputStream(file, false)));
 		}else{
