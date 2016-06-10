@@ -10,60 +10,64 @@ import org.gooru.insights.api.spring.exception.NotFoundException;
 import org.springframework.validation.Errors;
 
 
-public class ValidationUtils {
+public final class ValidationUtils {
+
+	private ValidationUtils() {
+		throw new AssertionError();
+	}
 
 	public static void rejectIfNullOrEmpty(Errors errors, String data, String field, String errorMsg) {
 		if (StringUtils.isBlank(data)) {
 			errors.rejectValue(field, errorMsg);
 		}
 	}
-	
+
 	public static void rejectIfNullOrEmpty(Errors errors, Collection<?> data, String field, String errorMsg) {
 		if (data == null || data.isEmpty()) {
 			errors.rejectValue(field, errorMsg);
 		}
 	}
-	
+
 	public static void rejectIfNullOrEmpty(String data, String code, String... message) {
 		if (StringUtils.isBlank(data)) {
 			throw new BadRequestException(MessageBuilder.getMessage(code, message));
 		}
 	}
-	
+
 	public static void rejectIfNullOrEmpty(Collection<?> data, String code, String... message) {
 		if (data == null || data.isEmpty()) {
 			throw new BadRequestException(MessageBuilder.getMessage(code, message));
 		}
 	}
-	
+
 	public static void rejectIfFalse(Boolean data, String code, String... message) {
-		if (!Boolean.valueOf(data)) {
+		if (!data) {
 			throw new BadRequestException(MessageBuilder.getMessage(code, message));
 		}
 	}
-	
+
 	public static void rejectIfTrue(Boolean data, String code, String... message) {
-		if (Boolean.valueOf(data)) {
+		if (data) {
 			throw new BadRequestException(MessageBuilder.getMessage(code, message));
 		}
 	}
-	
+
 	public static void rejectInvalidRequest(String code, String... message) {
 		throw new BadRequestException(MessageBuilder.getMessage(code, message));
 	}
-	
+
 	public static void rejectIfNull(Object data, String code, String... message) {
 		if (data == null) {
 			throw new BadRequestException(MessageBuilder.getMessage(code, message));
 		}
 	}
-	
+
 	public static void rejectIfNotFound(Object data, String code, String... message) {
 		if (data == null) {
 			throw new NotFoundException(MessageBuilder.getMessage(code, message));
 		}
 	}
-	
+
 	public static void rejectIfNull(Errors errors, Object data, String field, String errorMsg) {
 		if (data == null) {
 			errors.rejectValue(field, errorMsg);
@@ -106,14 +110,14 @@ public class ValidationUtils {
 			errors.rejectValue(field, errorCode, errorMsg);
 		}
 	}
-	
+
 	public static void rejectIfMaxLimitExceed(int maxlimit, String content, String code, String... message) {
 		if (content != null && content.length() > maxlimit) {
 			throw new BadRequestException(MessageBuilder.getMessage(code, message));
 		}
 
 	}
-	
+
 	public static void rejectIfAlreadyExist(Object data, String errorCode, String errorMsg) {
 		if (data != null) {
 			throw new BadRequestException(MessageBuilder.getMessage(errorCode, errorMsg));

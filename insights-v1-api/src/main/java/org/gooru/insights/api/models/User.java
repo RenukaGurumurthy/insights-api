@@ -30,30 +30,30 @@ import org.apache.commons.lang.StringUtils;
 public class User {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 8293909847220631830L;
-	
+
 	private Integer userId;
-	
+
 	private String gooruUId;
-	
+
 	private String firstName;
-	
+
 	private String lastName;
-	
+
 	private String username;
-	
+
 	private String emailId = "";
-	
+
 	private Integer confirmStatus;
 	private String registerToken;
 	private UserRole userRole;
 	private Set<UserRoleAssoc> userRoleSet;
 	private String userRoleSetString;
 	private String referenceUid;
-	
-	
+
+
 
 	private String importCode;
 	private Integer addedBySystem;
@@ -63,14 +63,14 @@ public class User {
 
 	private String profileImageUrl;
 
-	
-	
+
+
 	private Integer viewFlag;
-	
+
 	private String token;
-    
+
 	private Boolean isDeleted;
-	
+
 
 
 	public String getEmailId() {
@@ -134,7 +134,7 @@ public class User {
 	public String getUserRoleSetString() {
 		return this.userRoleSetString;
 	}
-	
+
 	public void setUsername(String username) {
 		this.username = username;
 	}
@@ -147,13 +147,13 @@ public class User {
 		String usernameDisplay = username;
 		if (username == null || username.isEmpty()) {
 			String firstName = "";
-			if (this.getFirstName() != null) {
-				firstName = this.getFirstName();
+			if (this.firstName != null) {
+				firstName = this.firstName;
 				firstName = StringUtils.remove(firstName, " ");
 			}
 			String lastName = "";
-			if (this.getLastName() != null) {
-				lastName = this.getLastName();
+			if (this.lastName != null) {
+				lastName = this.lastName;
 			}
 
 			usernameDisplay = firstName;
@@ -266,5 +266,5 @@ public class User {
 	public void setGooruUId(String gooruUId) {
 		this.gooruUId = gooruUId;
 	}
-	
+
 }

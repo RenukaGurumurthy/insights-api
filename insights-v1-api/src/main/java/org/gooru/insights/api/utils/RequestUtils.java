@@ -12,10 +12,10 @@ import org.gooru.insights.api.spring.exception.BadRequestException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class RequestUtils {
+public final class RequestUtils {
 
 	private static String id;
-	
+
 	public RequestUtils() {
 		UUID uuid = UUID.randomUUID();
 		id = uuid.toString();
@@ -29,7 +29,7 @@ public class RequestUtils {
 			return request.getParameter(ApiConstants.SESSION_TOKEN);
 		}
 	}
-	
+
 	public static String getRequestData(HttpServletRequest request,String requestBody){
 		requestBody = request.getParameter(ApiConstants.DATA) != null ? request.getParameter(ApiConstants.DATA) : requestBody;
 			if(StringUtils.isBlank(requestBody)){

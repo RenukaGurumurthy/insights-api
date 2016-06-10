@@ -10,57 +10,57 @@ import org.gooru.insights.api.constants.ApiConstants;
 public class SessionTaxonomyActivity implements Cloneable {
 
 	private String sessionId;
-	
+
 	private String subjectId;
-	
+
 	private String courseId;
-	
+
 	private String domainId;
-	
+
 	private String standardsId;
-	
+
 	private String learningTargetsId;
-	
+
 	private Set<String> subjectIds;
-	
+
 	private Set<String> courseIds;
-	
+
 	private Set<String> domainIds;
-	
+
 	private Set<String> standardsIds;
-	
+
 	private Set<String> learningTargetsIds;
-	
+
 	private Long views;
-	
+
 	private Long timespent;
-	
+
 	private Long attempts;
-	
+
 	private Long score;
-	
+
 	private String questionType;
-	
+
 	private String resourceType;
-	
+
 	private String answerStatus;
 
 	private String resourceId;
-	
+
 	private String questionId;
-	
+
 	private Long reaction;
-	
+
 	private List<SessionTaxonomyActivity> questions;
-	
+
 	private Long totalAttemptedQuestions;
-	
+
 	private String displayCode;
-	
-	public Object clone()throws CloneNotSupportedException{  
-		return super.clone();  	
-	}  
-	
+
+	public Object clone()throws CloneNotSupportedException{
+		return super.clone();
+	}
+
 	public Long getTotalAttemptedQuestions() {
 		return totalAttemptedQuestions;
 	}
@@ -203,39 +203,39 @@ public class SessionTaxonomyActivity implements Cloneable {
 
 	public void setQuestions(List<SessionTaxonomyActivity> questionsData) {
 		if(this.questions == null) {
-			this.questions = new ArrayList<SessionTaxonomyActivity>();
+			this.questions = new ArrayList<>();
 			for(SessionTaxonomyActivity questionData : questionsData) {
 				questions.add(reAllocateObjects(questionData));
 			}
 		}
 	}
-	
+
 	public SessionTaxonomyActivity() {
 		this.totalAttemptedQuestions = 1L;
 	}
-	
+
 	private SessionTaxonomyActivity(SessionTaxonomyActivity obj) {
-		this.timespent = obj.getTimespent();
-		this.attempts = obj.getAttempts();
-		this.score = obj.getScore();
-		this.questionType = obj.getQuestionType();
-		this.questionId = obj.getQuestionId();
-		this.answerStatus = obj.getAnswerStatus();
-		this.reaction = obj.getReaction();
+		this.timespent = obj.timespent;
+		this.attempts = obj.attempts;
+		this.score = obj.score;
+		this.questionType = obj.questionType;
+		this.questionId = obj.questionId;
+		this.answerStatus = obj.answerStatus;
+		this.reaction = obj.reaction;
 	}
-	
+
 	public static String getGroupByField(SessionTaxonomyActivity obj1, String levelType) {
 		switch(levelType) {
 		case ApiConstants.SUBJECT:
-			return obj1.getCourseId();
+			return obj1.courseId;
 		case ApiConstants.COURSE:
-			return obj1.getDomainId();
+			return obj1.domainId;
 		case ApiConstants.DOMAIN:
-			return obj1.getStandardsId();
+			return obj1.standardsId;
 		case ApiConstants.STANDARDS:
-			return obj1.getLearningTargetsId();
+			return obj1.learningTargetsId;
 		}
-		return obj1.getDomainId();
+		return obj1.domainId;
 	}
 	private SessionTaxonomyActivity reAllocateObjects(SessionTaxonomyActivity questionData) {
 			return new SessionTaxonomyActivity(questionData);
@@ -247,7 +247,7 @@ public class SessionTaxonomyActivity implements Cloneable {
 
 	public void setSubjectIds(String subjectIds) {
 		if(this.subjectIds  == null){
-			this.subjectIds = new HashSet<String>();	
+			this.subjectIds = new HashSet<>();
 		}
 		this.subjectIds.add(subjectIds);
 	}
@@ -258,7 +258,7 @@ public class SessionTaxonomyActivity implements Cloneable {
 
 	public void setCourseIds(String courseIds) {
 		if(this.courseIds  == null){
-			this.courseIds = new HashSet<String>();	
+			this.courseIds = new HashSet<>();
 		}
 		this.courseIds.add(courseIds);
 	}
@@ -269,7 +269,7 @@ public class SessionTaxonomyActivity implements Cloneable {
 
 	public void setDomainIds(String domainIds) {
 		if(this.domainIds  == null){
-			this.domainIds = new HashSet<String>();	
+			this.domainIds = new HashSet<>();
 		}
 		this.domainIds.add(domainIds);
 	}
@@ -280,7 +280,7 @@ public class SessionTaxonomyActivity implements Cloneable {
 
 	public void setStandardsIds(String standardsIds) {
 		if(this.standardsIds  == null){
-			this.standardsIds = new HashSet<String>();	
+			this.standardsIds = new HashSet<>();
 		}
 		this.standardsIds.add(standardsIds);
 	}
@@ -299,7 +299,7 @@ public class SessionTaxonomyActivity implements Cloneable {
 
 	public void setLearningTargetsIds(String learningTargetsIds) {
 		if(this.learningTargetsIds  == null){
-			this.learningTargetsIds = new HashSet<String>();	
+			this.learningTargetsIds = new HashSet<>();
 		}
 		this.learningTargetsIds.add(learningTargetsIds);
 	}

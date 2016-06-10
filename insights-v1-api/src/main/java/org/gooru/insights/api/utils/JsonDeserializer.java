@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.gooru.insights.api.utils;
 
@@ -12,11 +12,15 @@ import flexjson.JSONDeserializer;
 
 /**
  * @author Insights Team
- * 
+ *
  */
-public class JsonDeserializer {
+public final class JsonDeserializer {
 
 	private static final Logger logger = LoggerFactory.getLogger(JsonDeserializer.class);
+
+	private JsonDeserializer() {
+		throw new AssertionError();
+	}
 
 	public static <T> T deserialize(String json, Class<T> clazz) {
 		try {
@@ -26,7 +30,7 @@ public class JsonDeserializer {
 			return null;
 		}
 	}
-	
+
 	public static <T> T deserializeTypeRef(String json, TypeReference<T> type) {
 		ObjectMapper mapper = new ObjectMapper();
 		try {

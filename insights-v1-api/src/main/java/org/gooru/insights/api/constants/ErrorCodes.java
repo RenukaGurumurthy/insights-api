@@ -1,6 +1,6 @@
 package org.gooru.insights.api.constants;
 
-public class ErrorCodes {
+public final class ErrorCodes {
 
 	public static final String E100 = "E100";
 	public static final String E101 = "E101";
@@ -15,4 +15,8 @@ public class ErrorCodes {
 	public static final String E110 = "E110";
 	public static final String E111 = "E111";
 	public static final String E112 = "E112";
+
+	private ErrorCodes() {
+		throw new AssertionError();
+	}
 }
