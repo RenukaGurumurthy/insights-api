@@ -54,13 +54,13 @@ public class LambdaServiceImpl implements LambdaService{
 			String collectionType, String userUid) {
 		List<StudentsClassActivity> filteredList;
 		if (!collectionType.equalsIgnoreCase("both") && StringUtils.isNotBlank(userUid)) {
-			filteredList = resultList.stream().filter(object -> object.getCollectionType().matches(collectionType) && object.getUserUid().equalsIgnoreCase(userUid))
+			filteredList = resultList.stream().filter(object -> object.getCollectionType().matches(collectionType) && object.getUserUid().equalsIgnoreCase(userUid) && object.getAttemptStatus().equals(ApiConstants.COMPLETED))
 					.collect(Collectors.toList());
 		}else if (collectionType.equalsIgnoreCase("both") && StringUtils.isNotBlank(userUid)) {
-			filteredList = resultList.stream().filter(object -> object.getUserUid().equalsIgnoreCase(userUid))
+			filteredList = resultList.stream().filter(object -> object.getUserUid().equalsIgnoreCase(userUid) && object.getAttemptStatus().equals(ApiConstants.COMPLETED))
 					.collect(Collectors.toList());
 		}else if(!collectionType.equalsIgnoreCase("both") && StringUtils.isBlank(userUid)){
-			filteredList = resultList.stream().filter(object -> object.getCollectionType().matches(collectionType))
+			filteredList = resultList.stream().filter(object -> object.getCollectionType().matches(collectionType) && object.getAttemptStatus().equals(ApiConstants.COMPLETED))
 					.collect(Collectors.toList());
 		}else{
 			filteredList = resultList;
