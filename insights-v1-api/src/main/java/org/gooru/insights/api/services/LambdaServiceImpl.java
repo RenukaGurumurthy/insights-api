@@ -134,7 +134,7 @@ public class LambdaServiceImpl implements LambdaService{
 		}
 		object1.setTotalCount(classService.getCulCollectionCount(object1.getClassId(), StudentsClassActivity.aggregateDepth(object1, level), object1.getCollectionType()));
 		object1.setScoreInPercentage(object1.getScore(), object1.getCompletedCount());
-		object1.setReaction((object1 != null ? object1.getReaction() : 0) / object1.getCompletedCount());
+		object1.setReaction(Math.round((double)((object1 != null ? object1.getReaction() : 0) / object1.getCompletedCount())));
 		object1.setScore(null);
 		object1.setClassId(null);
 		object1.setCollectionType(null);
@@ -236,7 +236,7 @@ public class LambdaServiceImpl implements LambdaService{
 	}
 	private SessionTaxonomyActivity removeUnwantedFields(SessionTaxonomyActivity obj1, String depthLevel) {
 		
-		obj1.setScore(obj1.getScore()/obj1.getTotalAttemptedQuestions());
+		obj1.setScore(Math.round((double)(obj1.getScore()/obj1.getTotalAttemptedQuestions())));
 		obj1.setTotalAttemptedQuestions(null);
 		obj1.setSubjectId(null);
 		obj1.setCourseId(null);
