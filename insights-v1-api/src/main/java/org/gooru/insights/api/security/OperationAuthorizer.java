@@ -36,13 +36,7 @@ import org.springframework.stereotype.Component;
 public class OperationAuthorizer  {
 
 	public boolean hasAuthorization(AuthorizeOperations authorizeOperations) {
-		if (hasAuthority(authorizeOperations)) {
-			return true;
-		}
-		if (hasAuthority(authorizeOperations)) {
-			return true;
-		}
-		return false;
+		return hasAuthority(authorizeOperations) || hasAuthority(authorizeOperations);
 	}
 
 	private boolean hasAuthority(AuthorizeOperations authorizeOperations) {
@@ -88,21 +82,12 @@ public class OperationAuthorizer  {
 	}
 
 	public boolean hasAuthorization(String operation) {
-		if (hasAutority(operation)) {
-			return true;
-		}
-		if (hasAutority(operation)) {
-			return true;
-		}
-		return false;
+		return hasAutority(operation) || hasAutority(operation);
 	}
 
 	private boolean hasAutority(String operation) {
 		List<String> authorities = getAuthorizationsFromCache();
-		if (authorities != null && operation != null && authorities != null && authorities.contains(operation)) {
-			return true;
-		}
-		return false;
+		return authorities != null && operation != null && authorities != null && authorities.contains(operation);
 	}
 
 	private List<String> getAuthorizationsFromCache() {

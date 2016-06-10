@@ -3,39 +3,39 @@ package org.gooru.insights.api.models;
 public class ContentTaxonomyActivity {
 
 	private String subjectId;
-	
+
 	private String courseId;
-	
+
 	private String domainId;
-	
+
 	private String standardsId;
-	
+
 	private String learningTargetsId;
 
 	private String gooruOid;
-	
+
 	private String resourceFormat;
-	
+
 	private String resourceType;
-	
+
 	private Long views;
-	
+
 	private Long attempts;
-	
+
 	private Long timespent;
-	
+
 	private Long score;
-	
+
 	private String userUid;
 
 	private Long attemptedItemCount;
-	
+
 	private Long scoreInPercentage;
-	
+
 	private Long itemCount;
 
 	private String displayCode;
-	
+
 	public String getSubjectId() {
 		return subjectId;
 	}
@@ -147,41 +147,41 @@ public class ContentTaxonomyActivity {
 	public void setAttemptedItemCount(Long itemCount) {
 		this.attemptedItemCount = itemCount;
 	}
-	
+
 	public ContentTaxonomyActivity() {
 	}
-	
+
 	public ContentTaxonomyActivity(ContentTaxonomyActivity contentTaxonomyActivity, Integer depth) {
 
 		switch(depth) {
 		case 1:
-			this.setCourseId(contentTaxonomyActivity.getCourseId());
+			this.setCourseId(contentTaxonomyActivity.courseId);
 			break;
 		case 2:
-			this.setDomainId(contentTaxonomyActivity.getDomainId());
+			this.setDomainId(contentTaxonomyActivity.domainId);
 			break;
 		case 3:
-			this.setStandardsId(contentTaxonomyActivity.getStandardsId());
+			this.setStandardsId(contentTaxonomyActivity.standardsId);
 			break;
 		case 4:
-			this.setLearningTargetsId(contentTaxonomyActivity.getLearningTargetsId());
+			this.setLearningTargetsId(contentTaxonomyActivity.learningTargetsId);
 			break;
 		}
 	}
-	
+
 	public static String taxonomyDepthField(ContentTaxonomyActivity contentTaxonomyActivity,Integer depth) {
-		
+
 		switch(depth) {
 		case 1:
-			return contentTaxonomyActivity.getCourseId();
+			return contentTaxonomyActivity.courseId;
 		case 2:
-			return contentTaxonomyActivity.getDomainId();
+			return contentTaxonomyActivity.domainId;
 		case 3:
-			return contentTaxonomyActivity.getStandardsId();
+			return contentTaxonomyActivity.standardsId;
 		case 4:
-			return contentTaxonomyActivity.getLearningTargetsId();
+			return contentTaxonomyActivity.learningTargetsId;
 		}
-		return contentTaxonomyActivity.getCourseId();
+		return contentTaxonomyActivity.courseId;
 	}
 
 	public Long getScoreInPercentage() {

@@ -32,10 +32,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AuthorizeOperations
 {
-	public String operations();
-	
-	public String[] partyOperations() default {};
-	
-	public String partyUId() default "";
+	String operations();
+
+	String[] partyOperations() default {};
+
+	String partyUId() default "";
 
 }

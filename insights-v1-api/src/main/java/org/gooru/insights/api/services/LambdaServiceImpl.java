@@ -2,7 +2,6 @@ package org.gooru.insights.api.services;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,13 +23,13 @@ import org.springframework.stereotype.Component;
 public class LambdaServiceImpl implements LambdaService{
 
 	private static final Logger LOG = LoggerFactory.getLogger(LambdaServiceImpl.class);
-	
+
 	@Autowired
 	private ClassService classService;
 
 	@Override
 	public List<ContentTaxonomyActivity> aggregateTaxonomyActivityData(List<ContentTaxonomyActivity> resultList,  Integer depth) {
-		
+
 		long startTime =  System.currentTimeMillis();
 		Map<String, List<ContentTaxonomyActivity>> data = resultList.parallelStream().collect(Collectors.groupingBy(object -> ContentTaxonomyActivity.taxonomyDepthField(object,depth)));
 		resultList = data.entrySet().parallelStream().map(taxonomy -> taxonomy.getValue().parallelStream().reduce((f1,f2) -> getContentTaxonomyActivity(f1,f2, depth)).get()).collect(Collectors.toList());
@@ -38,22 +37,22 @@ public class LambdaServiceImpl implements LambdaService{
 		InsightsLogger.debug("content taxonomy activity 1st level aggregation Time:"+(endTime - startTime)+" record count:"+resultList.size());
 		return resultList;
 	}
-	
+
 	@Override
 	public List<Map<String, List<StudentsClassActivity>>> aggregateStudentsClassActivityData(List<StudentsClassActivity> resultList, String collectionType, String aggregateLevel) {
-		
-		Map<Object, Map<Object, List<StudentsClassActivity>>> groupResultList = resultList.stream()
-				.collect(Collectors.groupingBy(o -> o.getUserUid(), Collectors.groupingBy(o -> StudentsClassActivity.aggregateDepth(o, aggregateLevel))));
 
-		List<Map<String, List<StudentsClassActivity>>> aggregatedResultList = groupResultList.entrySet().stream()
+		Map<Object, Map<Object, List<StudentsClassActivity>>> groupResultList = resultList.stream()
+				.collect(Collectors.groupingBy(StudentsClassActivity::getUserUid, Collectors.groupingBy(o -> StudentsClassActivity.aggregateDepth(o, aggregateLevel))));
+
+
+		return groupResultList.entrySet().stream()
 				.map(fo -> aggregateStudentClassActivity(fo, collectionType, aggregateLevel)).collect(Collectors.toList());
-		return aggregatedResultList;
 	}
-	
+
 	@Override
 	public List<StudentsClassActivity> applyFiltersInStudentsClassActivity(List<StudentsClassActivity> resultList,
 			String collectionType, String userUid) {
-		List<StudentsClassActivity> filteredList = null;
+		List<StudentsClassActivity> filteredList;
 		if (!collectionType.equalsIgnoreCase("both") && StringUtils.isNotBlank(userUid)) {
 			filteredList = resultList.stream().filter(object -> object.getCollectionType().matches(collectionType) && object.getUserUid().equalsIgnoreCase(userUid))
 					.collect(Collectors.toList());
@@ -69,21 +68,22 @@ public class LambdaServiceImpl implements LambdaService{
 
 		return filteredList;
 	}
-	
+
 	private void aggregateTaxonomyActivityData(List<ContentTaxonomyActivity> resultList,  Integer depth1, Integer depth2) {
 	    long startTime =  System.currentTimeMillis();
-	                
-	    Map<Object, Map<Object, List<ContentTaxonomyActivity>>> data = resultList.stream().collect(Collectors.groupingBy(object -> ContentTaxonomyActivity.taxonomyDepthField(object,depth1), Collectors.groupingBy(object -> ContentTaxonomyActivity.taxonomyDepthField((ContentTaxonomyActivity) object,depth2))));
+
+	    Map<Object, Map<Object, List<ContentTaxonomyActivity>>> data = resultList.stream().collect(Collectors.groupingBy(object -> ContentTaxonomyActivity.taxonomyDepthField(object,depth1), Collectors.groupingBy(object -> ContentTaxonomyActivity.taxonomyDepthField(
+
+			object,depth2))));
 	    List<List<ContentTaxonomyActivity>> resultData = data.entrySet().stream().map(firstLevelObject -> firstLevelObject.getValue().entrySet().stream().map(secondLevelObject -> secondLevelObject.getValue().stream().reduce((f1,f2) -> getContentTaxonomyActivity(f1,f2, depth2)).get()).collect(Collectors.toList())).collect(Collectors.toList());
 	    resultList.clear();
-	    Iterator<List<ContentTaxonomyActivity>> dataList = resultData.iterator();
-	    while(dataList.hasNext()) {
-	         resultList.addAll(dataList.next());
-	    }
+		for (List<ContentTaxonomyActivity> aResultData : resultData) {
+			resultList.addAll(aResultData);
+		}
 	    long endTime = System.currentTimeMillis();
 	    InsightsLogger.debug("content taxonomy activity 2nd level aggregation Time:"+(endTime - startTime));
 	}
-	
+
 	private ContentTaxonomyActivity getContentTaxonomyActivity(ContentTaxonomyActivity  object1, ContentTaxonomyActivity  object2, Integer depth) {
 		ContentTaxonomyActivity  contentTaxonomyActivity = new ContentTaxonomyActivity(object1,depth);
 			contentTaxonomyActivity.setScore(sum(object1.getScore(), object2.getScore()));
@@ -92,25 +92,24 @@ public class LambdaServiceImpl implements LambdaService{
 			contentTaxonomyActivity.setTimespent(sum(object1.getTimespent(), object2.getTimespent()));
 		return contentTaxonomyActivity;
 	}
-	
+
 	private StudentsClassActivity getStudentsClassActivity(StudentsClassActivity object1, StudentsClassActivity object2,
 			String level) {
-		StudentsClassActivity studentsClassActivity = object1;
-		studentsClassActivity.setCollectionType(object1.getCollectionType());
-		studentsClassActivity.setScore(sum(object1.getScore(), object2.getScore()));
-		studentsClassActivity.setReaction(sum(object1.getReaction(), object2.getReaction()));
-		if (ApiConstants.COLLECTION.equals(object1.getCollectionType())) {			
-			studentsClassActivity.setCollectionId(object1.getCollectionId());
-			studentsClassActivity.setViews(sum(object1.getViews(), object2.getViews()));
+		object1.setCollectionType(object1.getCollectionType());
+		object1.setScore(sum(object1.getScore(), object2.getScore()));
+		object1.setReaction(sum(object1.getReaction(), object2.getReaction()));
+		if (ApiConstants.COLLECTION.equals(object1.getCollectionType())) {
+			object1.setCollectionId(object1.getCollectionId());
+			object1.setViews(sum(object1.getViews(), object2.getViews()));
 		}else{
-			studentsClassActivity.setAssessmentId(object1.getAssessmentId());
-			studentsClassActivity.setAttempts(sum(object1.getAttempts(), object2.getAttempts()));
+			object1.setAssessmentId(object1.getAssessmentId());
+			object1.setAttempts(sum(object1.getAttempts(), object2.getAttempts()));
 		}
-		studentsClassActivity.setTimeSpent(sum(object1.getTimeSpent(), object2.getTimeSpent()));
-		studentsClassActivity.setCompletedCount(1L);
-		return studentsClassActivity;
+		object1.setTimeSpent(sum(object1.getTimeSpent(), object2.getTimeSpent()));
+		object1.setCompletedCount(1L);
+		return object1;
 	}
-	
+
 	private StudentsClassActivity customizeFieldsInStudentClassActivity(StudentsClassActivity object1, String collectionType, String level) {
 		switch(level) {
 			case ApiConstants.UNIT:
@@ -130,7 +129,7 @@ public class LambdaServiceImpl implements LambdaService{
 					object1.setAssessmentId(null);
 				}
 				break;
-				
+
 		}
 		object1.setTotalCount(classService.getCulCollectionCount(object1.getClassId(), StudentsClassActivity.aggregateDepth(object1, level), object1.getCollectionType()));
 		object1.setScoreInPercentage(object1.getScore(), object1.getCompletedCount());
@@ -141,7 +140,7 @@ public class LambdaServiceImpl implements LambdaService{
 		object1.setUserUid(null);
 		return object1;
 	}
-	
+
 	private Map<String,List<StudentsClassActivity>> aggregateStudentClassActivity(Map.Entry<Object, Map<Object, List<StudentsClassActivity>>> fo, String collectionType, String aggregateLevel) {
 		Map<String, List<StudentsClassActivity>> studentActivity = new HashMap<>();
 		List<StudentsClassActivity> studentClassActivity = fo.getValue().entrySet().stream()
@@ -152,27 +151,31 @@ public class LambdaServiceImpl implements LambdaService{
 		studentActivity.put((String)fo.getKey(), studentClassActivity);
 		return studentActivity;
 	}
-	
+
 	@Override
 	public List<SessionTaxonomyActivity> aggregateSessionTaxonomyActivity(List<SessionTaxonomyActivity> sessionTaxonomyActivity, String levelType) {
-		
-		List<SessionTaxonomyActivity> resultSet = new ArrayList<SessionTaxonomyActivity>();
-		
-		Map<Object, Map<Object, List<SessionTaxonomyActivity>>> groupedData = sessionTaxonomyActivity.parallelStream().collect(Collectors.groupingBy(object -> object.getStandardsId(),Collectors.groupingBy(object -> object.getLearningTargetsId())));
-		
-		List<List<SessionTaxonomyActivity>>  standardsObj = groupedData.entrySet().parallelStream().map(data -> aggregateLearningTargetsObj(data.getValue())).collect(Collectors.toList());		
-		
-		standardsObj.forEach(o -> resultSet.addAll(o));
-		
+
+		List<SessionTaxonomyActivity> resultSet = new ArrayList<>();
+
+		Map<Object, Map<Object, List<SessionTaxonomyActivity>>> groupedData = sessionTaxonomyActivity.parallelStream().collect(Collectors.groupingBy(
+
+
+			SessionTaxonomyActivity::getStandardsId,Collectors.groupingBy(SessionTaxonomyActivity::getLearningTargetsId)));
+
+		List<List<SessionTaxonomyActivity>>  standardsObj = groupedData.entrySet().parallelStream().map(data -> aggregateLearningTargetsObj(data.getValue())).collect(Collectors.toList());
+
+		standardsObj.forEach(resultSet::addAll);
+
 		return resultSet;
 	}
-	
+
 	private List<SessionTaxonomyActivity> aggregateLearningTargetsObj(Map<Object, List<SessionTaxonomyActivity>> obj){
 			return obj.entrySet().parallelStream().map(ob -> generateStandardsMetrics(ob.getValue())).collect(Collectors.toList());
 	}
-	
+
 	private SessionTaxonomyActivity generateStandardsMetrics(List<SessionTaxonomyActivity> obj){
-		SessionTaxonomyActivity standardsObj = obj.parallelStream().map(o -> generateQuestionObj(o)).reduce((o1,o2) -> getSessionTaxonomyActivity(o1, o2)).map(ob -> removeUnwantedFields(ob, ApiConstants.DOMAIN)).get();
+		SessionTaxonomyActivity standardsObj = obj.parallelStream().map(this::generateQuestionObj).reduce(
+			this::getSessionTaxonomyActivity).map(ob -> removeUnwantedFields(ob, ApiConstants.DOMAIN)).get();
 		standardsObj.setQuestions(obj);
 		return standardsObj;
 	}
@@ -187,25 +190,31 @@ public class LambdaServiceImpl implements LambdaService{
 	@Override
 	public List<SessionTaxonomyActivity> aggregateSessionTaxonomyActivityByGooruOid(List<SessionTaxonomyActivity> sessionTaxonomyActivity) {
 
-		Map<String, List<SessionTaxonomyActivity>> groupedData = sessionTaxonomyActivity.parallelStream().collect(Collectors.groupingBy(object -> object.getResourceId()));		
-		
-		sessionTaxonomyActivity = groupedData.entrySet().parallelStream().map(taxonomy -> taxonomy.getValue().parallelStream().reduce((f1,f2) -> getSessionTaxonomyActivityByTax(f1,f2)).get()).map(f1 -> {removeUnwantedFields(f1);return f1;}).collect(Collectors.toList());
-		
+		Map<String, List<SessionTaxonomyActivity>> groupedData = sessionTaxonomyActivity.parallelStream().collect(Collectors.groupingBy(
+
+
+			SessionTaxonomyActivity::getResourceId));
+
+		sessionTaxonomyActivity = groupedData.entrySet().parallelStream().map(taxonomy -> taxonomy.getValue().parallelStream().reduce(
+
+
+			this::getSessionTaxonomyActivityByTax).get()).map(f1 -> {removeUnwantedFields(f1);return f1;}).collect(Collectors.toList());
+
 		return sessionTaxonomyActivity;
 	}
-	
+
 	private Long sum(Long obj1, Long obj2) {
 		if(obj1 != null) {
 			if(obj2 != null)
 				return obj1+obj2;
-			else 
+			else
 				return obj1;
-		} else if (obj2 != null) 
+		} else if (obj2 != null)
 			return obj2;
-		
+
 		return null;
 	}
-	
+
 	private SessionTaxonomyActivity getSessionTaxonomyActivity(SessionTaxonomyActivity obj1, SessionTaxonomyActivity obj2) {
 		obj1.setScore(obj1.getScore()+ obj2.getScore());
 		obj1.setAttempts(obj1.getAttempts() + obj2.getAttempts());
@@ -214,7 +223,7 @@ public class LambdaServiceImpl implements LambdaService{
 		obj1.setTotalAttemptedQuestions(obj1.getTotalAttemptedQuestions() + obj2.getTotalAttemptedQuestions());
 		return obj1;
 	}
-	
+
 	private SessionTaxonomyActivity getSessionTaxonomyActivityByTax(SessionTaxonomyActivity obj1,
 			SessionTaxonomyActivity obj2) {
 		obj1.getSubjectIds().addAll(obj2.getSubjectIds());
@@ -222,7 +231,7 @@ public class LambdaServiceImpl implements LambdaService{
 		obj1.getDomainIds().addAll(obj2.getDomainIds());
 		obj1.getStandardsIds().addAll(obj2.getStandardsIds());
 		obj1.getLearningTargetsIds().addAll(obj2.getLearningTargetsIds());
-		
+
 		return obj1;
 	}
 	private SessionTaxonomyActivity removeUnwantedFields(SessionTaxonomyActivity obj1) {
@@ -242,7 +251,7 @@ public class LambdaServiceImpl implements LambdaService{
 		obj1.setCourseId(null);
 		obj1.setDomainId(null);
 		if(obj1.getLearningTargetsId() != null && !obj1.getLearningTargetsId().equalsIgnoreCase(ApiConstants.NA)){
-			obj1.setStandardsId(null);	
+			obj1.setStandardsId(null);
 		}else{
 			obj1.setLearningTargetsId(null);
 		}

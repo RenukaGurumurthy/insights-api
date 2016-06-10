@@ -43,7 +43,7 @@ import flexjson.JSONSerializer;
 public class InsightsExceptionResolver extends SimpleMappingExceptionResolver {
 
 	private static final String DEFAULT_ERROR = "Internal Server Error!!!";
-	
+
 	private static final String DEVELOPER_MESSAGE = "developerMessage";
 
 	private static final String MAIL_To = "mailTo";
@@ -51,15 +51,15 @@ public class InsightsExceptionResolver extends SimpleMappingExceptionResolver {
 	private static final String SUPPORT_EMAIL_ID = "support@goorulearning.org";
 
 	private static final String STATUS_CODE = "statusCode";
-	
+
 	private static final String DEFAULT_TRACEID = "traceId Not-Specified";
-	
+
 	private static final String CONTENT_UNAVAILABLE = "Content Unavailable!";
 
 	public ModelAndView doResolveException(HttpServletRequest request,
 			HttpServletResponse response, Object handler, Exception ex) {
-		ResponseParamDTO<Map<Object, Object>> responseDTO = new ResponseParamDTO<Map<Object, Object>>();
-		Map<Object, Object> errorMap = new HashMap<Object, Object>();
+		ResponseParamDTO<Map<Object, Object>> responseDTO = new ResponseParamDTO<>();
+		Map<Object, Object> errorMap = new HashMap<>();
 		Integer statusCode = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 		String traceId = request.getAttribute("traceId") != null ? request.getAttribute("traceId").toString() : DEFAULT_TRACEID;
 		if (ex instanceof BadRequestException) {

@@ -16,7 +16,7 @@ public class MessageBuilder {
 	private static final String DEFAULT_MESSAGE = "Please contact developer!";
 
 	private static final String DEFAULT_MESSAGE_FILE_PATH = "message-properties/message";
-	
+
 	private static final String MESSAGE_FILE_PATH = "message.file.path";
 
 	private static final String LOCALE_LANG = "locale.lang";
@@ -35,15 +35,17 @@ public class MessageBuilder {
 	@PostConstruct
 	private void init() {
 
-		Locale locale = new Locale((!constants.getProperty(LOCALE_LANG).startsWith("$") ? constants.get(LOCALE_LANG).toString() : DEFAULT_LOCALE_LANG),
-				!constants.getProperty(LOCALE_COUNTRY).startsWith("$") ? constants.get(LOCALE_COUNTRY).toString() : DEFAULT_LOCALE_COUNTRY);
-		
-		resourceBundle = ResourceBundle.getBundle(!constants.getProperty(MESSAGE_FILE_PATH).startsWith("$") ? constants.get(MESSAGE_FILE_PATH).toString() : DEFAULT_MESSAGE_FILE_PATH, locale);
+		Locale locale = new Locale((!constants.getProperty(LOCALE_LANG).startsWith("$") ?
+			constants.getProperty(LOCALE_LANG) : DEFAULT_LOCALE_LANG),
+				!constants.getProperty(LOCALE_COUNTRY).startsWith("$") ? constants.getProperty(LOCALE_COUNTRY) : DEFAULT_LOCALE_COUNTRY);
+
+		resourceBundle = ResourceBundle.getBundle(!constants.getProperty(MESSAGE_FILE_PATH).startsWith("$") ?
+			constants.getProperty(MESSAGE_FILE_PATH) : DEFAULT_MESSAGE_FILE_PATH, locale);
 	}
 
 	/**
 	 * This will provide the value in the localizer
-	 * 
+	 *
 	 * @param key
 	 *            will be the fetch key
 	 * @return value returned as string
@@ -57,7 +59,7 @@ public class MessageBuilder {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param key
 	 * @param replacer
 	 * @return
@@ -75,9 +77,9 @@ public class MessageBuilder {
 	}
 
 	public static String buildString(Object[] text) {
-		StringBuffer stringBuffer = new StringBuffer();
-		for (int i = 0; i < text.length; i++) {
-			stringBuffer.append(text[i]);
+		StringBuilder stringBuffer = new StringBuilder();
+		for (Object aText : text) {
+			stringBuffer.append(aText);
 		}
 		return stringBuffer.toString();
 	}

@@ -19,8 +19,8 @@ import flexjson.JSONSerializer;
 import rx.Observable;
 
 public class BaseController {
-	
-	
+
+
 	@Deprecated
 	public <M> ModelAndView getModel(ResponseParamDTO<M> data) {
 
@@ -28,24 +28,24 @@ public class BaseController {
 		model.addObject(modelAttributes.RETURN_NAME.getAttribute() , new JSONSerializer().exclude(ApiConstants.EXCLUDE_CLASSES).deepSerialize(data));
 		return model;
 	}
-	
+
 	public <M> DeferredResult<M> getDeferredResult(Observable<M> peersObserver) {
 		DeferredResult<M> defferedResponse = new DeferredResult<>();
-		peersObserver.subscribe(m -> defferedResponse.setResult(m), e -> defferedResponse.setErrorResult(e));
+		peersObserver.subscribe(defferedResponse::setResult, defferedResponse::setErrorResult);
 		return defferedResponse;
 	}
-	
+
 	public HttpServletResponse setAllowOrigin(HttpServletResponse response) {
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Headers", "Cache-Control, Pragma, Origin, Authorization, Content-Type, X-Requested-With");
 		response.setHeader("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
 		return response;
 	}
-	
+
 	public void generateCSVOutput(HttpServletResponse response, File csvFile) throws IOException {
 		InputStream sheet = new FileInputStream(csvFile);
 		response.setContentType(apiHeaders.CSV_RESPONSE.apiHeader());
-		response.setHeader("Content-Disposition", "attachment; filename=\""+csvFile.getName()+"\"");
+		response.setHeader("Content-Disposition", "attachment; filename=\""+csvFile.getName()+ '"');
 		IOUtils.copy(sheet, response.getOutputStream());
 		response.getOutputStream().flush();
 		csvFile.delete();
