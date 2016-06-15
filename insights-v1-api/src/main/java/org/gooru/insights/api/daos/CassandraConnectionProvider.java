@@ -5,6 +5,7 @@ import java.util.Properties;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 
+import org.gooru.insights.api.constants.ApiConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,7 @@ public class CassandraConnectionProvider {
 			cluster = Cluster
 					.builder()
 					.withClusterName(clusterName)
-					.addContactPoint(hosts)
+					.addContactPoints(hosts.split(ApiConstants.COMMA))
 					.withRetryPolicy(DefaultRetryPolicy.INSTANCE)
 					/*.withReconnectionPolicy(
 							new ExponentialReconnectionPolicy(1000, 30000))
