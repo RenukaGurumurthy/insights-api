@@ -367,15 +367,15 @@ public class ClassServiceImpl implements ClassService {
 				studentsClassActivity.setCollectionType(classActivityRow.getString(ApiConstants._COLLECTION_TYPE));
 				studentsClassActivity.setScore(classActivityRow.getLong(ApiConstants.SCORE));
 				studentsClassActivity.setReaction(classActivityRow.getLong(ApiConstants.REACTION));
-				if (ApiConstants.COLLECTION.equals(collectionType)) {
+				if (collectionType.equals(ApiConstants.COLLECTION)) {
 					studentsClassActivity.setCollectionId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
 					studentsClassActivity.setViews(classActivityRow.getLong(ApiConstants.VIEWS));
-				} else if (ApiConstants.COLLECTION.equals(collectionType)){
+				} else if (collectionType.equals(ApiConstants.ASSESSMENT)){
 					studentsClassActivity.setAssessmentId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
 					studentsClassActivity.setAttempts(classActivityRow.getLong(ApiConstants.VIEWS));
 				}else {
 				  studentsClassActivity.setCollectionId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
-          studentsClassActivity.setViews(classActivityRow.getLong(ApiConstants.VIEWS));
+				  studentsClassActivity.setViews(classActivityRow.getLong(ApiConstants.VIEWS));
 				}
 				studentsClassActivity.setTimeSpent(classActivityRow.getLong(ApiConstants._TIME_SPENT));
 				studentsClassActivity.setAttemptStatus(classActivityRow.getString(ApiConstants._ATTEMPT_STATUS));
