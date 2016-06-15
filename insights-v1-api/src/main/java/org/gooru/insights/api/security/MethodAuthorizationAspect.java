@@ -64,7 +64,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	@Autowired
 	private CassandraService cassandraService;
 
-	private Map<String, String> entityOperationsRole = new HashMap<String, String>();
+	private final Map<String, String> entityOperationsRole = new HashMap<>();
 
 	private static final Logger LOG = LoggerFactory.getLogger(MethodAuthorizationAspect.class);
 
@@ -176,7 +176,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	private boolean isAuthorizedUser(String classGooruId, String userUidFromSession) {
 		if (StringUtils.isNotBlank(classGooruId)) {
 			ResultSet authorizedUsers = cassandraService.getAuthorizedUsers(classGooruId);
-			
+
 			if (authorizedUsers == null) {
 				LOG.error("API consumer is not a teacher or collaborator...");
 				return false;
@@ -202,15 +202,11 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 	private boolean isAuthorizedUserSession(String sessionId, String userUidFromSession) {
 		if (StringUtils.isNotBlank(sessionId)) {
 			ResultSet userSessions = cassandraService.getSesstionIdsByUserId(userUidFromSession);
-			List<String> sessionIds = new ArrayList<String>();
+			List<String> sessionIds = new ArrayList<>();
 			for (Row sessionRow : userSessions) {
 				sessionIds.add(sessionRow.getString(ApiConstants._SESSION_ID));
 			}
-			if (sessionIds.contains(sessionId)) {
-				return true;
-			} else {
-				return false;
-			}
+			return sessionIds.contains(sessionId);
 		}
 		// It should return false here. Re-look at this value once event sync
 		// implementation completed

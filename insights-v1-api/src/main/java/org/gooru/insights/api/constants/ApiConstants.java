@@ -2,248 +2,249 @@ package org.gooru.insights.api.constants;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
-public class ApiConstants {
+public final class ApiConstants {
 
 	/**
 	 * String constants
 	 */
-	
+
 	public static final String DATA = "data";
-	
+
 	public static final String STRING_EMPTY= "";
-	 
+
 	public static final String COMMA = ",";
-	
+
 	public static final String TILDA = "~";
-	
+
 	public static final String AS_TILDA = "AS"+TILDA;
-	
+
 	public static final String RS = "RS";
-	
+
 	public static final String QUESTION_MARK = "?";
-	
+
 	public static final String FORWARD_SLASH = "/";
-	
+
 	public static final String HYPHEN = "-";
-	
-	public static final String PIPE = "|"; 
-	
+
+	public static final String PIPE = "|";
+
 	public static final String DOUBLE_QUOTES = "\"";
-	
+
 	public static final String REPLACER = "{0}";
-	
+
 	public static final String GOORU_SESSION_TOKEN = "Gooru-Session-Token";
-	
+
 	public static final String SESSION_TOKEN = "sessionToken";
-	
+
 	public static final String TOMCAT_INIT = "tomcat-init";
-	
+
 	public static final String GOORU_REST_ENDPOINT = "gooru.api.rest.endpoint";
-	
+
 	public static final String ENTITY_ROLE_OPERATIONS = "entity_role_opertaions";
-	
+
 	public static final String ROLE_GOORU_ADMIN = "ROLE_GOORU_ADMIN";
-	
+
 	public static final String CONTENT_ADMIN = "Content_Admin";
-	
+
 	public static final String ORGANIZATION_ADMIN = "Organization_Admin";
-	
+
 	public static final String USER_ROLE_SETSTRING = "userRoleSetString";
-	
+
 	public static final String CONSTANT_VALUE = "constant_value";
-	
+
 	public static final String USER_TOKEN = "userToken";
-	
+
 	public static final String USER = "user";
-	
+
 	public static final String REPORT = "Report";
-	
+
 	public static final String VIEW = "View";
-	
+
 	public static final String VALUE = "value";
-	
+
 	public static final String COLUMN1 = "column1";
 
 	public static final  String COLUMNS_TO_EXPORT = "score_in_percentage|time_spent|views";
-	
+
 	public static final  String RESOURCE_COLUMNS_TO_EXPORT = ".*question_status.*|.*score_in_percentage.*|.*time_spent.*|.*views.*";
-	
+
 	public static final  String STRING_COLUMNS = ".*collection_type.*";
-	
-	public static final  String BIGINT_COLUMNS = ".*score_in_percentage.*|.*time_spent.*|.*views.*";
-	
-	
+
+	public static final Pattern BIGINT_COLUMNS_PATTERN = Pattern.compile(".*score_in_percentage.*|.*time_spent.*|.*views.*");
+
+
 	/**
 	 * Mail Constants
 	 */
 	public static final String DEFAULT_MAIL = "insights@goorulearning.org";
-	
+
 	public static final String DEFAULT_MAIL_MESSAGE = "File download link will be sent to your email Account";
 
 	public static final String MAIL_TEXT = "Hi,This report will take some more time to get process,we will send you this report to insights@goorulearning.org, Thanks";
-	
+
 	/**
 	 * Exclude fields
 	 */
-	
-	public static final String EXCLUDE_CLASSES = "*.class"; 
-	
+
+	public static final String EXCLUDE_CLASSES = "*.class";
+
 	/**
 	 * HTTP constants
 	 */
 	public static final String STATUS_CODE = "statusCode";
-	
+
 	public static final String RESOURCE_GOORUOID = "resourceGooruOId";
-	
+
 	public static final String SESSION = "session";
-	
+
 	public static final String USER_UID = "userUId";
-	
+
 	public static final String USERUID = "userUid";
-	
+
 	public static final String CLASSID_USERUID = "classId or userUId";
-	
+
 	public static final String CLASSPAGE_GOORU_OID = "classpage_gooru_oid";
-	
+
 	public static final String COLLECTION_GOORU_OID = "collection_gooru_oid";
-	
+
 	public static final String IS_GROUP_OWWNER = "is_group_owner";
-	
+
 	public static final String DELETED = "deleted";
-	
+
 	public static final String ASSESSMENT_TYPES = "assessment/url|assessment";
-	
+
 	public static final String USERCOUNT = "userCount";
-	
+
 	public static final String GOORUOID = "gooruOId";
-	
+
 	public static final String _GOORUOID = "gooruOid";
-	
+
 	public static final String GOORU_UID = "gooru_uid";
-	
+
 	public static final String GOORUUID = "gooruUid";
-	
+
 	public static final String ORDER = "order";
-	
+
 	public static final String USER_NAME = "userName";
-	
+
 	public static final String LAST_ACCESSED = "lastAccessed";
-	
+
 	public static final String LAST_MODIFIED = "lastModified";
-	
+
 	public static final String NFS_BUCKET = "insights.nfs.bucket.path";
-	
+
 	public static final String FOLDER = "folder";
-	
+
 	public static final String URL = "url";
-	
+
 	public static final String THUMBNAIL = "thumbnail";
-	
+
 	public static final String ASC = "ASC";
-	
+
 	public static final String DESC = "DESC";
-	
+
 	public static final String FILTERS = "filters";
-	
+
 	public static final String GOORU_OID = "gooru_oid";
-	
+
 	public static final String QUESTION_GOORU_OID = "question_gooru_oid";
-	
+
 	public static final String _QUESTIONGOORUOID = "questionGooruOid";
-	
+
 	public static final String COLLECTIONGOORUOID = "collection_gooru_oid";
-	
+
 	public static final String TOTAL_INCORRECT_COUNT = "totalInCorrectCount";
-	
+
 	public static final String TOTAL_CORRECT_COUNT = "totalCorrectCount";
-	
+
 	public static final String RESOURCE_GOORU_OID = "resourceGooruOid";
-	
+
 	public static final String RESOURCEGOORUOID = "resource_gooru_oid";
-	
+
 	public static final String HTTP = "http";
-	
+
 	public static final String SEQUENCE = "sequence";
-	
+
 	public static final String HTTPS = "https";
-	
+
 	public static final String _HTTP = "http://";
-	
+
 	public static final String _HTTPS = "https://";
-	
+
 	public static final String _IS_CORRECT = "is_correct";
-	
+
 	public static final String IS_CORRECT = "isCorrect";
-	
+
 	public static final String ANSWER_TEXT = "answer_text";
-	
+
 	public static final String _ANSWER_OBJECT = "answer_object";
-	
+
 	public static final String ANSWER_OBJECT = "answerObject";
-	
+
 	public static final String _ANSWER_ID = "answer_id";
 	public static final String ANSWER_ID = "answerId";
 	public static final String _QUESTION_ID = "question_id";
 	public static final String QUESTION_ID = "questionId";
 	public static final String _TYPE_NAME = "type_name";
-		
+
 	public static final String _AVG_TIME_SPENT = "avg_time_spent";
-	
+
 	public static final String AVG_TIME_SPENT = "avgTimeSpent";
-	
+
 	public static final String _ANSWERTEXT = "answerText";
-	
+
 	public static final String ATTEMPTS = "attempts";
-	
+
 	public static final String OPTIONS = "options";
-	
+
 	public static final String COLLECTION_ITEM_ID = "collectionItemId";
-	
+
 	public static final String COLLECTIONITEMID = "collection_item_id";
-	
+
 	public static final String FEEDBACKPROVIDER = "feedbackProviderUId";
-	
+
 	public static final String _FEEDBACK_PROVIDER = "feed_back_provider";
-	
+
 	public static final String FEEDBACK_TEACHER_NAME = "feedbackTeacherName";
-	
+
 	public static final String USERNAME = "username";
-	
+
 	public static final String CATEGORY = "category";
-	
+
 	public static final String META_DATA = "metaData";
-	
+
 	public static final String RESPONSE = "response";
-	
+
 	public static final String QUESTION = "question";
-	
+
 	public static final String QUESTIONS = "questions";
-	
+
 	public static final String QUESTION_TYPE = "questionType";
-	
+
 	public static final String QUESTION_MATCH = "question.questionType|question.type";
-	
+
 	public static final String _QUESTION_TYPE = "question_type";
-	
+
 	public static final String _DISPLAY_CODE = "display_code";
-	
+
 	public static final String DISPLAY_CODE = "displayCode";
-	
+
 	public static final String FIRST_NAME = "firstName";
-	
+
 	public static final String LAST_NAME = "lastName";
-	
+
 	public static final String EMAIL_ID = "emailId";
-	
+
 	public static final String GOORU_U_ID = "gooruUId";
-	
+
 	public static final String PARTY_UId = "partyUid";
-	
+
 	public static final String _USER_ID = "user_id";
-	
+
 	public static final String ID = "id";
 
 	public static final String KEY = "key";
@@ -260,22 +261,23 @@ public class ApiConstants {
 	public static final String CLASS = "class";
 	public static final String INPROGRESS = "in-progress";
 	public static final String COMPLETED = "completed";
+	public static final String BOTH = "both";
 	public static final String START = "start";
 	public static final String STOP = "stop";
 	public static final String EVENT_TIME = "eventTime";
 	public static final String SESSIONID = "sessionId";
-	
+
 	public static final String _SESSION_ID = "session_id";
-	
+
 	public static final String ITEM = "item";
 	public static final String COLLECTION_MATCH = "collection|scollection";
 	public static final String COLLECTION = "collection";
 	public static final String ASSESSMENT = "assessment";
 	public static final String CORRECT = "correct";
 	public static final String IN_CORRECT = "in_correct";
-	
+
 	public static final String ASSESSMENT_QUESTION_TYPES = "assessment-question|question";
-	
+
 	public static final String ASSESSMENT_SLASH_URL = "assessment/url";
 	public static final String LESSON_COUNT = "lessonCount";
 	public static final String UNIT_COUNT = "unitCount";
@@ -288,7 +290,7 @@ public class ApiConstants {
 	public static final String _RESOURCE_COUNT = "resource_count";
 	public static final String _QUESTION_COUNT = "question_count";
 	public static final String _OE_COUNT = "oe_count";
-	
+
 	public static final String SCORABLE_QUESTION_COUNT = "scorableQuestionCount";
 	public static final String SCORABLE_COUNT_ON_EVENT = "selectedSessionScorableQuestionCount";
 	public static final String EXTERNAL_ASSESSMENT_COUNT = "externalAssessmentCount";
@@ -334,7 +336,7 @@ public class ApiConstants {
 	public static final String CLOSE_BRACE = "}";
 	public static final String UTF8 = "UTF-8";
 	public static final String TIME_SPENT = "timespent";
-	
+
 	public static final String HAS_FRAME_BREAKER = "hasFrameBreaker";
 	public static final String QUESTION_DOT_TYPE = "question.type";
 	public static final String QUESTION_DOT_QUESTION_TYPE = "question.questionType";
@@ -362,9 +364,9 @@ public class ApiConstants {
 	public static final String _COLLECTION_UNIQUE_VIEWS = "collection_unique_views";
 	public static final String _UNIQUE_VIEWS = "unique_views";
 	public static final String _TOTAL_REACTION = "total_reaction";
-	public static final String _REACTED_COUNT = "reacted_count";	
+	public static final String _REACTED_COUNT = "reacted_count";
 	public static final String VISIBILITY = "visibility";
-	
+
 	public static final String _EVENT_TYPE = "event_type";
 	public static final String _COLLECTION_UID = "collection_uid";
 	public static final String _CONTENT_UID = "content_uid";
@@ -385,11 +387,11 @@ public class ApiConstants {
 	public static final String _RESOURCE_TYPE = "resource_type";
 	public static final String RESOURCES = "resources";
 	public static final String _ROW_KEY = "row_key";
-	public static final String _LEAF_NODE = "leaf_node";	
+	public static final String _LEAF_NODE = "leaf_node";
 	public static final String _ID = "Id";
 	public static final String CONTENT = "content";
 	public static final String _LEVEL_TYPE = "level_type";
-	public static final String COLLECTION_OR_ASSESSMENT = "collection|assessment|content";
+	public static final Pattern COLLECTION_OR_ASSESSMENT_PATTERN = Pattern.compile("collection|assessment|content");
 	public static final String _SUBJECT_ID = "subject_id";
 	public static final String _COURSE_ID = "course_id";
 	public static final String _DOMAIN_ID = "domain_id";
@@ -420,20 +422,25 @@ public class ApiConstants {
 	public static final String _CLUSTERING_KEY = "clustering_key";
 	public static final String _METRICS_NAME = "metrics_name";
 	public static final String _METRICS_VALUE = "metrics_value";
-	public static enum Numbers {
+
+	private ApiConstants() {
+		throw new AssertionError();
+	}
+
+	public enum Numbers {
 		FOUR("4"), FIVE("5");
 
-		private String number;
+		private final String number;
 
 		public String getNumber() {
 		return number;
 		}
 
-		private Numbers(String number) {
+		Numbers(String number) {
 		this.number = number;
 		}
 	}
-	
+
 	public enum ColumnFamilySet {
 		RESOURCE("resource"), DIM_RESOURCE("dim_resource"), REAL_TIME_DASHBOARD(
 				"real_time_aggregator"), CUSTOM_FIELDS("custom_fields_data"), LIVE_DASHBOARD(
@@ -444,7 +451,7 @@ public class ApiConstants {
 				"event_detail"), USERPROFILE("user_profile_settings"), USER_COLLECTION_ITEM_ASSOC(
 				"user_collection_item_assoc"), CONFIG_SETTING(
 				"job_config_settings"), USER("user"),DIM_USER("dim_user"), SESSION("sessions"), SESSION_ACTIVITY("session_activity")
-				,CLASS_ACTIVITY("class_activity"), SESSION_ACTIVITY_COUNTER("session_activity_counter"), 
+				,CLASS_ACTIVITY("class_activity"), SESSION_ACTIVITY_COUNTER("session_activity_counter"),
 				CLASS("class"),USER_GROUP_ASSOCIATION("user_group_association"),CONTENT_META("content_meta"),TABLE_DATATYPES("table_datatypes"),JOB_TRACKER("job_tracker"),CLASS_COLLECTION_SETTINGS("class_collection_settings")
 				,STUDENT_LOCATION("student_location"), USER_SESSIONS("user_sessions"),
 				USER_SESSION_ACTIVITY("user_session_activity"),CLASS_ACTIVITY_DATACUBE("class_activity_datacube"),
@@ -452,9 +459,9 @@ public class ApiConstants {
 				STUDENT_QUESTION_GRADE("student_question_grade"), USER_CLASS_COLLECTION_LAST_SESSIONS("user_class_collection_last_sessions"),CLASS_CONTENT_COUNT("class_content_count"),CONTENT_AUTHORIZED_USERS_COUNT("content_authorized_users"),STATISTICAL_DATA("statistical_data"),STUDENTS_CLASS_ACTIVITY("students_class_activity"),
 				TAXONOMY_PARENT_NODE("taxonomy_parent_node"),USER_SESSION_TAXONOMY_ACTIVITY("user_session_taxonomy_activity"),EVENTS("events");
 
-		private String columnFamily;
+		private final String columnFamily;
 
-		private ColumnFamilySet(String value) {
+		ColumnFamilySet(String value) {
 			columnFamily = value;
 		}
 
@@ -466,9 +473,9 @@ public class ApiConstants {
 	public enum modelAttributes {
 		VIEW_NAME("content"), CONTENT("content"), RETURN_NAME("content"), MESSAGE("message"), PAGINATE(
 				"paginate"), TOTAL_ROWS("totalRows");
-		private String attribute;
+		private final String attribute;
 
-		private modelAttributes(String attribute) {
+		modelAttributes(String attribute) {
 			this.attribute = attribute;
 		}
 
@@ -477,17 +484,17 @@ public class ApiConstants {
 		}
 	}
 
-	
+
 	/**
 	 * Message constants
 	 */
 	public static final String COURSE_PLAN_UNAVAILABLE = "Course Plan unavailable for CourseGooruOid : {} ";
 	public static final String MESSAGE = "message";
-	
-	private static Map<String, String> classHierarchyIdNameAsMap;
+
+	private static final Map<String, String> classHierarchyIdNameAsMap;
 
 	static {
-		classHierarchyIdNameAsMap = new HashMap<String, String>();
+		classHierarchyIdNameAsMap = new HashMap<>();
 		classHierarchyIdNameAsMap.put("class", "classId");
 		classHierarchyIdNameAsMap.put("course", "courseId");
 		classHierarchyIdNameAsMap.put("unit", "unitId");
@@ -496,22 +503,22 @@ public class ApiConstants {
 		classHierarchyIdNameAsMap.put("collection", "collectionId");
 		classHierarchyIdNameAsMap.put("content", "gooruOId");
 	}
-	
+
 	public static String getResponseNameByType(String type) {
 		return StringUtils.defaultIfEmpty(classHierarchyIdNameAsMap.get(type), type);
 	}
 
 	public enum apiHeaders{
 		ACCEPT("Accept"),JSON_HEADER("application/json"),XLS_HEADER("application/vnd.ms-excel"),XLS_RESPONSE("application/xls"),CSV_RESPONSE("application/csv");
-		
-		private String header;
-		
-		private apiHeaders(String header){
+
+		private final String header;
+
+		apiHeaders(String header){
 			this.header = header;
 		}
 		public String apiHeader(){
 			return header;
 		}
 	}
-	
+
 }

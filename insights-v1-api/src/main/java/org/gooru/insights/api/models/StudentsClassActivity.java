@@ -164,7 +164,7 @@ public class StudentsClassActivity implements Serializable {
 	}
 
 	public void setScoreInPercentage(Long score, Long totalCount) {
-		this.scoreInPercentage = (totalCount == null || totalCount == 0 || score == null) ? 0 : score /totalCount;
+		this.scoreInPercentage = (totalCount == null || totalCount == 0 || score == null) ? 0 : Math.round((double)(score /totalCount));
 	}
 
 	public Long getTotalCount() {

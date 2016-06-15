@@ -30,14 +30,14 @@ public class ClassExportServiceImpl implements ClassExportService {
 	@Autowired
 	private CqlCassandraDao cqlDAO;
 
-	protected final Logger LOG = LoggerFactory.getLogger(ClassExportServiceImpl.class);
+	private final Logger LOG = LoggerFactory.getLogger(ClassExportServiceImpl.class);
 
 	@Override
 	public File exportCsv(String classId, String courseId, String unitId, String lessonId, String collectionId,
 			String type, String userId) {
 		try {
 
-			List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
+			List<Map<String, Object>> dataList = new ArrayList<>();
 			List<String> classMembersList = getClassMembersList(classId, userId);
 			List<String> collectionItemsList = getCollectionItems(getLeastId(courseId, unitId, lessonId, collectionId, type));
 
@@ -94,18 +94,18 @@ public class ClassExportServiceImpl implements ClassExportService {
 	}
 
 	private List<String> getClassMembersList(String classId, String userId) {
-		List<String> classMembersList = null;
+		List<String> classMembersList;
 		if (StringUtils.isBlank(userId)) {
 			classMembersList = getClassMembers(classId);
 		} else {
-			classMembersList = new ArrayList<String>();
+			classMembersList = new ArrayList<>();
 			classMembersList.add(userId);
 		}
 		return classMembersList;
 	}
 
 	private List<String> getCollectionItems(String contentId) {
-		List<String> collectionItems = new ArrayList<String>();
+		List<String> collectionItems = new ArrayList<>();
 		ResultSet collectionItemSet = cqlDAO.getArchievedCollectionItem(contentId);
 		for (Row collectionItemRow : collectionItemSet) {
 			collectionItems.add(collectionItemRow.getString(ApiConstants.COLUMN1));
@@ -114,7 +114,7 @@ public class ClassExportServiceImpl implements ClassExportService {
 	}
 
 	private List<String> getClassMembers(String classId) {
-		List<String> classMembersList = new ArrayList<String>();
+		List<String> classMembersList = new ArrayList<>();
 		ResultSet classMemberSet = cqlDAO.getArchievedClassMembers(classId);
 		for (Row collectionItemRow : classMemberSet) {
 			classMembersList.add(collectionItemRow.getString(ApiConstants.COLUMN1));
@@ -150,7 +150,7 @@ public class ClassExportServiceImpl implements ClassExportService {
 	}
 
 	private void setUsageData(Map<String, Object> dataMap, String title, String rowKey, String collectionType) {
-		String columnNames = ApiConstants.COLUMNS_TO_EXPORT;;
+		String columnNames = ApiConstants.COLUMNS_TO_EXPORT;
 		boolean splitColumnName = false;
 		ResultSet usageDataSet = cqlDAO.getArchievedClassData(ServiceUtils.appendTilda(rowKey, collectionType));
 		processResultSet(usageDataSet, splitColumnName, columnNames, dataMap, title, collectionType);
@@ -162,7 +162,7 @@ public class ClassExportServiceImpl implements ClassExportService {
 			if (dbColumnName.matches(columnNames)) {
 			String columnName = splitColumnName ? dbColumnName.split(ApiConstants.TILDA)[1] : dbColumnName;
 				Object value ;
-				if(columnName.matches(ApiConstants.BIGINT_COLUMNS)){
+				if(ApiConstants.BIGINT_COLUMNS_PATTERN.matcher(columnName).matches()){
 				value = TypeCodec.bigint().deserialize(usageDataRow.getBytes(ApiConstants.VALUE),
 						cqlDAO.getClusterProtocolVersion());
 				}else{
@@ -174,7 +174,7 @@ public class ClassExportServiceImpl implements ClassExportService {
 		}
 	}
 	private Map<String, Object> getDataMap() {
-		Map<String, Object> dataMap = new LinkedHashMap<String, Object>();
+		Map<String, Object> dataMap = new LinkedHashMap<>();
 		dataMap.put(ExportConstants.FIRST_NAME, "");
 		dataMap.put(ExportConstants.LAST_NAME, "");
 		return dataMap;
