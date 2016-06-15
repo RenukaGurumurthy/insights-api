@@ -370,9 +370,12 @@ public class ClassServiceImpl implements ClassService {
 				if (ApiConstants.COLLECTION.equals(collectionType)) {
 					studentsClassActivity.setCollectionId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
 					studentsClassActivity.setViews(classActivityRow.getLong(ApiConstants.VIEWS));
-				} else {
+				} else if (ApiConstants.COLLECTION.equals(collectionType)){
 					studentsClassActivity.setAssessmentId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
 					studentsClassActivity.setAttempts(classActivityRow.getLong(ApiConstants.VIEWS));
+				}else {
+				  studentsClassActivity.setCollectionId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
+          studentsClassActivity.setViews(classActivityRow.getLong(ApiConstants.VIEWS));
 				}
 				studentsClassActivity.setTimeSpent(classActivityRow.getLong(ApiConstants._TIME_SPENT));
 				studentsClassActivity.setAttemptStatus(classActivityRow.getString(ApiConstants._ATTEMPT_STATUS));
@@ -971,8 +974,13 @@ public class ClassServiceImpl implements ClassService {
 				}
 			}
 		}
-		totalCount = ApiConstants.COLLECTION.equals(collectionType) ? collectionCount
-				: (assessmentCount + externalAssCount);
+		if(ApiConstants.COLLECTION.equals(collectionType)){
+		  totalCount = collectionCount;
+		}else if(ApiConstants.COLLECTION.equals(collectionType)){
+		  totalCount = assessmentCount + externalAssCount;
+		}else{
+		  totalCount = collectionCount + assessmentCount + externalAssCount;
+		}
 		return totalCount;
 	}
 

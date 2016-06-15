@@ -51,23 +51,28 @@ public class LambdaServiceImpl implements LambdaService{
 
 	@Override
 	public List<StudentsClassActivity> applyFiltersInStudentsClassActivity(List<StudentsClassActivity> resultList,
-			String collectionType, String userUid) {
-		List<StudentsClassActivity> filteredList;
-		if (!collectionType.equalsIgnoreCase("both") && StringUtils.isNotBlank(userUid)) {
-			filteredList = resultList.stream().filter(object -> object.getCollectionType().matches(collectionType) && object.getUserUid().equalsIgnoreCase(userUid) && object.getAttemptStatus().equals(ApiConstants.COMPLETED))
-					.collect(Collectors.toList());
-		}else if (collectionType.equalsIgnoreCase("both") && StringUtils.isNotBlank(userUid)) {
-			filteredList = resultList.stream().filter(object -> object.getUserUid().equalsIgnoreCase(userUid) && object.getAttemptStatus().equals(ApiConstants.COMPLETED))
-					.collect(Collectors.toList());
-		}else if(!collectionType.equalsIgnoreCase("both") && StringUtils.isBlank(userUid)){
-			filteredList = resultList.stream().filter(object -> object.getCollectionType().matches(collectionType) && object.getAttemptStatus().equals(ApiConstants.COMPLETED))
-					.collect(Collectors.toList());
-		}else{
-			filteredList = resultList;
-		}
+          String collectionType, String userUid) {
+    List<StudentsClassActivity> filteredList;
+    if (!collectionType.equalsIgnoreCase("both") && StringUtils.isNotBlank(userUid)) {
+      filteredList =
+              resultList.stream().filter(object -> object.getCollectionType().matches(collectionType) && object.getUserUid().equalsIgnoreCase(userUid)
+                      && object.getAttemptStatus().equals(ApiConstants.COMPLETED)).collect(Collectors.toList());
+    } else if (collectionType.equalsIgnoreCase("both") && StringUtils.isNotBlank(userUid)) {
+      filteredList = resultList.stream()
+              .filter(object -> object.getUserUid().equalsIgnoreCase(userUid) && object.getAttemptStatus().equals(ApiConstants.COMPLETED))
+              .collect(Collectors.toList());
+    } else if (!collectionType.equalsIgnoreCase("both") && StringUtils.isBlank(userUid)) {
+      filteredList = resultList.stream()
+              .filter(object -> object.getCollectionType().matches(collectionType) && object.getAttemptStatus().equals(ApiConstants.COMPLETED))
+              .collect(Collectors.toList());
+    } else if (collectionType.equalsIgnoreCase("both") && StringUtils.isBlank(userUid)) {
+      filteredList = resultList.stream().filter(object -> object.getAttemptStatus().equals(ApiConstants.COMPLETED)).collect(Collectors.toList());
+    } else {
+      filteredList = resultList;
+    }
 
-		return filteredList;
-	}
+    return filteredList;
+  }
 
 	private void aggregateTaxonomyActivityData(List<ContentTaxonomyActivity> resultList,  Integer depth1, Integer depth2) {
 	    long startTime =  System.currentTimeMillis();
