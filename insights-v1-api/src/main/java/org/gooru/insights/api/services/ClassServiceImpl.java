@@ -976,7 +976,7 @@ public class ClassServiceImpl implements ClassService {
 		}
 		if(ApiConstants.COLLECTION.equals(collectionType)){
 		  totalCount = collectionCount;
-		}else if(ApiConstants.COLLECTION.equals(collectionType)){
+		}else if(ApiConstants.ASSESSMENT.equals(collectionType)){
 		  totalCount = assessmentCount + externalAssCount;
 		}else{
 		  totalCount = collectionCount + assessmentCount + externalAssCount;

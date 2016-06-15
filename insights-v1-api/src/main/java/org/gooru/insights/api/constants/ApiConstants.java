@@ -261,6 +261,7 @@ public final class ApiConstants {
 	public static final String CLASS = "class";
 	public static final String INPROGRESS = "in-progress";
 	public static final String COMPLETED = "completed";
+	public static final String BOTH = "both";
 	public static final String START = "start";
 	public static final String STOP = "stop";
 	public static final String EVENT_TIME = "eventTime";
