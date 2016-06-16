@@ -150,8 +150,10 @@ public class StudentsClassActivity implements Serializable {
 		case ApiConstants.CONTENT:
 			if (ApiConstants.COLLECTION.equals(sca.collectionType)) {
 				return sca.collectionId;				
-			}else{
+			}else if (ApiConstants.ASSESSMENT.equals(sca.collectionType)){
 				return sca.assessmentId;
+			} else{
+			  return sca.collectionId;
 			}
 		default:
 			break;
