@@ -375,6 +375,7 @@ public class ClassServiceImpl implements ClassService {
 					studentsClassActivity.setAttempts(classActivityRow.getLong(ApiConstants.VIEWS));
 				}else {
 				  studentsClassActivity.setCollectionId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
+				  studentsClassActivity.setAssessmentId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
           studentsClassActivity.setViews(classActivityRow.getLong(ApiConstants.VIEWS));
 				}
 				studentsClassActivity.setTimeSpent(classActivityRow.getLong(ApiConstants._TIME_SPENT));
