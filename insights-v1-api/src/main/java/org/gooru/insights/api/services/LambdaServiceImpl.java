@@ -144,9 +144,9 @@ public class LambdaServiceImpl implements LambdaService{
 			case ApiConstants.CONTENT:
 				object1.setLessonId(null);
 				object1.setUnitId(null);
-				if(ApiConstants.ASSESSMENT.equalsIgnoreCase(collectionType)) {
+				if(ApiConstants.ASSESSMENT.equalsIgnoreCase(object1.getCollectionType())) {
 					object1.setCollectionId(null);
-				}else{
+				}else if(ApiConstants.COLLECTION.equalsIgnoreCase(object1.getCollectionType())){
 					object1.setAssessmentId(null);
 				}
 				break;
