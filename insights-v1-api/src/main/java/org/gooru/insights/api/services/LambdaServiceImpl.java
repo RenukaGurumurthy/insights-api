@@ -133,6 +133,8 @@ public class LambdaServiceImpl implements LambdaService{
 	}
 
 	private StudentsClassActivity customizeFieldsInStudentClassActivity(StudentsClassActivity object1, String collectionType, String level) {
+	
+	  object1.setTotalCount(classService.getCulCollectionCount(object1.getClassId(), StudentsClassActivity.aggregateDepth(object1, level), object1.getCollectionType()));
 		switch(level) {
 			case ApiConstants.UNIT:
 				object1.setLessonId(null);
@@ -145,6 +147,8 @@ public class LambdaServiceImpl implements LambdaService{
 				object1.setAssessmentId(null);
 				break;
 			case ApiConstants.CONTENT:
+			  //TODO: Need to fix total count should come from Cassandra
+			  object1.setTotalCount(1L);
 				object1.setLessonId(null);
 				object1.setUnitId(null);
 				if(ApiConstants.ASSESSMENT.equalsIgnoreCase(object1.getCollectionType())) {
@@ -155,7 +159,6 @@ public class LambdaServiceImpl implements LambdaService{
 				break;
 
 		}
-		object1.setTotalCount(classService.getCulCollectionCount(object1.getClassId(), StudentsClassActivity.aggregateDepth(object1, level), object1.getCollectionType()));
 		object1.setScoreInPercentage(object1.getScore(), object1.getCompletedCount());
 		object1.setReaction(Math.round((double)((object1 != null ? object1.getReaction() : 0) / object1.getCompletedCount())));
 		object1.setScore(null);
