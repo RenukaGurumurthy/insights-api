@@ -119,12 +119,18 @@ public class LambdaServiceImpl implements LambdaService{
 		object1.setCollectionType(object1.getCollectionType());
 		object1.setScore(sum(object1.getScore(), object2.getScore()));
 		object1.setReaction(sum(object1.getReaction(), object2.getReaction()));
-		if (ApiConstants.COLLECTION.equals(object1.getCollectionType())) {
+		if (ApiConstants.COLLECTION.equals(object1.getCollectionType()) && ApiConstants.COLLECTION.equals(object2.getCollectionType())) {
 			object1.setCollectionId(object1.getCollectionId());
 			object1.setViews(sum(object1.getViews(), object2.getViews()));
-		}else{
+		}else if (ApiConstants.ASSESSMENT.equals(object1.getCollectionType()) && ApiConstants.ASSESSMENT.equals(object2.getCollectionType())){
 			object1.setAssessmentId(object1.getAssessmentId());
 			object1.setAttempts(sum(object1.getAttempts(), object2.getAttempts()));
+		}else if (ApiConstants.ASSESSMENT.equals(object1.getCollectionType()) && ApiConstants.COLLECTION.equals(object2.getCollectionType())){
+		  object1.setAssessmentId(object1.getAssessmentId());
+      object1.setAttempts(sum(object1.getAttempts(), object2.getViews()));
+		}else if (ApiConstants.COLLECTION.equals(object1.getCollectionType()) && ApiConstants.ASSESSMENT.equals(object2.getCollectionType())){
+		  object1.setCollectionId(object1.getCollectionId());
+      object1.setAttempts(sum(object1.getViews(), object2.getAttempts()));
 		}
 		object1.setTimeSpent(sum(object1.getTimeSpent(), object2.getTimeSpent()));
 		object1.setCompletedCount(1L);
