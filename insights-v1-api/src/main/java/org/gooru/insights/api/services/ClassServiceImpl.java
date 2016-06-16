@@ -367,15 +367,14 @@ public class ClassServiceImpl implements ClassService {
 				studentsClassActivity.setCollectionType(classActivityRow.getString(ApiConstants._COLLECTION_TYPE));
 				studentsClassActivity.setScore(classActivityRow.getLong(ApiConstants.SCORE));
 				studentsClassActivity.setReaction(classActivityRow.getLong(ApiConstants.REACTION));
-				if (collectionType.equals(ApiConstants.COLLECTION)) {
+				if (ApiConstants.COLLECTION.equals(studentsClassActivity.getCollectionType())) {
 					studentsClassActivity.setCollectionId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
-					studentsClassActivity.setViews(classActivityRow.getLong(ApiConstants.VIEWS));
-				} else if (collectionType.equals(ApiConstants.ASSESSMENT)){
 					studentsClassActivity.setAssessmentId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
-					studentsClassActivity.setAttempts(classActivityRow.getLong(ApiConstants.VIEWS));
-				}else {
+					studentsClassActivity.setViews(classActivityRow.getLong(ApiConstants.VIEWS));
+				} else if (ApiConstants.ASSESSMENT.equals(studentsClassActivity.getCollectionType())){
 				  studentsClassActivity.setCollectionId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
-				  studentsClassActivity.setViews(classActivityRow.getLong(ApiConstants.VIEWS));
+				  studentsClassActivity.setAssessmentId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
+					studentsClassActivity.setAttempts(classActivityRow.getLong(ApiConstants.VIEWS));
 				}
 				studentsClassActivity.setTimeSpent(classActivityRow.getLong(ApiConstants._TIME_SPENT));
 				studentsClassActivity.setAttemptStatus(classActivityRow.getString(ApiConstants._ATTEMPT_STATUS));

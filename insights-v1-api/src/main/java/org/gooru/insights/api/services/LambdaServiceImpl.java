@@ -52,25 +52,36 @@ public class LambdaServiceImpl implements LambdaService{
 	@Override
 	public List<StudentsClassActivity> applyFiltersInStudentsClassActivity(List<StudentsClassActivity> resultList,
           String collectionType, String userUid) {
-    List<StudentsClassActivity> filteredList;
-    if (!collectionType.equalsIgnoreCase(ApiConstants.BOTH) && StringUtils.isNotBlank(userUid)) {
-      filteredList =
-              resultList.stream().filter(object -> object.getCollectionType().matches(collectionType) && object.getUserUid().equalsIgnoreCase(userUid)
-                      && object.getAttemptStatus().equals(ApiConstants.COMPLETED)).collect(Collectors.toList());
-    } else if (collectionType.equalsIgnoreCase(ApiConstants.BOTH) && StringUtils.isNotBlank(userUid)) {
-      filteredList = resultList.stream()
-              .filter(object -> object.getUserUid().equalsIgnoreCase(userUid) && object.getAttemptStatus().equals(ApiConstants.COMPLETED))
-              .collect(Collectors.toList());
-    } else if (!collectionType.equalsIgnoreCase(ApiConstants.BOTH) && StringUtils.isBlank(userUid)) {
-      filteredList = resultList.stream()
-              .filter(object -> object.getCollectionType().matches(collectionType) && object.getAttemptStatus().equals(ApiConstants.COMPLETED))
-              .collect(Collectors.toList());
-    } else if (collectionType.equalsIgnoreCase(ApiConstants.BOTH) && StringUtils.isBlank(userUid)) {
-      filteredList = resultList.stream().filter(object -> object.getAttemptStatus().equals(ApiConstants.COMPLETED)).collect(Collectors.toList());
-    } else {
-      filteredList = resultList;
+    List<StudentsClassActivity> filteredList = null;
+    
+    if(ApiConstants.BOTH.equalsIgnoreCase(collectionType)){
+      if(StringUtils.isNotBlank(userUid)){
+        filteredList = resultList.stream().filter(object -> object.getUserUid().equalsIgnoreCase(userUid) && ((object.getCollectionType().equalsIgnoreCase(ApiConstants.COLLECTION))
+                || (object.getCollectionType().equalsIgnoreCase(ApiConstants.ASSESSMENT) && object.getAttemptStatus().equals(ApiConstants.COMPLETED))))
+                .collect(Collectors.toList());
+      }else{
+        filteredList = resultList.stream().filter(object -> (object.getCollectionType().equalsIgnoreCase(ApiConstants.COLLECTION))
+                || (object.getCollectionType().equalsIgnoreCase(ApiConstants.ASSESSMENT) && object.getAttemptStatus().equals(ApiConstants.COMPLETED)))
+                .collect(Collectors.toList());
+      }
+    }else if(ApiConstants.COLLECTION.equalsIgnoreCase(collectionType)){
+      if(StringUtils.isNotBlank(userUid)){
+        filteredList =
+                resultList.stream().filter(object -> object.getCollectionType().matches(collectionType) && object.getUserUid().equalsIgnoreCase(userUid)).collect(Collectors.toList());
+      }else{
+        filteredList =
+                resultList.stream().filter(object -> object.getCollectionType().matches(collectionType)).collect(Collectors.toList());
+      }
+    }else if(ApiConstants.ASSESSMENT.equalsIgnoreCase(collectionType)){
+      if(StringUtils.isNotBlank(userUid)){
+        filteredList =
+                resultList.stream().filter(object -> object.getCollectionType().matches(collectionType) && object.getUserUid().equalsIgnoreCase(userUid)
+                        && object.getAttemptStatus().equals(ApiConstants.COMPLETED)).collect(Collectors.toList());
+      }else{
+        filteredList =
+                resultList.stream().filter(object -> object.getCollectionType().matches(collectionType) && object.getAttemptStatus().equals(ApiConstants.COMPLETED)).collect(Collectors.toList());
+      }
     }
-
     return filteredList;
   }
 
@@ -103,12 +114,18 @@ public class LambdaServiceImpl implements LambdaService{
 		object1.setCollectionType(object1.getCollectionType());
 		object1.setScore(sum(object1.getScore(), object2.getScore()));
 		object1.setReaction(sum(object1.getReaction(), object2.getReaction()));
-		if (ApiConstants.COLLECTION.equals(object1.getCollectionType())) {
+		if (ApiConstants.COLLECTION.equals(object1.getCollectionType()) && ApiConstants.COLLECTION.equals(object2.getCollectionType())) {
 			object1.setCollectionId(object1.getCollectionId());
 			object1.setViews(sum(object1.getViews(), object2.getViews()));
-		}else{
+		}else if (ApiConstants.ASSESSMENT.equals(object1.getCollectionType()) && ApiConstants.ASSESSMENT.equals(object2.getCollectionType())){
 			object1.setAssessmentId(object1.getAssessmentId());
 			object1.setAttempts(sum(object1.getAttempts(), object2.getAttempts()));
+		}else if (ApiConstants.ASSESSMENT.equals(object1.getCollectionType()) && ApiConstants.COLLECTION.equals(object2.getCollectionType())){
+		  object1.setAssessmentId(object1.getAssessmentId());
+      object1.setAttempts(sum(object1.getAttempts(), object2.getViews()));
+		}else if (ApiConstants.COLLECTION.equals(object1.getCollectionType()) && ApiConstants.ASSESSMENT.equals(object2.getCollectionType())){
+		  object1.setCollectionId(object1.getCollectionId());
+      object1.setAttempts(sum(object1.getViews(), object2.getAttempts()));
 		}
 		object1.setTimeSpent(sum(object1.getTimeSpent(), object2.getTimeSpent()));
 		object1.setCompletedCount(1L);
@@ -121,18 +138,21 @@ public class LambdaServiceImpl implements LambdaService{
 			case ApiConstants.UNIT:
 				object1.setLessonId(null);
 				object1.setCollectionId(null);
+				object1.setAssessmentId(null);
 				break;
 			case ApiConstants.LESSON:
 				object1.setUnitId(null);
 				object1.setCollectionId(null);
+				object1.setAssessmentId(null);
 				break;
 			case ApiConstants.CONTENT:
-				object1.setTotalCount(1L);
+			  //TODO: Need to fix total count should come from Cassandra
+			  object1.setTotalCount(1L);
 				object1.setLessonId(null);
 				object1.setUnitId(null);
-				if(ApiConstants.ASSESSMENT.equalsIgnoreCase(collectionType)) {
+				if(ApiConstants.ASSESSMENT.equalsIgnoreCase(object1.getCollectionType())) {
 					object1.setCollectionId(null);
-				}else{
+				}else if(ApiConstants.COLLECTION.equalsIgnoreCase(object1.getCollectionType())){
 					object1.setAssessmentId(null);
 				}
 				break;
