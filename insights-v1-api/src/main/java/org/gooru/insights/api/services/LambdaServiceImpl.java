@@ -54,19 +54,35 @@ public class LambdaServiceImpl implements LambdaService{
           String collectionType, String userUid) {
     List<StudentsClassActivity> filteredList;
     if (!collectionType.equalsIgnoreCase(ApiConstants.BOTH) && StringUtils.isNotBlank(userUid)) {
-      filteredList =
-              resultList.stream().filter(object -> object.getCollectionType().matches(collectionType) && object.getUserUid().equalsIgnoreCase(userUid)
-                      && object.getAttemptStatus().equals(ApiConstants.COMPLETED)).collect(Collectors.toList());
+      if (collectionType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
+        filteredList = resultList.stream()
+                .filter(object -> object.getCollectionType().matches(collectionType) && object.getUserUid().equalsIgnoreCase(userUid))
+                .collect(Collectors.toList());
+      } else {
+        // collectionType is assessment now.
+        filteredList = resultList.stream().filter(object -> object.getCollectionType().matches(collectionType)
+                && object.getUserUid().equalsIgnoreCase(userUid) && object.getAttemptStatus().equals(ApiConstants.COMPLETED))
+                .collect(Collectors.toList());
+      }
     } else if (collectionType.equalsIgnoreCase(ApiConstants.BOTH) && StringUtils.isNotBlank(userUid)) {
-      filteredList = resultList.stream()
-              .filter(object -> object.getUserUid().equalsIgnoreCase(userUid) && object.getAttemptStatus().equals(ApiConstants.COMPLETED))
+      filteredList = resultList.stream().filter(object -> object.getUserUid().equalsIgnoreCase(userUid) && ((object.getCollectionType()
+              .equalsIgnoreCase(ApiConstants.COLLECTION))
+              || (object.getCollectionType().equalsIgnoreCase(ApiConstants.ASSESSMENT) && object.getAttemptStatus().equals(ApiConstants.COMPLETED))))
               .collect(Collectors.toList());
     } else if (!collectionType.equalsIgnoreCase(ApiConstants.BOTH) && StringUtils.isBlank(userUid)) {
-      filteredList = resultList.stream()
-              .filter(object -> object.getCollectionType().matches(collectionType) && object.getAttemptStatus().equals(ApiConstants.COMPLETED))
-              .collect(Collectors.toList());
+      if (collectionType.equalsIgnoreCase(ApiConstants.COLLECTION)) {
+
+        filteredList = resultList.stream().filter(object -> object.getCollectionType().matches(collectionType)).collect(Collectors.toList());
+      } else {
+        // collectionType is assessment now.
+        filteredList = resultList.stream()
+                .filter(object -> object.getCollectionType().matches(collectionType) && object.getAttemptStatus().equals(ApiConstants.COMPLETED))
+                .collect(Collectors.toList());
+      }
     } else if (collectionType.equalsIgnoreCase(ApiConstants.BOTH) && StringUtils.isBlank(userUid)) {
-      filteredList = resultList.stream().filter(object -> object.getAttemptStatus().equals(ApiConstants.COMPLETED)).collect(Collectors.toList());
+      filteredList = resultList.stream().filter(object -> (object.getCollectionType().equalsIgnoreCase(ApiConstants.COLLECTION))
+              || (object.getCollectionType().equalsIgnoreCase(ApiConstants.ASSESSMENT) && object.getAttemptStatus().equals(ApiConstants.COMPLETED)))
+              .collect(Collectors.toList());
     } else {
       filteredList = resultList;
     }
