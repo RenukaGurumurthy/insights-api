@@ -370,7 +370,7 @@ public class ClassServiceImpl implements ClassService {
 				if (ApiConstants.COLLECTION.equals(collectionType)) {
 					studentsClassActivity.setCollectionId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
 					studentsClassActivity.setViews(classActivityRow.getLong(ApiConstants.VIEWS));
-				} else if (ApiConstants.COLLECTION.equals(collectionType)){
+				} else if (ApiConstants.ASSESSMENT.equals(collectionType)){
 					studentsClassActivity.setAssessmentId(classActivityRow.getString(ApiConstants._COLLECTION_UID));
 					studentsClassActivity.setAttempts(classActivityRow.getLong(ApiConstants.VIEWS));
 				}else {
