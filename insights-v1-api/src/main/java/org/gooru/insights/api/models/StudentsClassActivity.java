@@ -149,13 +149,10 @@ public class StudentsClassActivity implements Serializable {
 			return sca.lessonId;
 		case ApiConstants.CONTENT:
 			if (ApiConstants.COLLECTION.equals(sca.collectionType)) {
-			  System.out.println("t 1 " + sca.collectionType );
 				return sca.collectionId;				
 			}else if (ApiConstants.ASSESSMENT.equals(sca.collectionType)){
-			  System.out.println("t 2 " + sca.collectionType );
 			  return sca.assessmentId;
 			} else{
-			  System.out.println("t 3 " + sca.collectionType );
 			  return sca.collectionId;
 			}
 		default:
