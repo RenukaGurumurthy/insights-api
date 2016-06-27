@@ -35,12 +35,12 @@ public class BaseController {
 		return defferedResponse;
 	}
 
-	public HttpServletResponse setAllowOrigin(HttpServletResponse response) {
+	/*public HttpServletResponse setAllowOrigin(HttpServletResponse response) {
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Headers", "Cache-Control, Pragma, Origin, Authorization, Content-Type, X-Requested-With");
 		response.setHeader("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
 		return response;
-	}
+	}*/
 
 	public void generateCSVOutput(HttpServletResponse response, File csvFile) throws IOException {
 		InputStream sheet = new FileInputStream(csvFile);
