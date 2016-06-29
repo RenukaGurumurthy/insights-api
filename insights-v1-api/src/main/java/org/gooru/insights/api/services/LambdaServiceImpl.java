@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.gooru.insights.api.constants.ApiConstants;
 import org.gooru.insights.api.models.ContentTaxonomyActivity;
-import org.gooru.insights.api.models.ResponseParamDTO;
 import org.gooru.insights.api.models.SessionTaxonomyActivity;
 import org.gooru.insights.api.models.StudentsClassActivity;
 import org.gooru.insights.api.utils.InsightsLogger;
@@ -18,8 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import flexjson.JSONSerializer;
 
 
 @SuppressWarnings({ "unused", "unused" })
@@ -302,114 +299,4 @@ public class LambdaServiceImpl implements LambdaService{
 		obj1.setReaction(null);
 		return obj1;
 	}
-	
-	public static void main(String a[]){/*
-	  TestPojo o1 = new TestPojo();
-	  TestPojo o2 = new TestPojo();
-	  TestPojo o3 = new TestPojo();
-    TestPojo o4 = new TestPojo();
-    
-    TestPojo o5 = new TestPojo();
-    
-	  o1.setLessonId("l1");
-	  o1.setAssessmentId("l1a1");
-	  o1.setUserId("u1");
-	  o1.setCollectionType("assessment");
-	  o1.setViews(1L);
-	  
-	  o2.setLessonId("l2");
-	  o2.setAssessmentId("l2c1");
-    o2.setUserId("u1");
-    o2.setCollectionType("collection");
-    o2.setViews(1L);
-    
-    o3.setLessonId("l1");
-    o3.setAssessmentId("l1c1");
-    o3.setUserId("u2");
-    o3.setCollectionType("collection");
-    o3.setViews(1L);
-    
-    o4.setLessonId("l2");
-    o4.setAssessmentId("l2a1");
-    o4.setUserId("u1");
-    o4.setCollectionType("assessment");
-    o4.setViews(1L);
-    
-    o5.setLessonId("l2");
-    o5.setAssessmentId("l2a2");
-    o5.setUserId("u1");
-    o5.setCollectionType("assessment");
-    o5.setViews(1L);
-    List<TestPojo> classActivityResultSetList = new ArrayList<>();
-    
-    classActivityResultSetList.add(o1);
-    classActivityResultSetList.add(o2);
-    classActivityResultSetList.add(o3);
-    classActivityResultSetList.add(o4);
-    classActivityResultSetList.add(o5);
-
-   Map<String, Map<String, Map<String, List<TestPojo>>>> groupedData =  classActivityResultSetList.parallelStream().collect(Collectors.groupingBy(TestPojo::getUserId, Collectors.groupingBy(TestPojo::getCollectionType ,Collectors.groupingBy(TestPojo::getLessonId))));
-    
-   List<Map<String, List<Map<String, List<TestPojo>>>>>   finalData = groupedData.entrySet().stream().map(fo -> aggregateTestPojo(fo)).collect(Collectors.toList());
-   
-   //finalData.forEach(o -> System.out.println(o));
-   ResponseParamDTO<Map<String, Object>> responseParamDTO = new ResponseParamDTO<>();
-   
-   List<Map<String, Object>> result = new ArrayList<>();
-   
-   for (Map<String, List<Map<String, List<TestPojo>>>> aggregatedSubList : finalData) {
-     for (Entry<String, List<Map<String, List<TestPojo>>>> data : aggregatedSubList.entrySet()) {
-
-       Map<String, Object> resultMap = new HashMap<>();
-       if (data.getValue().size() == 0) {
-         continue;
-       }
-       resultMap.put("userUid", data.getKey());
-       resultMap.put("usageData", data.getValue());
-       result.add(resultMap);
-     }
-   }   
-   
-   responseParamDTO.setContent(result);
-  
-  System.out.println("result->" + new JSONSerializer().exclude("*.class").deepSerialize(responseParamDTO));
-  
-   
-   
-	*/}
-	 private static Map<String, List<Map<String, List<TestPojo>>>> aggregateTestPojo(Entry<String, Map<String, Map<String, List<TestPojo>>>> fo) {
-	   
-	   Map<String, List<Map<String, List<TestPojo>>>> studentActivity = new HashMap<>();
-	   
-	   studentActivity.put((String)fo.getKey(), fo.getValue().entrySet().stream().map(o -> aggregateTestPojo2(o)).collect(Collectors.toList()));
-	   
-	   return studentActivity;
-	   
-	 }
-	 
-	 private static Map<String, List<TestPojo>> aggregateTestPojo2(Entry<String, Map<String, List<TestPojo>>> fo) {
-     Map<String, List<TestPojo>> studentActivity = new HashMap<>();
-     
-     List<TestPojo> studentClassActivity = fo.getValue().entrySet().stream()
-         .map(sob -> sob.getValue().stream().map(defaultValueForAggregation -> {defaultValueForAggregation.setCompleted(1L);return defaultValueForAggregation;})
-             .reduce((o1, o2) -> getTestPojo(o1, o2))
-             .map(additionalCalculation -> customizeFieldsInTestPojo(additionalCalculation)).get())
-         .collect(Collectors.toList());
-     studentActivity.put((String)fo.getKey(), studentClassActivity);
-     return studentActivity;
-	 }
-	 
-	 private static TestPojo getTestPojo(TestPojo object1, TestPojo object2) {
-    object1.setCollectionType(object1.getCollectionType());
-    object1.setCollectionId(object1.getCollectionId());
-    object1.setViews(sum(object1.getViews(), object2.getViews()));
-    object1.setAssessmentId(object1.getAssessmentId());
-    return object1;
-  }
-	 
-  private static TestPojo customizeFieldsInTestPojo(TestPojo o) {
-    o.setAssessmentId(null);
-    o.setCollectionId(null);
-    return o;
-  }
 }
