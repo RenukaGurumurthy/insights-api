@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -383,12 +384,11 @@ public class ClassServiceImpl implements ClassService {
 			}
 			List<StudentsClassActivity> filteredList = lambdaService
 					.applyFiltersInStudentsClassActivity(classActivityResultSetList, collectionType,userUid);
-			List<Map<String, List<StudentsClassActivity>>> aggregatedList = lambdaService
+			List<Map<String, List<Map<String, List<StudentsClassActivity>>>>> aggregatedList = lambdaService
 					.aggregateStudentsClassActivityData(filteredList, collectionType, nextLevelType);
 			List<Map<String, Object>> result = new ArrayList<>();
-			for (Map<String, List<StudentsClassActivity>> aggregatedSubList : aggregatedList) {
-				for (Map.Entry<String, List<StudentsClassActivity>> data : aggregatedSubList.entrySet()) {
-
+			 for (Map<String, List<Map<String, List<StudentsClassActivity>>>> aggregatedSubList : aggregatedList) {
+		     for (Entry<String, List<Map<String, List<StudentsClassActivity>>>> data : aggregatedSubList.entrySet()) {
 					Map<String, Object> resultMap = new HashMap<>();
 					if (data.getValue().size() == 0) {
 						continue;
