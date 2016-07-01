@@ -24,7 +24,7 @@
     <listener>
     	<listener-class>org.gooru.insights.api.listener.StartupListener</listener-class>
     </listener>
-        <filter>
+       <!--  <filter>
                 <filter-name>CORS</filter-name>
                 <filter-class>com.thetransactioncompany.cors.CORSFilter</filter-class>
                         <async-supported>true</async-supported>
@@ -67,8 +67,8 @@
                         <param-name>cors.maxAge</param-name>
                         <param-value>3600</param-value>
                 </init-param>
-<!--                 Added init param CORS
- -->        </filter>
+                Added init param CORS
+        </filter>
           <filter-mapping>
         <filter-name>CORS</filter-name>
         <servlet-name>dispatcher</servlet-name>
@@ -76,7 +76,7 @@
         <filter-mapping>
         <filter-name>CORS</filter-name>
         <url-pattern>/*</url-pattern>
-        </filter-mapping> 
+        </filter-mapping>  -->
   <servlet>
     <servlet-name>atmos-dispatcher</servlet-name>
     <servlet-class>org.atmosphere.cpr.MeteorServlet</servlet-class>
