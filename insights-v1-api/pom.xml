@@ -124,14 +124,14 @@
 		</dependency>
 		<!-- end -->
 		<!--redirect -->
-		<dependency>
+	<!-- 	<dependency>
 			<groupId>org.restlet.jse</groupId>
 			<artifactId>org.restlet</artifactId>
 			<version>2.0.7</version>
 			<type>pom</type>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
+		</dependency> -->
+		<!-- <dependency>
 			<groupId>org.restlet.jse</groupId>
 			<artifactId>org.restlet</artifactId>
 			<version>2.0.7</version>
@@ -140,7 +140,7 @@
 			<groupId>org.restlet.jse</groupId>
 			<artifactId>org.restlet.ext.simple</artifactId>
 			<version>2.0.0</version>
-		</dependency>
+		</dependency> -->
 		<!-- jstl modelAndView result -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -196,11 +196,11 @@
 			<type>jar</type>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.restlet.jse</groupId>
 			<artifactId>org.restlet.ext.json</artifactId>
 			<version>2.1-M3</version>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
