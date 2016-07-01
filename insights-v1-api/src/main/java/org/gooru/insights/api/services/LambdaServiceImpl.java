@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -41,7 +42,7 @@ public class LambdaServiceImpl implements LambdaService{
 	@Override
 	public List<Map<String, List<StudentsClassActivity>>> aggregateStudentsClassActivityData(List<StudentsClassActivity> resultList, String collectionType, String aggregateLevel) {
 
-		Map<Object, Map<Object, List<StudentsClassActivity>>> groupResultList = resultList.stream()
+		Map<String, Map<String, List<StudentsClassActivity>>> groupResultList = resultList.stream()
 				.collect(Collectors.groupingBy(StudentsClassActivity::getUserUid, Collectors.groupingBy(o -> StudentsClassActivity.aggregateDepth(o, aggregateLevel))));
 
 
@@ -49,6 +50,27 @@ public class LambdaServiceImpl implements LambdaService{
 				.map(fo -> aggregateStudentClassActivity(fo, collectionType, aggregateLevel)).collect(Collectors.toList());
 	}
 
+	
+	/**
+	 * This is method will aggregate data based on different collection types. Current supported collection type are collection and assessment
+	 * @param resultList
+	 * @param collectionType
+	 * @param aggregateLevel
+	 * @return
+	 */
+	 @Override
+  public List<Map<String, List<Map<String, List<StudentsClassActivity>>>>> aggregateStudentsClassActivityBothData(List<StudentsClassActivity> resultList,
+          String collectionType, String aggregateLevel) {
+    Map<String, Map<String, Map<String, List<StudentsClassActivity>>>> groupResultList = resultList.stream()
+            .collect(Collectors.groupingBy(StudentsClassActivity::getUserUid, Collectors.groupingBy(StudentsClassActivity::getCollectionType,
+                    Collectors.groupingBy(o -> StudentsClassActivity.aggregateDepth(o, aggregateLevel)))));
+
+    List<Map<String, List<Map<String, List<StudentsClassActivity>>>>> finalData = groupResultList.entrySet().stream()
+            .map(fo -> aggregateStudentClassActivityByUser(fo, collectionType, aggregateLevel)).collect(Collectors.toList());
+
+    return finalData;
+  }
+	 
 	@Override
 	public List<StudentsClassActivity> applyFiltersInStudentsClassActivity(List<StudentsClassActivity> resultList,
           String collectionType, String userUid) {
@@ -168,7 +190,7 @@ public class LambdaServiceImpl implements LambdaService{
 		return object1;
 	}
 
-	private Map<String,List<StudentsClassActivity>> aggregateStudentClassActivity(Map.Entry<Object, Map<Object, List<StudentsClassActivity>>> fo, String collectionType, String aggregateLevel) {
+	private Map<String,List<StudentsClassActivity>> aggregateStudentClassActivity(Map.Entry<String, Map<String, List<StudentsClassActivity>>> fo, String collectionType, String aggregateLevel) {
 		Map<String, List<StudentsClassActivity>> studentActivity = new HashMap<>();
 		List<StudentsClassActivity> studentClassActivity = fo.getValue().entrySet().stream()
 				.map(sob -> sob.getValue().stream().map(defaultValueForAggregation -> {defaultValueForAggregation.setCompletedCount(1L);  return defaultValueForAggregation;})
@@ -179,6 +201,16 @@ public class LambdaServiceImpl implements LambdaService{
 		return studentActivity;
 	}
 
+  private Map<String, List<Map<String, List<StudentsClassActivity>>>> aggregateStudentClassActivityByUser(
+          Entry<String, Map<String, Map<String, List<StudentsClassActivity>>>> fo, String collectionType, String aggregateLevel) {
+
+    Map<String, List<Map<String, List<StudentsClassActivity>>>> studentActivity = new HashMap<>();
+    studentActivity.put((String) fo.getKey(), fo.getValue().entrySet().stream()
+            .map(o -> aggregateStudentClassActivity(o, collectionType, aggregateLevel)).collect(Collectors.toList()));
+    return studentActivity;
+
+  }
+	
 	@Override
 	public List<SessionTaxonomyActivity> aggregateSessionTaxonomyActivity(List<SessionTaxonomyActivity> sessionTaxonomyActivity, String levelType) {
 

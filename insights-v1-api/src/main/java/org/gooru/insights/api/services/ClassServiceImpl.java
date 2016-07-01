@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -383,22 +384,38 @@ public class ClassServiceImpl implements ClassService {
 			}
 			List<StudentsClassActivity> filteredList = lambdaService
 					.applyFiltersInStudentsClassActivity(classActivityResultSetList, collectionType,userUid);
-			List<Map<String, List<StudentsClassActivity>>> aggregatedList = lambdaService
-					.aggregateStudentsClassActivityData(filteredList, collectionType, nextLevelType);
 			List<Map<String, Object>> result = new ArrayList<>();
-			for (Map<String, List<StudentsClassActivity>> aggregatedSubList : aggregatedList) {
-				for (Map.Entry<String, List<StudentsClassActivity>> data : aggregatedSubList.entrySet()) {
+      if (!collectionType.equalsIgnoreCase(ApiConstants.BOTH)) {
+        List<Map<String, List<StudentsClassActivity>>> aggregatedList =
+                lambdaService.aggregateStudentsClassActivityData(filteredList, collectionType, nextLevelType);
+        for (Map<String, List<StudentsClassActivity>> aggregatedSubList : aggregatedList) {
+          for (Map.Entry<String, List<StudentsClassActivity>> data : aggregatedSubList.entrySet()) {
 
-					Map<String, Object> resultMap = new HashMap<>();
-					if (data.getValue().size() == 0) {
-						continue;
-					}
-					resultMap.put("userUid", data.getKey());
-					resultMap.put("usageData", data.getValue());
-					result.add(resultMap);
-				}
-			}
-			responseParamDTO.setContent(result);
+            Map<String, Object> resultMap = new HashMap<>();
+            if (data.getValue().size() == 0) {
+              continue;
+            }
+            resultMap.put("userUid", data.getKey());
+            resultMap.put("usageData", data.getValue());
+            result.add(resultMap);
+          }
+        }
+      } else {
+        List<Map<String, List<Map<String, List<StudentsClassActivity>>>>> aggregatedList =
+                lambdaService.aggregateStudentsClassActivityBothData(filteredList, collectionType, nextLevelType);
+        for (Map<String, List<Map<String, List<StudentsClassActivity>>>> aggregatedSubList : aggregatedList) {
+          for (Entry<String, List<Map<String, List<StudentsClassActivity>>>> data : aggregatedSubList.entrySet()) {
+            Map<String, Object> resultMap = new HashMap<>();
+            if (data.getValue().size() == 0) {
+              continue;
+            }
+            resultMap.put("userUid", data.getKey());
+            resultMap.put("usageData", data.getValue());
+            result.add(resultMap);
+          }
+        }
+      }
+      responseParamDTO.setContent(result);
 		}
 		return responseParamDTO;
 	}

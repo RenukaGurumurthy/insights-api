@@ -21,4 +21,7 @@ public interface LambdaService {
 
 	List<StudentsClassActivity> applyFiltersInStudentsClassActivity(List<StudentsClassActivity> resultList,
 			String collectionType, String userUid);
+
+  List<Map<String, List<Map<String, List<StudentsClassActivity>>>>> aggregateStudentsClassActivityBothData(List<StudentsClassActivity> resultList, String collectionType,
+          String aggregateLevel);
 }
