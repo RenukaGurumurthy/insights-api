@@ -11,7 +11,7 @@ public interface LambdaService {
 
 	List<ContentTaxonomyActivity> aggregateTaxonomyActivityData(List<ContentTaxonomyActivity> resultList, Integer depth);
 
-	List<Map<String, List<Map<String, List<StudentsClassActivity>>>>> aggregateStudentsClassActivityData(List<StudentsClassActivity> resultList,
+	List<Map<String, List<StudentsClassActivity>>> aggregateStudentsClassActivityData(List<StudentsClassActivity> resultList,
 			String collectionType, String aggregateLevel);
 	
 	List<SessionTaxonomyActivity> aggregateSessionTaxonomyActivity(List<SessionTaxonomyActivity> sessionTaxonomyActivity, String levelType);
