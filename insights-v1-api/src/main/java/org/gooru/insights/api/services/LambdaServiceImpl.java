@@ -131,8 +131,14 @@ public class LambdaServiceImpl implements LambdaService{
 		return contentTaxonomyActivity;
 	}
 
-	private StudentsClassActivity getStudentsClassActivity(StudentsClassActivity object1, StudentsClassActivity object2,
+	private StudentsClassActivity getStudentsClassActivity(StudentsClassActivity objectOriginal, StudentsClassActivity object2,
 			String level) {
+    StudentsClassActivity object1 = null;
+    try {
+      object1 = (StudentsClassActivity) objectOriginal.clone();
+    } catch (CloneNotSupportedException e) {
+      LOG.error("Error while customize fields", e);
+    }
 		object1.setCollectionType(object1.getCollectionType());
 		object1.setScore(sum(object1.getScore(), object2.getScore()));
 		object1.setReaction(sum(object1.getReaction(), object2.getReaction()));
@@ -154,8 +160,13 @@ public class LambdaServiceImpl implements LambdaService{
 		return object1;
 	}
 
-	private StudentsClassActivity customizeFieldsInStudentClassActivity(StudentsClassActivity object1, String collectionType, String level) {
-	
+	private StudentsClassActivity customizeFieldsInStudentClassActivity(StudentsClassActivity objectOriginal, String collectionType, String level) {
+    StudentsClassActivity object1 = null;
+    try {
+      object1 = (StudentsClassActivity) objectOriginal.clone();
+    } catch (CloneNotSupportedException e) {
+      LOG.error("Error while customize fields", e);
+    }
 	  object1.setTotalCount(classService.getCulCollectionCount(object1.getClassId(), StudentsClassActivity.aggregateDepth(object1, level), object1.getCollectionType()));
 		switch(level) {
 			case ApiConstants.UNIT:
@@ -197,10 +208,30 @@ public class LambdaServiceImpl implements LambdaService{
 						.reduce((o1, o2) -> getStudentsClassActivity(o1, o2,aggregateLevel))
 						.map(additionalCalculation -> customizeFieldsInStudentClassActivity(additionalCalculation, collectionType, aggregateLevel)).get())
 				.collect(Collectors.toList());
+    if (aggregateLevel.equalsIgnoreCase(ApiConstants.LESSON)) {
+      studentClassActivity = getSourceList(fo, studentClassActivity);
+    }
 		studentActivity.put((String)fo.getKey(), studentClassActivity);
 		return studentActivity;
 	}
 
+  private List<StudentsClassActivity> getSourceList(Map.Entry<String, Map<String, List<StudentsClassActivity>>> fo,
+          List<StudentsClassActivity> studentClassActivity) {
+    List<StudentsClassActivity> finalStudentActivity = new ArrayList<>();
+    try {
+      Map<String, List<StudentsClassActivity>> lessonRecordSet = fo.getValue();
+      for (StudentsClassActivity studentsClassActivity : studentClassActivity) {
+        StudentsClassActivity studentsClassActivityClone = (StudentsClassActivity) studentsClassActivity.clone();
+        String lessonId = studentsClassActivityClone.getLessonId();
+        List<StudentsClassActivity> sourceList = lessonRecordSet.get(lessonId);
+        studentsClassActivityClone.setSourceList(sourceList);
+        finalStudentActivity.add(studentsClassActivityClone);
+      }
+    } catch (CloneNotSupportedException e) {
+      LOG.error("Error while cloning object in set source list", e);
+    }
+    return finalStudentActivity;
+  }
   private Map<String, List<Map<String, List<StudentsClassActivity>>>> aggregateStudentClassActivityByUser(
           Entry<String, Map<String, Map<String, List<StudentsClassActivity>>>> fo, String collectionType, String aggregateLevel) {
 

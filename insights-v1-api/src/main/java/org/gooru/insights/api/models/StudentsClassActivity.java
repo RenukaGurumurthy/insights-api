@@ -1,10 +1,11 @@
 package org.gooru.insights.api.models;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.gooru.insights.api.constants.ApiConstants;
 
-public class StudentsClassActivity implements Serializable {
+public class StudentsClassActivity implements Serializable,Cloneable {
 
 	/**
 	 * 
@@ -44,6 +45,12 @@ public class StudentsClassActivity implements Serializable {
 	private Long attempts;
 	
 	private String assessmentId;
+
+	private List<StudentsClassActivity> sourceList;
+	
+	public Object clone()throws CloneNotSupportedException{  
+    return super.clone();   
+  }  
 	
 	public String getClassId() {
 		return classId;
@@ -200,4 +207,12 @@ public class StudentsClassActivity implements Serializable {
 	public void setAssessmentId(String assessmentId) {
 		this.assessmentId = assessmentId;
 	}
+
+  public List<StudentsClassActivity> getSourceList() {
+    return sourceList;
+  }
+
+  public void setSourceList(List<StudentsClassActivity> sourceList) {
+    this.sourceList = sourceList;
+  }
 }
