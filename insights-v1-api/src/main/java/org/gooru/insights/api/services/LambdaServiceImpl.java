@@ -218,19 +218,38 @@ public class LambdaServiceImpl implements LambdaService{
   private List<StudentsClassActivity> getSourceList(Map.Entry<String, Map<String, List<StudentsClassActivity>>> fo,
           List<StudentsClassActivity> studentClassActivity) {
     List<StudentsClassActivity> finalStudentActivity = new ArrayList<>();
-    try {
-      Map<String, List<StudentsClassActivity>> lessonRecordSet = fo.getValue();
-      for (StudentsClassActivity studentsClassActivity : studentClassActivity) {
-        StudentsClassActivity studentsClassActivityClone = (StudentsClassActivity) studentsClassActivity.clone();
+    Map<String, List<StudentsClassActivity>> lessonRecordSet = fo.getValue();
+    studentClassActivity.forEach(studentClassActivityObj -> {
+      try {
+        StudentsClassActivity studentsClassActivityClone = (StudentsClassActivity) studentClassActivityObj.clone();
         String lessonId = studentsClassActivityClone.getLessonId();
         List<StudentsClassActivity> sourceList = lessonRecordSet.get(lessonId);
-        studentsClassActivityClone.setSourceList(sourceList);
+        studentsClassActivityClone.setSourceList(modifySourceList(sourceList));
         finalStudentActivity.add(studentsClassActivityClone);
+      } catch (CloneNotSupportedException e) {
+        LOG.error("Error while cloning object in set source list", e);
       }
-    } catch (CloneNotSupportedException e) {
-      LOG.error("Error while cloning object in set source list", e);
-    }
+    });
     return finalStudentActivity;
+  }
+
+  private List<StudentsClassActivity> modifySourceList(List<StudentsClassActivity> sourceList) {
+    List<StudentsClassActivity> finalSourceList = new ArrayList<>();
+    sourceList.forEach(studentClassActivityObj -> {
+      try {
+        StudentsClassActivity studentsClassActivityClone = (StudentsClassActivity) studentClassActivityObj.clone();
+        studentsClassActivityClone.setClassId(null);
+        studentsClassActivityClone.setCourseId(null);
+        studentsClassActivityClone.setUnitId(null);
+        studentsClassActivityClone.setLessonId(null);
+        studentsClassActivityClone.setAttemptStatus(null);
+        studentsClassActivityClone.setUserUid(null);
+        finalSourceList.add(studentsClassActivityClone);
+      } catch (Exception e) {
+        LOG.error("Error while modify source list", e);
+      }
+    });
+    return finalSourceList;
   }
   private Map<String, List<Map<String, List<StudentsClassActivity>>>> aggregateStudentClassActivityByUser(
           Entry<String, Map<String, Map<String, List<StudentsClassActivity>>>> fo, String collectionType, String aggregateLevel) {
