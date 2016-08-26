@@ -216,4 +216,9 @@ public class StudentsClassActivity implements Serializable,Cloneable {
     this.sourceList = sourceList;
   }
 
+  public static void main(String a[]) {
+	  Long score = 600L;
+	  Long totalCount = 7L;
+	 System.out.println(Math.round((double)score /totalCount));
+  }
 }
