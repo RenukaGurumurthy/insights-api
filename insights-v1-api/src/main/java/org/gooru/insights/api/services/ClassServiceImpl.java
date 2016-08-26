@@ -949,7 +949,7 @@ public class ClassServiceImpl implements ClassService {
 
 		if(contentTaxonomyActivity.getScore() != null && contentTaxonomyActivity.getAttempts() != null) {
 			contentTaxonomyActivity.setScoreInPercentage(
-				(long) Math.round((contentTaxonomyActivity.getScore() / contentTaxonomyActivity.getAttempts())));
+				(long) Math.round((double)contentTaxonomyActivity.getScore() / contentTaxonomyActivity.getAttempts()));
 			//Avoiding score in response
 			contentTaxonomyActivity.setScore(null);
 		}

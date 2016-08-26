@@ -354,7 +354,7 @@ public class LambdaServiceImpl implements LambdaService{
 	}
 	private SessionTaxonomyActivity removeUnwantedFields(SessionTaxonomyActivity obj1, String depthLevel) {
 		
-		obj1.setScore(Math.round((double)(obj1.getScore()/obj1.getTotalAttemptedQuestions())));
+		obj1.setScore(Math.round((double)obj1.getScore()/obj1.getTotalAttemptedQuestions()));
 		obj1.setTotalAttemptedQuestions(null);
 		obj1.setSubjectId(null);
 		obj1.setCourseId(null);
