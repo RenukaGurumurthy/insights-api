@@ -173,7 +173,7 @@ public class StudentsClassActivity implements Serializable,Cloneable {
 	}
 
 	public void setScoreInPercentage(Long score, Long totalCount) {
-		this.scoreInPercentage = (totalCount == null || totalCount == 0 || score == null) ? 0 : Math.round(((double)score /totalCount));
+		this.scoreInPercentage = (totalCount == null || totalCount == 0 || score == null) ? 0 : Math.round((double)score /totalCount);
 	}
 
 	public Long getTotalCount() {
@@ -216,9 +216,4 @@ public class StudentsClassActivity implements Serializable,Cloneable {
     this.sourceList = sourceList;
   }
 
-  public static void main(String a[]) {
-	  Long score = 600L;
-	  Long totalCount = 7L;
-	 System.out.println(Math.round((double)score /totalCount));
-  }
 }
