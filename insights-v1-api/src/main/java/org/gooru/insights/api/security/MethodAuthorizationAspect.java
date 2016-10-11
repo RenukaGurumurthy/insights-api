@@ -159,7 +159,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			} else if (StringUtils.isNotBlank(classId)) {
 				return isAuthorizedUser(classId, userUidFromSession);
 			} else if (StringUtils.isNotBlank(sessionId)) {
-				return isAuthorizedUserSession(sessionId, userUidFromSession);
+				return isAuthorizedUserSession(sessionId, userIdFromRequest);
 			} else if(isStressApi){
 				return true;
 			}else {
