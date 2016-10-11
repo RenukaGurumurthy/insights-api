@@ -125,7 +125,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			String userUidFromSession = jsonObject.getString(ApiConstants._USER_ID);
 			String userIdFromRequest = RequestUtils.getUserIdFromRequestParam(request);
 			String classId = RequestUtils.getClassIdFromRequestParam(request);
-			String sessionId = RequestUtils.getClassIdFromRequestParam(request);
+			String sessionId = RequestUtils.getSessionIdFromRequestParam(request);
 			boolean isStressApi = false;
 			if (StringUtils.isBlank(classId) || StringUtils.isBlank(userIdFromRequest)
 					|| StringUtils.isBlank(sessionId)) {
