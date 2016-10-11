@@ -139,7 +139,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 					if (pathVar.equalsIgnoreCase("class")) {
 						classId = path[(i + 1)];
 					}
-					if (pathVar.equalsIgnoreCase("session")) {
+					if (StringUtils.isBlank(sessionId) && pathVar.equalsIgnoreCase("session")) {
 						sessionId = path[(i + 1)];
 					}
 					if (pathVar.equalsIgnoreCase("activity")) {
