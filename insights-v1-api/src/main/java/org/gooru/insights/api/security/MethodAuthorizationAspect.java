@@ -127,6 +127,7 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			String classId = RequestUtils.getClassIdFromRequestParam(request);
 			String sessionId = RequestUtils.getSessionIdFromRequestParam(request);
 			boolean isStressApi = false;
+			boolean isTaxonomyApi = false;
 			if (StringUtils.isBlank(classId) || StringUtils.isBlank(userIdFromRequest)
 					|| StringUtils.isBlank(sessionId)) {
 				String pathInfo = request.getPathInfo();
@@ -145,6 +146,9 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 					if (pathVar.equalsIgnoreCase("activity")) {
 						isStressApi = true;
 					}
+					if (pathVar.equalsIgnoreCase("taxonomy")) {
+						isTaxonomyApi = true;
+					}
 					i++;
 				}
 			}
@@ -159,7 +163,14 @@ public class MethodAuthorizationAspect extends OperationAuthorizer {
 			} else if (StringUtils.isNotBlank(classId)) {
 				return isAuthorizedUser(classId, userUidFromSession);
 			} else if (StringUtils.isNotBlank(sessionId)) {
-				return isAuthorizedUserSession(sessionId, userIdFromRequest);
+				/* FIXME : This is temporary fix to support both GG-2035 and GG-2067. 
+				 Ideally if taxonomy usage API supports to accept userId in param (requires FE change), this if condition is not required 
+				 and can use userIdFromRequest for teacher and student. Or some other solution to be used for teacher, which doesn't affect other APIs*/
+				if(isTaxonomyApi) {
+					return isAuthorizedUserSession(sessionId, userUidFromSession);
+				} else {
+					return isAuthorizedUserSession(sessionId, userIdFromRequest);
+				}
 			} else if(isStressApi){
 				return true;
 			}else {
